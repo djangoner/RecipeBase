@@ -1,7 +1,6 @@
 Django==3.2.6
-djangorestframework==3.12.2
-django-filter==2.4.0
-markdown==3.3.4
-django-ckeditor==6.2.0
-drf-writable-nested==0.6.3
-django-cleanup==6.0.0
+django_ckeditor==6.2.0
+djangorestframework==3.13.1
+drf_spectacular==0.21.2
+drf_writable_nested==0.6.3
+python-dotenv==0.20.0

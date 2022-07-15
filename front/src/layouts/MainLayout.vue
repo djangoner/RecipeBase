@@ -97,7 +97,7 @@ export default defineComponent({
     },
     logout() {
       this.store.logout();
-      this.router.push({ name: 'login' }).catch(() => {});
+      this.$router.push({ name: 'login' }).catch(() => {});
     },
   },
 

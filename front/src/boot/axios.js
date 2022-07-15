@@ -12,7 +12,7 @@ const api = axios.create({ baseURL: "/api/v1" });
 
 const token = localStorage.getItem("authToken");
 if (token) {
-  api.defaults.headers.common["Authorization"] = "Bearer " + token;
+  api.defaults.headers.common["Authorization"] = "Token  " + token;
 }
 
 export default boot(({ app }) => {

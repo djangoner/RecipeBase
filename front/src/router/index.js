@@ -45,7 +45,7 @@ export default route(function (/* { store, ssrContext } */) {
         .then()
         .catch((err) => {
           store.logout().then(() => {
-            next({ name: "login", query: { next: to.fullPath } });
+            Router.push({ name: "login", query: { next: to.fullPath } });
           });
         });
     }

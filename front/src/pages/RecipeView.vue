@@ -276,16 +276,32 @@
                   :columns="ingredientsColumns"
                   row-key="id"
                   flat
+                  dense
                   v-if="recipe?.ingredients?.length > 0 || edit"
                 >
                   <template #bottom> </template>
+                  <!-- Custom fields -->
+
+                  <template #body-cell-amount_rec="slotScope">
+                    <td class="text-right" style="width: 30px">
+                      <q-input
+                        v-if="edit"
+                        v-model.number="slotScope.row.amount"
+                        type="number"
+                        dense
+                      />
+                      <span v-else>{{ slotScope.value }}</span>
+                    </td>
+                  </template>
+
+                  <!-- Bottom row -->
                   <template v-if="edit" v-slot:body-cell-actions="slotProps">
-                    <q-td>
+                    <q-td class="q-py-none">
                       <div class="row justify-around">
                         <q-btn
                           icon="delete"
                           color="negative"
-                          size="sm"
+                          size="xs"
                           dense
                           @click="removeIngredient(slotProps.row)"
                         ></q-btn>
@@ -355,7 +371,7 @@
                         <div class="flex justify-center items-center">
                           <q-btn
                             color="positive"
-                            icon="save"
+                            icon="add"
                             size="sm"
                             @click="addIngredient()"
                           ></q-btn>

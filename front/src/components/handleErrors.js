@@ -16,7 +16,7 @@ export let handleErrors = {
       let errValidation = "";
 
       if (typeof data === "object") {
-        console.debug(data);
+        console.debug("Err data: ", data);
         for (const [key, val] of Object.entries(data)) {
           // console.debug(key, val);
           let errJoin = val.join(", ");

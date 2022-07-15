@@ -8,6 +8,8 @@ export const useBaseStore = defineStore("base", {
     tags: null,
     ingredients: null,
     amount_types: null,
+    week_plan: null,
+    meal_time: null,
   }),
 
   getters: {},
@@ -16,7 +18,7 @@ export const useBaseStore = defineStore("base", {
     async loadRecipes(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/recipes", { params: payload })
+          .get("/recipes/", { params: payload })
           .then((resp) => {
             this.recipes = resp.data;
             resolve(resp);
@@ -109,6 +111,49 @@ export const useBaseStore = defineStore("base", {
           .get("/ingredients/amount_types/", { params: payload })
           .then((resp) => {
             this.amount_types = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadWeekPlan(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get(`/recipe_plan_week/${payload.year}_${payload.week}/`, {
+            params: payload,
+          })
+          .then((resp) => {
+            this.week_plan = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async saveWeekPlan(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .patch(`/recipe_plan_week/${payload.year}_${payload.week}/`, payload)
+          .then((resp) => {
+            this.week_plan = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadMealTime(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get("meal_time", {
+            params: payload,
+          })
+          .then((resp) => {
+            this.meal_time = resp.data;
             resolve(resp);
           })
           .catch((err) => {

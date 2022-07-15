@@ -2,6 +2,7 @@ import uuid
 
 from ckeditor.fields import RichTextField
 from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.fields import related
 from django.utils.html import strip_tags
@@ -120,8 +121,9 @@ class RecipeTag(models.Model):
 class MealTime(models.Model):
 
     title = models.CharField(_("Название"), max_length=255)
-    time = models.TimeField(_("Примерное время"))
+    time = models.TimeField(_("Примерное время"), null=True, blank=True)
     num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
+    is_primary = models.BooleanField(_("Основной прием пищи"), help_text=_("Является ли прием пищи основным (обязательным на каждый день)"), default=False)
 
     class Meta:
         ordering = ["-num", "time"]
@@ -129,20 +131,35 @@ class MealTime(models.Model):
         verbose_name_plural = _("Время приема пищи")
 
     def __str__(self) -> str:
-        return f"{self.time} - {self.title}"
+        if self.time:
+            return f"{self.time} - {self.title}"
+        else:
+            return f"{self.title}"
 
 
-class RecipePlan(models.Model):
-
+class RecipePlanWeek(models.Model):
     year = models.SmallIntegerField(_("Год"))
     week = models.SmallIntegerField(_("Неделя"))
 
+    class Meta:
+        ordering = ['-year', '-week']
+        verbose_name = _("План недели")
+        verbose_name_plural = _("Планы недели")
+
+    def __str__(self) -> str:
+        return f"{self.year}-{self.week}"
+
+class RecipePlan(models.Model):
+
+    week = models.ForeignKey(RecipePlanWeek, models.CASCADE, verbose_name=_("План недели"), blank=True, related_name="plans")
+    day = models.PositiveSmallIntegerField(_("День недели"), blank=False, null=True, validators=[MinValueValidator(1), MaxValueValidator(7)])
     meal_time = models.ForeignKey(MealTime, models.CASCADE, verbose_name=_("Время приема пищи"))
     recipe = models.ForeignKey(Recipe, models.SET_NULL, verbose_name=_("Рецепт"), null=True, blank=True)
 
     class Meta:
-        verbose_name = _("Запланированный рецепт")
-        verbose_name_plural = _("Запланированные рецепты")
+        ordering = ['day', 'meal_time__num']
+        verbose_name = _("План рецепта")
+        verbose_name_plural = _("План рецепта")
 
     def __str__(self) -> str:
-        return f"{self.year}.{self.week} {self.meal_time}"
+        return f"{self.week}.{self.day} {self.meal_time}"

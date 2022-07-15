@@ -31,7 +31,7 @@ export const useAuthStore = defineStore("auth", {
             const token = resp.data.token;
 
             localStorage.setItem("authToken", token);
-            api.defaults.headers.common["Authorization"] = "Bearer " + token;
+            api.defaults.headers.common["Authorization"] = "Token  " + token;
             this.authToken = token;
 
             resolve(resp);
@@ -45,7 +45,7 @@ export const useAuthStore = defineStore("auth", {
     async loadAccountInfo() {
       return new Promise((resolve, reject) => {
         api
-          .get("/users/current_user_info")
+          .get("/users/current_user_info/")
           .then((resp) => {
             this.account = resp.data;
             resolve(resp);

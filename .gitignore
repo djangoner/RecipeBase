@@ -1,5 +1,6 @@
 # Django
 !package.json
+.env
 *.csv
 *.ini
 *.json*

@@ -36,6 +36,8 @@ DEBUG = getenv("DEBUG", False)
 
 ALLOWED_HOSTS = getenv("ALLOWED_HOSTS", "*").split(" ")
 
+USE_X_FORWARDED_HOST = True
+HOSTNAME_OVERRIDE = getenv("HOSTNAME_OVERRIDE", None)
 
 # Application definition
 

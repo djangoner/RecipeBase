@@ -14,10 +14,12 @@ from recipes.services import MEASURING_CONVERT, MEASURING_TYPES, short_text
 DESC_LENGTH = 80
 User = get_user_model()
 
+
 def recipe_image_upload_to(instance, filename):
     ext = filename.split(".")[-1]
     uid = uuid.uuid4()
     return f"uploads/recipe_images/{instance.recipe.pk}/{uid}.{ext}"
+
 
 # // Models \\
 
@@ -28,11 +30,16 @@ class Recipe(models.Model):
     content_source = RichTextField(_("Содержание (изначальное) "), blank=True)
     short_description = models.TextField(_("Короткое описание"), null=True, blank=True)
     portion_count = models.FloatField(_("Кол-во порций"), null=True, blank=True)
-    cooking_time = models.IntegerField(_("Примерное время приготовления"), null=True, blank=True)
+    cooking_time = models.IntegerField(
+        _("Примерное время приготовления"), null=True, blank=True
+    )
 
     source_link = models.CharField(
-        _("Источника"), max_length=255, blank=True, null=True)
-    tags = models.ManyToManyField('RecipeTag', 'recipes', verbose_name=_("Метки"), blank=True)
+        _("Источника"), max_length=255, blank=True, null=True
+    )
+    tags = models.ManyToManyField(
+        "RecipeTag", "recipes", verbose_name=_("Метки"), blank=True
+    )
 
     created = models.DateTimeField(_("Создан"), auto_now_add=True, null=True)
     edited = models.DateTimeField(_("Изменен"), auto_now=True, null=True)
@@ -41,7 +48,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = _("Рецепт")
         verbose_name_plural = _("Рецепты")
-        ordering = ['-created']
+        ordering = ["-created"]
 
     def __str__(self):
         return self.title
@@ -59,16 +66,20 @@ class Recipe(models.Model):
 
 
 class RecipeImage(models.Model):
-    recipe = models.ForeignKey(Recipe, models.SET_NULL, related_name="images", verbose_name=_(
-        "Рецепт"), null=True, blank=False)
-    image = models.ImageField(
-        _("Изображение"), upload_to=recipe_image_upload_to)
-    title = models.CharField(
-        _("Заголовок"), max_length=100, blank=True, null=True)
+    recipe = models.ForeignKey(
+        Recipe,
+        models.SET_NULL,
+        related_name="images",
+        verbose_name=_("Рецепт"),
+        null=True,
+        blank=False,
+    )
+    image = models.ImageField(_("Изображение"), upload_to=recipe_image_upload_to)
+    title = models.CharField(_("Заголовок"), max_length=100, blank=True, null=True)
     num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
 
     class Meta:
-        ordering = ['num', '-id']
+        ordering = ["num", "-id"]
         verbose_name = _("Изображение рецепта")
         verbose_name_plural = _("Изображения рецептов")
 
@@ -78,8 +89,16 @@ class RecipeImage(models.Model):
         else:
             return f"#{self.id} {self.image}"
 
+
 class Ingredient(models.Model):
     title = models.CharField(_("Название"), max_length=100)
+    min_pack_size = models.SmallIntegerField(
+        _("Объём упаковки"),
+        null=True,
+        blank=True,
+        help_text=_("Минимальный размер упаковки в граммах / миллилитрах"),
+    )
+
 
     class Meta:
         verbose_name = _("Ингредиент")
@@ -91,13 +110,25 @@ class Ingredient(models.Model):
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
-        Recipe, models.CASCADE, related_name="ingredients", verbose_name=_("Рецепт"), blank=True)
+        Recipe,
+        models.CASCADE,
+        related_name="ingredients",
+        verbose_name=_("Рецепт"),
+        blank=True,
+    )
     ingredient = models.ForeignKey(
-        Ingredient, models.CASCADE, related_name="recipe_ingredients", verbose_name=_("Ингредиент"))
+        Ingredient,
+        models.CASCADE,
+        related_name="recipe_ingredients",
+        verbose_name=_("Ингредиент"),
+    )
     amount = models.FloatField(_("Количество"), max_length=15)
-    amount_grams = models.SmallIntegerField(_("Количество в граммах"), editable=False, blank=True, null=True)
+    amount_grams = models.SmallIntegerField(
+        _("Количество в граммах"), editable=False, blank=True, null=True
+    )
     amount_type = models.CharField(
-        _("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15)
+        _("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15
+    )
     is_main = models.BooleanField(_("Основной игредиент"), default=False)
 
     class Meta:
@@ -106,6 +137,7 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f"{self.recipe}: {self.ingredient}"
+
 
 class RecipeTag(models.Model):
     title = models.CharField(_("Название метки"), max_length=50)
@@ -119,14 +151,20 @@ class RecipeTag(models.Model):
 
     def recipes_count(self):
         return self.recipes.count()
+
     recipes_count.verbose_name = _("Количество рецептов")
+
 
 class MealTime(models.Model):
 
     title = models.CharField(_("Название"), max_length=255)
     time = models.TimeField(_("Примерное время"), null=True, blank=True)
     num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
-    is_primary = models.BooleanField(_("Основной прием пищи"), help_text=_("Является ли прием пищи основным (обязательным на каждый день)"), default=False)
+    is_primary = models.BooleanField(
+        _("Основной прием пищи"),
+        help_text=_("Является ли прием пищи основным (обязательным на каждый день)"),
+        default=False,
+    )
 
     class Meta:
         ordering = ["-num", "time"]
@@ -145,22 +183,38 @@ class RecipePlanWeek(models.Model):
     week = models.SmallIntegerField(_("Неделя"))
 
     class Meta:
-        ordering = ['-year', '-week']
+        ordering = ["-year", "-week"]
         verbose_name = _("План недели")
         verbose_name_plural = _("Планы недели")
 
     def __str__(self) -> str:
         return f"{self.year}-{self.week}"
 
+
 class RecipePlan(models.Model):
 
-    week = models.ForeignKey(RecipePlanWeek, models.CASCADE, verbose_name=_("План недели"), blank=True, related_name="plans")
-    day = models.PositiveSmallIntegerField(_("День недели"), blank=False, null=True, validators=[MinValueValidator(1), MaxValueValidator(7)])
-    meal_time = models.ForeignKey(MealTime, models.CASCADE, verbose_name=_("Время приема пищи"))
-    recipe = models.ForeignKey(Recipe, models.SET_NULL, verbose_name=_("Рецепт"), null=True, blank=True)
+    week = models.ForeignKey(
+        RecipePlanWeek,
+        models.CASCADE,
+        verbose_name=_("План недели"),
+        blank=True,
+        related_name="plans",
+    )
+    day = models.PositiveSmallIntegerField(
+        _("День недели"),
+        blank=False,
+        null=True,
+        validators=[MinValueValidator(1), MaxValueValidator(7)],
+    )
+    meal_time = models.ForeignKey(
+        MealTime, models.CASCADE, verbose_name=_("Время приема пищи")
+    )
+    recipe = models.ForeignKey(
+        Recipe, models.SET_NULL, verbose_name=_("Рецепт"), null=True, blank=True
+    )
 
     class Meta:
-        ordering = ['day', 'meal_time__num']
+        ordering = ["day", "meal_time__num"]
         verbose_name = _("План рецепта")
         verbose_name_plural = _("План рецепта")
 

@@ -311,6 +311,8 @@
                   class="no-bottom"
                   :rows="recipe.ingredients"
                   :columns="ingredientsColumns"
+                  :rows-per-page-options="[0]"
+                  :hide-pagination="true"
                   flat
                   dense
                   v-if="recipe?.ingredients?.length > 0 || edit"
@@ -527,6 +529,7 @@ export default {
       {
         name: 'is_main',
         label: 'Основной',
+        field: 'is_main',
         required: true,
         sortable: true,
         style: 'width: 30px',

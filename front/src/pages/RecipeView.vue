@@ -45,25 +45,21 @@
                   v-model="recipe.source_link"
                   v-if="edit"
                   label="Источник рецепта"
-                  :rules="[
-                    (val) =>
-                      !val ||
-                      val.startsWith('http://') ||
-                      val.startsWith('https://') ||
-                      'Ссылка должна начинаться с http:// или https://',
-                  ]"
                   filled
                 >
                 </q-input>
                 <h6 class="text-center q-my-none" v-else>
                   <q-btn
-                    v-if="recipe.source_link"
+                    v-if="recipe.source_link && recipe.source_link.startsWith('http')"
                     :href="recipe.source_link"
                     target="_blank"
                     icon="open_in_new"
                     size="sm"
                     >Открыть источник</q-btn
                   >
+                  <h6 class="text-center q-my-none" v-else>
+                    Источник: {{ recipe.source_link || '-' }}
+                  </h6>
                 </h6>
               </div>
 

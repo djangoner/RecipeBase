@@ -1,12 +1,21 @@
 <template>
   <q-page padding>
-    <q-btn
-      class="q-mb-md"
-      icon="arrow_back"
-      size="sm"
-      @click="$router.push({ name: 'recipes' })"
-      >Назад</q-btn
-    >
+    <div class="row q-col-gutter-x-md q-mb-md">
+      <div>
+        <q-btn icon="arrow_back" size="sm" @click="$router.push({ name: 'recipes' })"
+          >Назад</q-btn
+        >
+      </div>
+      <div v-if="!edit">
+        <q-btn
+          icon="add"
+          size="sm"
+          color="positive"
+          @click="$router.push({ name: 'recipe', params: { id: 'new' } })"
+          >Новый рецепт</q-btn
+        >
+      </div>
+    </div>
 
     <q-form @submit.prevent="saveRecipe()">
       <div class="row q-gutter-y-lg q-col-gutter-x-md" v-if="recipe">
@@ -563,12 +572,15 @@ export default {
       this.loadAmountTypes();
     }
   },
+  beforeRouteUpdate(to) {
+    this.loadRecipe(to.params.id);
+  },
   methods: {
-    loadRecipe() {
-      let id = this.$route.params.id;
+    loadRecipe(load_id) {
+      let id = load_id || this.$route.params.id;
 
       if (id == 'new') {
-        this.store.recipe = Object.assign({}, defaultRecipe);
+        this.resetData();
         this.edit = true;
         return;
       }
@@ -587,6 +599,12 @@ export default {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки рецептов');
         });
+    },
+    resetData() {
+      console.debug('Recipe resetData');
+      this.recipe = Object.assign({}, defaultRecipe);
+      this.recipe.tags.length = 0;
+      this.recipe.ingredients.length = 0;
     },
     async uploadImg(img) {
       return new Promise((resolve, reject) => {

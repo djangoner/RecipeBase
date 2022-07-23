@@ -27,9 +27,11 @@ class Recipe(models.Model):
     content = RichTextField(_("Содержание"), blank=True)
     content_source = RichTextField(_("Содержание (изначальное) "), blank=True)
     short_description = models.TextField(_("Короткое описание"), null=True, blank=True)
+    portion_count = models.FloatField(_("Кол-во порций"), null=True, blank=True)
+    cooking_time = models.IntegerField(_("Примерное время приготовления"), null=True, blank=True)
 
-    source_link = models.URLField(
-        _("Адрес источника"), max_length=255, blank=True, null=True)
+    source_link = models.CharField(
+        _("Источника"), max_length=255, blank=True, null=True)
     tags = models.ManyToManyField('RecipeTag', 'recipes', verbose_name=_("Метки"), blank=True)
 
     created = models.DateTimeField(_("Создан"), auto_now_add=True, null=True)
@@ -96,6 +98,7 @@ class RecipeIngredient(models.Model):
     amount_grams = models.SmallIntegerField(_("Количество в граммах"), editable=False, blank=True, null=True)
     amount_type = models.CharField(
         _("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15)
+    is_main = models.BooleanField(_("Основной игредиент"), default=False)
 
     class Meta:
         verbose_name = _("Ингредиент рецепта")

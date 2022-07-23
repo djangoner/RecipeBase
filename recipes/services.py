@@ -6,6 +6,8 @@ MEASURING_TYPES = (
     ('pinch', _("Щепотка")),
     ('table_spoon', _("Ст. Л.")),
     ('tea_spoon', _("Ч. Л.")),
+    ('head', _("Качан")),
+    ('items', _("Шт")),
 )
 
 MEASURING_CONVERT = {

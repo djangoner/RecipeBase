@@ -104,6 +104,38 @@
                 </q-select>
               </div>
 
+              <!-- Info -->
+
+              <div class="q-my-md">
+                <q-input
+                  v-if="edit"
+                  v-model.number="recipe.portion_count"
+                  type="number"
+                  label="Количество порций"
+                  filled
+                >
+                </q-input>
+                <h6 class="text-center q-my-none" v-else-if="recipe.portion_count">
+                  <q-icon name="pie_chart_outline" color="grey"></q-icon>
+                  Порций: {{ recipe.portion_count || '-' }}
+                </h6>
+              </div>
+              <div class="q-my-md">
+                <q-input
+                  v-if="edit"
+                  v-model.number="recipe.cooking_time"
+                  type="number"
+                  label="Время приготовления"
+                  hint="Примерное время приготовления в минутах"
+                  filled
+                >
+                </q-input>
+                <h6 class="text-center q-my-none" v-else-if="recipe.cooking_time">
+                  <q-icon name="timer" color="grey"></q-icon>
+                  Время приготовления: {{ recipe.cooking_time || '-' }}
+                </h6>
+              </div>
+
               <!-- Images carousel -->
               <div class="images-carousel q-pa-md" v-if="!edit">
                 <q-carousel
@@ -270,7 +302,6 @@
                   class="no-bottom"
                   :rows="recipe.ingredients"
                   :columns="ingredientsColumns"
-                  row-key="id"
                   flat
                   dense
                   v-if="recipe?.ingredients?.length > 0 || edit"
@@ -278,15 +309,53 @@
                   <template #bottom> </template>
                   <!-- Custom fields -->
 
+                  <template #body-cell-title="slotScope">
+                    <td class="text-right" style="width: 50px">
+                      <q-select
+                        v-model="slotScope.row.ingredient"
+                        v-if="edit"
+                        :input-debounce="0"
+                        :options="ingList"
+                        option-label="title"
+                        style="max-width: 120px"
+                        @filter="filterIngredients"
+                        @new-value="addIngredient"
+                        use-input
+                        options-dense
+                        dense
+                      >
+                        <template v-slot:no-option>
+                          <q-item>
+                            <q-item-section class="text-grey">
+                              Нет результатов
+                            </q-item-section>
+                          </q-item>
+                        </template>
+                      </q-select>
+                      <span v-else>{{ slotScope.value }}</span>
+                    </td>
+                  </template>
+
                   <template #body-cell-amount_rec="slotScope">
-                    <td class="text-right" style="width: 30px">
+                    <td class="text-right" style="width: 50px">
                       <q-input
                         v-if="edit"
                         v-model.number="slotScope.row.amount"
                         type="number"
+                        step="0.01"
                         dense
                       />
                       <span v-else>{{ slotScope.value }}</span>
+                    </td>
+                  </template>
+
+                  <template #body-cell-is_main="slotScope">
+                    <td class="text-right" style="width: 30px">
+                      <q-checkbox
+                        v-model="slotScope.row.is_main"
+                        :disable="!edit"
+                        size="sm"
+                      ></q-checkbox>
                     </td>
                   </template>
 
@@ -341,7 +410,6 @@
                         <q-select
                           v-model="ingAdd.amount_type"
                           v-if="edit"
-                          label="Единица измерения"
                           use-input
                           @keydown.enter.prevent="addIngredient()"
                           @filter="filterIngredientsAmountType"
@@ -351,7 +419,7 @@
                           option-value="id"
                           map-options
                           emit-value
-                          style="max-width: 140px"
+                          style="max-width: 100px"
                         >
                           <template v-slot:no-option>
                             <q-item>
@@ -423,18 +491,33 @@ export default {
         sortable: true,
         style: 'width: 50px',
       },
+      // {
+      //   name: 'amount_type',
+      //   label: 'Ед. изм.',
+      //   field: (row) => row.amount_type,
+      //   required: true,
+      //   sortable: true,
+      //   style: 'width: 20px',
+      // },
       {
         name: 'amount_rec',
         label: 'Вес (рецепт)',
         field: (row) => row.amount + '  (' + row.amount_type + ')',
         required: true,
         sortable: true,
-        style: 'width: 30px',
+        style: 'width: 20px',
       },
       {
         name: 'amount_g',
         label: 'Вес (гр.)',
         field: (row) => (row.amount_grams ? row.amount_grams + ' гр.' : '-'),
+        required: true,
+        sortable: true,
+        style: 'width: 30px',
+      },
+      {
+        name: 'is_main',
+        label: 'Основной',
         required: true,
         sortable: true,
         style: 'width: 30px',
@@ -445,6 +528,7 @@ export default {
       select: null,
       amount: null,
       amount_type: 'g',
+      is_main: false,
     };
 
     let requiredRule = (val) => !!val || 'Обязательное поле';
@@ -556,6 +640,14 @@ export default {
       } else {
         payload = await this.handleImages(payload);
       }
+
+      if (!payload.cooking_time) {
+        payload.cooking_time = 0;
+      }
+      if (!payload.portion_count) {
+        payload.portion_count = 0;
+      }
+
       console.debug('Saving recipe: ', payload);
 
       method(payload)
@@ -681,8 +773,9 @@ export default {
         ingredient: this.ingAdd.select,
         amount: this.ingAdd.amount,
         amount_type: this.ingAdd.amount_type,
+        is_main: false,
       });
-      this.ingadd = Object.assign({}, this.ingAddDefault);
+      this.ingAdd = Object.assign({}, this.ingAddDefault);
     },
 
     removeIngredient(row) {
@@ -702,7 +795,7 @@ export default {
         let ingredients = this.ingredients?.results;
 
         this.ingList = ingredients?.filter(
-          (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
+          (v) => v.title.toLowerCase().indexOf(needle) > -1 // && !isUsed(v)
         );
         // console.debug(needle, this.tagList, tags);
       });
@@ -768,6 +861,8 @@ export default {
 }
 
 :deep(.recipe-text) {
+  overflow: hidden;
+
   h1,
   h2,
   h3,
@@ -791,6 +886,10 @@ export default {
   h5,
   h6 {
     font-size: 1rem;
+  }
+
+  img {
+    max-width: 100%;
   }
 }
 :deep(.no-bottom) {

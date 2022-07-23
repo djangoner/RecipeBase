@@ -5,6 +5,7 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     authToken: localStorage.getItem("authToken"),
     account: null,
+    users: null,
   }),
 
   getters: {
@@ -48,6 +49,20 @@ export const useAuthStore = defineStore("auth", {
           .get("/users/current_user_info/")
           .then((resp) => {
             this.account = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    async loadUsers() {
+      return new Promise((resolve, reject) => {
+        api
+          .get("/users/")
+          .then((resp) => {
+            this.users = resp.data;
             resolve(resp);
           })
           .catch((err) => {

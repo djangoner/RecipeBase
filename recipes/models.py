@@ -99,7 +99,6 @@ class Ingredient(models.Model):
         help_text=_("Минимальный размер упаковки в граммах / миллилитрах"),
     )
 
-
     class Meta:
         verbose_name = _("Ингредиент")
         verbose_name_plural = _("Ингредиенты")
@@ -176,6 +175,27 @@ class MealTime(models.Model):
             return f"{self.time} - {self.title}"
         else:
             return f"{self.title}"
+
+
+class RecipeRating(models.Model):
+
+    user = models.ForeignKey(
+        User, models.CASCADE, related_name="ratings", verbose_name=_("Пользователь")
+    )
+    recipe = models.ForeignKey(
+        Recipe, models.CASCADE, related_name="ratings", verbose_name=_("Рецепт")
+    )
+    rating = models.SmallIntegerField(
+        _("Оценка"), validators=[MinValueValidator(0), MaxValueValidator(5)]
+    )
+
+    class Meta:
+        verbose_name = _("Оценка рецепта")
+        verbose_name_plural = _("Оценка рецептов")
+        # unique_together = [["user", "recipe"]]
+
+    def __str__(self) -> str:
+        return f"{self.recipe} {self.user} - {self.rating}"
 
 
 class RecipePlanWeek(models.Model):

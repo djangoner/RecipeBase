@@ -30,8 +30,8 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_fields = ["is_active"]
     http_method_names = ["get", "post", "put", "patch"]
 
-    def get_queryset(self):
-        return super().get_queryset().exclude(id=self.request.user.id)
+    # def get_queryset(self):
+    #     return super().get_queryset().exclude(id=self.request.user.id)
 
     @extend_schema(
         request=None,

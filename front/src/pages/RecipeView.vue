@@ -464,20 +464,29 @@
                   <h6 class="text-bold">Игредиенты не указаны</h6>
                 </div>
               </div>
+
+              <!-- Recipe Ratings -->
+
+              <div class="q-my-sm">
+                <div class="text-h6 text-center q-mb-sm">Рейтинг:</div>
+
+                <recipe-rating v-model="store.recipe" :edit="edit"></recipe-rating>
+              </div>
             </q-card-section>
           </q-card>
         </div>
       </div>
     </q-form>
 
-    <q-inner-loading :showing="loading"></q-inner-loading>
+    <q-inner-loading :showing="loading || saving"></q-inner-loading>
   </q-page>
 </template>
 
 <script>
 import { useBaseStore } from 'src/stores/base';
 import { date } from 'quasar';
-import recipeImagesUpload from 'components/recipeImagesUpload.vue';
+import RecipeImagesUpload from 'src/components/RecipeImagesUpload.vue';
+import recipeRating from 'src/components/RecipeRating.vue';
 
 let defaultRecipe = {
   content: '',
@@ -488,7 +497,8 @@ let defaultRecipe = {
 
 export default {
   components: {
-    recipeImagesUpload,
+    RecipeImagesUpload,
+    recipeRating,
   },
   data() {
     const store = useBaseStore();
@@ -651,6 +661,7 @@ export default {
     async saveRecipe() {
       // console.debug('Save recipe');
       this.saving = true;
+      this.edit = false;
 
       let payload = Object.assign({}, this.recipe);
       let isCreating = !this.exists;
@@ -669,12 +680,18 @@ export default {
         payload.portion_count = 0;
       }
 
+      payload.ratings = payload.ratings.map((r) => {
+        if (r.user) {
+          r.user = r.user.id;
+        }
+        return r;
+      });
+
       console.debug('Saving recipe: ', payload);
 
       method(payload)
         .then((resp) => {
           this.saving = false;
-          this.edit = false;
 
           if (isCreating) {
             console.debug('Redirecting from created recipe: ', resp.data);
@@ -690,6 +707,7 @@ export default {
         })
         .catch((err) => {
           this.saving = false;
+          this.edit = true;
           this.handleErrors(err, 'Ошибка сохранения рецепта');
         });
     },

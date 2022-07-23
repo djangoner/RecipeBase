@@ -6,12 +6,13 @@ from rest_framework import (decorators, exceptions, response, serializers,
 
 from recipes.models import (Ingredient, MealTime, Recipe, RecipeImage,
                             RecipeIngredient, RecipePlan, RecipePlanWeek,
-                            RecipeTag)
+                            RecipeRating, RecipeTag)
 from recipes.serializers import (IngredientSerializer, MealTimeSerializer,
                                  RecipeImageSerializer,
                                  RecipeIngredientSerializer,
                                  RecipePlanSerializer,
-                                 RecipePlanWeekSerializer, RecipeSerializer,
+                                 RecipePlanWeekSerializer,
+                                 RecipeRatingSerializer, RecipeSerializer,
                                  RecipeTagSerializer)
 from recipes.services import MEASURING_CONVERT, MEASURING_TYPES
 
@@ -86,4 +87,9 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
 class RecipePlanViewset(viewsets.ModelViewSet):
     queryset = RecipePlan.objects.all()
     serializer_class = RecipePlanSerializer
+
+
+class RecipeRatingViewset(viewsets.ModelViewSet):
+    queryset = RecipeRating.objects.all()
+    serializer_class = RecipeRatingSerializer
 

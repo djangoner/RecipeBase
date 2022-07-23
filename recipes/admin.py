@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from recipes.models import (Ingredient, MealTime, Recipe, RecipeImage,
                             RecipeIngredient, RecipePlan, RecipePlanWeek,
-                            RecipeTag)
+                            RecipeRating, RecipeTag)
 
 
 class RecipeIngredientsInline(admin.StackedInline):
@@ -20,13 +20,19 @@ class RecipePlanInline(admin.TabularInline):
     model = RecipePlan
 
 
+class RecipeRatingInline(admin.TabularInline):
+    extra = 0
+    model = RecipeRating
+    autocomplete_fields = ["recipe", "user"]
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ["title", "short_description", "created", "edited"]
     search_fields = ["title", "content"]
     filter_horizontal = ("tags",)
 
-    inlines = [RecipeIngredientsInline, RecipeImageInline]
+    inlines = [RecipeIngredientsInline, RecipeImageInline, RecipeRatingInline]
 
 
 @admin.register(Ingredient)

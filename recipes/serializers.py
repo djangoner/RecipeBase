@@ -1,9 +1,11 @@
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
+from users.models import User
+from users.serializers import UserSerializer
 
 from recipes.models import (Ingredient, MealTime, Recipe, RecipeImage,
                             RecipeIngredient, RecipePlan, RecipePlanWeek,
-                            RecipeTag)
+                            RecipeRating, RecipeTag)
 
 
 class RecipeImageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -38,11 +40,27 @@ class RecipeTagSerializer(WritableNestedModelSerializer, serializers.ModelSerial
         fields = "__all__"
 
 
+class RecipeRatingSerializer(serializers.ModelSerializer):
+
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    class Meta:
+        model = RecipeRating
+        fields = "__all__"
+
+
+    def to_representation(self, instance):
+        self.fields['user'] = UserSerializer()
+        return super().to_representation(instance)
+
+
+
 class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     short_description = serializers.SerializerMethodField()
     images = RecipeImageSerializer(many=True)
     tags = RecipeTagSerializer(many=True)
     ingredients = RecipeIngredientSerializer(many=True)
+    ratings = RecipeRatingSerializer(many=True)
 
     class Meta:
         model = Recipe

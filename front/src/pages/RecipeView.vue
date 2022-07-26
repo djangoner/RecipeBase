@@ -615,7 +615,8 @@ export default {
     },
     resetData() {
       console.debug('Recipe resetData');
-      this.recipe = Object.assign({}, defaultRecipe);
+      this.store.recipe = Object.assign({}, defaultRecipe);
+      // this.recipe = Object.assign({}, defaultRecipe);
       this.recipe.tags.length = 0;
       this.recipe.ingredients.length = 0;
     },

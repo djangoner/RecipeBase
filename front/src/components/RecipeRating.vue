@@ -66,7 +66,7 @@ export default {
         });
     },
     userRating(user) {
-      let exists = this.modelValue?.ratings.filter((r) => {
+      let exists = this.modelValue?.ratings?.filter((r) => {
         return r.user.id == user.id || r.user == user.id;
       });
       console.debug('userRating: ', user, exists);

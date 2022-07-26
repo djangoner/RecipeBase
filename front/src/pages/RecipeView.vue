@@ -493,6 +493,7 @@ let defaultRecipe = {
   tags: [],
   images: [],
   ingredients: [],
+  ratings: [],
 };
 
 export default {

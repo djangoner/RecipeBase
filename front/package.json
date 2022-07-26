@@ -1,7 +1,7 @@
 {
   "name": "recipe_base",
   "version": "0.0.1",
-  "description": "A base of recipes",
+  "description": "Home base of recipes",
   "productName": "Recipe Base",
   "author": "Your Name <djangoner6@gmail.com>",
   "private": true,
@@ -27,7 +27,14 @@
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^9.0.0",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "workbox-build": "^6.5.0",
+    "workbox-cacheable-response": "^6.5.0",
+    "workbox-core": "^6.5.0",
+    "workbox-expiration": "^6.5.0",
+    "workbox-precaching": "^6.5.0",
+    "workbox-routing": "^6.5.0",
+    "workbox-strategies": "^6.5.0"
   },
   "engines": {
     "node": "^18 || ^16 || ^14.19",

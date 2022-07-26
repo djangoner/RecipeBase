@@ -820,9 +820,19 @@ export default {
 
     removeIngredient(row) {
       console.debug('Remove ingredient: ', row);
-      this.recipe.ingredients = this.recipe.ingredients.filter((t) => {
-        return t != row;
-      });
+      this.$q
+        .dialog({
+          title: 'Подтверждение удаления ингредиента',
+          message: `Вы уверены что хотите удалить ингредиент '${row.ingredient.title}' ?`,
+          cancel: true,
+          persistent: true,
+        })
+        .onOk(() => {
+          console.debug('Remove ingredient confirmed');
+          this.recipe.ingredients = this.recipe.ingredients.filter((t) => {
+            return t != row;
+          });
+        });
     },
 
     filterIngredients(val, update, abort) {

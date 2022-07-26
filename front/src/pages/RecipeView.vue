@@ -567,7 +567,7 @@ export default {
       tagList: null,
       amountTypeList: null,
       ingAddDefault,
-      ingAdd: ingAddDefault,
+      ingAdd: Object.assign({}, ingAddDefault),
       ingList: null,
       requiredRule,
       ingredientsColumns,

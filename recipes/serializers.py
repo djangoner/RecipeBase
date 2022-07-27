@@ -24,13 +24,13 @@ class RecipeIngredientSerializer(
     WritableNestedModelSerializer, serializers.ModelSerializer
 ):
     ingredient = IngredientSerializer()
-    amount_type = serializers.SerializerMethodField()
+    amount_type_str = serializers.SerializerMethodField()
 
     class Meta:
         model = RecipeIngredient
         fields = "__all__"
 
-    def get_amount_type(self, obj: RecipeIngredient):
+    def get_amount_type_str(self, obj: RecipeIngredient):
         return obj.get_amount_type_display()
 
 

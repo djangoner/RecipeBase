@@ -355,7 +355,11 @@
                         type="number"
                         step="0.01"
                         dense
-                      />
+                      >
+                        <q-tooltip>
+                          Единица измерения: {{ slotScope.row.amount_type_str }}
+                        </q-tooltip>
+                      </q-input>
                       <span v-else>{{ slotScope.value }}</span>
                     </td>
                   </template>
@@ -524,7 +528,7 @@ export default {
       {
         name: 'amount_rec',
         label: 'Вес (рецепт)',
-        field: (row) => row.amount + '  (' + row.amount_type + ')',
+        field: (row) => row.amount + '  (' + row.amount_type_str + ')',
         required: true,
         sortable: true,
         style: 'width: 20px',
@@ -706,6 +710,7 @@ export default {
             type: 'positive',
             message: `Рецепт успешно ${created_tx}`,
           });
+          this.loadIngredients();
         })
         .catch((err) => {
           this.saving = false;

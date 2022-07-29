@@ -94,12 +94,30 @@ WSGI_APPLICATION = "RecipeBase.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if os.environ.get("USE_DB_ENGINE") or os.environ.get("DB_ENGINE"):
+    CONN_MAX_AGE = 100
+    DATABASES = {
+        "default": {
+            "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
+            "NAME": os.environ.get("DB_NAME", "db.sqlite"),
+            "USER": os.environ.get("DB_USER", ""),
+            "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+            "HOST": os.environ.get("DB_HOST", None),
+            "PORT": os.environ.get("DB_PORT", None),
+            "CONN_MAX_AGE": 600,
+        }
     }
-}
+else:
+    CONN_MAX_AGE = 5
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+            "OPTIONS": {
+                "timeout": 20,
+            },
+        }
+    }
 
 
 # Password validation

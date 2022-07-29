@@ -1,5 +1,6 @@
 from django.utils.translation import ugettext_lazy as _
 
+
 MEASURING_TYPES = (
     ("g", _("Граммы")),
     ("l", _("Литры")),

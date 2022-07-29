@@ -10,6 +10,9 @@ export const useBaseStore = defineStore("base", {
     amount_types: null,
     week_plan: null,
     meal_time: null,
+    product_list: null,
+    product_list_items: null,
+    product_list_item: null,
   }),
 
   getters: {},
@@ -146,6 +149,36 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
+    async loadProductListWeek(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get(`/product_list_week/${payload.year}_${payload.week}/`, {
+            params: payload,
+          })
+          .then((resp) => {
+            this.product_list = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async generateProductListWeek(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get(`/product_list_week/${payload.year}_${payload.week}/generate/`, {
+            params: payload,
+          })
+          .then((resp) => {
+            this.product_list = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
     async loadMealTime(payload) {
       return new Promise((resolve, reject) => {
         api
@@ -154,6 +187,64 @@ export const useBaseStore = defineStore("base", {
           })
           .then((resp) => {
             this.meal_time = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadProductListItems(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get("/product_list_item/", {
+            params: payload,
+          })
+          .then((resp) => {
+            this.product_list_items = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    async loadProductListItem(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get(`/product_list_item/${payload.id}/`, {
+            params: payload,
+          })
+          .then((resp) => {
+            this.product_list_item = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    async createProductListItem(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .post(`/product_list_item/`, payload)
+          .then((resp) => {
+            this.product_list_item = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async updateProductListItem(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .patch(`/product_list_item/${payload.id}/`, payload)
+          .then((resp) => {
+            this.product_list_item = resp.data;
             resolve(resp);
           })
           .catch((err) => {

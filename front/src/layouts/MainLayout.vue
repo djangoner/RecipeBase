@@ -51,6 +51,12 @@
           ><q-item-section avatar><q-icon name="article"></q-icon></q-item-section>
           <q-item-section>Рецепты</q-item-section>
         </q-item>
+        <q-item :to="{ name: 'product_list' }"
+          ><q-item-section avatar
+            ><q-icon name="shopping_basket"></q-icon
+          ></q-item-section>
+          <q-item-section>Список продуктов</q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 

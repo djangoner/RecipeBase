@@ -8,7 +8,8 @@ from django.db.models.fields import related
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 
-from recipes.services import MEASURING_CONVERT, MEASURING_TYPES, short_text
+from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_TYPES,
+                                         short_text)
 
 # // Helpers
 DESC_LENGTH = 80
@@ -98,6 +99,7 @@ class Ingredient(models.Model):
         blank=True,
         help_text=_("Минимальный размер упаковки в граммах / миллилитрах"),
     )
+    need_buy = models.BooleanField(_("Требует покупки"), default=True)
 
     class Meta:
         verbose_name = _("Ингредиент")
@@ -183,7 +185,11 @@ class RecipeRating(models.Model):
         User, models.CASCADE, related_name="ratings", verbose_name=_("Пользователь")
     )
     recipe = models.ForeignKey(
-        Recipe, models.CASCADE, related_name="ratings", verbose_name=_("Рецепт")
+        Recipe,
+        models.CASCADE,
+        related_name="ratings",
+        verbose_name=_("Рецепт"),
+        blank=True,
     )
     rating = models.SmallIntegerField(
         _("Оценка"), validators=[MinValueValidator(0), MaxValueValidator(5)]
@@ -240,3 +246,99 @@ class RecipePlan(models.Model):
 
     def __str__(self) -> str:
         return f"{self.week}.{self.day} {self.meal_time}"
+
+
+class ProductListWeek(models.Model):
+    year = models.SmallIntegerField(_("Год"))
+    week = models.SmallIntegerField(_("Неделя"))
+
+    class Meta:
+        ordering = ["-year", "-week"]
+        verbose_name = _("Список продуктов недели")
+        verbose_name_plural = _("Списки продуктов недель")
+
+    def __str__(self) -> str:
+        return f"{self.year}-{self.week}"
+
+
+class ProductListItem(models.Model):
+
+    week = models.ForeignKey(
+        ProductListWeek,
+        models.CASCADE,
+        verbose_name=_("Список продуктов недели"),
+        blank=True,
+        related_name="items",
+    )
+    day = models.PositiveSmallIntegerField(
+        _("День недели"),
+        blank=False,
+        null=True,
+        validators=[MinValueValidator(1), MaxValueValidator(7)],
+    )
+    # recipe = models.ForeignKey(
+    #     Recipe, models.SET_NULL, verbose_name=_("Рецепт"), null=True, blank=True
+    # )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        models.CASCADE,
+        related_name="plan_items",
+        verbose_name=_("Ингредиент"),
+        null=True,
+        blank=True,
+    )
+    ingredients = models.ManyToManyField(
+        RecipeIngredient,
+        related_name="plan_items",
+        verbose_name=_("Ингредиенты рецептов"),
+        blank=True,
+    )
+    is_auto = models.BooleanField(_("Автоматический"), default=False)
+    is_deleted = models.BooleanField(_("Удален"), default=False)
+    ##
+
+    is_completed = models.BooleanField(_("Завершен"), default=False)
+    title = models.CharField(_("Название"), max_length=255)
+    amount = models.FloatField(_("Количество"), null=True, blank=True, max_length=15)
+    amount_type = models.CharField(
+        _("Единица измерения"),
+        choices=MEASURING_TYPES,
+        default="g",
+        max_length=15,
+        blank=True,
+    )
+
+    description = models.TextField(_("Описание"), null=True, blank=True)
+    priority = models.PositiveSmallIntegerField(
+        _("Приоритет"),
+        default=5,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+    )
+
+    author = models.ForeignKey(
+        User,
+        models.CASCADE,
+        verbose_name=_("Автор"),
+        related_name="product_item_author",
+        null=True,
+        blank=True,
+    )
+    assigned = models.ForeignKey(
+        User,
+        models.CASCADE,
+        verbose_name=_("Ответственный"),
+        related_name="product_item_assigned",
+        null=True,
+        blank=True,
+    )
+    created = models.DateTimeField(_("Время создания"), auto_now_add=True)
+    edited = models.DateTimeField(_("Время полследнего редактирования"), auto_now=True)
+    ##
+
+    class Meta:
+        ordering = ["day", "priority"]
+        verbose_name = _("Список покупок")
+        verbose_name_plural = _("Список покупок")
+
+    def __str__(self) -> str:
+        return f"{self.week}.{self.day} {self.title}"

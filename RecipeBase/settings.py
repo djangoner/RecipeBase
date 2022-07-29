@@ -222,14 +222,14 @@ LOGGING = {
             "include_html": True,
         },
         "console": {"class": "logging.StreamHandler", "formatter": "verbose"},
-        "logfile": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "level": "DEBUG",
-            "filename": os.path.join(BASE_DIR, "django.log"),
-            "maxBytes": 1024 * 30,  # in kb
-            "backupCount": 1 if DEBUG else 5,
-            "formatter": "verbose",
-        },
+        # "logfile": {
+        #     "class": "logging.handlers.RotatingFileHandler",
+        #     "level": "DEBUG",
+        #     "filename": os.path.join(BASE_DIR, "django.log"),
+        #     "maxBytes": 1024 * 30,  # in kb
+        #     "backupCount": 1 if DEBUG else 5,
+        #     "formatter": "verbose",
+        # },
     },
-    "loggers": {"": {"level": "DEBUG", "handlers": ["console", "logfile"]}},
+    "loggers": {"": {"level": "DEBUG", "handlers": ["console"]}},
 }

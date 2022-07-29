@@ -3,7 +3,8 @@ from rest_framework import serializers
 from users.models import User
 from users.serializers import UserSerializer
 
-from recipes.models import (Ingredient, MealTime, Recipe, RecipeImage,
+from recipes.models import (Ingredient, MealTime, ProductListItem,
+                            ProductListWeek, Recipe, RecipeImage,
                             RecipeIngredient, RecipePlan, RecipePlanWeek,
                             RecipeRating, RecipeTag)
 
@@ -48,11 +49,9 @@ class RecipeRatingSerializer(serializers.ModelSerializer):
         model = RecipeRating
         fields = "__all__"
 
-
     def to_representation(self, instance):
-        self.fields['user'] = UserSerializer()
+        self.fields["user"] = UserSerializer()
         return super().to_representation(instance)
-
 
 
 class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -78,7 +77,6 @@ class MealTimeSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-
 class RecipePlanSerializer(serializers.ModelSerializer):
     # recipe = RecipeSerializer()
     # meal_time = MealTimeSerializer()
@@ -87,7 +85,6 @@ class RecipePlanSerializer(serializers.ModelSerializer):
         model = RecipePlan
         fields = "__all__"
         depth = 0
-
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -98,11 +95,38 @@ class RecipePlanSerializer(serializers.ModelSerializer):
         return representation
 
 
-
-class RecipePlanWeekSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class RecipePlanWeekSerializer(
+    WritableNestedModelSerializer, serializers.ModelSerializer
+):
     plans = RecipePlanSerializer(many=True)
 
     class Meta:
         model = RecipePlanWeek
+        fields = "__all__"
+        depth = 1
+
+
+class ProductListItemSerializer(
+    WritableNestedModelSerializer, serializers.ModelSerializer
+):
+    amount_type_str = serializers.SerializerMethodField()
+    week = serializers.PrimaryKeyRelatedField(queryset=ProductListWeek.objects.all())
+
+    class Meta:
+        model = ProductListItem
+        fields = "__all__"
+        read_only_fields = ("is_auto", "ingredient", "created", "edited")
+        # depth = 1
+
+    def get_amount_type_str(self, obj: RecipeIngredient):
+        return obj.get_amount_type_display()
+
+class ProductListWeekSerializer(
+    WritableNestedModelSerializer, serializers.ModelSerializer
+):
+    items = ProductListItemSerializer(many=True)
+
+    class Meta:
+        model = ProductListWeek
         fields = "__all__"
         depth = 1

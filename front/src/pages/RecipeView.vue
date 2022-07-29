@@ -95,6 +95,7 @@
                   :options="tagList"
                   option-label="title"
                   use-input
+                  dense
                   @new-value="addTag"
                 >
                   <template v-slot:no-option>
@@ -403,6 +404,7 @@
                           @filter="filterIngredients"
                           @new-value="addIngredient"
                           use-input
+                          dense
                         >
                           <template v-slot:no-option>
                             <q-item>
@@ -434,6 +436,7 @@
                           option-value="id"
                           map-options
                           emit-value
+                          dense
                           style="max-width: 100px"
                         >
                           <template v-slot:no-option>

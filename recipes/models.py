@@ -8,7 +8,8 @@ from django.db.models.fields import related
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 
-from recipes.services.measurings import MEASURING_CONVERT, MEASURING_TYPES, short_text
+from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_TYPES,
+                                         short_text)
 
 # // Helpers
 DESC_LENGTH = 80
@@ -274,7 +275,7 @@ class ProductListItem(models.Model):
         _("День недели"),
         blank=False,
         null=True,
-        validators=[MinValueValidator(1), MaxValueValidator(7)],
+        validators=[MinValueValidator(0), MaxValueValidator(7)],
     )
     # recipe = models.ForeignKey(
     #     Recipe, models.SET_NULL, verbose_name=_("Рецепт"), null=True, blank=True
@@ -305,6 +306,7 @@ class ProductListItem(models.Model):
         choices=MEASURING_TYPES,
         default="g",
         max_length=15,
+        null=True,
         blank=True,
     )
 

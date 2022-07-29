@@ -73,6 +73,21 @@
           use-input
         >
         </q-select>
+
+        <div class="q-my-md" v-if="item.is_auto && item.ingredients">
+          <span class="text-subtitle-1">Используется в рецептах:</span>
+          <q-list class="q-my-sm" dense>
+            <q-item
+              v-for="ing of item.ingredients"
+              :key="ing.id"
+              clickable
+              :to="{ name: 'recipe', params: { id: ing.recipe.id } }"
+            >
+              {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
+            </q-item>
+          </q-list>
+        </div>
+
         <q-input
           v-model="item.description"
           @update:modelValue="$emit('updateItem', item)"
@@ -130,6 +145,16 @@ export default {
       let fday = getDateOfISOWeek(this.week.year, this.week.week);
       fday.setDate(fday.getDate() + idx - 1);
       return date.formatDate(fday, 'MM.DD');
+    },
+    ingUsingStr(ing) {
+      let recipe = ing.recipe;
+
+      let ings = recipe.ingredients.filter((i) => i.id == ing.id);
+      let texts = ings.map((i) => {
+        return i.amount + ' ' + i.amount_type_str;
+      });
+
+      return texts.join(', ');
     },
   },
   computed: {

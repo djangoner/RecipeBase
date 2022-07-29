@@ -26,15 +26,8 @@
         <template v-if="item.amount">
           (
           <template v-if="item.ingredient.min_pack_size">
-            {{ item.amount / item.ingredient.min_pack_size }}
-            {{
-              intFormat(
-                item.amount / item.ingredient.min_pack_size,
-                'упаковка',
-                'упаковки',
-                'упаковок'
-              )
-            }},
+            ~{{ Math.ceil(item.amount / item.ingredient.min_pack_size) }}
+            шт.,
           </template>
           {{ item.amount }} {{ item.amount_type_str }}
           )

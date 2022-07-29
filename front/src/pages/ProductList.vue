@@ -111,6 +111,10 @@ export default {
     },
     updateItem(item) {
       let payload = Object.assign({}, item);
+
+      delete payload['ingredient'];
+      delete payload['ingredients'];
+
       this.saving = true;
 
       this.store

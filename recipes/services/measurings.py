@@ -13,6 +13,14 @@ MEASURING_TYPES = (
     ("items", _("Шт")),
 )
 
+MEASURING_SHORT = {
+    "g": "гр",
+    "kg": "кг",
+    "l": "л",
+    "ml": "мл",
+    "items": "шт"
+}
+
 MEASURING_CONVERT = {
     # meas: gramm_count
     "g": 1,

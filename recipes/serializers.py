@@ -3,19 +3,20 @@ from rest_framework import serializers
 from users.models import User
 from users.serializers import UserSerializer
 
-from recipes.models import (
-    Ingredient,
-    MealTime,
-    ProductListItem,
-    ProductListWeek,
-    Recipe,
-    RecipeImage,
-    RecipeIngredient,
-    RecipePlan,
-    RecipePlanWeek,
-    RecipeRating,
-    RecipeTag,
-)
+from recipes.models import (Ingredient, MealTime, ProductListItem,
+                            ProductListWeek, Recipe, RecipeImage,
+                            RecipeIngredient, RecipePlan, RecipePlanWeek,
+                            RecipeRating, RecipeTag)
+from recipes.services.measurings import MEASURING_SHORT, MEASURING_TYPES
+
+
+def amount_str(meas: str):
+    if meas in MEASURING_SHORT:
+        return MEASURING_SHORT[meas]
+    elif meas in MEASURING_TYPES:
+        return MEASURING_TYPES[meas]
+
+    return meas
 
 
 class RecipeImageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -41,7 +42,20 @@ class RecipeIngredientSerializer(
         fields = "__all__"
 
     def get_amount_type_str(self, obj: RecipeIngredient):
-        return obj.get_amount_type_display()
+        return amount_str(obj.amount_type)
+
+class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
+
+    # def to_representation(self, instance):
+    #     self.fields["recipe"] = RecipeSerializer()
+    #     return super().to_representation(instance)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        representation["recipe"] = RecipeSerializer(instance.recipe).data
+
+        return representation
 
 
 class RecipeTagSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -128,7 +142,16 @@ class ProductListItemSerializer(
         # depth = 1
 
     def get_amount_type_str(self, obj: RecipeIngredient):
-        return obj.get_amount_type_display()
+        return amount_str(obj.amount_type)
+
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        representation["ingredient"] = IngredientSerializer(instance.ingredient).data
+        representation["ingredients"] = RecipeIngredientWithRecipeSerializer(instance.ingredients, many=True).data
+
+        return representation
 
 
 class ProductListWeekSerializer(

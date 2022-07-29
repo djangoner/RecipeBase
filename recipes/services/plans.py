@@ -2,14 +2,8 @@ import logging
 import math
 from typing import List, Tuple
 
-from recipes.models import (
-    Ingredient,
-    ProductListItem,
-    ProductListWeek,
-    RecipeIngredient,
-    RecipePlan,
-    RecipePlanWeek,
-)
+from recipes.models import (Ingredient, ProductListItem, ProductListWeek,
+                            RecipeIngredient, RecipePlan, RecipePlanWeek)
 from recipes.services.measurings import MEASURING_CONVERT, amount_to_grams
 
 log = logging.getLogger("PlansGen")
@@ -92,9 +86,9 @@ def get_plan_week(week: RecipePlanWeek) -> dict:
         all_convert = all([is_convertable(m) for m in meas_types])
         all_any = len(meas_types) == 1
 
-        log.debug(
-            f"Measurings: {meas_types}, all_convert: {all_convert}, all_any: {all_any}"
-        )
+        # log.debug(
+        #     f"Measurings: {meas_types}, all_convert: {all_convert}, all_any: {all_any}"
+        # )
         if all_convert:  # If can convert all measurings to one
             meas, amount = convert_all_to_grams(amounts)
             info["measuring"] = meas
@@ -108,9 +102,10 @@ def get_plan_week(week: RecipePlanWeek) -> dict:
         # -- Check min pack size
         if ing.min_pack_size:
 
-            info["amount"] = (
-                math.ceil(info["amount"] / ing.min_pack_size) * ing.min_pack_size
-            )
+            if not info["measuring"] in ["items"]:
+                info["amount"] = (
+                    math.ceil(info["amount"] / ing.min_pack_size) * ing.min_pack_size
+                )
 
     return res
 
@@ -132,12 +127,13 @@ def update_plan_week(week: RecipePlanWeek):
                 "title": ing_name,
                 "amount": ing_info["amount"],
                 "amount_type": ing_info["measuring"],
-                "day": ing_info["min_day"],
+                "day": ing_info["min_day"] - 1,
                 "is_deleted": False,
             },
         )
         plan_item: ProductListItem
         plan_item.ingredients.set(ing_info["ingredients"])
+        plan_item.save()
         edited_plans.append(plan_item.id)
 
     old_items = plan_week.items.exclude(id__in=edited_plans)

@@ -34,7 +34,7 @@ export const useBaseStore = defineStore("base", {
     async loadRecipe(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/recipes/" + payload.id, { params: payload })
+          .get("/recipes/" + payload.id + "/", { params: payload })
           .then((resp) => {
             this.recipe = resp.data;
             resolve(resp);

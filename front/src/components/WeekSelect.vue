@@ -55,6 +55,7 @@ export function getDateOfISOWeek(y, w) {
 }
 
 export let WeekDays = {
+  0: 'Вс (прошлый)',
   1: 'Понедельник',
   2: 'Вторник',
   3: 'Среда',

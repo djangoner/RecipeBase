@@ -1,35 +1,24 @@
 from datetime import datetime
 
 from django.shortcuts import get_object_or_404, render
-from rest_framework import decorators, exceptions, response, serializers, viewsets
+from rest_framework import (decorators, exceptions, response, serializers,
+                            viewsets)
 
-from recipes.models import (
-    Ingredient,
-    MealTime,
-    ProductListItem,
-    ProductListWeek,
-    Recipe,
-    RecipeImage,
-    RecipeIngredient,
-    RecipePlan,
-    RecipePlanWeek,
-    RecipeRating,
-    RecipeTag,
-)
-from recipes.serializers import (
-    IngredientSerializer,
-    MealTimeSerializer,
-    ProductListItemSerializer,
-    ProductListWeekSerializer,
-    RecipeImageSerializer,
-    RecipeIngredientSerializer,
-    RecipePlanSerializer,
-    RecipePlanWeekSerializer,
-    RecipeRatingSerializer,
-    RecipeSerializer,
-    RecipeTagSerializer,
-)
-from recipes.services.measurings import MEASURING_CONVERT, MEASURING_TYPES
+from recipes.models import (Ingredient, MealTime, ProductListItem,
+                            ProductListWeek, Recipe, RecipeImage,
+                            RecipeIngredient, RecipePlan, RecipePlanWeek,
+                            RecipeRating, RecipeTag)
+from recipes.serializers import (IngredientSerializer, MealTimeSerializer,
+                                 ProductListItemSerializer,
+                                 ProductListWeekSerializer,
+                                 RecipeImageSerializer,
+                                 RecipeIngredientSerializer,
+                                 RecipePlanSerializer,
+                                 RecipePlanWeekSerializer,
+                                 RecipeRatingSerializer, RecipeSerializer,
+                                 RecipeTagSerializer)
+from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_SHORT,
+                                         MEASURING_TYPES)
 from recipes.services.plans import update_plan_week
 
 
@@ -60,6 +49,7 @@ class IngredientViewset(viewsets.ModelViewSet):
             {
                 "types": measuring_types,
                 "convert": MEASURING_CONVERT,
+                "short": MEASURING_SHORT,
             }
         )
 

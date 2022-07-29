@@ -29,4 +29,4 @@ def recipe_post_save(sender: Recipe, instance, **kwargs):
 
 @receiver(post_save, sender=RecipePlanWeek)
 def recipe_plan_post_save(sender: RecipePlanWeek, instance, **kwargs):
-    update_plan_week(get_current_plan_week())
+    update_plan_week(instance)

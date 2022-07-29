@@ -42,12 +42,13 @@
         </q-icon>
         <q-icon v-else name="edit"></q-icon>
 
-        <q-badge class="q-mx-sm" :color="priorityColors[item.priority]">
+        <q-badge class="q-mx-sm q-py-xs" :color="priorityColors[item.priority]">
           <q-icon name="flag" size="10px" />
           <span class="q-ml-xs">
             {{ item.priority }}
           </span>
         </q-badge>
+        <q-icon name="notes" size="17px" color="blue-grey" v-if="item.description" />
 
         {{ getDay(item.day) }}
         {{ WeekDays[item.day] }}

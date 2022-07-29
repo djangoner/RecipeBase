@@ -22,7 +22,7 @@
         v-for="(day, idx) of WeekDays"
         :key="idx"
       >
-        <q-card class="q-px-xs q-py-sm full-height">
+        <q-card class="row column justify-around q-px-xs q-py-sm full-height">
           <q-card-section>
             <span class="text-h6">
               <b>{{ getDay(idx - 1) }}</b> {{ day }}
@@ -32,7 +32,10 @@
           <q-card-section>
             <div class="flex column">
               <template v-for="mtime of meal_time" :key="mtime.id">
-                <div class="row" v-if="getRecipe(idx, mtime) || mtime.is_primary">
+                <div
+                  class="row"
+                  v-if="getRecipe(idx, mtime) !== undefined || mtime.is_primary"
+                >
                   <div class="col">
                     <span class="text-subtitle1 q-my-none">
                       {{ mtime.title }}
@@ -66,6 +69,22 @@
                   </div>
                 </div>
               </template>
+
+              <div class="row q-mt-sm">
+                <q-select
+                  class="col"
+                  :modelValue="null"
+                  :options="meal_time"
+                  @update:modelValue="addMtime(idx, $event)"
+                  option-value="id"
+                  option-label="title"
+                  label="Добавить"
+                  map-options
+                  use-input
+                  options-dense
+                  dense
+                ></q-select>
+              </div>
             </div>
           </q-card-section>
         </q-card>
@@ -131,6 +150,7 @@ export default {
       week: null,
       loading: false,
       date_picker: null,
+      addMtimeSelect: null,
       search: '',
       WeekDays,
     };
@@ -318,6 +338,20 @@ export default {
       }
       this.saveWeekPlan();
     },
+    addMtime(day_idx, mtime) {
+      console.debug('addMtime: ', day_idx, mtime);
+      this.plan.plans.push(
+        Object.assign(
+          {},
+          {
+            day: parseInt(day_idx),
+            meal_time: mtime,
+            recipe: null,
+          }
+        )
+      );
+    },
+
     timeFormat(raw) {
       return raw.slice(0, raw.length - 3);
     },

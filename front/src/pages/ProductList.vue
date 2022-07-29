@@ -46,7 +46,7 @@
       ></product-list-items>
     </q-list>
 
-    <q-inner-loading :showing="loading || saving"></q-inner-loading>
+    <q-inner-loading :showing="loading"></q-inner-loading>
   </q-page>
 </template>
 

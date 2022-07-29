@@ -11,10 +11,11 @@ from recipes.services.measurings import MEASURING_SHORT, MEASURING_TYPES
 
 
 def amount_str(meas: str):
+    meas_types = dict(MEASURING_TYPES)
     if meas in MEASURING_SHORT:
         return MEASURING_SHORT[meas]
-    elif meas in MEASURING_TYPES:
-        return MEASURING_TYPES[meas]
+    elif meas in meas_types:
+        return meas_types[meas]
 
     return meas
 

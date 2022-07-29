@@ -102,6 +102,7 @@ class Ingredient(models.Model):
     need_buy = models.BooleanField(_("Требует покупки"), default=True)
 
     class Meta:
+        ordering = ["title"]
         verbose_name = _("Ингредиент")
         verbose_name_plural = _("Ингредиенты")
 

@@ -18,11 +18,14 @@
     <div class="row wrap q-col-gutter-x-sm q-col-gutter-y-md">
       <!-- :class="$q.screen.lt.md ? 'column' : ''" -->
       <div
-        class="col-6 col-sm-4 col-md-4 col-lg-3 col-xl-3"
+        class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3"
         v-for="(day, idx) of WeekDays"
         :key="idx"
       >
-        <q-card class="row column justify-around q-px-xs q-py-sm full-height">
+        <q-card
+          class="row column justify-around q-px-xs q-py-sm full-height"
+          :class="idx >= 6 ? 'bg-grey-3' : ''"
+        >
           <q-card-section>
             <span class="text-h6">
               <b>{{ getDay(idx - 1) }}</b> {{ day }}
@@ -55,6 +58,7 @@
                       @filter="filterRecipes"
                       use-input
                       clearable
+                      options-dense
                       dense
                     >
                       <template v-slot:no-option>
@@ -293,6 +297,10 @@ export default {
     },
 
     filterRecipes(val, update, abort) {
+      if (this.search == val && this.recipesList) {
+        update(() => {});
+        return;
+      }
       this.search = val;
       this.loadRecipes()
         .then(() => {

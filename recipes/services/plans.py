@@ -117,6 +117,10 @@ def update_plan_week(week: RecipePlanWeek):
 
     edited_plans = []
 
+    if not ingredients or not isinstance(ingredients, dict):
+        log.warning(f"Strange ingredients: {ingredients}")
+        return
+
     for ing_name, ing_info in ingredients.items():
         ing: RecipeIngredient = ing_info["ingredient"]
 

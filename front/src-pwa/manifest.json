@@ -3,7 +3,7 @@
   "short_name": "RecipeBase",
   "start_url": ".",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#027be3",
   "icons": [

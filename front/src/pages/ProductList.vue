@@ -89,7 +89,9 @@ export default {
     this.week.week = week;
     this.loadList();
   },
-  beforeRouteUpdate(to) {},
+  beforeRouteUpdate(to) {
+    this.loadList();
+  },
   methods: {
     loadList() {
       let payload = {
@@ -134,6 +136,7 @@ export default {
           this.handleErrors(err, 'Ошибка сохранения списка продуктов');
         });
     },
+    deleteItem(item) {},
     regenerateList() {
       let payload = {
         year: this.week.year,

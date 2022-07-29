@@ -34,12 +34,21 @@
         </template>
       </span>
       <!-- First column bottom row, date -->
-      <span class="text-body2 text-primary">
+      <span class="text-body2" :class="WeekDaysColors[item.day]">
         <q-icon v-if="item.is_auto" name="settings">
           <q-tooltip>
             Этот рецепт был создан автоматически на основе плана на неделю
           </q-tooltip>
         </q-icon>
+        <q-icon v-else name="edit"></q-icon>
+
+        <q-badge class="q-mx-sm" :color="priorityColors[item.priority]">
+          <q-icon name="flag" size="10px" />
+          <span class="q-ml-xs">
+            {{ item.priority }}
+          </span>
+        </q-badge>
+
         {{ getDay(item.day) }}
         {{ WeekDays[item.day] }}
       </span>
@@ -55,6 +64,25 @@ import weekSelect, {
 } from 'components/WeekSelect.vue';
 import { date } from 'quasar';
 
+let WeekDaysColors = {
+  0: 'text-light-green-6',
+  1: 'text-teal',
+  2: 'text-cyan',
+  3: 'text-light-blue',
+  4: 'text-blue-10',
+  5: 'text-indigo',
+  6: 'text-purple',
+  7: 'text-deep-purple',
+};
+
+let priorityColors = {
+  1: 'red',
+  2: 'orange',
+  3: 'yellpw',
+  4: 'green',
+  5: 'grey',
+};
+
 export default {
   props: { modelValue: { required: true }, week: {} },
   emits: ['openItem', 'updateItem', 'update:modelValue'],
@@ -63,6 +91,8 @@ export default {
     return {
       listItems: null,
       WeekDays,
+      WeekDaysColors,
+      priorityColors,
     };
   },
   methods: {

@@ -252,5 +252,17 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
+    async deleteProductListItem(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .delete(`/product_list_item/${payload.id}/`, payload)
+          .then((resp) => {
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
   },
 });

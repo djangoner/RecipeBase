@@ -56,6 +56,7 @@
           dense
           options-dense
           use-input
+          clearable
         >
         </q-select>
         <q-select
@@ -74,6 +75,7 @@
         >
         </q-select>
 
+        <!-- Used in recipes -->
         <div class="q-my-md" v-if="item.is_auto && item.ingredients">
           <span class="text-subtitle-1">Используется в рецептах:</span>
           <q-list class="q-my-sm" dense>
@@ -88,6 +90,7 @@
           </q-list>
         </div>
 
+        <!-- Ingredient description -->
         <q-input
           v-model="item.description"
           @update:modelValue="$emit('updateItem', item)"
@@ -151,7 +154,11 @@ export default {
 
       let ings = recipe.ingredients.filter((i) => i.id == ing.id);
       let texts = ings.map((i) => {
-        return i.amount + ' ' + i.amount_type_str;
+        let r = i.amount + ' ' + i.amount_type_str;
+        if (i.is_main) {
+          r += ', основной';
+        }
+        return r;
       });
 
       return texts.join(', ');

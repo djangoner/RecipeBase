@@ -137,3 +137,6 @@ class ProductListItemViewset(viewsets.ModelViewSet):
     queryset = ProductListItem.objects.all()
     serializer_class = ProductListItemSerializer
     filterset_fields = ["is_auto", "is_deleted", "is_completed"]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)

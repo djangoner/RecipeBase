@@ -1,8 +1,8 @@
 from django.utils.translation import ugettext_lazy as _
 
-
 MEASURING_TYPES = (
     ("g", _("Граммы")),
+    ("kg", _("Килограммы")),
     ("l", _("Литры")),
     ("ml", _("Миллилитры")),
     ("cup", _("Стакан")),
@@ -14,7 +14,9 @@ MEASURING_TYPES = (
 )
 
 MEASURING_CONVERT = {
+    # meas: gramm_count
     "g": 1,
+    "kg": 1000,
     "cup": 250,
     "pinch": 2,
     "table_spoon": 20,

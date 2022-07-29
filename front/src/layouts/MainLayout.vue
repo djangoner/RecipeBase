@@ -43,13 +43,13 @@
           ><q-item-section avatar><q-icon name="home"></q-icon></q-item-section>
           <q-item-section>Главная</q-item-section>
         </q-item>
-        <q-item :to="{ name: 'week_plan' }"
-          ><q-item-section avatar><q-icon name="calendar_month"></q-icon></q-item-section>
-          <q-item-section>План</q-item-section>
-        </q-item>
         <q-item :to="{ name: 'recipes' }"
           ><q-item-section avatar><q-icon name="article"></q-icon></q-item-section>
           <q-item-section>Рецепты</q-item-section>
+        </q-item>
+        <q-item :to="{ name: 'week_plan' }"
+          ><q-item-section avatar><q-icon name="calendar_month"></q-icon></q-item-section>
+          <q-item-section>План</q-item-section>
         </q-item>
         <q-item :to="{ name: 'product_list' }"
           ><q-item-section avatar

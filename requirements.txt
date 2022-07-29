@@ -7,3 +7,4 @@ drf_spectacular==0.21.2
 drf_writable_nested==0.6.3
 python-dotenv==0.20.0
 pillow==8.0.1
+psycopg2-binary==2.9.3

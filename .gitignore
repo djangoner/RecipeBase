@@ -5,6 +5,7 @@
 *.ini
 *.json*
 !front/*.json
+!manifest.json
 *.log*
 *.pyc
 *.sqlite*

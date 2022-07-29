@@ -2,8 +2,14 @@ import logging
 import math
 from typing import List, Tuple
 
-from recipes.models import (Ingredient, ProductListItem, ProductListWeek,
-                            RecipeIngredient, RecipePlan, RecipePlanWeek)
+from recipes.models import (
+    Ingredient,
+    ProductListItem,
+    ProductListWeek,
+    RecipeIngredient,
+    RecipePlan,
+    RecipePlanWeek,
+)
 from recipes.services.measurings import MEASURING_CONVERT, amount_to_grams
 
 log = logging.getLogger("PlansGen")
@@ -101,12 +107,7 @@ def get_plan_week(week: RecipePlanWeek) -> dict:
 
         # -- Check min pack size
         if ing.min_pack_size:
-            print(
-                "Min pack!",
-                info["amount"],
-                ing.min_pack_size,
-                info["amount"] / ing.min_pack_size,
-            )
+
             info["amount"] = (
                 math.ceil(info["amount"] / ing.min_pack_size) * ing.min_pack_size
             )
@@ -125,7 +126,7 @@ def update_plan_week(week: RecipePlanWeek):
         ing: RecipeIngredient = ing_info["ingredient"]
 
         plan_item, _ = plan_week.items.update_or_create(
-            ingredient = ing_info['ingredient'],
+            ingredient=ing_info["ingredient"],
             is_auto=True,
             defaults={
                 "title": ing_name,

@@ -3,8 +3,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from drf_spectacular.authentication import SessionScheme
 from rest_framework import pagination
-from rest_framework.authentication import (BasicAuthentication,
-                                           SessionAuthentication)
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.response import Response
 
 UserModel = get_user_model()

@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "ckeditor",
-    'django_cleanup.apps.CleanupConfig',
+    "django_cleanup.apps.CleanupConfig",
     # Custom
     "recipes.apps.RecipesConfig",
     "users.apps.UsersConfig",

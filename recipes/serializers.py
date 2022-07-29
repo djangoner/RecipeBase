@@ -3,10 +3,19 @@ from rest_framework import serializers
 from users.models import User
 from users.serializers import UserSerializer
 
-from recipes.models import (Ingredient, MealTime, ProductListItem,
-                            ProductListWeek, Recipe, RecipeImage,
-                            RecipeIngredient, RecipePlan, RecipePlanWeek,
-                            RecipeRating, RecipeTag)
+from recipes.models import (
+    Ingredient,
+    MealTime,
+    ProductListItem,
+    ProductListWeek,
+    Recipe,
+    RecipeImage,
+    RecipeIngredient,
+    RecipePlan,
+    RecipePlanWeek,
+    RecipeRating,
+    RecipeTag,
+)
 
 
 class RecipeImageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -120,6 +129,7 @@ class ProductListItemSerializer(
 
     def get_amount_type_str(self, obj: RecipeIngredient):
         return obj.get_amount_type_display()
+
 
 class ProductListWeekSerializer(
     WritableNestedModelSerializer, serializers.ModelSerializer

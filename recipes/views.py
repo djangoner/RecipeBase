@@ -1,22 +1,34 @@
 from datetime import datetime
 
 from django.shortcuts import get_object_or_404, render
-from rest_framework import (decorators, exceptions, response, serializers,
-                            viewsets)
+from rest_framework import decorators, exceptions, response, serializers, viewsets
 
-from recipes.models import (Ingredient, MealTime, ProductListItem,
-                            ProductListWeek, Recipe, RecipeImage,
-                            RecipeIngredient, RecipePlan, RecipePlanWeek,
-                            RecipeRating, RecipeTag)
-from recipes.serializers import (IngredientSerializer, MealTimeSerializer,
-                                 ProductListItemSerializer,
-                                 ProductListWeekSerializer,
-                                 RecipeImageSerializer,
-                                 RecipeIngredientSerializer,
-                                 RecipePlanSerializer,
-                                 RecipePlanWeekSerializer,
-                                 RecipeRatingSerializer, RecipeSerializer,
-                                 RecipeTagSerializer)
+from recipes.models import (
+    Ingredient,
+    MealTime,
+    ProductListItem,
+    ProductListWeek,
+    Recipe,
+    RecipeImage,
+    RecipeIngredient,
+    RecipePlan,
+    RecipePlanWeek,
+    RecipeRating,
+    RecipeTag,
+)
+from recipes.serializers import (
+    IngredientSerializer,
+    MealTimeSerializer,
+    ProductListItemSerializer,
+    ProductListWeekSerializer,
+    RecipeImageSerializer,
+    RecipeIngredientSerializer,
+    RecipePlanSerializer,
+    RecipePlanWeekSerializer,
+    RecipeRatingSerializer,
+    RecipeSerializer,
+    RecipeTagSerializer,
+)
 from recipes.services.measurings import MEASURING_CONVERT, MEASURING_TYPES
 from recipes.services.plans import update_plan_week
 
@@ -42,7 +54,7 @@ class IngredientViewset(viewsets.ModelViewSet):
     @decorators.action(["GET"], detail=False)
     def amount_types(self, request):
 
-        measuring_types = [{"id": k, "title": v} for k,v in MEASURING_TYPES]
+        measuring_types = [{"id": k, "title": v} for k, v in MEASURING_TYPES]
 
         return response.Response(
             {
@@ -72,7 +84,7 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
     serializer_class = RecipePlanWeekSerializer
 
     def get_object(self):
-        pk = self.kwargs.get('pk', None)
+        pk = self.kwargs.get("pk", None)
         year, week = None, None
         if pk in ["current", "now"]:
             year, week = datetime.now().year, datetime.now().isocalendar()[1]
@@ -87,6 +99,7 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
             return plan_week
 
         return super().get_object()
+
 
 class RecipePlanViewset(viewsets.ModelViewSet):
     queryset = RecipePlan.objects.all()
@@ -103,7 +116,7 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
     serializer_class = ProductListWeekSerializer
 
     def get_object(self):
-        pk = self.kwargs.get('pk', None)
+        pk = self.kwargs.get("pk", None)
         year, week = None, None
         if pk in ["current", "now"]:
             year, week = datetime.now().year, datetime.now().isocalendar()[1]
@@ -119,11 +132,12 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
 
         return super().get_object()
 
-
     @decorators.action(["GET"], detail=True)
-    def generate(self, request, pk = None):
+    def generate(self, request, pk=None):
         week = self.get_object()
-        week_plan, _ = RecipePlanWeek.objects.get_or_create(year=week.year, week=week.week)
+        week_plan, _ = RecipePlanWeek.objects.get_or_create(
+            year=week.year, week=week.week
+        )
         update_plan_week(week_plan)
 
         return self.retrieve(request)

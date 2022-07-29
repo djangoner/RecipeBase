@@ -1,9 +1,18 @@
 from django.contrib import admin
 
-from recipes.models import (Ingredient, MealTime, ProductListItem,
-                            ProductListWeek, Recipe, RecipeImage,
-                            RecipeIngredient, RecipePlan, RecipePlanWeek,
-                            RecipeRating, RecipeTag)
+from recipes.models import (
+    Ingredient,
+    MealTime,
+    ProductListItem,
+    ProductListWeek,
+    Recipe,
+    RecipeImage,
+    RecipeIngredient,
+    RecipePlan,
+    RecipePlanWeek,
+    RecipeRating,
+    RecipeTag,
+)
 
 
 class RecipeIngredientsInline(admin.StackedInline):
@@ -91,8 +100,24 @@ class ProductListWeekAdmin(admin.ModelAdmin):
 
 @admin.register(ProductListItem)
 class ProductListItemAdmin(admin.ModelAdmin):
-    list_display = ["week", "title", "amount", "amount_type", "priority", "is_deleted", "is_auto"]
-    list_filter = ["is_auto", "is_deleted", "priority", "author", "assigned", "week__year", "week__week"]
+    list_display = [
+        "week",
+        "title",
+        "amount",
+        "amount_type",
+        "priority",
+        "is_deleted",
+        "is_auto",
+    ]
+    list_filter = [
+        "is_auto",
+        "is_deleted",
+        "priority",
+        "author",
+        "assigned",
+        "week__year",
+        "week__week",
+    ]
     search_fields = ["week", "title", "description"]
     autocomplete_fields = ("author", "assigned", "week", "ingredient")
     filter_horizontal = ("ingredients",)

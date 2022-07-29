@@ -16,12 +16,19 @@ Including another URLconf
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from recipes.views import (IngredientViewset, MealTimeViewset,
-                           ProductListItemViewset, ProductListWeekViewset,
-                           RecipeImageViewset, RecipeIngredientViewset,
-                           RecipePlanViewset, RecipePlanWeekViewset,
-                           RecipeRatingViewset, RecipeTagViewset,
-                           RecipeViewset)
+from recipes.views import (
+    IngredientViewset,
+    MealTimeViewset,
+    ProductListItemViewset,
+    ProductListWeekViewset,
+    RecipeImageViewset,
+    RecipeIngredientViewset,
+    RecipePlanViewset,
+    RecipePlanWeekViewset,
+    RecipeRatingViewset,
+    RecipeTagViewset,
+    RecipeViewset,
+)
 
 router = routers.DefaultRouter()
 router.register("recipes", RecipeViewset)
@@ -36,5 +43,4 @@ router.register("recipe_rating", RecipeRatingViewset)
 router.register("product_list_week", ProductListWeekViewset)
 router.register("product_list_item", ProductListItemViewset)
 
-urlpatterns = [
-]
+urlpatterns = []

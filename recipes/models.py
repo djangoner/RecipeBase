@@ -8,8 +8,7 @@ from django.db.models.fields import related
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 
-from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_TYPES,
-                                         short_text)
+from recipes.services.measurings import MEASURING_CONVERT, MEASURING_TYPES, short_text
 
 # // Helpers
 DESC_LENGTH = 80

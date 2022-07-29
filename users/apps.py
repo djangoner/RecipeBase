@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class UsersConfig(AppConfig):
-    name = 'users'
+    name = "users"
     verbose_name = _("Авторизация")
 
     def ready(self):

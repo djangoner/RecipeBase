@@ -51,6 +51,7 @@
                   width="100%"
                   height="200px"
                   fit="cover"
+                  style="max-height: 200px"
                 >
                   <div class="absolute-bottom text-subtitle1 text-center">
                     {{ recipe.title }}

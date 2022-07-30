@@ -236,12 +236,22 @@
 
               <div class="flex justify-around">
                 <q-btn
+                  @click="saveAndContinue = false"
                   type="submit"
                   icon="save"
                   color="positive"
                   :loading="saving"
                   v-if="edit"
                   >Сохранить</q-btn
+                >
+                <q-btn
+                  @click="saveAndContinue = true"
+                  type="submit"
+                  icon="save"
+                  color="positive"
+                  :loading="saving"
+                  v-if="edit"
+                  >Сохранить и продолжить</q-btn
                 >
               </div>
             </q-card-section>
@@ -601,6 +611,7 @@ export default {
       tagAddSelect: null,
       tagList: null,
       amountTypeList: null,
+      saveAndContinue: false,
       ingAddDefault,
       ingAdd: Object.assign({}, ingAddDefault),
       ingList: null,
@@ -699,7 +710,9 @@ export default {
     async saveRecipe() {
       // console.debug('Save recipe');
       this.saving = true;
-      this.edit = false;
+      if (!this.saveAndContinue) {
+        this.edit = false;
+      }
 
       let payload = Object.assign({}, this.recipe);
       let isCreating = !this.exists;

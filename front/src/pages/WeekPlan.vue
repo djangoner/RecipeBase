@@ -64,8 +64,10 @@
                 <q-select
                   class="col"
                   :modelValue="null"
-                  :options="meal_time"
+                  :options="meal_time_options"
                   @update:modelValue="addMtime(idx, $event)"
+                  @filter="filterMealTime"
+                  :input-debounce="0"
                   option-value="id"
                   option-label="title"
                   label="Добавить"
@@ -105,6 +107,7 @@ export default {
       },
       loading: false,
       addMtimeSelect: null,
+      meal_time_options: [],
       search: '',
       WeekDays,
     };
@@ -211,6 +214,24 @@ export default {
         .catch(() => {
           update(() => {});
         });
+    },
+
+    filterMealTime(val, update, abort) {
+      update(() => {
+        let isUsed = (mtime) => {
+          //   // console.debug(ing, this.recipe.ingredients);
+          return this.plan?.plans.some((plan) => {
+            return plan.meal_time.id == mtime.id;
+          });
+          //   return this.recipe.ingredients.some((t) => t.ingredient.id == ing.id);
+        };
+        const needle = val.toLowerCase();
+
+        this.meal_time_options = this.meal_time.filter(
+          (v) => !v.is_primary && v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
+        );
+        // console.debug(needle, this.tagList, tags);
+      });
     },
     // Utils
     getRecipe(day, mtime) {

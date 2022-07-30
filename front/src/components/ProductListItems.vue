@@ -100,7 +100,7 @@ export default {
     getDay(idx) {
       let fday = getDateOfISOWeek(this.week.year, this.week.week);
       fday.setDate(fday.getDate() + idx - 1);
-      return date.formatDate(fday, 'MM.DD');
+      return date.formatDate(fday, 'DD.MM');
     },
     intFormat(number, val1, val2, val3) {
       let n = number.toString();

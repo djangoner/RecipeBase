@@ -141,7 +141,7 @@ export default {
       let fday = new Date(this?.date_picker?.from);
       let day = fday.getDay();
       fday.setDate(fday.getDate() + day + idx - 1);
-      return date.formatDate(fday, 'MM.DD');
+      return date.formatDate(fday, 'DD.MM');
     },
   },
   watch: {

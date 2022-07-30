@@ -1,5 +1,5 @@
 <template>
-  <week-select v-model="week" @update:modeLValue="loadWeekPlan()" />
+  <week-select v-model="week" @update:modelValue="loadWeekPlan()" />
   <q-page padding>
     <div class="row wrap q-col-gutter-x-sm q-col-gutter-y-md">
       <!-- :class="$q.screen.lt.md ? 'column' : ''" -->

@@ -3,85 +3,82 @@
   <q-page padding>
     <div class="row wrap q-col-gutter-x-sm q-col-gutter-y-md">
       <!-- :class="$q.screen.lt.md ? 'column' : ''" -->
-      <div
-        class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3"
-        v-for="(day, idx) of WeekDays"
-        :key="idx"
-      >
-        <q-card
-          v-if="idx > 0"
-          class="row column justify-around q-px-xs q-py-sm full-height"
-          :class="idx >= 6 ? 'bg-grey-3' : ''"
-        >
-          <q-card-section>
-            <span class="text-h6">
-              <b>{{ getDay(idx - 1) }}</b> {{ day }}
-            </span>
-          </q-card-section>
+      <template v-for="(day, idx) of WeekDays" :key="idx">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3" v-if="idx > 0">
+          <q-card
+            class="row column justify-around q-px-xs q-py-sm full-height"
+            :class="idx >= 6 ? 'bg-grey-3' : ''"
+          >
+            <q-card-section>
+              <span class="text-h6">
+                <b>{{ getDay(idx - 1) }}</b> {{ day }}
+              </span>
+            </q-card-section>
 
-          <q-card-section>
-            <div class="flex column">
-              <template v-for="mtime of meal_time" :key="mtime.id">
-                <div
-                  class="row"
-                  v-if="getRecipe(idx, mtime) !== undefined || mtime.is_primary"
-                >
-                  <div class="col">
-                    <span class="text-subtitle1 q-my-none">
-                      {{ mtime.title }}
-                      <q-tooltip>
-                        {{ mtime.title }} - {{ timeFormat(mtime.time) }}
-                      </q-tooltip>
-                    </span>
-                  </div>
+            <q-card-section>
+              <div class="flex column">
+                <template v-for="mtime of meal_time" :key="mtime.id">
+                  <div
+                    class="row"
+                    v-if="getRecipe(idx, mtime) !== undefined || mtime.is_primary"
+                  >
+                    <div class="col">
+                      <span class="text-subtitle1 q-my-none">
+                        {{ mtime.title }}
+                        <q-tooltip>
+                          {{ mtime.title }} - {{ timeFormat(mtime.time) }}
+                        </q-tooltip>
+                      </span>
+                    </div>
 
-                  <div class="col">
-                    <q-select
-                      :model-value="getRecipe(idx, mtime)"
-                      @update:modelValue="setRecipe(idx, mtime, $event)"
-                      :input-debounce="100"
-                      :options="recipesList"
-                      option-label="title"
-                      @filter="filterRecipes"
-                      use-input
-                      clearable
-                      options-dense
-                      dense
-                    >
-                      <template v-slot:no-option>
-                        <q-item>
-                          <q-item-section class="text-grey">
-                            Нет результатов
-                          </q-item-section>
-                        </q-item>
-                      </template>
-                    </q-select>
-                    <!-- <span>{{ getRecipe(idx, mtime)?.title }}</span> -->
+                    <div class="col">
+                      <q-select
+                        :model-value="getRecipe(idx, mtime)"
+                        @update:modelValue="setRecipe(idx, mtime, $event)"
+                        :input-debounce="100"
+                        :options="recipesList"
+                        option-label="title"
+                        @filter="filterRecipes"
+                        use-input
+                        clearable
+                        options-dense
+                        dense
+                      >
+                        <template v-slot:no-option>
+                          <q-item>
+                            <q-item-section class="text-grey">
+                              Нет результатов
+                            </q-item-section>
+                          </q-item>
+                        </template>
+                      </q-select>
+                      <!-- <span>{{ getRecipe(idx, mtime)?.title }}</span> -->
+                    </div>
                   </div>
+                </template>
+
+                <div class="row q-mt-sm">
+                  <q-select
+                    class="col"
+                    :modelValue="null"
+                    :options="meal_time_options"
+                    @update:modelValue="addMtime(idx, $event)"
+                    @filter="filterMealTime"
+                    :input-debounce="0"
+                    option-value="id"
+                    option-label="title"
+                    label="Добавить"
+                    map-options
+                    use-input
+                    options-dense
+                    dense
+                  ></q-select>
                 </div>
-              </template>
-
-              <div class="row q-mt-sm">
-                <q-select
-                  class="col"
-                  :modelValue="null"
-                  :options="meal_time_options"
-                  @update:modelValue="addMtime(idx, $event)"
-                  @filter="filterMealTime"
-                  :input-debounce="0"
-                  option-value="id"
-                  option-label="title"
-                  label="Добавить"
-                  map-options
-                  use-input
-                  options-dense
-                  dense
-                ></q-select>
               </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
     </div>
   </q-page>
   <q-inner-loading :showing="loading"></q-inner-loading>

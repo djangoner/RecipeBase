@@ -9,6 +9,7 @@
         :key="idx"
       >
         <q-card
+          v-if="idx > 0"
           class="row column justify-around q-px-xs q-py-sm full-height"
           :class="idx >= 6 ? 'bg-grey-3' : ''"
         >

@@ -143,7 +143,8 @@ export default {
         });
     },
     saveWeekPlan() {
-      let payload = Object.assign({}, this.plan);
+      // let payload = Object.assign({}, this.plan);
+      let payload = JSON.parse(JSON.stringify(this.plan));
       this.saving = true;
 
       payload.plans.map((p) => {

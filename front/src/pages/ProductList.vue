@@ -1,7 +1,12 @@
 <template>
   <q-page>
     <week-select v-model="week" @update:modelValue="loadList()" />
-    <q-linear-progress v-show="saving" indeterminate />
+    <q-linear-progress
+      :value="completedPrc"
+      :indeterminate="saving"
+      :instant-feedback="saving"
+      :animation-speed="500"
+    />
     <product-list-item-view v-model="viewItem" :week="week" @updateItem="updateItem" />
 
     <div class="row items-center q-mt-sm q-ml-md">
@@ -209,6 +214,17 @@ export default {
         }
         // this.store.product_list.items = newValue;
       },
+    },
+    completedPrc() {
+      let itemsCompleted = this.store.product_list?.items.filter((i) => i.is_completed)
+        ?.length;
+      let itemsTotal = this.store.product_list?.items?.length;
+
+      if (!itemsCompleted || !itemsTotal) {
+        return 0;
+      }
+
+      return itemsCompleted / itemsTotal;
     },
   },
   watch: {

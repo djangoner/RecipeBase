@@ -1,5 +1,11 @@
 <template>
   <week-select v-model="week" @update:modelValue="loadWeekPlan()" />
+  <q-linear-progress
+    :value="fillingPrc"
+    :indeterminate="saving"
+    :instant-feedback="saving"
+    :animation-speed="500"
+  />
   <q-page padding>
     <div class="row wrap q-col-gutter-x-sm q-col-gutter-y-md">
       <!-- :class="$q.screen.lt.md ? 'column' : ''" -->
@@ -105,6 +111,7 @@ export default {
         week: null,
       },
       loading: false,
+      saving: false,
       addMtimeSelect: null,
       meal_time_options: [],
       search: '',
@@ -112,7 +119,7 @@ export default {
     };
   },
   mounted() {
-    let [year, week] = getYearWeek()
+    let [year, week] = getYearWeek();
     this.week.year = year;
     this.week.week = week;
     this.loadMealTime();
@@ -137,7 +144,7 @@ export default {
     },
     saveWeekPlan() {
       let payload = Object.assign({}, this.plan);
-      this.loading = true;
+      this.saving = true;
 
       payload.plans.map((p) => {
         if (typeof p.recipe == 'object') {
@@ -157,10 +164,10 @@ export default {
       this.store
         .saveWeekPlan(payload)
         .then(() => {
-          this.loading = false;
+          this.saving = false;
         })
         .catch((err) => {
-          this.loading = false;
+          this.saving = false;
           this.handleErrors(err, 'Ошибка загрузки плана');
         });
     },
@@ -300,6 +307,19 @@ export default {
     },
     recipesList() {
       return this.store.recipes?.results;
+    },
+    fillingPrc() {
+      if (!this.meal_time) {
+        return;
+      }
+      let plansFilled = this.store.week_plan?.plans?.length;
+      let plansTotal = this.meal_time.filter((m) => m.is_primary).length * 5;
+
+      if (!plansFilled || !plansTotal) {
+        return 0;
+      }
+
+      return plansFilled / plansTotal;
     },
   },
   watch: {

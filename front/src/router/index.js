@@ -44,7 +44,12 @@ export default route(function (/* { store, ssrContext } */) {
         .loadAccountInfo()
         .then()
         .catch((err) => {
-          if (!err.response && err.code === "ERR_NETWORK") {
+          if (
+            !err.response &&
+            (!err.code ||
+              err.code === "ERR_NETWORK" ||
+              err.code == "ERR_INTERNET_DISCONNECTED")
+          ) {
           } else {
             store.logout().then(() => {
               Router.push({ name: "login", query: { next: to.fullPath } });

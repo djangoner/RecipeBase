@@ -44,9 +44,12 @@ export default route(function (/* { store, ssrContext } */) {
         .loadAccountInfo()
         .then()
         .catch((err) => {
-          store.logout().then(() => {
-            Router.push({ name: "login", query: { next: to.fullPath } });
-          });
+          if (!err.response && err.code === "ERR_NETWORK") {
+          } else {
+            store.logout().then(() => {
+              Router.push({ name: "login", query: { next: to.fullPath } });
+            });
+          }
         });
     }
 

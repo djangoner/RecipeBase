@@ -95,6 +95,7 @@
                   :options="tagList"
                   option-label="title"
                   use-input
+                  options-dense
                   dense
                   @new-value="addTag"
                 >
@@ -369,6 +370,7 @@
                           @keydown.enter.prevent="addIngredient()"
                           @filter="filterIngredients"
                           @new-value="addIngredient"
+                          options-dense
                           use-input
                           dense
                         >
@@ -402,6 +404,7 @@
                           option-value="id"
                           map-options
                           emit-value
+                          options-dense
                           dense
                           style="max-width: 100px"
                         >

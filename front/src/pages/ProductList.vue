@@ -56,6 +56,7 @@ import weekSelect, {
   getDateOfISOWeek,
   WeekDays,
   getWeekNumber,
+  getYearWeek,
 } from 'components/WeekSelect.vue';
 import ProductListItemView from 'components/ProductListItemView.vue';
 import ProductListItems from 'components/ProductListItems.vue';
@@ -84,7 +85,7 @@ export default {
     };
   },
   mounted() {
-    let [year, week] = getWeekNumber(new Date());
+    let [year, week] = getYearWeek();
     this.week.year = year;
     this.week.week = week;
     this.loadList();

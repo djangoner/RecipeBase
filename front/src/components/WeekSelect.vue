@@ -54,6 +54,23 @@ export function getDateOfISOWeek(y, w) {
   return ISOweekStart;
 }
 
+export function getYearWeek() {
+  let today = new Date();
+  let year, week;
+
+  // If today is friday or weekend
+  console.debug('Today: ', today.getDay());
+  if (today.getDay() >= 5) {
+    let date = new Date();
+    date.setDate(date.getDate() + 7);
+    [year, week] = getWeekNumber(date);
+  } else {
+    [year, week] = getWeekNumber(new Date());
+  }
+
+  return [year, week];
+}
+
 export let WeekDays = {
   0: 'Вс (прошлый)',
   1: 'Понедельник',
@@ -86,7 +103,7 @@ export default {
   },
   methods: {
     selectToday() {
-      let [year, week] = getWeekNumber(new Date());
+      let [year, week] = getYearWeek();
       this.week_pick.year = year;
       this.week_pick.week = week;
       this.changeWeek(0);

@@ -1,7 +1,7 @@
 {
   "name": "RecipeBase",
   "short_name": "RecipeBase",
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",

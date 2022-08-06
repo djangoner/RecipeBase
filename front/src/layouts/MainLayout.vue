@@ -39,6 +39,11 @@
 
         <q-separator class="q-mb-md" />
 
+        <q-item v-if="!isOnLine" class="bg-orange text-white">
+          <q-item-section avatar><q-icon name="wifi_off"></q-icon></q-item-section>
+          <q-item-section>Нет подключения к интернету</q-item-section>
+        </q-item>
+
         <q-item :to="{ name: 'index' }"
           ><q-item-section avatar><q-icon name="home"></q-icon></q-item-section>
           <q-item-section>Главная</q-item-section>
@@ -61,6 +66,10 @@
     </q-drawer>
 
     <q-page-container>
+      <q-item v-if="!isOnLine" class="bg-orange text-white">
+        <q-item-section avatar><q-icon name="wifi_off"></q-icon></q-item-section>
+        <q-item-section>Нет подключения к интернету</q-item-section>
+      </q-item>
       <router-view />
     </q-page-container>
   </q-layout>

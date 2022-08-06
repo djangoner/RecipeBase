@@ -164,6 +164,19 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
+    async saveProductListWeek(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .patch(`/product_list_week/${payload.year}_${payload.week}/`, payload)
+          .then((resp) => {
+            this.product_list = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
     async generateProductListWeek(payload) {
       return new Promise((resolve, reject) => {
         api

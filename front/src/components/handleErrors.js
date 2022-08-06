@@ -1,6 +1,15 @@
 export let handleErrors = {
+  data() {
+    return { isOnLine: navigator.onLine };
+  },
   mounted() {
     this.httpErrors = {};
+    window.addEventListener("online", () => {
+      this.isOnLine = true;
+    });
+    window.addEventListener("offline", () => {
+      this.isOnLine = false;
+    });
   },
   methods: {
     handleErrors(err, title) {
@@ -11,8 +20,20 @@ export let handleErrors = {
       }
 
       this.loading = false;
-      let data = err.response.data || {};
-      let respText = [err.response.status, err.response.statusText].join(" ");
+      let data = err.response?.data || {};
+      let respText;
+
+      if (
+        !err.response &&
+        (!err.code ||
+          err.code === "ERR_NETWORK" ||
+          err.code == "ERR_INTERNET_DISCONNECTED")
+      ) {
+        respText = "Ошибка подключения к серверу";
+      } else {
+        respText = [err.response?.status, err.response?.statusText].join(" ");
+      }
+
       let errValidation = "";
 
       if (typeof data === "object") {

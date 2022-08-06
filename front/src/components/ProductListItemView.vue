@@ -3,7 +3,7 @@
     :modelValue="!!modelValue"
     @update:modelValue="$emit('update:modelValue', null)"
   >
-    <q-card style="width: 700px; max-width: 90vw">
+    <q-card style="width: 700px; max-width: 90vw" v-if="item">
       <!-- Top row -->
       <q-card-section class="row items-center no-wrap q-pb-none">
         <div class="col row">
@@ -166,7 +166,7 @@ export default {
   },
   computed: {
     item() {
-      return this.modelValue;
+      return this.modelValue || {};
     },
     weekDaysOptions() {
       return Object.entries(this.WeekDays).map(([id, name]) => {

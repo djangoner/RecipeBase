@@ -59,7 +59,7 @@ export function getYearWeek() {
   let year, week;
 
   // If today is friday or weekend
-  console.debug('Today: ', today.getDay());
+  // console.debug('Today: ', today.getDay());
   if (today.getDay() >= 5) {
     let date = new Date();
     date.setDate(date.getDate() + 7);

@@ -16,6 +16,7 @@
         icon="refresh"
         size="sm"
         @click="regenerateList()"
+        :disable="!isOnLine"
       ></q-btn>
       <q-toggle v-model="showCompleted" label="Показать завершенные" />
     </div>
@@ -93,7 +94,17 @@ export default {
     let [year, week] = getYearWeek();
     this.week.year = year;
     this.week.week = week;
-    this.loadList();
+    if (this.isOnLine) {
+      if (this.$q.localStorage.has('local_productlist_updated')) {
+        this.syncLocal();
+      }
+      this.loadList();
+    } else {
+      let local_cache = this.$q.localStorage.getItem('local_productlist');
+      if (local_cache) {
+        this.store.product_list = local_cache;
+      }
+    }
   },
   beforeRouteUpdate(to) {
     this.loadList();
@@ -117,7 +128,66 @@ export default {
           this.handleErrors(err, 'Ошибка загрузки списка продуктов');
         });
     },
+    syncServer() {
+      console.debug('SyncServer');
+      this.$q.localStorage.set('local_productlist', this.store?.product_list);
+
+      if (!this.isOnLine) {
+        this.$q.localStorage.set('local_productlist_updated', true);
+      }
+    },
+    syncLocal() {
+      this.$q.notify({
+        type: 'info',
+        caption: 'Синхронизация изменений с сервером...',
+        icon: '',
+      });
+
+      this.loading = true;
+
+      let payload = this.$q.localStorage.getItem('local_productlist');
+      payload.items = payload.items.map((item) => {
+        delete item['ingredient'];
+        delete item['ingredients'];
+        return item;
+      });
+      console.debug('SyncLocal: ', payload);
+
+      this.store
+        .saveProductListWeek(payload)
+        .then(() => {
+          this.loading = false;
+          this.$q.notify({
+            type: 'positive',
+            caption: 'Список продуктов успешно синхронизирован',
+            icon: '',
+          });
+          this.$q.localStorage.remove('local_productlist_updated');
+
+          // this.loadList();
+        })
+        .catch((err) => {
+          this.loading = false;
+          this.handleErrors(err, 'Ошибка синхронизации списка продуктов');
+        });
+    },
     updateItem(item) {
+      if (!item) {
+        return;
+      }
+      if (!this.isOnLine) {
+        console.debug('Upd item: ', item);
+        // Update offline data
+        this.store.product_list.items = this.store.product_list.items.map((i) => {
+          if (i.id == item.id) {
+            // console.debug(resp);
+            return item;
+          }
+          return i;
+        });
+        // this.syncServer();
+        return;
+      }
       let payload = Object.assign({}, item);
 
       delete payload['ingredient'];
@@ -130,7 +200,7 @@ export default {
         .then((resp) => {
           this.store.product_list.items = this.store.product_list.items.map((i) => {
             if (i.id == item.id) {
-              console.debug(resp);
+              // console.debug(resp);
               return resp.data;
             }
             return i;
@@ -208,7 +278,7 @@ export default {
         return res;
       },
       set(newValue) {
-        console.debug('set: ', newValue, this.store.product_list.items);
+        // console.debug('set: ', newValue, this.store.product_list.items);
         if (this.store.product_list.items == newValue) {
           return;
         }
@@ -223,11 +293,20 @@ export default {
       if (!itemsCompleted || !itemsTotal) {
         return 0;
       }
-
       return itemsCompleted / itemsTotal;
     },
   },
   watch: {
+    isOnLine(val, oldVal) {
+      if (val && !oldVal) {
+        this.syncLocal();
+      }
+    },
+    listItems(val, oldVal) {
+      if (val !== oldVal) {
+        this.syncServer();
+      }
+    },
     // viewItem(val) {
     //   this.$router.replace({ query: { task: val?.id } });
     // },

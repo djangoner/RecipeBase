@@ -60,7 +60,7 @@ export function getYearWeek() {
 
   // If today is friday or weekend
   // console.debug('Today: ', today.getDay());
-  if (today.getDay() >= 5) {
+  if (today.getDay() >= 5 || today.getDay() == 0) {
     let date = new Date();
     date.setDate(date.getDate() + 7);
     [year, week] = getWeekNumber(date);

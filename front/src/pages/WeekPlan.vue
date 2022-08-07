@@ -295,7 +295,7 @@ export default {
     },
     getDay(idx) {
       let fday = getDateOfISOWeek(this.week.year, this.week.week);
-      fday.setDate(fday.getDate() + idx - 1);
+      fday.setDate(fday.getDate() + idx);
       return date.formatDate(fday, 'DD.MM');
     },
   },

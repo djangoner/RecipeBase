@@ -235,7 +235,7 @@ export default {
         const needle = val.toLowerCase();
 
         this.meal_time_options = this.meal_time.filter(
-          (v) => !v.is_primary && v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
+          (v) => !v.is_primary && v.title.toLowerCase().indexOf(needle) > -1
         );
         // console.debug(needle, this.tagList, tags);
       });

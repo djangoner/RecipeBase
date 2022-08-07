@@ -7,13 +7,14 @@
     :animation-speed="500"
   />
   <q-page padding>
-    <div class="row wrap q-col-gutter-x-sm q-col-gutter-y-md">
+    <div class="row wrap items-start q-col-gutter-x-sm q-col-gutter-y-md">
       <!-- :class="$q.screen.lt.md ? 'column' : ''" -->
       <template v-for="(day, idx) of WeekDays" :key="idx">
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3" v-if="idx > 0">
+        <div v-if="idx > 0" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3">
           <q-card
             class="row column justify-around q-px-xs q-py-sm full-height"
             :class="idx >= 6 ? 'bg-grey-3' : ''"
+            style="min-height: 300px"
           >
             <q-card-section>
               <span class="text-h6">

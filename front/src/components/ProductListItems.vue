@@ -27,9 +27,24 @@
           (
           <template v-if="item.ingredient.min_pack_size">
             ~{{ Math.ceil(item.amount / item.ingredient.min_pack_size) }}
-            шт.,
+            {{
+              intFormat(
+                Math.ceil(item.amount / item.ingredient.min_pack_size),
+                'упаковка',
+                'упаковки',
+                'упаковок'
+              )
+            }},
           </template>
           {{ item.amount }} {{ item.amount_type_str }}
+          )
+        </template>
+        <template v-else-if="item.ingredients && item.ingredients.length > 0">
+          (
+          <span v-for="(sub_ing, index) of item.ingredients" :key="sub_ing.id">
+            {{ sub_ing.amount }} {{ sub_ing.amount_type_str
+            }}<template v-if="index != item.ingredients.length - 1">, </template>
+          </span>
           )
         </template>
       </span>

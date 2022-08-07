@@ -55,7 +55,7 @@ def get_plan_week(week: RecipePlanWeek) -> dict:
             ing_name = ing.ingredient.title
 
             if not ing.ingredient.need_buy:  # Skip not required to buy ingredients
-                return
+                continue
 
             if not ing_name in res:  # Create default ingredient
                 res[ing_name] = {

@@ -9,16 +9,33 @@
     />
     <product-list-item-view v-model="viewItem" :week="week" @updateItem="updateItem" />
 
-    <div class="row items-center q-mt-sm q-ml-md">
-      <q-btn
-        label="Обновить автоматический список"
-        color="primary"
-        icon="refresh"
-        size="sm"
-        @click="regenerateList()"
-        :disable="!isOnLine"
-      ></q-btn>
-      <q-toggle v-model="showCompleted" label="Показать завершенные" />
+    <div class="row items-center q-mt-sm q-ml-sm q-col-gutter-sm">
+      <div>
+        <q-btn
+          label="Обновить автоматический список"
+          class="q-ml-none"
+          color="primary"
+          icon="refresh"
+          size="sm"
+          @click="regenerateList()"
+          :disable="!isOnLine"
+        ></q-btn>
+      </div>
+      <div>
+        <q-btn
+          label="Синхронизация"
+          :color="canSync ? 'positive' : 'primary'"
+          icon="sync"
+          size="sm"
+          @click="syncLocal()"
+          :disable="!canSync"
+        >
+          <q-tooltip v-if="!canSync">Нет данных для синхронизации</q-tooltip>
+        </q-btn>
+      </div>
+      <div>
+        <q-toggle v-model="showCompleted" label="Показать завершенные" />
+      </div>
     </div>
 
     <!-- Product list -->
@@ -87,6 +104,7 @@ export default {
         week: null,
       },
       viewItem: null,
+      canSyncFlag: false,
       WeekDays,
     };
   },
@@ -94,10 +112,19 @@ export default {
     let [year, week] = getYearWeek();
     this.week.year = year;
     this.week.week = week;
+
+    this.canSyncFlag = this.$q.localStorage.has('local_productlist_updated');
+
     if (this.isOnLine) {
-      if (this.$q.localStorage.has('local_productlist_updated')) {
-        this.syncLocal();
+      if (this.canSync) {
+        this.$q.notify({
+          type: 'info',
+          caption: 'Рекомендуется выполнить синхронизацию изменений с сервером',
+        });
       }
+      // if (this.$q.localStorage.has('local_productlist_updated')) {
+      //   this.syncLocal();
+      // }
       this.loadList();
     } else {
       let local_cache = this.$q.localStorage.getItem('local_productlist');
@@ -140,7 +167,7 @@ export default {
       this.$q.notify({
         type: 'info',
         caption: 'Синхронизация изменений с сервером...',
-        icon: '',
+        icon: 'cloud_sync',
       });
 
       this.loading = true;
@@ -160,9 +187,9 @@ export default {
           this.$q.notify({
             type: 'positive',
             caption: 'Список продуктов успешно синхронизирован',
-            icon: '',
           });
           this.$q.localStorage.remove('local_productlist_updated');
+          this.canSync = false;
 
           // this.loadList();
         })
@@ -295,11 +322,21 @@ export default {
       }
       return itemsCompleted / itemsTotal;
     },
+    canSync: {
+      get() {
+        return this.isOnLine && this.canSyncFlag;
+      },
+      set(val) {
+        this.canSyncFlag = val;
+      },
+    },
   },
   watch: {
     isOnLine(val, oldVal) {
       if (val && !oldVal) {
-        this.syncLocal();
+        this.canSyncFlag = this.$q.localStorage.has('local_productlist_updated');
+      } else if (!val && oldVal) {
+        this.canSyncFlag = false;
       }
     },
     listItems(val, oldVal) {

@@ -54,7 +54,6 @@ export let handleErrors = {
           respText ||
           // data ||
           "Неизвестная ошибка",
-        icon: "",
         progress: true,
         html: true,
       });

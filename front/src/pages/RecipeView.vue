@@ -217,6 +217,9 @@
                   :toolbar="editorToolbar"
                   :fonts="editorFonts"
                 />
+
+                <h6 class="q-my-sm">Комментарий</h6>
+                <q-input v-model="recipe.comment" type="textarea" label="Комментарий" />
               </div>
               <div v-else>
                 <div class="q-my-md" v-if="recipe.content_source">
@@ -224,14 +227,20 @@
                     >Содержание (изначальное)</span
                   >
                   <div class="recipe-text" v-html="recipe.content_source"></div>
-                  <hr />
+                  <q-separator />
                 </div>
 
-                <div class="q-my-md">
+                <div class="q-my-md" v-if="recipe.content">
                   <span class="text-h6 q-my-sm text-primary">Содержание</span>
 
                   <div class="recipe-text" v-html="recipe.content"></div>
-                  <hr />
+                  <q-separator />
+                </div>
+                <div class="q-my-md" v-if="recipe.comment">
+                  <span class="text-h6 q-my-sm text-primary">Комментарий</span>
+
+                  <div class="recipe-text format-spaces" v-html="recipe.comment"></div>
+                  <q-separator />
                 </div>
               </div>
 
@@ -995,6 +1004,9 @@ export default {
   img {
     max-width: 100%;
   }
+}
+.format-spaces {
+  white-space: pre-line;
 }
 :deep(.no-bottom) {
   .q-table__bottom {

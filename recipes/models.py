@@ -30,6 +30,7 @@ class Recipe(models.Model):
     content = RichTextField(_("Содержание"), blank=True)
     content_source = RichTextField(_("Содержание (изначальное) "), blank=True)
     short_description = models.TextField(_("Короткое описание"), null=True, blank=True)
+    comment = models.TextField(_("Комментарий"), null=True, blank=True)
     portion_count = models.FloatField(_("Кол-во порций"), null=True, blank=True)
     cooking_time = models.IntegerField(
         _("Примерное время приготовления"), null=True, blank=True

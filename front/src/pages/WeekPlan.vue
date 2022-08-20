@@ -336,7 +336,11 @@ export default {
       if (!this.meal_time) {
         return;
       }
-      let plansFilled = this.store.week_plan?.plans?.length;
+      let plans = this.store.week_plan?.plans;
+      let plansFilled;
+      if (plans) {
+        plansFilled = plans.filter((p) => p.meal_time.is_primary).length;
+      }
       let plansTotal = this.meal_time.filter((m) => m.is_primary).length * 5;
 
       if (!plansFilled || !plansTotal) {

@@ -13,7 +13,7 @@
         <div v-if="idx > 0" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3">
           <q-card
             class="row column justify-around q-px-xs q-py-sm full-height"
-            :class="idx >= 6 ? 'bg-grey-3' : ''"
+            :class="[idx >= 6 ? 'bg-grey-3' : '', WeekDaysColors[idx]]"
             style="min-height: 300px"
           >
             <q-card-section>
@@ -26,10 +26,10 @@
               <div class="flex column">
                 <template v-for="mtime of meal_time" :key="mtime.id">
                   <div
-                    class="row"
+                    class="row q-col-gutter-x-sm wrap"
                     v-if="getRecipe(idx, mtime) !== undefined || mtime.is_primary"
                   >
-                    <div class="col">
+                    <div class="col-auto">
                       <span class="text-subtitle1 q-my-none">
                         {{ mtime.title }}
                         <q-tooltip>
@@ -60,6 +60,19 @@
                         </template>
                       </q-select>
                       <!-- <span>{{ getRecipe(idx, mtime)?.title }}</span> -->
+                    </div>
+
+                    <div class="flex flex-center col-auto" v-if="getRecipe(idx, mtime)">
+                      <q-btn
+                        :to="{ name: 'recipe', params: { id: getRecipe(idx, mtime).id } }"
+                        icon="open_in_new"
+                        size="sm"
+                        flat
+                        dense
+                        round
+                      >
+                        <q-tooltip>Открыть рецепт</q-tooltip>
+                      </q-btn>
                     </div>
                   </div>
                 </template>
@@ -101,6 +114,14 @@ import weekSelect, {
 import { useBaseStore } from 'src/stores/base';
 import { date } from 'quasar';
 
+let WeekDaysColors = {
+  1: 'bg-amber-2',
+  2: 'bg-cyan-3',
+  3: 'bg-light-blue-3',
+  4: 'bg-blue-4',
+  5: 'bg-indigo-3',
+};
+
 export default {
   components: { weekSelect },
   data() {
@@ -117,6 +138,7 @@ export default {
       meal_time_options: [],
       search: '',
       WeekDays,
+      WeekDaysColors,
     };
   },
   mounted() {
@@ -210,10 +232,10 @@ export default {
     },
 
     filterRecipes(val, update, abort) {
-      if (this.search == val && this.recipesList) {
-        update(() => {});
-        return;
-      }
+      // if (this.search == val && this.recipesList) {
+      //   update(() => {});
+      //   return;
+      // }
       this.search = val;
       this.loadRecipes()
         .then(() => {

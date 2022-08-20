@@ -4,6 +4,7 @@ from ckeditor.fields import RichTextField
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import F
 from django.db.models.fields import related
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
@@ -170,7 +171,7 @@ class MealTime(models.Model):
     )
 
     class Meta:
-        ordering = ["-num", "time"]
+        ordering = [F("num").asc(nulls_last=True), F("time").asc(nulls_last=True)]
         verbose_name = _("Время приема пищи")
         verbose_name_plural = _("Время приема пищи")
 

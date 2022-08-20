@@ -19,7 +19,6 @@ export let handleErrors = {
         title = "Ошибка загрузки данных";
       }
 
-      this.loading = false;
       let data = err.response?.data || {};
       let respText;
 

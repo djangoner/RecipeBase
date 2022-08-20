@@ -2,6 +2,7 @@
   <q-dialog
     :modelValue="!!modelValue"
     @update:modelValue="$emit('update:modelValue', null)"
+    no-route-dismiss
   >
     <q-card style="width: 700px; max-width: 90vw" v-if="item">
       <!-- Top row -->

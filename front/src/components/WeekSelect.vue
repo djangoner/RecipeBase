@@ -99,7 +99,12 @@ export default {
     };
   },
   mounted() {
-    this.selectToday();
+    if (!this.modelValue.year || !this.modelValue.week) {
+      this.selectToday();
+    } else {
+      this.week_pick = this.modelValue;
+      this.updateDatePicker();
+    }
   },
   methods: {
     selectToday() {
@@ -156,6 +161,7 @@ export default {
     },
     getDay(idx) {
       let fday = new Date(this?.date_picker?.from);
+      // let fday = getDateOfISOWeek(this.week_pick.year, this.week_pick.week);
       let day = fday.getDay();
       fday.setDate(fday.getDate() + day + idx - 1);
       return date.formatDate(fday, 'DD.MM');

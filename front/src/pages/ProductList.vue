@@ -9,33 +9,15 @@
     />
     <product-list-item-view v-model="viewItem" :week="week" @updateItem="updateItem" />
 
-    <div class="row items-center q-mt-sm q-ml-sm q-col-gutter-sm">
-      <div>
-        <q-btn
-          label="Обновить автоматический список"
-          class="q-ml-none"
-          color="primary"
-          icon="refresh"
-          size="sm"
-          @click="regenerateList()"
-          :disable="!isOnLine"
-        ></q-btn>
-      </div>
-      <div>
-        <q-btn
-          label="Синхронизация"
-          :color="canSync ? 'positive' : 'primary'"
-          icon="sync"
-          size="sm"
-          @click="syncLocal()"
-          :disable="!canSync"
-        >
-          <q-tooltip v-if="!canSync">Нет данных для синхронизации</q-tooltip>
-        </q-btn>
-      </div>
-      <div>
-        <q-toggle v-model="showCompleted" label="Показать завершенные" />
-      </div>
+    <div class="row items-center q-mt-sm q-ml-md">
+      <q-btn
+        label="Обновить автоматический список"
+        color="primary"
+        icon="refresh"
+        size="sm"
+        @click="regenerateList()"
+      ></q-btn>
+      <q-toggle v-model="showCompleted" label="Показать завершенные" />
     </div>
 
     <!-- Product list -->
@@ -99,20 +81,16 @@ export default {
       saving: false,
       showCompleted: true,
       createItem: '',
-      week: {
-        year: null,
-        week: null,
-      },
+      // week: {
+      //   year: null,
+      //   week: null,
+      // },
       viewItem: null,
       canSyncFlag: false,
       WeekDays,
     };
   },
   mounted() {
-    let [year, week] = getYearWeek();
-    this.week.year = year;
-    this.week.week = week;
-
     this.canSyncFlag = this.$q.localStorage.has('local_productlist_updated');
 
     if (this.isOnLine) {
@@ -133,11 +111,11 @@ export default {
       }
     }
   },
-  beforeRouteUpdate(to) {
-    this.loadList();
-  },
   methods: {
     loadList() {
+      if (!this.week?.year || !this.week?.week) {
+        return;
+      }
       let payload = {
         year: this.week.year,
         week: this.week.week,
@@ -149,6 +127,10 @@ export default {
         .loadProductListWeek(payload)
         .then(() => {
           this.loading = false;
+          let argTask = this.$query.task;
+          if (!this.viewItem && argTask) {
+            this.selectItemByID(argTask);
+          }
         })
         .catch((err) => {
           this.loading = false;
@@ -261,6 +243,7 @@ export default {
     openItem(item) {
       console.debug('Open item: ', item);
       this.viewItem = item;
+      this.$query.task = item.id;
     },
     createNewItem() {
       let payload = {
@@ -282,8 +265,21 @@ export default {
           this.handleErrors(err, 'Ошибка создания задачи');
         });
     },
+    selectItemByID(val) {
+      let res = this.store.product_list?.items.filter((i) => i.id == val);
+      this.viewItem = res[0];
+    },
   },
   computed: {
+    week: {
+      get() {
+        return { year: this.$query.year, week: this.$query.week };
+      },
+      set(val) {
+        this.$query.year = val.year;
+        this.$query.week = val.week;
+      },
+    },
     listItems: {
       get() {
         let res = this.store.product_list?.items || [];
@@ -332,21 +328,20 @@ export default {
     },
   },
   watch: {
-    isOnLine(val, oldVal) {
-      if (val && !oldVal) {
-        this.canSyncFlag = this.$q.localStorage.has('local_productlist_updated');
-      } else if (!val && oldVal) {
-        this.canSyncFlag = false;
-      }
+    viewItem(val, oldVal) {
+      this.$query.task = val?.id;
     },
-    listItems(val, oldVal) {
-      if (val !== oldVal) {
-        this.syncServer();
-      }
+    '$query.task': {
+      handler(val, oldVal) {
+        this.$nextTick(() => {
+          if (val) {
+            this.selectItemByID(val);
+          } else {
+            this.viewItem = null;
+          }
+        });
+      },
     },
-    // viewItem(val) {
-    //   this.$router.replace({ query: { task: val?.id } });
-    // },
   },
 };
 </script>

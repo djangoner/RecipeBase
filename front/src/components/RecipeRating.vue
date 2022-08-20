@@ -69,7 +69,7 @@ export default {
       let exists = this.modelValue?.ratings?.filter((r) => {
         return r.user.id == user.id || r.user == user.id;
       });
-      console.debug('userRating: ', user, exists);
+      // console.debug('userRating: ', user, exists);
 
       if (exists && exists.length > 0) {
         return exists[0]?.rating || 0;
@@ -81,7 +81,7 @@ export default {
       let exists = this.modelValue?.ratings.filter((r) => {
         return r.user.id == user.id;
       });
-      console.debug('setUserRating: ', user, rating, exists);
+      // console.debug('setUserRating: ', user, rating, exists);
 
       if (exists && exists.length > 0) {
         let mvalue = Object.assign({}, this.modelValue);

@@ -1087,6 +1087,11 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@oarepo/vue-query-synchronizer@^3.0.0":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@oarepo/vue-query-synchronizer/-/vue-query-synchronizer-3.0.2.tgz#13fa9dc5d7a3ca2e2fe373ce2082b1c83a6e2cb3"
+  integrity sha512-GTqYWyG/MatJCLaqll7pop3ZOrEt7eY7cqc8lWyyGOG5LrUOMoQzHD8nNH1GOLoKPMEaFuA4y5wc+INyuOCs2Q==
+
 "@positron/stack-trace@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@positron/stack-trace/-/stack-trace-1.0.0.tgz#14fcc712a530038ef9be1ce6952315a839f466a8"

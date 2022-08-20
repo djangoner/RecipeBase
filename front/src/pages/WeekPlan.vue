@@ -23,7 +23,11 @@
             </q-card-section>
 
             <q-card-section>
-              <div class="flex column">
+              <div class="q-gutter-y-md" v-if="loading">
+                <q-skeleton type="QInput" />
+                <q-skeleton type="QInput" />
+              </div>
+              <div class="flex column" v-else>
                 <template v-for="mtime of meal_time" :key="mtime.id">
                   <div
                     class="row q-col-gutter-x-sm wrap"
@@ -76,24 +80,27 @@
                     </div>
                   </div>
                 </template>
+              </div>
+            </q-card-section>
+            <q-space />
 
-                <div class="row q-mt-sm">
-                  <q-select
-                    class="col"
-                    :modelValue="null"
-                    :options="meal_time_options"
-                    @update:modelValue="addMtime(idx, $event)"
-                    @filter="filterMealTime"
-                    :input-debounce="0"
-                    option-value="id"
-                    option-label="title"
-                    label="Добавить"
-                    map-options
-                    use-input
-                    options-dense
-                    dense
-                  ></q-select>
-                </div>
+            <q-card-section>
+              <div class="row q-mt-sm">
+                <q-select
+                  class="col"
+                  :modelValue="null"
+                  :options="meal_time_options"
+                  @update:modelValue="addMtime(idx, $event)"
+                  @filter="filterMealTime"
+                  :input-debounce="0"
+                  option-value="id"
+                  option-label="title"
+                  label="Добавить"
+                  map-options
+                  use-input
+                  options-dense
+                  dense
+                ></q-select>
               </div>
             </q-card-section>
           </q-card>
@@ -128,10 +135,10 @@ export default {
     const store = useBaseStore();
     return {
       store,
-      week: {
-        year: null,
-        week: null,
-      },
+      // week: {
+      //   year: null,
+      //   week: null,
+      // },
       loading: false,
       saving: false,
       addMtimeSelect: null,
@@ -142,13 +149,13 @@ export default {
     };
   },
   mounted() {
-    let [year, week] = getYearWeek();
-    this.week.year = year;
-    this.week.week = week;
     this.loadMealTime();
   },
   methods: {
     loadWeekPlan() {
+      if (!this.week?.year || !this.week?.week) {
+        return;
+      }
       let payload = {
         year: this.week.year,
         week: this.week.week,
@@ -323,6 +330,15 @@ export default {
     },
   },
   computed: {
+    week: {
+      get() {
+        return { year: this.$query?.year, week: this.$query?.week };
+      },
+      set(val) {
+        this.$query.year = val?.year;
+        this.$query.week = val?.week;
+      },
+    },
     plan() {
       return this.store.week_plan;
     },

@@ -2,9 +2,7 @@
   <q-page padding>
     <div class="row q-col-gutter-x-md q-mb-md">
       <div>
-        <q-btn icon="arrow_back" size="sm" @click="$router.push({ name: 'recipes' })"
-          >Назад</q-btn
-        >
+        <q-btn icon="arrow_back" size="sm" @click="$router.go(-1)">Назад</q-btn>
       </div>
       <div v-if="!edit">
         <q-btn

@@ -33,6 +33,10 @@ const routes = [
         name: "week_plan",
         meta: {
           requiresAuth: true,
+          query: {
+            year: "int:",
+            week: "int:",
+          },
         },
       },
       {
@@ -41,6 +45,11 @@ const routes = [
         name: "product_list",
         meta: {
           requiresAuth: true,
+          query: {
+            task: "int:",
+            year: "int:",
+            week: "int:",
+          },
         },
       },
     ],

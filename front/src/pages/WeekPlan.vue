@@ -239,10 +239,10 @@ export default {
     },
 
     filterRecipes(val, update, abort) {
-      // if (this.search == val && this.recipesList) {
-      //   update(() => {});
-      //   return;
-      // }
+      if (this.search == val && this.recipesList) {
+        update(() => {});
+        return;
+      }
       this.search = val;
       this.loadRecipes()
         .then(() => {
@@ -383,6 +383,7 @@ body.body--dark {
   }
   .q-field--dark {
     .q-field__label,
+    .q-field__input,
     .q-field__marginal {
       color: black;
     }

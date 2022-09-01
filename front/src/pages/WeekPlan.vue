@@ -7,7 +7,9 @@
     :animation-speed="500"
   />
   <q-page padding>
-    <div class="row wrap items-start q-col-gutter-x-sm q-col-gutter-y-md">
+    <div
+      class="week-select-page row wrap items-start q-col-gutter-x-sm q-col-gutter-y-md"
+    >
       <!-- :class="$q.screen.lt.md ? 'column' : ''" -->
       <template v-for="(day, idx) of WeekDays" :key="idx">
         <div v-if="idx > 0" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3">
@@ -377,19 +379,19 @@ export default {
 </script>
 
 <style lang="scss">
-body.body--dark {
+body.body--dark .week-select-page {
   .q-card {
     color: black !important;
   }
-  .q-field--dark {
-    .q-field__label,
-    .q-field__input,
-    .q-field__marginal {
-      color: black;
-    }
-    .q-field__control:before {
-      border-color: black;
-    }
+}
+body.body--dark .week-select-page .q-field--dark {
+  .q-field__label,
+  .q-field__input,
+  .q-field__marginal {
+    color: black;
+  }
+  .q-field__control:before {
+    border-color: black;
   }
 }
 </style>

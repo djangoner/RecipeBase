@@ -90,6 +90,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "RecipeBase.wsgi.application"
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+    *os.getenv("INTERNAL_IPS", "").split(",")
+]
+
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -173,6 +178,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CKEDITOR_UPLOAD_PATH = "uploads/ckeditor/"
 
+if DEBUG:
+    INSTALLED_APPS += ["debug_toolbar"]
+    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+
+
 CKEDITOR_CONFIGS = {
     "default": {
         "toolbar": "Custom",
@@ -249,5 +259,11 @@ LOGGING = {
         #     "formatter": "verbose",
         # },
     },
-    "loggers": {"": {"level": "DEBUG", "handlers": ["console"]}},
+    "loggers": {
+        "": {"level": "DEBUG", "handlers": ["console"]},
+        # "django.db.backends": {
+        #     "level": "DEBUG",
+        #     "handlers": ["console"],
+        # },
+    },
 }

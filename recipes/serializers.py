@@ -1,7 +1,7 @@
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 from users.models import User
-from users.serializers import UserSerializer
+from users.serializers import ShortUserSerializer, UserSerializer
 
 from recipes.models import (Ingredient, MealTime, ProductListItem,
                             ProductListWeek, Recipe, RecipeImage,
@@ -54,7 +54,7 @@ class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        representation["recipe"] = RecipeSerializer(instance.recipe).data
+        representation["recipe"] = RecipeShortSerializer(instance.recipe).data
 
         return representation
 
@@ -74,7 +74,7 @@ class RecipeRatingSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def to_representation(self, instance):
-        self.fields["user"] = UserSerializer()
+        self.fields["user"] = ShortUserSerializer()
         return super().to_representation(instance)
 
 
@@ -84,14 +84,25 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
     tags = RecipeTagSerializer(many=True)
     ingredients = RecipeIngredientSerializer(many=True)
     ratings = RecipeRatingSerializer(many=True)
+    author = ShortUserSerializer()
 
     class Meta:
         model = Recipe
-        fields = "__all__"
+        exclude = ()
         depth = 2
 
     def get_short_description(self, obj: Recipe):
         return obj.get_short_description()
+
+
+class RecipeShortSerializer(RecipeSerializer):
+    tags = None
+    # ingredients = None
+    ratings = None
+    author = None
+
+    class Meta(RecipeSerializer.Meta):
+        exclude = list(RecipeSerializer.Meta.exclude) + ["author"]
 
 
 class MealTimeSerializer(serializers.ModelSerializer):
@@ -113,7 +124,7 @@ class RecipePlanSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        representation["recipe"] = RecipeSerializer(instance.recipe).data
+        representation["recipe"] = RecipeShortSerializer(instance.recipe).data
         representation["meal_time"] = MealTimeSerializer(instance.meal_time).data
 
         return representation
@@ -129,6 +140,12 @@ class RecipePlanWeekSerializer(
         fields = "__all__"
         depth = 1
 
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+
+        # rep["plans"] = RecipePlanSerializer(instance.plans.prefetch_related("meal_time").all(), many=True).data
+        return rep
+
 
 class ProductListItemSerializer(
     WritableNestedModelSerializer, serializers.ModelSerializer
@@ -139,7 +156,7 @@ class ProductListItemSerializer(
     class Meta:
         model = ProductListItem
         fields = "__all__"
-        read_only_fields = ("is_auto", "ingredient", "created", "edited")
+        read_only_fields = ("is_auto", "ingredient", "ingredients", "created", "edited")
         # depth = 1
 
     def get_amount_type_str(self, obj: RecipeIngredient):
@@ -149,7 +166,7 @@ class ProductListItemSerializer(
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        representation["ingredient"] = IngredientSerializer(instance.ingredient).data
+        # representation["ingredient"] = IngredientSerializer(instance.ingredient).data
         representation["ingredients"] = RecipeIngredientWithRecipeSerializer(instance.ingredients, many=True).data
 
         return representation

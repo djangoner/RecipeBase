@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, render
 from rest_framework import (decorators, exceptions, response, serializers,
                             viewsets)
@@ -21,9 +22,19 @@ from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_SHORT,
                                          MEASURING_TYPES)
 from recipes.services.plans import update_plan_week
 
+from .drf_optimize import OptimizeModelViewSetMetaclass
+
 
 class RecipeViewset(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.prefetch_related(
+        "author",
+        "ratings",
+        "ratings__user",
+        "ingredients",
+        "ingredients__ingredient",
+        "tags",
+        "images",
+    )
     serializer_class = RecipeSerializer
     search_fields = ["title", "content", "content_source", "short_description"]
 
@@ -70,7 +81,18 @@ class MealTimeViewset(viewsets.ModelViewSet):
 
 
 class RecipePlanWeekViewset(viewsets.ModelViewSet):
-    queryset = RecipePlanWeek.objects.all()
+    queryset = RecipePlanWeek.objects.prefetch_related(
+        "plans",
+        "plans__meal_time",
+        "plans__recipe",
+        "plans__recipe__author",
+        "plans__recipe__ratings",
+        "plans__recipe__ratings__user",
+        "plans__recipe__ingredients",
+        "plans__recipe__ingredients__ingredient",
+        "plans__recipe__tags",
+        "plans__recipe__images",
+    )
     serializer_class = RecipePlanWeekSerializer
 
     def get_object(self):
@@ -85,24 +107,43 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
                 pass
 
         if year or week:
-            plan_week, _ = RecipePlanWeek.objects.get_or_create(year=year, week=week)
+            plan_week, _ = self.queryset.get_or_create(year=year, week=week)
             return plan_week
 
         return super().get_object()
 
 
 class RecipePlanViewset(viewsets.ModelViewSet):
-    queryset = RecipePlan.objects.all()
+    queryset = RecipePlan.objects.prefetch_related(
+        "meal_time",
+        "recipe",
+        "recipe__author",
+        "recipe__ratings",
+        "recipe__ratings__user",
+        "recipe__ingredients",
+        "recipe__ingredients__ingredient",
+        "recipe__tags",
+        "recipe__images",
+    )
     serializer_class = RecipePlanSerializer
 
 
 class RecipeRatingViewset(viewsets.ModelViewSet):
-    queryset = RecipeRating.objects.all()
+    queryset = RecipeRating.objects.prefetch_related("user")
     serializer_class = RecipeRatingSerializer
 
 
 class ProductListWeekViewset(viewsets.ModelViewSet):
-    queryset = ProductListWeek.objects.all()
+    queryset = ProductListWeek.objects.prefetch_related(
+        "items",
+        "items__ingredients",
+        "items__ingredients__ingredient",
+        "items__ingredients__recipe",
+        "items__ingredients__recipe__ingredients",
+        "items__ingredients__recipe__ingredients__ingredient",
+        "items__ingredients__recipe__tags",
+        "items__ingredients__recipe__images",
+    )
     serializer_class = ProductListWeekSerializer
 
     def get_object(self):
@@ -134,7 +175,15 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
 
 
 class ProductListItemViewset(viewsets.ModelViewSet):
-    queryset = ProductListItem.objects.all()
+    queryset = ProductListItem.objects.prefetch_related(
+        "ingredients",
+        "ingredients__ingredient",
+        "ingredients__recipe",
+        "ingredients__recipe__ingredients",
+        "ingredients__recipe__ingredients__ingredient",
+        "ingredients__recipe__tags",
+        "ingredients__recipe__images",
+    )
     serializer_class = ProductListItemSerializer
     filterset_fields = ["is_auto", "is_deleted", "is_completed"]
 

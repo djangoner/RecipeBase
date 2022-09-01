@@ -49,4 +49,6 @@ if settings.DEBUG:
                 "document_root": settings.MEDIA_ROOT,
             },
         ),
+        path('__debug__/', include('debug_toolbar.urls'))
     ]
+

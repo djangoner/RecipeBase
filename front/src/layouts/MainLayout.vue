@@ -62,6 +62,13 @@
           ></q-item-section>
           <q-item-section>Список продуктов</q-item-section>
         </q-item>
+
+        <q-item clickable @click="toggleDark">
+          <q-item-section avatar>
+            <q-icon :name="darkIcon()"></q-icon>
+          </q-item-section>
+          <q-item-section> Тёмная тема </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
@@ -76,8 +83,11 @@
 </template>
 
 <script>
+import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth';
 import { defineComponent, ref } from 'vue';
+
+const darkModes = ['auto', true, false];
 
 export default defineComponent({
   name: 'MainLayout',
@@ -87,12 +97,46 @@ export default defineComponent({
   setup() {
     const leftDrawerOpen = ref(false);
     const store = useAuthStore();
+    const $q = useQuasar();
+
+    const preferedMode = $q.localStorage.getItem('preferedMode');
+
+    if (preferedMode !== null) {
+      $q.dark.set(preferedMode);
+    }
 
     return {
       store,
       leftDrawerOpen,
+      darkModes,
+
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
+      },
+      toggleDark() {
+        let mode = $q.dark.mode;
+        let idxCurr = darkModes.indexOf(mode);
+        let idxNew = idxCurr + 1;
+        if (idxNew >= darkModes.length) {
+          idxNew = 0;
+        }
+        let newMode = darkModes[idxNew];
+        // set
+        $q.dark.set(newMode);
+        $q.localStorage.set('preferedMode', newMode);
+      },
+      darkIcon() {
+        let mode = $q.dark.mode;
+        switch (mode) {
+          case false:
+            return 'light_mode';
+          case true:
+            return 'dark_mode';
+          case 'auto':
+            return 'brightness_auto';
+          default:
+            return 'dark_mode';
+        }
       },
     };
   },

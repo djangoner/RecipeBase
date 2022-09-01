@@ -375,3 +375,20 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+body.body--dark {
+  .q-card {
+    color: black !important;
+  }
+  .q-field--dark {
+    .q-field__label,
+    .q-field__marginal {
+      color: black;
+    }
+    .q-field__control:before {
+      border-color: black;
+    }
+  }
+}
+</style>

@@ -22,8 +22,6 @@ from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_SHORT,
                                          MEASURING_TYPES)
 from recipes.services.plans import update_plan_week
 
-from .drf_optimize import OptimizeModelViewSetMetaclass
-
 
 class RecipeViewset(viewsets.ModelViewSet):
     queryset = Recipe.objects.prefetch_related(

@@ -84,13 +84,17 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
     tags = RecipeTagSerializer(many=True)
     ingredients = RecipeIngredientSerializer(many=True)
     ratings = RecipeRatingSerializer(many=True)
-    author = ShortUserSerializer()
 
     class Meta:
         model = Recipe
         exclude = ()
         read_only_fields = ("author",)
         depth = 2
+
+    def to_representation(self, instance):
+        self.fields["author"] = ShortUserSerializer()
+        return super().to_representation(instance)
+
 
     def get_short_description(self, obj: Recipe):
         return obj.get_short_description()

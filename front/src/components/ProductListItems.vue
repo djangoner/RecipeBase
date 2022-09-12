@@ -67,6 +67,8 @@
 
         {{ getDay(item.day) }}
         {{ WeekDays[item.day] }}
+
+        <span class="text-teal" v-if="isEdited(item)"> [Изменено локально] </span>
       </span>
     </div>
   </q-item>
@@ -130,8 +132,25 @@ export default {
       }
       return number;
     },
+    isEdited(item) {
+      // let isNotSynced = !!this.$q.localStorage.getItem('local_productlist_updated');
+      if (!this.local_cache) {
+        return;
+      }
+      let cached_item = this.local_cache.items.filter((i) => {
+        return i.id == item.id;
+      })[0];
+
+      let isChanged = JSON.stringify(cached_item) !== JSON.stringify(item);
+
+      return isChanged;
+    },
   },
-  computed: {},
+  computed: {
+    local_cache() {
+      return this.$q.localStorage.getItem('local_productlist');
+    },
+  },
   watch: {
     listItems(val, oldVal) {
       if (val == oldVal) {

@@ -9,15 +9,33 @@
     />
     <product-list-item-view v-model="viewItem" :week="week" @updateItem="updateItem" />
 
-    <div class="row items-center q-mt-sm q-ml-md">
-      <q-btn
-        label="Обновить автоматический список"
-        color="primary"
-        icon="refresh"
-        size="sm"
-        @click="regenerateList()"
-      ></q-btn>
-      <q-toggle v-model="showCompleted" label="Показать завершенные" />
+    <div class="row items-center q-mt-sm q-ml-sm q-col-gutter-sm">
+      <div>
+        <q-btn
+          label="Обновить автоматический список"
+          class="q-ml-none"
+          color="primary"
+          icon="refresh"
+          size="sm"
+          @click="regenerateList()"
+          :disable="!isOnLine"
+        ></q-btn>
+      </div>
+      <div>
+        <q-btn
+          label="Синхронизация"
+          :color="canSync ? 'positive' : 'primary'"
+          icon="sync"
+          size="sm"
+          @click="syncLocal()"
+          :disable="!canSync"
+        >
+          <q-tooltip v-if="!canSync">Нет данных для синхронизации</q-tooltip>
+        </q-btn>
+      </div>
+      <div>
+        <q-toggle v-model="showCompleted" label="Показать завершенные" />
+      </div>
     </div>
 
     <!-- Product list -->
@@ -131,6 +149,11 @@ export default {
           if (!this.viewItem && argTask) {
             this.selectItemByID(argTask);
           }
+
+          let rewriteLocal = !this.$q.localStorage.has('local_productlist_updated');
+          if (rewriteLocal) {
+            this.syncServer();
+          }
         })
         .catch((err) => {
           this.loading = false;
@@ -194,7 +217,7 @@ export default {
           }
           return i;
         });
-        // this.syncServer();
+        this.syncServer();
         return;
       }
       let payload = Object.assign({}, item);

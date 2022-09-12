@@ -336,7 +336,7 @@ class ProductListItem(models.Model):
         blank=True,
     )
     created = models.DateTimeField(_("Время создания"), auto_now_add=True)
-    edited = models.DateTimeField(_("Время полследнего редактирования"), auto_now=True)
+    # edited = models.DateTimeField(_("Время полследнего редактирования"), auto_now=True)
     ##
 
     class Meta:

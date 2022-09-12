@@ -171,7 +171,7 @@ class ProductListItemSerializer(
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        # representation["ingredient"] = IngredientSerializer(instance.ingredient).data
+        representation["ingredient"] = IngredientSerializer(instance.ingredient).data
         representation["ingredients"] = RecipeIngredientWithRecipeSerializer(instance.ingredients, many=True).data
 
         return representation

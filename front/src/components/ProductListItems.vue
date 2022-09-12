@@ -141,7 +141,7 @@ export default {
         return i.id == item.id;
       })[0];
 
-      let isChanged = JSON.stringify(cached_item) !== JSON.stringify(item);
+      let isChanged = cached_item && JSON.stringify(cached_item) !== JSON.stringify(item);
 
       return isChanged;
     },

@@ -1,11 +1,38 @@
 from datetime import datetime
+from time import time
 
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import m2m_changed, post_save, pre_save
 from django.dispatch import receiver
 
-from recipes.models import Recipe, RecipeIngredient, RecipePlanWeek
+from recipes.models import Recipe, RecipeIngredient, RecipePlan, RecipePlanWeek
 from recipes.services.measurings import amount_to_grams
 from recipes.services.plans import update_plan_week
+
+
+def get_current_time_milli():
+    return int(round(time() * 1000))
+
+
+def debouncer(callback, throttle=1000):
+
+    last_millis = get_current_time_milli()
+
+    def throttle_f(*args, **kwargs):
+        nonlocal last_millis
+        curr_millis = get_current_time_milli()
+        if (curr_millis - last_millis) > throttle:
+            last_millis = get_current_time_milli()
+            callback(*args, **kwargs)
+
+    return throttle_f
+
+def update_plan_week_current():
+    return update_plan_week(get_current_plan_week())
+
+###
+
+debounce_upd_plan_current_week = debouncer(update_plan_week_current, throttle=2000)
+debounce_upd_plan = debouncer(update_plan_week, throttle=2000)
 
 
 def get_current_plan_week():
@@ -23,10 +50,10 @@ def recipe_pre_save(sender: RecipeIngredient, instance, **kwargs):
 
 
 @receiver(post_save, sender=Recipe)
-def recipe_post_save(sender: Recipe, instance, **kwargs):
-    update_plan_week(get_current_plan_week())
+def recipe_post_save(sender, instance: Recipe, **kwargs):
+    debounce_upd_plan_current_week()
 
 
-@receiver(post_save, sender=RecipePlanWeek)
-def recipe_plan_post_save(sender: RecipePlanWeek, instance, **kwargs):
-    update_plan_week(instance)
+@receiver(post_save, sender=RecipePlan)
+def recipe_plan_post_save(sender, instance: RecipePlan, **kwargs):
+    debounce_upd_plan(instance.week)

@@ -756,7 +756,7 @@ export default {
 
           if (isCreating) {
             console.debug('Redirecting from created recipe: ', resp.data);
-            this.$router.push({ name: 'recipe', params: { id: resp.data.id } });
+            this.$router.replace({ name: 'recipe', params: { id: resp.data.id } });
             // .catch(() => {});
           }
 

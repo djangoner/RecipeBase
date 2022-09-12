@@ -9,8 +9,10 @@ export const useBaseStore = defineStore("base", {
     ingredients: null,
     amount_types: null,
     week_plan: null,
+    week_plans: null,
     meal_time: null,
     product_list: null,
+    product_lists: null,
     product_list_items: null,
     product_list_item: null,
   }),
@@ -136,6 +138,21 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
+    async loadWeekPlans(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get(`/recipe_plan_week/`, {
+            params: payload,
+          })
+          .then((resp) => {
+            this.week_plans = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
     async saveWeekPlan(payload) {
       return new Promise((resolve, reject) => {
         api
@@ -149,14 +166,31 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async loadProductListWeek(payload) {
+    async loadProductListWeek(payload, no_save) {
       return new Promise((resolve, reject) => {
         api
           .get(`/product_list_week/${payload.year}_${payload.week}/`, {
             params: payload,
           })
           .then((resp) => {
-            this.product_list = resp.data;
+            if (!no_save) {
+              this.product_list = resp.data;
+            }
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadProductListWeeks(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get(`/product_list_week/`, {
+            params: payload,
+          })
+          .then((resp) => {
+            this.product_lists = resp.data;
             resolve(resp);
           })
           .catch((err) => {

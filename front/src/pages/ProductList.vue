@@ -203,7 +203,7 @@ export default {
           this.handleErrors(err, 'Ошибка синхронизации списка продуктов');
         });
     },
-    updateItem(item) {
+    updateItem(item, reload) {
       if (!item) {
         return;
       }
@@ -237,6 +237,9 @@ export default {
             }
             return i;
           });
+          if (reload) {
+            this.loadList();
+          }
           this.saving = false;
         })
         .catch((err) => {

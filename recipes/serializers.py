@@ -145,11 +145,12 @@ class RecipePlanWeekSerializer(
         fields = "__all__"
         depth = 1
 
-    def to_representation(self, instance):
-        rep = super().to_representation(instance)
 
-        # rep["plans"] = RecipePlanSerializer(instance.plans.prefetch_related("meal_time").all(), many=True).data
-        return rep
+
+class RecipePlanWeekShortSerializer(
+    RecipePlanWeekSerializer, serializers.ModelSerializer
+):
+    plans = None
 
 
 class ProductListItemSerializer(
@@ -186,3 +187,8 @@ class ProductListWeekSerializer(
         model = ProductListWeek
         fields = "__all__"
         depth = 1
+
+class ProductListWeekShortSerializer(
+    ProductListWeekSerializer
+):
+    items = None

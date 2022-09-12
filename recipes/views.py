@@ -2,8 +2,8 @@ from datetime import datetime
 
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, render
-from rest_framework import (decorators, exceptions, response, serializers,
-                            viewsets)
+from rest_framework import (decorators, exceptions, filters, response,
+                            serializers, viewsets)
 
 from recipes.models import (Ingredient, MealTime, ProductListItem,
                             ProductListWeek, Recipe, RecipeImage,
@@ -12,10 +12,12 @@ from recipes.models import (Ingredient, MealTime, ProductListItem,
 from recipes.serializers import (IngredientSerializer, MealTimeSerializer,
                                  ProductListItemSerializer,
                                  ProductListWeekSerializer,
+                                 ProductListWeekShortSerializer,
                                  RecipeImageSerializer,
                                  RecipeIngredientSerializer,
                                  RecipePlanSerializer,
                                  RecipePlanWeekSerializer,
+                                 RecipePlanWeekShortSerializer,
                                  RecipeRatingSerializer, RecipeSerializer,
                                  RecipeTagSerializer)
 from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_SHORT,
@@ -92,6 +94,15 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
         "plans__recipe__images",
     )
     serializer_class = RecipePlanWeekSerializer
+    search_fields = ["year", "week"]
+
+    def get_serializer_class(self):
+        short = self.request.GET.get("short")
+
+        if short:
+            return RecipePlanWeekShortSerializer
+
+        return self.serializer_class
 
     def get_object(self):
         pk = self.kwargs.get("pk", None)
@@ -144,6 +155,14 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
     )
     serializer_class = ProductListWeekSerializer
 
+    def get_serializer_class(self):
+        short = self.request.GET.get("short")
+
+        if short:
+            return ProductListWeekShortSerializer
+
+        return self.serializer_class
+
     def get_object(self):
         pk = self.kwargs.get("pk", None)
         year, week = None, None
@@ -171,7 +190,6 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
 
         return self.retrieve(request)
 
-
 class ProductListItemViewset(viewsets.ModelViewSet):
     queryset = ProductListItem.objects.prefetch_related(
         "ingredients",
@@ -187,3 +205,14 @@ class ProductListItemViewset(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @decorators.action(["POST"], detail=True)
+    def move_week(self, request, pk=None):
+        week_plan, _ = ProductListItem.objects.get_or_create(
+            pk=pk
+        )
+        week = get_object_or_404(ProductListWeek, pk=request.GET.get('week'))
+        week_plan.week = week
+        week_plan.save(update_fields=["week"])
+
+        return self.retrieve(request)

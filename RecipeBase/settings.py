@@ -33,6 +33,7 @@ SECRET_KEY = getenv(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = getenv("DEBUG", False)
+DEBUGBAR = getenv("DEBUGBAR", False)
 
 ALLOWED_HOSTS = getenv("ALLOWED_HOSTS", "*").split(" ")
 
@@ -178,7 +179,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CKEDITOR_UPLOAD_PATH = "uploads/ckeditor/"
 
-if DEBUG:
+if DEBUGBAR:
     INSTALLED_APPS += ["debug_toolbar"]
     MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
 

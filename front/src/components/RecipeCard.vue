@@ -88,7 +88,7 @@
         </table>
       </div>
 
-      <div v-if="recipe.tags">
+      <div v-if="recipe.tags && recipe.tags.length > 0">
         <span class="q-my-sm text-subtitle2">Метки:</span>
         <div class="row q-col-gutter-sm">
           <div v-for="tag of recipe.tags" :key="tag.id">

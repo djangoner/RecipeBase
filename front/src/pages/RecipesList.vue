@@ -194,7 +194,7 @@
                 <div class="q-my-sm">
                   <div
                     class="q-my-sm"
-                    v-for="user of users"
+                    v-for="user of usersRate"
                     :key="user.id"
                     :set="(rating = userRating(user))"
                   >
@@ -601,6 +601,15 @@ export default {
     users() {
       return this.storeAuth?.users?.results;
     },
+    usersRate() {
+      let users = this.users;
+      if (!users) {
+        return users;
+      }
+      return users.filter((u) => {
+        return u?.profile?.show_rate;
+      });
+    },
     tags() {
       return this.store.tags;
     },
@@ -629,6 +638,11 @@ export default {
     tableColumns() {
       let r = tableColumns.slice();
       if (this.compilation == 'top10') {
+        r.unshift({
+          name: 'pos',
+          label: '#',
+          field: (r) => this.recipes.results.indexOf(r) + 1,
+        });
         r.push({
           name: 'cooked_times',
           label: 'Приготовлений',

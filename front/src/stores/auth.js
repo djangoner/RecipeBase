@@ -57,10 +57,10 @@ export const useAuthStore = defineStore("auth", {
       });
     },
 
-    async loadUsers() {
+    async loadUsers(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/users/")
+          .get("/users/", { params: payload })
           .then((resp) => {
             this.users = resp.data;
             resolve(resp);

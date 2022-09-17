@@ -15,11 +15,15 @@
         <div v-if="idx > 0" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3">
           <q-card
             class="row column justify-around q-px-xs q-py-sm full-height"
-            :class="[idx >= 6 ? 'bg-grey-3' : '', WeekDaysColors[idx]]"
+            :class="[
+              idx >= 6 ? 'bg-grey-3' : '',
+              WeekDaysColors[idx],
+              isToday(getDay(idx - 1)) ? 'shadow-5' : '',
+            ]"
             style="min-height: 300px"
           >
             <q-card-section>
-              <span class="text-h6">
+              <span class="text-h6" :class="isToday(getDay(idx - 1)) ? 'day-active' : ''">
                 <b>{{ getDay(idx - 1) }}</b> {{ day }}
               </span>
             </q-card-section>
@@ -33,7 +37,8 @@
                 <template v-for="mtime of meal_time" :key="mtime.id">
                   <div
                     class="row q-col-gutter-x-sm wrap"
-                    v-if="getRecipe(idx, mtime) !== undefined || mtime.is_primary"
+                    :set="(recipe = getRecipe(idx, mtime))"
+                    v-if="recipe !== undefined || mtime.is_primary"
                   >
                     <div class="col-auto">
                       <span class="text-subtitle1 q-my-none">
@@ -46,7 +51,7 @@
 
                     <div class="col">
                       <q-select
-                        :model-value="getRecipe(idx, mtime)"
+                        :model-value="recipe"
                         @update:modelValue="setRecipe(idx, mtime, $event)"
                         :input-debounce="100"
                         :options="recipesList"
@@ -68,9 +73,9 @@
                       <!-- <span>{{ getRecipe(idx, mtime)?.title }}</span> -->
                     </div>
 
-                    <div class="flex flex-center col-auto" v-if="getRecipe(idx, mtime)">
+                    <div class="flex flex-center col-auto" v-if="recipe">
                       <q-btn
-                        :to="{ name: 'recipe', params: { id: getRecipe(idx, mtime).id } }"
+                        :to="{ name: 'recipe', params: { id: recipe.id } }"
                         icon="open_in_new"
                         size="sm"
                         flat
@@ -80,6 +85,11 @@
                         <q-tooltip>Открыть рецепт</q-tooltip>
                       </q-btn>
                     </div>
+
+                    <recipe-card-tooltip
+                      v-if="recipe"
+                      :recipe="recipe"
+                    ></recipe-card-tooltip>
                   </div>
                 </template>
               </div>
@@ -122,6 +132,7 @@ import weekSelect, {
 } from 'components/WeekSelect.vue';
 import { useBaseStore } from 'src/stores/base';
 import { date } from 'quasar';
+import recipeCardTooltip from 'components/RecipeCardTooltip.vue';
 
 let WeekDaysColors = {
   1: 'bg-amber-2',
@@ -132,7 +143,7 @@ let WeekDaysColors = {
 };
 
 export default {
-  components: { weekSelect },
+  components: { weekSelect, recipeCardTooltip },
   data() {
     const store = useBaseStore();
     return {
@@ -330,6 +341,12 @@ export default {
       fday.setDate(fday.getDate() + idx);
       return date.formatDate(fday, 'DD.MM');
     },
+    isToday(day) {
+      let d = new Date();
+      let d_str = d.getDate() + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
+      return day == d_str;
+      // return day.getUTCDate() == new Date().getUTCDate();
+    },
   },
   computed: {
     week: {
@@ -379,6 +396,10 @@ export default {
 </script>
 
 <style lang="scss">
+.day-active {
+  text-decoration: underline;
+}
+
 body.body--dark .week-select-page {
   .q-card {
     color: black !important;

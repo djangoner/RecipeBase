@@ -117,7 +117,7 @@
             :columns="tableColumns"
             :loading="loading"
             :filter="search"
-            :rows-per-page-options="[5, 10, 15, 20, 50]"
+            :rows-per-page-options="[1, 5, 10, 15, 20, 50]"
             @row-click="onRowClick"
             v-model:pagination="tablePagination"
             @request="loadRecipesTable"
@@ -291,37 +291,41 @@ let tableColumns = [
   {
     name: 'title',
     label: 'Название',
+    align: 'left',
     field: 'title',
     required: true,
     sortable: true,
   },
-  {
-    name: 'portion_count',
-    label: 'Порций',
-    field: 'portion_count',
-    required: true,
-    sortable: true,
-  },
+  // {
+  //   name: 'portion_count',
+  //   label: 'Порций',
+  //   field: 'portion_count',
+  //   required: true,
+  //   sortable: true,
+  // },
   {
     name: 'cooking_time',
     label: 'Время',
     field: 'cooking_time',
     required: true,
     sortable: true,
+    style: 'width: 40px',
   },
   {
     name: 'last_cooked',
-    label: 'Последнее приготовление',
+    label: 'Приготовили',
     field: (r) => date.formatDate(r.last_cooked, 'YYYY.MM.DD'),
     required: true,
     sortable: true,
+    style: 'width: 40px',
   },
   {
     name: 'created',
     label: 'Создан',
-    field: (r) => date.formatDate(r.created, 'YYYY.MM.DD hh:mm:ss'),
+    field: (r) => date.formatDate(r.created, 'YYYY.MM.DD hh:mm'),
     required: true,
     sortable: true,
+    style: 'width: 50px',
   },
 ];
 
@@ -355,7 +359,7 @@ export default {
       // compilation: this.$query.compilation,
       showFilters: this.$q.localStorage.getItem('recipesShowFilters'),
       filters: Object.assign({}, filters),
-      filtersDefault: filters,
+      filtersDefault: JSON.parse(JSON.stringify(filters)),
       orderingOptions,
     };
   },
@@ -574,6 +578,8 @@ export default {
     },
     resetFilters() {
       this.filters = Object.assign({}, this.filtersDefault);
+      this.filters.ratings = [];
+      console.debug('Reset: ', this.filters);
     },
 
     openRecipe(id) {
@@ -641,14 +647,19 @@ export default {
         r.unshift({
           name: 'pos',
           label: '#',
-          field: (r) => this.recipes.results.indexOf(r) + 1,
+          field: (r) =>
+            this.recipes.results.indexOf(r) + 1 + (this.page - 1) * this.page_size,
+          style: 'width: 20px',
         });
-        r.push({
+        r.splice(2, 0, {
           name: 'cooked_times',
-          label: 'Приготовлений',
+          label: 'Кол-во',
           field: 'cooked_times',
           sortable: true,
+          style: 'width: 20px',
         });
+      } else if (this.compilation == 'new') {
+        r = r.filter((c) => c.name !== 'last_cooked');
       }
       return r;
     },

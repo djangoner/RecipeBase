@@ -275,6 +275,13 @@
                 <div class="row column q-px-md q-col-gutter-sm">
                   <span><b>Дата создания:</b> {{ dateFormat(recipe.created) }}</span>
                   <span><b>Дата изменения:</b> {{ dateFormat(recipe.edited) }}</span>
+                  <span v-if="recipe.last_cooked"
+                    ><b>Последний раз приготовлено:</b>
+                    {{ dateOnlyFormat(recipe.last_cooked) }}</span
+                  >
+                  <span v-if="recipe.cooked_times"
+                    ><b>Приготовлено (раз):</b> {{ recipe.cooked_times }}</span
+                  >
                   <span><b>Автор:</b> {{ recipe?.author?.username || '?' }}</span>
                 </div>
               </q-expansion-item>
@@ -924,7 +931,10 @@ export default {
       });
     },
     dateFormat(raw) {
-      return date.formatDate(raw, 'YYYY.MM.DD HH:MM');
+      return date.formatDate(raw, 'YYYY.MM.DD hh:mm');
+    },
+    dateOnlyFormat(raw) {
+      return date.formatDate(raw, 'YYYY.MM.DD');
     },
   },
 

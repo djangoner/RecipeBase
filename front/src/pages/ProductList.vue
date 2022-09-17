@@ -92,12 +92,18 @@ export default {
   },
   data() {
     const store = useBaseStore();
+
+    let showCompleted = this.$q.localStorage.getItem('productsShowCompleted');
+    if (showCompleted === null) {
+      showCompleted = true;
+    }
+
     return {
       store,
       loading: false,
       updating: false,
       saving: false,
-      showCompleted: true,
+      showCompleted: showCompleted,
       createItem: '',
       // week: {
       //   year: null,
@@ -367,6 +373,9 @@ export default {
           }
         });
       },
+    },
+    showCompleted(val, oldVal) {
+      this.$q.localStorage.set('productsShowCompleted', val);
     },
   },
 };

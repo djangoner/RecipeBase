@@ -235,7 +235,7 @@ export default {
           .catch((err) => {
             console.warn(err);
             reject(err);
-            this.handleError(err, 'Ошибка загрузки рецептов');
+            this.handleErrors(err, 'Ошибка загрузки рецептов');
           });
       });
     },

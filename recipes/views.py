@@ -28,10 +28,19 @@ from recipes.services.plans import update_plan_week
 
 class RecipeFilterSet(filters.FilterSet):
     rating = filters.CharFilter(method="filter_rating", label="Rating filter")
+    compilation = filters.CharFilter(method="filter_compilation", label="Compilation filter")
+    tags_include = filters.ModelChoiceFilter(
+        method="filter_tags_include", label="Tags include", queryset=RecipeTag.objects
+    )
+    tags_exclude = filters.ModelChoiceFilter(
+        method="filter_tags_exclude", label="Tags exclude", queryset=RecipeTag.objects
+    )
+    cooking_time_gt = filters.NumberFilter("cooking_time", lookup_expr="gte")
+    cooking_time_lt = filters.NumberFilter("cooking_time", lookup_expr="lte")
 
     class Meta:
         model = Recipe
-        exclude = ()
+        exclude = ("tags",)
 
     def filter_rating(self, queryset, name, value):
         if not len(value.split("_")) == 2:
@@ -61,6 +70,15 @@ class RecipeFilterSet(filters.FilterSet):
 
         return queryset.filter(*q)
 
+    def filter_tags_include(self, queryset, name, value):
+        return queryset.filter(tags=value)
+
+    def filter_tags_exclude(self, queryset, name, value):
+        return queryset.exclude(tags=value)
+
+    def filter_compilation(self, queryset, name, value):
+        return queryset
+
 
 class RecipeViewset(viewsets.ModelViewSet):
     queryset = Recipe.objects.prefetch_related(
@@ -73,7 +91,7 @@ class RecipeViewset(viewsets.ModelViewSet):
         "images",
     )
     serializer_class = RecipeSerializer
-    search_fields = ["title", "short_description", "coment"]
+    search_fields = ["title", "short_description", "comment"]
     filterset_class = RecipeFilterSet
 
     def perform_create(self, serializer):

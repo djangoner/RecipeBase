@@ -1,5 +1,11 @@
 <template>
   <q-page padding>
+    <!-- Compilations tabs -->
+    <q-tabs v-model="this.filters.compilation">
+      <q-tab :name="null" icon="restaurant_menu" label="Все"></q-tab>
+      <q-tab name="long_uncooked" icon="history" label="Давно не готовили"></q-tab>
+    </q-tabs>
+
     <!-- Search input -->
     <q-input v-model="search" debounce="250" label="Поиск" clearable>
       <template #prepend>
@@ -26,12 +32,14 @@
       >
     </div>
 
+    <span v-if="recipes"> Найдено результатов: {{ recipes.count }} </span>
+
     <!-- Recipe cards -->
     <div
       class="row q-col-gutter-x-md q-col-gutter-y-md"
       :class="$q.screen.gt.sm ? 'no-wrap' : ''"
     >
-      <div class="q-mt-md" v-if="recipes">
+      <div class="col q-mt-md" v-if="recipes">
         <!-- Pagination -->
         <div>
           <div class="flex justify-center q-mb-md">
@@ -70,45 +78,148 @@
           <h6 class="text-bold">Результатов не найдено</h6>
         </div>
       </div>
-      <div
-        class="col-12 col-md-3"
-        :class="$q.screen.gt.sm ? '' : 'order-first'"
-        v-if="showFilters && recipes"
+
+      <transition
+        appear
+        enter-active-class="animated slideInRight"
+        leave-active-class="animated slideOutRight"
       >
-        <q-card>
-          <q-card-section>
-            <h6 class="q-my-sm text-center">Фильтры</h6>
+        <div
+          class="col-12 col-md-3 col-shrink"
+          :class="$q.screen.gt.sm ? '' : 'order-first'"
+          v-if="showFilters && recipes"
+        >
+          <q-card>
+            <q-card-section>
+              <h6 class="q-my-sm text-center text-bold">Фильтры</h6>
 
-            <q-form @submit="loadRecipes()">
-              <div class="q-my-sm">
-                <h6 class="q-my-sm text-subtitle2">Время готовки</h6>
-                <q-range
-                  v-model="filters.cooking_time"
-                  class="q-px-md"
-                  :min="5"
-                  :max="120"
-                  :step="5"
-                  label
-                />
-              </div>
+              <q-form @submit="loadRecipes()" @reset="resetFilters()">
+                <div class="q-my-sm">
+                  <h6 class="q-my-sm text-subtitle2 text-bold">Время готовки</h6>
+                  <q-range
+                    v-model="filters.cooking_time"
+                    class="q-px-md"
+                    :min="5"
+                    :max="120"
+                    :step="5"
+                    label
+                  />
+                </div>
 
-              <div class="q-my-sm">
-                <h6 class="q-my-sm text-subtitle2">Метки</h6>
-              </div>
-              <div class="q-my-sm">
-                <h6 class="q-my-sm text-subtitle2">Рейтинг</h6>
-              </div>
+                <div class="q-my-sm">
+                  <h6 class="q-my-sm text-subtitle2 text-bold">Метки</h6>
+                  <q-select
+                    v-model="filters.tags_include"
+                    label="Включить"
+                    @filter="filterTagsInclude"
+                    :options="tagList"
+                    option-label="title"
+                    option-value="id"
+                    use-input
+                    multiple
+                    use-chips
+                    map-options
+                    emit-value
+                    options-dense
+                    dense
+                  ></q-select>
+                  <q-select
+                    v-model="filters.tags_exclude"
+                    label="Исключить"
+                    @filter="filterTagsExclude"
+                    :options="tagList"
+                    option-label="title"
+                    option-value="id"
+                    use-input
+                    multiple
+                    use-chips
+                    map-options
+                    emit-value
+                    options-dense
+                    dense
+                  ></q-select>
+                </div>
+                <div class="q-my-sm">
+                  <h6 class="q-my-sm text-subtitle2 text-bold">Рейтинг</h6>
+                </div>
 
-              <div class="row justify-around">
-                <q-btn type="reset" color="negative" size="sm" icon="close"
-                  >Сбросить</q-btn
-                >
-                <q-btn type="submit" color="primary" size="sm" icon="search">Поиск</q-btn>
-              </div>
-            </q-form>
-          </q-card-section>
-        </q-card>
-      </div>
+                <div class="q-my-sm">
+                  <div
+                    class="q-my-sm"
+                    v-for="user of users"
+                    :key="user.id"
+                    :set="(rating = userRating(user))"
+                  >
+                    <div>
+                      <div
+                        class="row justify-between q-col-gutter-x-sm q-col-gutter-y-sm"
+                      >
+                        <span>
+                          {{ userReadable(user) }}
+                        </span>
+                        <div class="row col-grow justify-between q-col-gutter-x-sm">
+                          <div class="row items-center no-wrap">
+                            <q-icon
+                              v-if="rating.min === 0"
+                              size="xs"
+                              name="thumb_down"
+                              color="grey"
+                            >
+                            </q-icon>
+                            <template v-else>
+                              <q-icon
+                                v-for="i in Math.floor(rating.min)"
+                                :key="i"
+                                size="xs"
+                                name="star_rate"
+                                color="teal"
+                              >
+                              </q-icon>
+                            </template>
+                          </div>
+                          <q-space />
+                          <div
+                            class="row items-center no-wrap"
+                            :set="(rating = userRating(user))"
+                          >
+                            <q-icon
+                              v-for="i in Math.floor(rating.max)"
+                              :key="i"
+                              size="xs"
+                              name="star_rate"
+                              color="teal"
+                            >
+                            </q-icon>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <q-range
+                      :modelValue="rating"
+                      @update:modelValue="userSetRating(user, $event)"
+                      class="q-px-md"
+                      :min="0"
+                      :max="5"
+                      label
+                    >
+                    </q-range>
+                  </div>
+                </div>
+
+                <div class="row justify-around">
+                  <q-btn type="reset" color="negative" size="sm" icon="close"
+                    >Сбросить</q-btn
+                  >
+                  <q-btn type="submit" color="primary" size="sm" icon="search"
+                    >Поиск</q-btn
+                  >
+                </div>
+              </q-form>
+            </q-card-section>
+          </q-card>
+        </div>
+      </transition>
 
       <q-inner-loading :showing="loading"></q-inner-loading>
     </div>
@@ -118,23 +229,33 @@
 <script>
 import { useBaseStore } from 'stores/base.js';
 import recipeCard from 'components/RecipeCard.vue';
-import { debounce, throttle } from 'quasar';
+import { debounce } from 'quasar';
+import { useAuthStore } from 'src/stores/auth';
 
 export default {
   components: { recipeCard },
   data() {
     const store = useBaseStore();
+    const storeAuth = useAuthStore();
+    let filters = {
+      compilation: null,
+      cooking_time: { min: 5, max: 120 },
+      tags_include: [],
+      tags_exclude: [],
+      ratings: {},
+    };
 
     return {
       store,
+      storeAuth,
       search: '',
       page: 1,
       display_mode: 'cards',
       loading: false,
+      tagList: null,
       showFilters: this.$q.localStorage.getItem('recipesShowFilters'),
-      filters: {
-        cooking_time: { min: 5, max: 120 },
-      },
+      filters: Object.assign({}, filters),
+      filtersDefault: filters,
     };
   },
   created() {
@@ -143,15 +264,59 @@ export default {
 
   mounted() {
     this.loadRecipes();
+    if (!this.tags) {
+      this.loadTags();
+    }
+    if (!this.users) {
+      this.loadUsers();
+    }
   },
 
   methods: {
     loadRecipes() {
-      let payload = {
-        search: this.search,
-        page: this.page,
-        // page_size: 1,
-      };
+      let payload = new URLSearchParams();
+
+      payload.append('search', this.search);
+      payload.append('page', this.page);
+
+      if (this.filters.compilation) {
+        payload.append('compilation', this.filters.compilation);
+      }
+
+      if (this.filters.tags_include) {
+        for (const tag of this.filters.tags_include) {
+          payload.append('tags_include', tag);
+        }
+      }
+      if (this.filters.cooking_time) {
+        if (this.filters.cooking_time.min > 5) {
+          payload.append('cooking_time_gt', this.filters.cooking_time.min);
+        }
+        if (this.filters.cooking_time.max < 120) {
+          payload.append('cooking_time_lt', this.filters.cooking_time.max);
+        }
+      }
+      if (this.filters.tags_exclude) {
+        for (const tag of this.filters.tags_exclude) {
+          payload.append('tags_exclude', tag);
+        }
+      }
+      if (this.filters.ratings) {
+        for (const [user_id, values] of Object.entries(this.filters.ratings)) {
+          if (values.min == values.max) {
+            payload.append('rating', `${user_id}_${values.min}`);
+          } else {
+            if (values.min > 0) {
+              payload.append('rating', `${user_id}_+${values.min}`);
+            }
+
+            if (values.max < 5) {
+              payload.append('rating', `${user_id}_-${values.max}`);
+            }
+          }
+        }
+      }
+
       this.loading = true;
 
       this.store
@@ -162,14 +327,128 @@ export default {
         .catch((err) => {
           console.warn(err);
           this.loading = false;
-          this.handleError(err, 'Ошибка загрузки рецептов');
+          this.handleErrors(err, 'Ошибка загрузки рецептов');
         });
+    },
+
+    loadTags() {
+      let payload = {
+        page_size: 1000,
+      };
+      this.store
+        .loadTags(payload)
+        .then(() => {
+          // this.loading = false;
+        })
+        .catch((err) => {
+          // this.loading = false;
+          this.handleErrors(err, 'Ошибка загрузки меток');
+        });
+    },
+    loadIngredients() {
+      let payload = {
+        page_size: 1000,
+      };
+      this.store
+        .loadIngredients(payload)
+        .then(() => {
+          this.ingList = this.ingredients?.results;
+          // this.loading = false;
+        })
+        .catch((err) => {
+          // this.loading = false;
+          this.handleErrors(err, 'Ошибка загрузки ингредиентов');
+        });
+    },
+    loadAmountTypes() {
+      let payload = {
+        page_size: 1000,
+      };
+      this.store
+        .loadAmountTypes(payload)
+        .then(() => {
+          // this.loading = false;
+          this.amountTypeList = this.amount_types?.types;
+        })
+        .catch((err) => {
+          // this.loading = false;
+          this.handleErrors(err, 'Ошибка загрузки типов измерений');
+        });
+    },
+    loadUsers() {
+      let payload = {
+        page_size: 1000,
+        can_rate: true,
+      };
+      this.storeAuth
+        .loadUsers(payload)
+        .then(() => {
+          this.loading = false;
+        })
+        .catch((err) => {
+          this.loading = false;
+          this.handleErrors(err, 'Ошибка загрузки пользователей');
+        });
+    },
+
+    filterTagsInclude(val, update, abort) {
+      update(() => {
+        let isUsed = (tag) => {
+          return this.filters.tags_exclude.some((t) => t == tag.id);
+        };
+
+        const needle = val.toLowerCase();
+        let tags = this.tags?.results;
+
+        this.tagList = tags?.filter(
+          (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
+        );
+        // console.debug(needle, this.tagList, tags);
+      });
+    },
+    filterTagsExclude(val, update, abort) {
+      update(() => {
+        let isUsed = (tag) => {
+          return this.filters.tags_include.some((t) => t == tag.id);
+        };
+
+        const needle = val.toLowerCase();
+        let tags = this.tags?.results;
+
+        this.tagList = tags?.filter(
+          (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
+        );
+        // console.debug(needle, this.tagList, tags);
+      });
+    },
+    userRating(user) {
+      let exists = this.filters?.ratings[user.id];
+      // console.debug('userRating: ', user, exists);
+
+      if (exists) {
+        return exists;
+      } else {
+        return { min: 0, max: 5 };
+      }
+    },
+    userSetRating(user, rating) {
+      // console.debug('setUserRating: ', user, rating);
+
+      this.filters.ratings[user.id] = rating;
+    },
+    ressetFilters() {
+      this.filters = Object.assign({}, filtersDefault);
     },
 
     openRecipe(id) {
       this.$router.push({ name: 'recipe', params: { id: id } }).catch((e) => {});
     },
-
+    userReadable(user) {
+      if (user.first_name) {
+        return user.first_name + ' ' + user.last_name;
+      }
+      return user.username;
+    },
     shortText(tx, length = 100) {
       if (tx.length < length) {
         return tx;
@@ -183,10 +462,23 @@ export default {
     recipes() {
       return this.store.recipes;
     },
+    users() {
+      return this.storeAuth?.users?.results;
+    },
+    tags() {
+      return this.store.tags;
+    },
+    ingredients() {
+      return this.store.ingredients;
+    },
+    amount_types() {
+      return this.store.amount_types;
+    },
   },
 
   watch: {
     search() {
+      this.page = 1;
       this.loadRecipes();
     },
     page() {
@@ -195,6 +487,7 @@ export default {
     filters: {
       deep: true,
       handler(val, oldVal) {
+        this.page = 1;
         this.debounceLoadRecipes();
       },
     },

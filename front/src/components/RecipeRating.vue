@@ -19,7 +19,7 @@
             :color-selected="['grey', 'green-5']"
             :max="6"
             size="2em"
-            color="primary"
+            :color="$q.dark.isActive ? 'grey-4' : 'primary'"
           />
         </td>
       </tr>
@@ -47,7 +47,9 @@ export default {
     };
   },
   mounted() {
-    this.loadUsers();
+    if (!this.users) {
+      this.loadUsers();
+    }
   },
   methods: {
     loadUsers() {

@@ -11,12 +11,21 @@
       <div class="flex justify-center items-center" style="min-height: 100px">
         <!-- <q-icon name="restaurant_menu" size="50px" color="grey"></q-icon> -->
         <q-img
-          :src="recipe.images ? recipe.images[0]?.image : null"
+          :src="recipe.images.length > 0 ? recipe.images[0]?.image : '/favicon.png'"
+          placeholder-src="/favicon.png"
           width="100%"
           height="200px"
           fit="cover"
           style="max-height: 200px"
         >
+          <template v-slot:error>
+            <div class="absolute-full flex flex-center bg-negative text-white">
+              Ошибка загрузки
+            </div>
+            <div class="absolute-bottom text-subtitle1 text-center">
+              {{ recipe.title }}
+            </div>
+          </template>
           <div class="absolute-bottom text-subtitle1 text-center">
             {{ recipe.title }}
           </div>
@@ -29,9 +38,9 @@
     </q-card-section>
 
     <!-- Aside info tooltip -->
-
     <q-tooltip
-      class="fit overflow-auto bg-grey-3 rounded-borders text-black"
+      class="fit overflow-auto rounded-borders text-black"
+      :class="$q.dark.isActive ? 'bg-grey-7' : 'bg-grey-3'"
       anchor="center right"
       self="center left"
       :offset="[2, 0]"

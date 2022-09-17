@@ -66,12 +66,19 @@
 </template>
 
 <script>
+import { date } from 'quasar';
+
 export default {
   props: {
     recipe: { required: true },
   },
   data() {
     return {};
+  },
+  methods: {
+    dateFormat(dt) {
+      return date.formatDate(dt, 'YYYY.MM.DD');
+    },
   },
 };
 </script>

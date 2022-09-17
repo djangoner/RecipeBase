@@ -17,6 +17,10 @@ const routes = [
         name: "recipes",
         meta: {
           requiresAuth: true,
+          query: {
+            compilation: "string:",
+            display: "string:cards",
+          },
         },
       },
       {

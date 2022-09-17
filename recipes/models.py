@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from ckeditor.fields import RichTextField
 from django.contrib.auth import get_user_model
@@ -235,11 +236,13 @@ class RecipePlan(models.Model):
         null=True,
         validators=[MinValueValidator(1), MaxValueValidator(7)],
     )
+    date = models.DateField(_("Дата"), null=True, blank=True)
+
     meal_time = models.ForeignKey(
         MealTime, models.CASCADE, verbose_name=_("Время приема пищи")
     )
     recipe = models.ForeignKey(
-        Recipe, models.SET_NULL, verbose_name=_("Рецепт"), null=True, blank=True
+        Recipe, models.SET_NULL, verbose_name=_("Рецепт"), null=True, blank=True, related_name="plans"
     )
 
     class Meta:
@@ -250,6 +253,17 @@ class RecipePlan(models.Model):
     def __str__(self) -> str:
         return f"{self.week}.{self.day} {self.meal_time}"
 
+
+    def gen_date(self) -> datetime:
+        date = datetime.strptime(' '.join(map(str, [self.week.year, self.week.week, self.day])), '%G %V %u')
+        return date
+
+    def check_date(self):
+        date = self.gen_date()
+
+        if not self.date or date != self.date:
+            self.date = date
+            self.save(update_fields=["date"])
 
 class ProductListWeek(models.Model):
     year = models.SmallIntegerField(_("Год"))

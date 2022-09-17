@@ -17,7 +17,7 @@
       show-if-above
       bordered
     >
-      <q-list>
+      <q-list class="text-grey-9">
         <!-- <q-item-label header>База рецептов</q-item-label> -->
 
         <q-item class="cursor-pointer">
@@ -44,7 +44,7 @@
           <q-item-section>Нет подключения к интернету</q-item-section>
         </q-item>
 
-        <q-item :to="{ name: 'index' }"
+        <q-item :to="{ name: 'index' }" exact
           ><q-item-section avatar><q-icon name="home"></q-icon></q-item-section>
           <q-item-section>Главная</q-item-section>
         </q-item>

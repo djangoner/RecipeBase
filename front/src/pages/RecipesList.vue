@@ -1,9 +1,16 @@
 <template>
-  <q-page padding>
+  <q-page class="q-pt-sm" padding>
     <!-- Compilations tabs -->
-    <q-tabs v-model="this.filters.compilation">
-      <q-tab :name="null" icon="restaurant_menu" label="Все"></q-tab>
-      <q-tab name="long_uncooked" icon="history" label="Давно не готовили"></q-tab>
+    <q-tabs
+      v-model="this.compilation"
+      content-class="text-grey-9"
+      active-class="text-secondary"
+    >
+      <q-tab name="" icon="restaurant_menu" label="Все"></q-tab>
+      <q-tab name="new" icon="hourglass_top" label="Новое"></q-tab>
+      <q-tab name="top10" icon="grade" label="Топ 10"></q-tab>
+      <q-tab name="long_uncooked" icon="history" label="4+ недели"></q-tab>
+      <q-tab name="vlong_uncooked" icon="history" label="8+ недель"></q-tab>
     </q-tabs>
 
     <!-- Search input -->
@@ -12,8 +19,17 @@
         <q-icon name="search" />
       </template>
     </q-input>
+    <q-select
+      v-model="ordering"
+      :options="orderingOptions"
+      label="Сортировка"
+      map-options
+      emit-value
+      options-dense
+      dense
+    ></q-select>
 
-    <div class="row q-gutter-x-md">
+    <div class="row q-gutter-x-md items-center">
       <q-btn
         class="q-my-sm"
         icon="add"
@@ -30,6 +46,19 @@
         @click="showFilters = !showFilters"
         >Фильтры</q-btn
       >
+
+      <q-space />
+
+      <q-btn-toggle
+        v-model="displayMode"
+        :options="[
+          { label: 'Карточки', value: 'cards', icon: 'dashboard' },
+          { label: 'Таблица', value: 'table', icon: 'table_view' },
+        ]"
+        toggle-color="primary"
+        size="sm"
+        dense
+      ></q-btn-toggle>
     </div>
 
     <span v-if="recipes"> Найдено результатов: {{ recipes.count }} </span>
@@ -40,43 +69,62 @@
       :class="$q.screen.gt.sm ? 'no-wrap' : ''"
     >
       <div class="col q-mt-md" v-if="recipes">
-        <!-- Pagination -->
-        <div>
-          <div class="flex justify-center q-mb-md">
+        <!-- Cards mode -->
+        <template v-if="displayMode == 'cards'">
+          <!-- Pagination -->
+          <div>
+            <div class="flex justify-center q-mb-md">
+              <q-pagination
+                v-model="page"
+                :max="recipes.total_pages"
+                direction-links
+              ></q-pagination>
+            </div>
+            <q-separator class="q-my-md" />
+            <!-- /Pagination -->
+          </div>
+          <div class="recipes-row row q-col-gutter-x-md q-col-gutter-y-sm">
+            <div
+              class="col-xs-12 col-sm-6 col-md-4 col-lg-3"
+              v-for="recipe of recipes.results"
+              :key="recipe.id"
+            >
+              <!-- Recipe card -->
+              <recipe-card :recipe="recipe"></recipe-card>
+            </div>
+          </div>
+
+          <q-separator class="q-my-md" />
+
+          <!-- Pagination -->
+          <div class="flex justify-center q-mt-md" v-if="recipes.results.length > 0">
             <q-pagination
               v-model="page"
               :max="recipes.total_pages"
               direction-links
             ></q-pagination>
           </div>
-          <q-separator class="q-my-md" />
           <!-- /Pagination -->
-        </div>
-        <div class="recipes-row row q-col-gutter-x-md q-col-gutter-y-sm">
-          <div
-            class="col-xs-12 col-sm-6 col-md-4 col-lg-3"
-            v-for="recipe of recipes.results"
-            :key="recipe.id"
-          >
-            <!-- Recipe card -->
-            <recipe-card :recipe="recipe"></recipe-card>
+          <div class="flex justify-center items-center full-height" v-else>
+            <h6 class="text-bold">Результатов не найдено</h6>
           </div>
-        </div>
-
-        <q-separator class="q-my-md" />
-
-        <!-- Pagination -->
-        <div class="flex justify-center q-mt-md" v-if="recipes.results.length > 0">
-          <q-pagination
-            v-model="page"
-            :max="recipes.total_pages"
-            direction-links
-          ></q-pagination>
-        </div>
-        <!-- /Pagination -->
-        <div class="flex justify-center items-center full-height" v-else>
-          <h6 class="text-bold">Результатов не найдено</h6>
-        </div>
+        </template>
+        <!-- Table mode -->
+        <template v-else-if="displayMode == 'table'">
+          <q-table
+            title="Рецепты"
+            :rows="recipes?.results"
+            :columns="tableColumns"
+            :loading="loading"
+            :filter="search"
+            :rows-per-page-options="[5, 10, 15, 20, 50]"
+            @row-click="onRowClick"
+            v-model:pagination="tablePagination"
+            @request="loadRecipesTable"
+            binary-state-sort
+            :dense="$q.screen.lt.md"
+          ></q-table>
+        </template>
       </div>
 
       <transition
@@ -89,7 +137,7 @@
           :class="$q.screen.gt.sm ? '' : 'order-first'"
           v-if="showFilters && recipes"
         >
-          <q-card>
+          <q-card class="position-sticky">
             <q-card-section>
               <h6 class="q-my-sm text-center text-bold">Фильтры</h6>
 
@@ -221,7 +269,7 @@
         </div>
       </transition>
 
-      <q-inner-loading :showing="loading"></q-inner-loading>
+      <q-inner-loading v-if="displayMode == 'cards'" :showing="loading"></q-inner-loading>
     </div>
   </q-page>
 </template>
@@ -229,8 +277,53 @@
 <script>
 import { useBaseStore } from 'stores/base.js';
 import recipeCard from 'components/RecipeCard.vue';
-import { debounce } from 'quasar';
+import { date, debounce } from 'quasar';
 import { useAuthStore } from 'src/stores/auth';
+
+let orderingOptions = [
+  { label: 'Создан - по возрастанию', value: 'created' },
+  { label: 'Создан - по убыванию', value: '-created' },
+  { label: 'Последнее приготовление - по возрастанию', value: 'last_cooked' },
+  { label: 'Последнее приготовление - по убыванию', value: '-last_cooked' },
+];
+
+let tableColumns = [
+  {
+    name: 'title',
+    label: 'Название',
+    field: 'title',
+    required: true,
+    sortable: true,
+  },
+  {
+    name: 'portion_count',
+    label: 'Порций',
+    field: 'portion_count',
+    required: true,
+    sortable: true,
+  },
+  {
+    name: 'cooking_time',
+    label: 'Время',
+    field: 'cooking_time',
+    required: true,
+    sortable: true,
+  },
+  {
+    name: 'last_cooked',
+    label: 'Последнее приготовление',
+    field: (r) => date.formatDate(r.last_cooked, 'YYYY.MM.DD'),
+    required: true,
+    sortable: true,
+  },
+  {
+    name: 'created',
+    label: 'Создан',
+    field: (r) => date.formatDate(r.created, 'YYYY.MM.DD hh:mm:ss'),
+    required: true,
+    sortable: true,
+  },
+];
 
 export default {
   components: { recipeCard },
@@ -238,7 +331,6 @@ export default {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
     let filters = {
-      compilation: null,
       cooking_time: { min: 5, max: 120 },
       tags_include: [],
       tags_exclude: [],
@@ -250,12 +342,21 @@ export default {
       storeAuth,
       search: '',
       page: 1,
-      display_mode: 'cards',
+      page_size: 20,
       loading: false,
       tagList: null,
+      ordering: '-created',
+      tablePagination: {
+        rowsPerPage: 20,
+        page: 1,
+        sortBy: 'created',
+        descending: true,
+      },
+      // compilation: this.$query.compilation,
       showFilters: this.$q.localStorage.getItem('recipesShowFilters'),
       filters: Object.assign({}, filters),
       filtersDefault: filters,
+      orderingOptions,
     };
   },
   created() {
@@ -274,61 +375,96 @@ export default {
 
   methods: {
     loadRecipes() {
-      let payload = new URLSearchParams();
+      return new Promise((resolve, reject) => {
+        let payload = new URLSearchParams();
 
-      payload.append('search', this.search);
-      payload.append('page', this.page);
+        payload.append('search', this.search);
+        payload.append('page', this.page);
+        payload.append('page_size', this.page_size);
 
-      if (this.filters.compilation) {
-        payload.append('compilation', this.filters.compilation);
-      }
+        if (this.compilation == 'top10') {
+          payload.append('ordering', '');
+          if (this.tablePagination.sortBy !== 'cooked_times') {
+            this.tablePagination.sortBy = 'cooked_times';
+            this.tablePagination.descending = true;
+          }
+        } else {
+          payload.append('ordering', this.ordering);
+          this.tablePagination.sortBy = this.ordering;
+        }
 
-      if (this.filters.tags_include) {
-        for (const tag of this.filters.tags_include) {
-          payload.append('tags_include', tag);
+        if (this.compilation) {
+          payload.append('compilation', this.compilation);
         }
-      }
-      if (this.filters.cooking_time) {
-        if (this.filters.cooking_time.min > 5) {
-          payload.append('cooking_time_gt', this.filters.cooking_time.min);
-        }
-        if (this.filters.cooking_time.max < 120) {
-          payload.append('cooking_time_lt', this.filters.cooking_time.max);
-        }
-      }
-      if (this.filters.tags_exclude) {
-        for (const tag of this.filters.tags_exclude) {
-          payload.append('tags_exclude', tag);
-        }
-      }
-      if (this.filters.ratings) {
-        for (const [user_id, values] of Object.entries(this.filters.ratings)) {
-          if (values.min == values.max) {
-            payload.append('rating', `${user_id}_${values.min}`);
-          } else {
-            if (values.min > 0) {
-              payload.append('rating', `${user_id}_+${values.min}`);
-            }
 
-            if (values.max < 5) {
-              payload.append('rating', `${user_id}_-${values.max}`);
-            }
+        if (this.filters.tags_include) {
+          for (const tag of this.filters.tags_include) {
+            payload.append('tags_include', tag);
           }
         }
-      }
+        if (this.filters.cooking_time) {
+          if (this.filters.cooking_time.min > 5) {
+            payload.append('cooking_time_gt', this.filters.cooking_time.min);
+          }
+          if (this.filters.cooking_time.max < 120) {
+            payload.append('cooking_time_lt', this.filters.cooking_time.max);
+          }
+        }
+        if (this.filters.tags_exclude) {
+          for (const tag of this.filters.tags_exclude) {
+            payload.append('tags_exclude', tag);
+          }
+        }
+        if (this.filters.ratings) {
+          let r = [];
+          for (const [user_id, values] of Object.entries(this.filters.ratings)) {
+            if (values.min == values.max) {
+              r.push(`${user_id}_${values.min}`);
+              // payload.append('rating', `${user_id}_${values.min}`);
+            } else {
+              if (values.min > 0) {
+                r.push(`${user_id}_+${values.min}`);
+                // payload.append('rating', `${user_id}_+${values.min}`);
+              }
 
-      this.loading = true;
+              if (values.max < 5) {
+                r.push(`${user_id}_-${values.max}`);
+                // payload.append('rating', `${user_id}_-${values.max}`);
+              }
+            }
+          }
+          payload.append('rating', r.join(','));
+        }
 
-      this.store
-        .loadRecipes(payload)
-        .then(() => {
-          this.loading = false;
-        })
-        .catch((err) => {
-          console.warn(err);
-          this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки рецептов');
-        });
+        this.loading = true;
+
+        this.store
+          .loadRecipes(payload)
+          .then((resp) => {
+            this.loading = false;
+            this.tablePagination.rowsNumber = this.recipes.count;
+            resolve(resp);
+          })
+          .catch((err) => {
+            console.warn(err);
+            reject(err);
+            this.loading = false;
+            this.handleErrors(err, 'Ошибка загрузки рецептов');
+          });
+      });
+    },
+
+    loadRecipesTable(props) {
+      console.debug('tableProps: ', props.pagination);
+      this.ordering = (props.pagination.descending ? '-' : '') + props.pagination.sortBy;
+      this.page = props.pagination.page;
+      this.page_size = props.pagination.rowsPerPage;
+      this.loadRecipes().then((resp) => {
+        Object.assign(this.tablePagination, props.pagination);
+      });
+    },
+    onRowClick(e, row, index) {
+      this.openRecipe(row.id);
     },
 
     loadTags() {
@@ -436,8 +572,8 @@ export default {
 
       this.filters.ratings[user.id] = rating;
     },
-    ressetFilters() {
-      this.filters = Object.assign({}, filtersDefault);
+    resetFilters() {
+      this.filters = Object.assign({}, this.filtersDefault);
     },
 
     openRecipe(id) {
@@ -474,11 +610,45 @@ export default {
     amount_types() {
       return this.store.amount_types;
     },
+    compilation: {
+      get() {
+        return this.$query.compilation;
+      },
+      set(val) {
+        this.$query.compilation = val;
+      },
+    },
+    displayMode: {
+      get() {
+        return this.$query.display;
+      },
+      set(val) {
+        this.$query.display = val;
+      },
+    },
+    tableColumns() {
+      let r = tableColumns.slice();
+      if (this.compilation == 'top10') {
+        r.push({
+          name: 'cooked_times',
+          label: 'Приготовлений',
+          field: 'cooked_times',
+          sortable: true,
+        });
+      }
+      return r;
+    },
   },
 
   watch: {
     search() {
       this.page = 1;
+      this.loadRecipes();
+    },
+    ordering() {
+      this.loadRecipes();
+    },
+    compilation() {
       this.loadRecipes();
     },
     page() {
@@ -497,3 +667,10 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.position-sticky {
+  position: sticky;
+  top: 60px;
+}
+</style>

@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from django.db.models import Prefetch, Q
+from django.db.models import Count, F, Func, Max, Prefetch, Q, Value
 from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 from django_filters import rest_framework as filters
 from rest_framework import (decorators, exceptions, response, serializers,
                             viewsets)
@@ -28,11 +29,13 @@ from recipes.services.plans import update_plan_week
 
 class RecipeFilterSet(filters.FilterSet):
     rating = filters.CharFilter(method="filter_rating", label="Rating filter")
-    compilation = filters.CharFilter(method="filter_compilation", label="Compilation filter")
-    tags_include = filters.ModelChoiceFilter(
+    compilation = filters.CharFilter(
+        method="filter_compilation", label="Compilation filter"
+    )
+    tags_include = filters.ModelMultipleChoiceFilter(
         method="filter_tags_include", label="Tags include", queryset=RecipeTag.objects
     )
-    tags_exclude = filters.ModelChoiceFilter(
+    tags_exclude = filters.ModelMultipleChoiceFilter(
         method="filter_tags_exclude", label="Tags exclude", queryset=RecipeTag.objects
     )
     cooking_time_gt = filters.NumberFilter("cooking_time", lookup_expr="gte")
@@ -43,6 +46,11 @@ class RecipeFilterSet(filters.FilterSet):
         exclude = ("tags",)
 
     def filter_rating(self, queryset, name, value):
+        for subval in value.split(","):
+            queryset = self._filter_rating(queryset, name, subval)
+        return queryset.distinct()
+
+    def _filter_rating(self, queryset, name, value):
         if not len(value.split("_")) == 2:
             return queryset
 
@@ -71,28 +79,62 @@ class RecipeFilterSet(filters.FilterSet):
         return queryset.filter(*q)
 
     def filter_tags_include(self, queryset, name, value):
-        return queryset.filter(tags=value)
+        if not value:
+            return queryset
+        return queryset.filter(tags__in=value).distinct()
 
     def filter_tags_exclude(self, queryset, name, value):
-        return queryset.exclude(tags=value)
+        if not value:
+            return queryset
+        return queryset.exclude(tags__in=value).distinct()
 
     def filter_compilation(self, queryset, name, value):
+        if value == "long_uncooked":
+            qs = queryset.filter(
+                last_cooked__lt=timezone.now() - timezone.timedelta(weeks=4)
+            )
+            return qs
+        elif value == "vlong_uncooked":
+            qs = queryset.filter(
+                last_cooked__lt=timezone.now() - timezone.timedelta(weeks=8)
+            )
+            return qs
+        elif value == "top10":
+            qs = queryset.annotate(cooked_times=Count(F("plans__date"))).order_by("-cooked_times").filter(cooked_times__gt=0)
+            return qs
+        elif value == "new":
+            qs = queryset.filter(last_cooked=None)
+            return qs
+
         return queryset
 
 
 class RecipeViewset(viewsets.ModelViewSet):
-    queryset = Recipe.objects.prefetch_related(
-        "author",
-        "ratings",
-        "ratings__user",
-        "ingredients",
-        "ingredients__ingredient",
-        "tags",
-        "images",
+    queryset = (
+        Recipe.objects.prefetch_related(
+            "author",
+            "ratings",
+            "ratings__user",
+            "ingredients",
+            "ingredients__ingredient",
+            "tags",
+            "images",
+        )
+        .annotate(last_cooked=Max(F("plans__date")))
+        .distinct()
     )
     serializer_class = RecipeSerializer
     search_fields = ["title", "short_description", "comment"]
     filterset_class = RecipeFilterSet
+    ordering_fields = [
+        "created",
+        "edited",
+        "id",
+        "title",
+        "portion_count",
+        "cooking_time",
+        "last_cooked",
+    ]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

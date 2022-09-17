@@ -80,6 +80,8 @@ class RecipeRatingSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     short_description = serializers.SerializerMethodField()
+    last_cooked = serializers.SerializerMethodField()
+    cooked_times = serializers.SerializerMethodField()
     images = RecipeImageSerializer(many=True)
     tags = RecipeTagSerializer(many=True)
     ingredients = RecipeIngredientSerializer(many=True)
@@ -99,6 +101,12 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
     def get_short_description(self, obj: Recipe):
         return obj.get_short_description()
 
+
+    def get_last_cooked(self, obj: Recipe):
+        return getattr(obj, "last_cooked", None)
+
+    def get_cooked_times(self, obj: Recipe):
+        return getattr(obj, "cooked_times", None)
 
 class RecipeShortSerializer(RecipeSerializer):
     tags = None

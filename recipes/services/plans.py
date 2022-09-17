@@ -47,6 +47,7 @@ def get_plan_week(week: RecipePlanWeek) -> dict:
 
     for plan in week.plans.all():
         plan: RecipePlan
+        plan.check_date()
         recipe = plan.recipe
         ingredients = recipe.ingredients.all()
 

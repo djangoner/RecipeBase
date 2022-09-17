@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404, render
-from rest_framework import (decorators, exceptions, filters, response,
-                            serializers, viewsets)
+from django_filters import rest_framework as filters
+from rest_framework import (decorators, exceptions, response, serializers,
+                            viewsets)
 
 from recipes.models import (Ingredient, MealTime, ProductListItem,
                             ProductListWeek, Recipe, RecipeImage,
@@ -25,6 +26,42 @@ from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_SHORT,
 from recipes.services.plans import update_plan_week
 
 
+class RecipeFilterSet(filters.FilterSet):
+    rating = filters.CharFilter(method="filter_rating", label="Rating filter")
+
+    class Meta:
+        model = Recipe
+        exclude = ()
+
+    def filter_rating(self, queryset, name, value):
+        if not len(value.split("_")) == 2:
+            return queryset
+
+        user, rating = value.split("_")
+        rating_mode = None
+
+        if rating.startswith("-"):
+            rating_mode = False
+            rating = rating[1:]
+        elif rating.startswith("+"):
+            rating_mode = True
+            rating = rating[1:]
+
+        rating = int(rating)
+        user = int(user)
+
+        q = [Q(ratings__user=user)]
+
+        if rating_mode == True:
+            q.append(Q(ratings__rating__gte=rating))
+        elif rating_mode == False:
+            q.append(Q(ratings__rating__lte=rating))
+        else:
+            q.append(Q(ratings__rating=rating))
+
+        return queryset.filter(*q)
+
+
 class RecipeViewset(viewsets.ModelViewSet):
     queryset = Recipe.objects.prefetch_related(
         "author",
@@ -36,7 +73,8 @@ class RecipeViewset(viewsets.ModelViewSet):
         "images",
     )
     serializer_class = RecipeSerializer
-    search_fields = ["title", "content", "content_source", "short_description"]
+    search_fields = ["title", "short_description", "coment"]
+    filterset_class = RecipeFilterSet
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -190,6 +228,7 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
 
         return self.retrieve(request)
 
+
 class ProductListItemViewset(viewsets.ModelViewSet):
     queryset = ProductListItem.objects.prefetch_related(
         "ingredients",
@@ -208,10 +247,8 @@ class ProductListItemViewset(viewsets.ModelViewSet):
 
     @decorators.action(["POST"], detail=True)
     def move_week(self, request, pk=None):
-        week_plan, _ = ProductListItem.objects.get_or_create(
-            pk=pk
-        )
-        week = get_object_or_404(ProductListWeek, pk=request.GET.get('week'))
+        week_plan, _ = ProductListItem.objects.get_or_create(pk=pk)
+        week = get_object_or_404(ProductListWeek, pk=request.GET.get("week"))
         week_plan.week = week
         week_plan.save(update_fields=["week"])
 

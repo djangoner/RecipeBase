@@ -1,7 +1,7 @@
 <template>
   <q-item
     class="cursor-pointer non-selectable"
-    :class="[item.is_completed ? 'bg-grey-4' : '']"
+    :class="itemCls(item)"
     v-for="item of listItems"
     :key="item.id"
     @click="$emit('openItem', item)"
@@ -144,6 +144,11 @@ export default {
       let isChanged = cached_item && JSON.stringify(cached_item) !== JSON.stringify(item);
 
       return isChanged;
+    },
+    itemCls(item) {
+      if (item.is_completed) {
+        return this.$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-4';
+      }
     },
   },
   computed: {

@@ -13,7 +13,7 @@
         <td class="cell-rating">
           <q-rating
             :modelValue="userRating(user) + 1"
-            :disable="!edit"
+            :readonly="!edit"
             @update:modelValue="userSetRating(user, $event - 1)"
             :icon="['thumb_down', 'star']"
             :color-selected="['grey', 'green-5']"

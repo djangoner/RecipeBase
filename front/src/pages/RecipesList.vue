@@ -20,7 +20,7 @@
     <div class="q-mt-md" v-if="recipes">
       <!-- Pagination -->
       <div>
-        <div class="flex justify-center q-mb-md" v-if="recipes.results.length > 10">
+        <div class="flex justify-center q-mb-md">
           <q-pagination
             v-model="page"
             :max="recipes.total_pages"
@@ -37,33 +37,7 @@
           :key="recipe.id"
         >
           <!-- Recipe card -->
-          <q-card
-            class="cursor-pointer q-hoverable"
-            v-ripple
-            @click="openRecipe(recipe.id)"
-          >
-            <span class="q-focus-helper"></span>
-            <q-card-section>
-              <div class="flex justify-center items-center" style="min-height: 100px">
-                <!-- <q-icon name="restaurant_menu" size="50px" color="grey"></q-icon> -->
-                <q-img
-                  :src="recipe.images ? recipe.images[0]?.image : null"
-                  width="100%"
-                  height="200px"
-                  fit="cover"
-                  style="max-height: 200px"
-                >
-                  <div class="absolute-bottom text-subtitle1 text-center">
-                    {{ recipe.title }}
-                  </div>
-                </q-img>
-              </div>
-            </q-card-section>
-
-            <q-card-section>
-              <span class="text-subtitle2">{{ recipe.short_description }}</span>
-            </q-card-section>
-          </q-card>
+          <recipe-card :recipe="recipe"></recipe-card>
         </div>
       </div>
 
@@ -89,8 +63,10 @@
 
 <script>
 import { useBaseStore } from 'stores/base.js';
+import recipeCard from 'components/RecipeCard.vue';
 
 export default {
+  components: { recipeCard },
   data() {
     const store = useBaseStore();
 

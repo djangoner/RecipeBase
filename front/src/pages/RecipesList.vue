@@ -14,7 +14,7 @@
     </q-tabs>
 
     <!-- Search input -->
-    <q-input v-model="search" debounce="250" label="Поиск" clearable>
+    <q-input v-model="search" debounce="250" label="Поиск" autofocus clearable>
       <template #prepend>
         <q-icon name="search" />
       </template>
@@ -460,7 +460,10 @@ export default {
 
     loadRecipesTable(props) {
       console.debug('tableProps: ', props.pagination);
-      this.ordering = (props.pagination.descending ? '-' : '') + props.pagination.sortBy;
+      this.ordering =
+        (props.pagination.descending && !props.pagination.sortBy.startsWith('-')
+          ? '-'
+          : '') + props.pagination.sortBy;
       this.page = props.pagination.page;
       this.page_size = props.pagination.rowsPerPage;
       this.loadRecipes().then((resp) => {

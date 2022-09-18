@@ -36,61 +36,77 @@
               <div class="flex column" v-else>
                 <template v-for="mtime of meal_time" :key="mtime.id">
                   <div
-                    class="row q-col-gutter-x-sm wrap"
-                    :set="(recipe = getRecipe(idx, mtime))"
-                    v-if="getRecipe(idx, mtime) !== undefined || mtime.is_primary"
+                    :set="(recipes = getRecipes(idx, mtime))"
+                    v-if="getRecipes(idx, mtime).length > 0 || mtime.is_primary"
                   >
-                    {{ recipe?.id }}
-                    <div class="col-auto">
-                      <span class="text-subtitle1 q-my-none">
-                        {{ mtime.title }}
-                        <q-tooltip>
-                          {{ mtime.title }} - {{ timeFormat(mtime.time) }}
-                        </q-tooltip>
-                      </span>
-                    </div>
+                    <div
+                      class="row q-col-gutter-x-sm wrap"
+                      v-for="(recipe, rec_idx) of recipes"
+                      :key="recipe"
+                    >
+                      <div class="col-auto">
+                        <span class="text-subtitle1 q-my-none">
+                          {{ mtime.title }}
+                          <q-tooltip>
+                            {{ mtime.title }} - {{ timeFormat(mtime.time) }}
+                          </q-tooltip>
+                        </span>
+                      </div>
 
-                    <div class="col">
-                      <q-select
-                        :model-value="recipe"
-                        @update:modelValue="setRecipe(idx, mtime, $event)"
-                        :input-debounce="100"
-                        :options="recipesList"
-                        option-label="title"
-                        @filter="filterRecipes"
-                        use-input
-                        clearable
-                        options-dense
-                        dense
-                      >
-                        <template v-slot:no-option>
-                          <q-item>
-                            <q-item-section class="text-grey">
-                              Нет результатов
-                            </q-item-section>
-                          </q-item>
-                        </template>
-                      </q-select>
-                      <!-- <span>{{ getRecipe(idx, mtime)?.title }}</span> -->
-                    </div>
+                      <div class="col">
+                        <q-select
+                          :model-value="recipe"
+                          @update:modelValue="setRecipe(idx, mtime, $event, rec_idx)"
+                          :input-debounce="100"
+                          :options="recipesList"
+                          option-label="title"
+                          @filter="filterRecipes"
+                          use-input
+                          clearable
+                          options-dense
+                          dense
+                        >
+                          <template v-slot:no-option>
+                            <q-item>
+                              <q-item-section class="text-grey">
+                                Нет результатов
+                              </q-item-section>
+                            </q-item>
+                          </template>
+                        </q-select>
+                        <!-- <span>{{ getRecipe(idx, mtime)?.title }}</span> -->
+                      </div>
 
-                    <div class="flex flex-center col-auto" v-if="recipe">
-                      <q-btn
-                        :to="{ name: 'recipe', params: { id: recipe.id } }"
-                        icon="open_in_new"
-                        size="sm"
-                        flat
-                        dense
-                        round
-                      >
-                        <q-tooltip>Открыть рецепт</q-tooltip>
-                      </q-btn>
-                    </div>
+                      <div class="flex flex-center col-auto" v-if="recipe">
+                        <q-btn
+                          :to="{ name: 'recipe', params: { id: recipe.id } }"
+                          icon="open_in_new"
+                          size="sm"
+                          flat
+                          dense
+                          round
+                        >
+                          <q-tooltip>Открыть рецепт</q-tooltip>
+                        </q-btn>
+                      </div>
+                      <div class="flex flex-center col-auto" v-else>
+                        <q-btn
+                          @click="delPlan(idx, mtime)"
+                          icon="close"
+                          size="sm"
+                          flat
+                          dense
+                          round
+                        >
+                          <q-tooltip>Убрать</q-tooltip>
+                        </q-btn>
+                      </div>
 
-                    <recipe-card-tooltip
-                      v-if="recipe"
-                      :recipe="recipe"
-                    ></recipe-card-tooltip>
+                      <recipe-card-tooltip
+                        v-if="recipe"
+                        :recipe="recipe"
+                      ></recipe-card-tooltip>
+                    </div>
                   </div>
                 </template>
               </div>
@@ -294,13 +310,28 @@ export default {
       });
       return recipes[0]?.recipe;
     },
-    setRecipe(day, mtime, value) {
+    getRecipes(day, mtime) {
+      if (!this.plan) {
+        return;
+      }
+      let recipes = this.plan?.plans.filter((plan) => {
+        return plan.day == day && plan.meal_time.id == mtime.id;
+      });
+
+      if (mtime.is_primary) {
+        if (recipes.length < 1) {
+          return [null];
+        }
+      }
+      return recipes.map((r) => r.recipe);
+    },
+    setRecipe(day, mtime, value, rec_idx) {
       console.debug('setRecipe: ', day, mtime, value);
       let plans = this.plan.plans.filter((plan) => {
         return plan.day == day && plan.meal_time.id == mtime.id;
       });
 
-      let plan = plans[0];
+      let plan = plans[rec_idx || 0];
       if (plan) {
         console.debug('Updating recipe...');
         plan.recipe = value;
@@ -332,6 +363,19 @@ export default {
           }
         )
       );
+    },
+    delPlan(idx, mtime) {
+      console.debug('delPlan: ', idx, mtime, this.plan.plans);
+      let delOne = false;
+      this.plan.plans = this.plan.plans.filter((p) => {
+        let r = p.day != idx || p.meal_time != mtime || p.recipe != null;
+        if (!r && !delOne) {
+          delOne = true;
+          return false;
+        }
+
+        return true;
+      });
     },
 
     timeFormat(raw) {

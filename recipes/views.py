@@ -100,13 +100,13 @@ class RecipeFilterSet(filters.FilterSet):
             )
             return qs
         elif value == "top10":
-            qs = queryset.annotate(cooked_times=Count(F("plans__date"))).order_by("-cooked_times").filter(cooked_times__gt=0)
+            qs = queryset.order_by("-cooked_times").filter(cooked_times__gt=0)
             return qs
         elif value == "new":
             week_firstday = timezone.now().today()
             while week_firstday.weekday() > 0:
                 week_firstday = week_firstday - timezone.timedelta(days=1)
-            qs = queryset.filter(Q(last_cooked=None) | Q(last_cooked__gt=week_firstday.date()))
+            qs = queryset.filter(Q(last_cooked=None) | (Q(last_cooked__gt=week_firstday.date()) & Q(cooked_times=1)))
             return qs
 
         return queryset
@@ -123,6 +123,7 @@ class RecipeViewset(viewsets.ModelViewSet):
             "tags",
             "images",
         )
+        .annotate(cooked_times=Count(F("plans__date")))
         .annotate(last_cooked=Max(F("plans__date")))
         .distinct()
     )

@@ -28,7 +28,7 @@
             {{ userReadable }}
           </q-item-section>
 
-          <q-menu fit auto-close>
+          <q-menu anchor="bottom middle" self="top middle" auto-close>
             <q-list dense>
               <q-item class="justify-center text-negative" clickable @click="askLogout">
                 Выйти

@@ -103,7 +103,10 @@ class RecipeFilterSet(filters.FilterSet):
             qs = queryset.annotate(cooked_times=Count(F("plans__date"))).order_by("-cooked_times").filter(cooked_times__gt=0)
             return qs
         elif value == "new":
-            qs = queryset.filter(last_cooked=None)
+            week_firstday = timezone.now().today()
+            while week_firstday.weekday() > 0:
+                week_firstday = week_firstday - timezone.timedelta(days=1)
+            qs = queryset.filter(Q(last_cooked=None) | Q(last_cooked__gt=week_firstday.date()))
             return qs
 
         return queryset

@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from django.db.models import Count, F, Func, Max, Prefetch, Q, Value
@@ -89,7 +90,13 @@ class RecipeFilterSet(filters.FilterSet):
         return queryset.exclude(tags__in=value).distinct()
 
     def filter_compilation(self, queryset, name, value):
-        if value == "long_uncooked":
+        if value != "archive":
+            queryset = queryset.filter(is_archived=False)
+
+        if value == "archive":
+            qs = queryset.filter(is_archived=True)
+            return qs
+        elif value == "long_uncooked":
             qs = queryset.filter(
                 last_cooked__lt=timezone.now() - timezone.timedelta(weeks=4)
             )
@@ -108,6 +115,8 @@ class RecipeFilterSet(filters.FilterSet):
                 week_firstday = week_firstday - timezone.timedelta(days=1)
             qs = queryset.filter(Q(last_cooked=None) | (Q(last_cooked__gt=week_firstday.date()) & Q(cooked_times=1)))
             return qs
+        else:
+            logging.warning(f"Unknown compilation: '{value}'")
 
         return queryset
 

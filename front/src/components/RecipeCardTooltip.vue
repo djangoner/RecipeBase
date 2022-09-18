@@ -8,7 +8,11 @@
     max-width="300px"
     max-height="300px"
   >
-    <h6 class="q-mt-none q-mb-sm text-subtitle1">{{ recipe.title }}</h6>
+    <h6 class="q-mt-none q-mb-sm text-subtitle1">
+      <q-icon v-if="recipe.is_archived" name="archive" size="xs" color="primary">
+      </q-icon>
+      {{ recipe.title }}
+    </h6>
     <h6 class="q-mt-none q-mb-sm text-subtitle2" v-if="recipe.last_cooked">
       Приготовлено {{ dateFormat(recipe.last_cooked) }}
       <template v-if="recipe.cooked_times">({{ recipe.cooked_times }} раз)</template>

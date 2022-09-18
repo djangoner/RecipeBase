@@ -39,6 +39,15 @@
                   </template></q-input
                 >
                 <h4 class="text-center q-my-none" v-else>
+                  <q-icon
+                    v-if="recipe.is_archived"
+                    class="q-mr-xs"
+                    name="archive"
+                    size="sm"
+                    color="primary"
+                  >
+                    <q-tooltip>Этот рецепт архивирован</q-tooltip>
+                  </q-icon>
                   {{ recipe.title }}
                   <q-btn icon="edit" @click="toggleEdit()" flat>
                     <q-tooltip>Изменить рецепт</q-tooltip>
@@ -143,6 +152,16 @@
                   <q-icon name="timer" color="grey"></q-icon>
                   Время приготовления: {{ recipe.cooking_time || '-' }}
                 </h6>
+              </div>
+              <div class="q-my-md" v-if="edit">
+                <q-select
+                  v-model="recipe.is_archived"
+                  :options="archivedOptions"
+                  label="Статус"
+                  map-options
+                  emit-value
+                  filled
+                ></q-select>
               </div>
 
               <!-- Images carousel -->
@@ -636,6 +655,10 @@ export default {
       ingredientsColumns,
       editorToolbar,
       editorFonts,
+      archivedOptions: [
+        { label: 'Не архивирован', value: false },
+        { label: 'Архивирован', value: true },
+      ],
     };
   },
   mounted() {

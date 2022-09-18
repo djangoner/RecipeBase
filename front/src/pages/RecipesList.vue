@@ -2,7 +2,7 @@
   <q-page class="q-pt-sm" padding>
     <!-- Compilations tabs -->
     <q-tabs
-      v-model="this.compilation"
+      v-model="compilation"
       content-class="text-grey-9"
       active-class="text-secondary"
     >
@@ -11,6 +11,7 @@
       <q-tab name="top10" icon="grade" label="Топ 10"></q-tab>
       <q-tab name="long_uncooked" icon="history" label="4+ недели"></q-tab>
       <q-tab name="vlong_uncooked" icon="history" label="8+ недель"></q-tab>
+      <q-tab name="archive" icon="archive" label="Архив"></q-tab>
     </q-tabs>
 
     <!-- Search input -->

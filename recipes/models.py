@@ -48,6 +48,7 @@ class Recipe(models.Model):
     created = models.DateTimeField(_("Создан"), auto_now_add=True, null=True)
     edited = models.DateTimeField(_("Изменен"), auto_now=True, null=True)
     author = models.ForeignKey(User, models.SET_NULL, null=True, blank=True)
+    is_archived = models.BooleanField(_("Архивирован"), default=False)
 
     class Meta:
         verbose_name = _("Рецепт")

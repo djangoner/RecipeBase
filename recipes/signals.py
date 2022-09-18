@@ -56,4 +56,9 @@ def recipe_post_save(sender, instance: Recipe, **kwargs):
 
 @receiver(post_save, sender=RecipePlan)
 def recipe_plan_post_save(sender, instance: RecipePlan, **kwargs):
+    instance.check_date()
     debounce_upd_plan(instance.week)
+
+@receiver(post_save, sender=RecipePlanWeek)
+def recipe_plan_week_post_save(sender, instance: RecipePlanWeek, **kwargs):
+    debounce_upd_plan(instance)

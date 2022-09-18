@@ -95,6 +95,7 @@ export default {
         year: null,
         week: null,
       },
+      week_pick_old: {},
       WeekDays,
     };
   },
@@ -181,8 +182,14 @@ export default {
     },
     week_pick: {
       deep: true,
-      handler: function (val, oldVal) {
-        console.debug('week_pick: ', val, oldVal);
+      handler: function (val) {
+        let notChanged = JSON.stringify(val) === JSON.stringify(this.week_pick_old);
+        if (notChanged) {
+          this.week_pick_old = Object.assign({}, val);
+          return;
+        }
+        console.debug('week_pick: ', notChanged, val, this.week_pick_old);
+        this.week_pick_old = Object.assign({}, val);
         this.$emit('update:modelValue', val);
       },
     },

@@ -37,7 +37,7 @@
                 <template v-for="mtime of meal_time" :key="mtime.id">
                   <div
                     :set="(recipes = getRecipes(idx, mtime))"
-                    v-if="getRecipes(idx, mtime).length > 0 || mtime.is_primary"
+                    v-if="getRecipes(idx, mtime)?.length > 0 || mtime.is_primary"
                   >
                     <div
                       class="row q-col-gutter-x-sm wrap"

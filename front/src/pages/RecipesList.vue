@@ -62,7 +62,7 @@
       ></q-btn-toggle>
     </div>
 
-    <span v-if="recipes"> Найдено результатов: {{ recipes.count }} </span>
+    <span v-if="recipes"> Найдено результатов: {{ recipes?.count }} </span>
 
     <!-- Recipe cards -->
     <div
@@ -447,7 +447,7 @@ export default {
           .loadRecipes(payload)
           .then((resp) => {
             this.loading = false;
-            this.tablePagination.rowsNumber = this.recipes.count;
+            this.tablePagination.rowsNumber = this.recipes?.count;
             resolve(resp);
           })
           .catch((err) => {

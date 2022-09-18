@@ -127,7 +127,8 @@ export default {
       // if (this.$q.localStorage.has('local_productlist_updated')) {
       //   this.syncLocal();
       // }
-      this.loadList();
+
+      // this.loadList();
     } else {
       let local_cache = this.$q.localStorage.getItem('local_productlist');
       if (local_cache) {

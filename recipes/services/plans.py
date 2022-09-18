@@ -101,12 +101,13 @@ def get_plan_week(week: RecipePlanWeek) -> dict:
             log.warning(f"Can't convert all measurings of {ing} ({meas_types}) to one!")
 
         # -- Check min pack size
-        if ing.min_pack_size:
+        # if ing.min_pack_size:
 
-            if not info["measuring"] in ["items"]:
-                info["amount"] = (
-                    math.ceil(info["amount"] / ing.min_pack_size) * ing.min_pack_size
-                )
+
+        #     if not info["measuring"] in ["items"]:
+        #         info["amount"] = (
+        #             math.ceil(info["amount"] / ing.min_pack_size) * ing.min_pack_size
+        #         )
 
     return res
 

@@ -38,8 +38,9 @@
                   <div
                     class="row q-col-gutter-x-sm wrap"
                     :set="(recipe = getRecipe(idx, mtime))"
-                    v-if="recipe !== undefined || mtime.is_primary"
+                    v-if="getRecipe(idx, mtime) !== undefined || mtime.is_primary"
                   >
+                    {{ recipe?.id }}
                     <div class="col-auto">
                       <span class="text-subtitle1 q-my-none">
                         {{ mtime.title }}

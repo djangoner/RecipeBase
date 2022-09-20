@@ -1,18 +1,10 @@
 from django.contrib import admin
+from django.db.models import Count, F
 
-from recipes.models import (
-    Ingredient,
-    MealTime,
-    ProductListItem,
-    ProductListWeek,
-    Recipe,
-    RecipeImage,
-    RecipeIngredient,
-    RecipePlan,
-    RecipePlanWeek,
-    RecipeRating,
-    RecipeTag,
-)
+from recipes.models import (Ingredient, MealTime, ProductListItem,
+                            ProductListWeek, Recipe, RecipeImage,
+                            RecipeIngredient, RecipePlan, RecipePlanWeek,
+                            RecipeRating, RecipeTag)
 
 
 class RecipeIngredientsInline(admin.StackedInline):
@@ -29,6 +21,7 @@ class RecipeImageInline(admin.TabularInline):
 class RecipePlanInline(admin.TabularInline):
     extra = 0
     model = RecipePlan
+    autocomplete_fields = ["recipe", "meal_time"]
 
 
 class RecipeRatingInline(admin.TabularInline):
@@ -39,11 +32,20 @@ class RecipeRatingInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ["title", "short_description", "created", "edited"]
+    list_display = ["title", "created", "edited", "get_cooked_times"]
     search_fields = ["title", "content"]
     filter_horizontal = ("tags",)
 
     inlines = [RecipeIngredientsInline, RecipeImageInline, RecipeRatingInline]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.annotate(cooked_times=Count(F("plans__date")))
+
+    def get_cooked_times(self, obj):
+        return getattr(obj, "cooked_times", None)
+
+    get_cooked_times.short_description = "Приготовлений"
 
 
 @admin.register(Ingredient)
@@ -56,13 +58,13 @@ class IngredientAdmin(admin.ModelAdmin):
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
     list_display = ["recipe", "ingredient"]
-    search_fields = ["recipe", "ingredient"]
+    search_fields = ["recipe__title", "ingredient__title"]
     autocomplete_fields = ["recipe", "ingredient"]
 
 
 @admin.register(RecipeImage)
 class RecipeImageAdmin(admin.ModelAdmin):
-    list_display = ["image", "title"]
+    list_display = ["id","image", "title"]
     search_fields = ["image", "title"]
 
 
@@ -75,6 +77,8 @@ class RecipeTagAdmin(admin.ModelAdmin):
 @admin.register(MealTime)
 class MealTimeAdmin(admin.ModelAdmin):
     list_display = ["title", "time", "num", "is_primary"]
+    search_fields = ["title", "time"]
+    list_editable = ["num"]
 
 
 @admin.register(RecipePlanWeek)
@@ -86,9 +90,9 @@ class RecipePlanWeekAdmin(admin.ModelAdmin):
 
 @admin.register(RecipePlan)
 class RecipePlanAdmin(admin.ModelAdmin):
-    list_display = ["week", "meal_time"]
+    list_display = ["week", "meal_time", "recipe"]
     list_filter = ["meal_time", "week__year", "week__week"]
-    search_fields = ["week"]
+    search_fields = ["week__year", "week__week", "recipe__title"]
 
 
 @admin.register(ProductListWeek)
@@ -118,6 +122,6 @@ class ProductListItemAdmin(admin.ModelAdmin):
         "week__year",
         "week__week",
     ]
-    search_fields = ["week", "title", "description"]
+    search_fields = ["week__year", "week__week", "title", "description"]
     autocomplete_fields = ("author", "assigned", "week", "ingredient")
     filter_horizontal = ("ingredients",)

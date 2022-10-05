@@ -142,7 +142,7 @@ def update_plan_week(week: RecipePlanWeek):
         plan_item.save()
         edited_plans.append(plan_item.id)
 
-    old_items = plan_week.items.exclude(id__in=edited_plans)
+    old_items = plan_week.items.exclude(id__in=edited_plans, is_auto=False)
     # old_items.update(is_deleted=True)
     old_items.delete()
 

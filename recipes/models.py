@@ -10,8 +10,7 @@ from django.db.models.fields import related
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 
-from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_TYPES,
-                                         short_text)
+from recipes.services.measurings import MEASURING_CONVERT, MEASURING_TYPES, short_text
 
 # // Helpers
 DESC_LENGTH = 80
@@ -65,7 +64,9 @@ class Recipe(models.Model):
         if self.short_description:
             return short_text(self.short_description, length)
 
-        return short_text(strip_tags(self.content), length)
+        return short_text(
+            strip_tags(self.content) or strip_tags(self.content_source), length
+        )
 
     get_short_description.short_description = _("Краткое содержание")
 
@@ -243,7 +244,12 @@ class RecipePlan(models.Model):
         MealTime, models.CASCADE, verbose_name=_("Время приема пищи")
     )
     recipe = models.ForeignKey(
-        Recipe, models.SET_NULL, verbose_name=_("Рецепт"), null=True, blank=True, related_name="plans"
+        Recipe,
+        models.SET_NULL,
+        verbose_name=_("Рецепт"),
+        null=True,
+        blank=True,
+        related_name="plans",
     )
 
     class Meta:
@@ -254,9 +260,10 @@ class RecipePlan(models.Model):
     def __str__(self) -> str:
         return f"{self.week}.{self.day} {self.meal_time}"
 
-
     def gen_date(self) -> datetime:
-        date = datetime.strptime(' '.join(map(str, [self.week.year, self.week.week, self.day])), '%G %V %u')
+        date = datetime.strptime(
+            " ".join(map(str, [self.week.year, self.week.week, self.day])), "%G %V %u"
+        )
         return date
 
     def check_date(self):
@@ -265,6 +272,7 @@ class RecipePlan(models.Model):
         if not self.date or date != self.date:
             self.date = date
             self.save(update_fields=["date"])
+
 
 class ProductListWeek(models.Model):
     year = models.SmallIntegerField(_("Год"))

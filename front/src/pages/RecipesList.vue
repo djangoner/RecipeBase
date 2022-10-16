@@ -86,7 +86,7 @@
           </div>
           <div class="recipes-row row q-col-gutter-x-md q-col-gutter-y-sm">
             <div
-              class="col-xs-12 col-sm-6 col-md-4 col-lg-3"
+              class="col-xs-12 col-sm-6 col-md-4 col-lg-2"
               v-for="recipe of recipes.results"
               :key="recipe.id"
             >
@@ -134,7 +134,7 @@
         leave-active-class="animated slideOutRight"
       >
         <div
-          class="col-12 col-md-3 col-shrink"
+          class="col-12 col-md-3 col-lg-2 col-shrink"
           :class="$q.screen.gt.sm ? '' : 'order-first'"
           v-if="showFilters && recipes"
         >
@@ -206,7 +206,7 @@
                         <span>
                           {{ userReadable(user) }}
                         </span>
-                        <div class="row col-grow justify-between q-col-gutter-x-sm">
+                        <!-- <div class="row col-grow justify-between q-col-gutter-x-sm">
                           <div class="row items-center no-wrap">
                             <q-icon
                               v-if="rating.min === 0"
@@ -240,7 +240,7 @@
                             >
                             </q-icon>
                           </div>
-                        </div>
+                        </div> -->
                       </div>
                     </div>
 

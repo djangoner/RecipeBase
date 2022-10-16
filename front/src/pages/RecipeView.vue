@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <div class="row q-col-gutter-x-md q-mb-md">
+    <div class="row q-col-gutter-x-md q-pb-md">
       <div>
         <q-btn icon="arrow_back" size="sm" @click="$router.go(-1)">Назад</q-btn>
       </div>
@@ -15,20 +15,24 @@
       </div>
     </div>
 
-    <q-form @submit.prevent="saveRecipe()">
+    <q-form class="q-mt-md" @submit.prevent="saveRecipe()">
       <div class="row q-gutter-y-lg q-col-gutter-x-md" v-if="recipe">
         <div class="col-xs-12 col-md-6">
           <!--  col-lg-8 -->
           <q-card>
-            <q-card-section>
+            <q-card-section
+              class="flex column"
+              :class="dense ? 'q-gutter-y-sm' : 'q-gutter-y-md'"
+            >
               <!-- Recipe details -->
-              <div class="q-mt-none q-mb-md">
+              <div class="q-mt-none">
                 <q-input
                   v-model="recipe.title"
                   v-if="edit"
                   label="Название рецепта *"
                   :rules="[requiredRule]"
                   filled
+                  :dense="dense"
                 >
                   <template #after>
                     <q-btn v-if="exists" icon="edit" @click="toggleEdit()" flat>
@@ -56,12 +60,13 @@
               </div>
 
               <!-- Recipe source -->
-              <div class="q-my-md">
+              <div>
                 <q-input
                   v-model="recipe.source_link"
                   v-if="edit"
                   label="Источник рецепта"
                   filled
+                  :dense="dense"
                 >
                 </q-input>
                 <h6 class="text-center q-my-none" v-else>
@@ -102,8 +107,8 @@
                   :options="tagList"
                   option-label="title"
                   use-input
-                  options-dense
-                  dense
+                  :options-dense="dense"
+                  :dense="dense"
                   @new-value="addTag"
                 >
                   <template v-slot:no-option>
@@ -124,13 +129,14 @@
 
               <!-- Info -->
 
-              <div class="q-my-md">
+              <div>
                 <q-input
                   v-if="edit"
                   v-model.number="recipe.portion_count"
                   type="number"
                   label="Количество порций"
                   filled
+                  :dense="dense"
                 >
                 </q-input>
                 <h6 class="text-center q-my-none" v-else-if="recipe.portion_count">
@@ -138,7 +144,7 @@
                   Порций: {{ recipe.portion_count || '-' }}
                 </h6>
               </div>
-              <div class="q-my-md">
+              <div>
                 <q-input
                   v-if="edit"
                   v-model.number="recipe.cooking_time"
@@ -146,6 +152,7 @@
                   label="Время приготовления"
                   hint="Примерное время приготовления в минутах"
                   filled
+                  :dense="dense"
                 >
                 </q-input>
                 <h6 class="text-center q-my-none" v-else-if="recipe.cooking_time">
@@ -153,14 +160,16 @@
                   Время приготовления: {{ recipe.cooking_time || '-' }}
                 </h6>
               </div>
-              <div class="q-my-md" v-if="edit">
+              <div v-if="edit">
                 <q-select
                   v-model="recipe.is_archived"
                   :options="archivedOptions"
                   label="Статус"
+                  options-dense
                   map-options
                   emit-value
                   filled
+                  :dense="dense"
                 ></q-select>
               </div>
 
@@ -211,15 +220,7 @@
 
               <!-- Recipe content -->
 
-              <div class="q-pa-md q-gutter-sm" v-if="edit">
-                <q-input
-                  v-model="recipe.short_description"
-                  type="textarea"
-                  label="Короткое описание"
-                  hint="Показывается на карточке рецепта"
-                  :disable="!edit"
-                />
-
+              <div class="q-pa-md q-gutter-sm full-width" v-if="edit">
                 <h6 class="q-my-sm">Содержание (изначальное, источник)</h6>
                 <q-editor
                   v-model="recipe.content_source"
@@ -239,7 +240,7 @@
                 <q-input v-model="recipe.comment" type="textarea" label="Комментарий" />
               </div>
               <div v-else>
-                <div class="q-my-md" v-if="recipe.content_source">
+                <div v-if="recipe.content_source">
                   <span class="text-h6 q-my-sm text-primary"
                     >Содержание (изначальное)</span
                   >
@@ -247,13 +248,20 @@
                   <q-separator />
                 </div>
 
-                <div class="q-my-md" v-if="recipe.content">
+                <div v-if="recipe.content">
                   <span class="text-h6 q-my-sm text-primary">Содержание</span>
 
                   <div class="recipe-text" v-html="recipe.content"></div>
                   <q-separator />
                 </div>
-                <div class="q-my-md" v-if="recipe.comment">
+                <q-input
+                  v-model="recipe.short_description"
+                  type="textarea"
+                  label="Короткое описание"
+                  hint="Показывается на карточке рецепта"
+                  :readonly="!edit"
+                />
+                <div v-if="recipe.comment">
                   <span class="text-h6 q-my-sm text-primary">Комментарий</span>
 
                   <div class="recipe-text format-spaces" v-html="recipe.comment"></div>
@@ -284,7 +292,7 @@
             </q-card-section>
           </q-card>
         </div>
-        <div class="col-xs-12 col-md-6 q-gutter-y-sm">
+        <div class="col-xs-12 col-md-6 q-mt-sm q-gutter-y-sm">
           <!--  col-lg-4 -->
           <!-- Aside information -->
           <q-card class="q-mt-none position-sticky">
@@ -498,6 +506,7 @@ import RecipeImagesUpload from 'src/components/RecipeImagesUpload.vue';
 import recipeRating from 'src/components/RecipeRating.vue';
 
 let defaultRecipe = {
+  content_source: '',
   content: '',
   tags: [],
   images: [],
@@ -976,6 +985,9 @@ export default {
     },
     exists() {
       return Boolean(this.recipe?.id);
+    },
+    dense() {
+      return this.$q.screen.lt.sm;
     },
   },
 

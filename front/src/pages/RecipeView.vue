@@ -220,7 +220,7 @@
 
               <!-- Recipe content -->
 
-              <div class="q-pa-md q-gutter-sm full-width" v-if="edit">
+              <div class="q-py-md q-gutter-sm full-width" v-if="edit">
                 <h6 class="q-my-sm">Содержание (изначальное, источник)</h6>
                 <q-editor
                   v-model="recipe.content_source"
@@ -254,19 +254,19 @@
                   <div class="recipe-text" v-html="recipe.content"></div>
                   <q-separator />
                 </div>
-                <q-input
-                  v-model="recipe.short_description"
-                  type="textarea"
-                  label="Короткое описание"
-                  hint="Показывается на карточке рецепта"
-                  :readonly="!edit"
-                />
-                <div v-if="recipe.comment">
-                  <span class="text-h6 q-my-sm text-primary">Комментарий</span>
+              </div>
+              <q-input
+                v-model="recipe.short_description"
+                type="textarea"
+                label="Короткое описание"
+                hint="Показывается на карточке рецепта"
+                :readonly="!edit"
+              />
+              <div v-if="!edit && recipe.comment">
+                <span class="text-h6 q-my-sm text-primary">Комментарий</span>
 
-                  <div class="recipe-text format-spaces" v-html="recipe.comment"></div>
-                  <q-separator />
-                </div>
+                <div class="recipe-text format-spaces" v-html="recipe.comment"></div>
+                <q-separator />
               </div>
 
               <div class="flex justify-around">
@@ -987,7 +987,8 @@ export default {
       return Boolean(this.recipe?.id);
     },
     dense() {
-      return this.$q.screen.lt.sm;
+      // return this.$q.screen.lt.sm;
+      return true;
     },
   },
 

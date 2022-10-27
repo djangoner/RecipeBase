@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: Two vertical blocks -->
   <q-tooltip
     class="fit overflow-auto rounded-borders text-black"
     :class="$q.dark.isActive ? 'bg-grey-7' : 'bg-grey-3'"
@@ -62,10 +63,10 @@
       </div>
     </div>
 
-    <div v-if="recipe.comment">
+    <!-- <div v-if="recipe.comment">
       <span class="q-my-sm text-subtitle2">Комментарий:</span>
       <p style="white-space: pre-line">{{ recipe.comment }}</p>
-    </div>
+    </div> -->
   </q-tooltip>
 </template>
 

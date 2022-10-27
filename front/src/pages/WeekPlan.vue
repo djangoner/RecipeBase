@@ -19,6 +19,7 @@
               idx >= 6 ? 'bg-grey-3' : '',
               WeekDaysColors[idx],
               isToday(getDay(idx - 1)) ? 'shadow-5' : '',
+              `weekday-${idx}`,
             ]"
             style="min-height: 300px"
           >
@@ -47,6 +48,17 @@
                       <div class="col-auto">
                         <span class="text-subtitle1 q-my-none">
                           {{ mtime.title }}
+                          <q-icon
+                            v-if="recipe?.comment"
+                            name="notes"
+                            size="xs"
+                            color="primary"
+                          >
+                            <q-tooltip class="full-width">
+                              Комментарий:
+                              {{ recipe?.comment }}
+                            </q-tooltip>
+                          </q-icon>
                           <q-tooltip>
                             {{ mtime.title }} - {{ timeFormat(mtime.time) }}
                           </q-tooltip>
@@ -89,7 +101,10 @@
                           <q-tooltip>Открыть рецепт</q-tooltip>
                         </q-btn>
                       </div>
-                      <div class="flex flex-center col-auto" v-else>
+                      <div
+                        class="flex flex-center col-auto"
+                        v-else-if="!mtime.is_primary"
+                      >
                         <q-btn
                           @click="delPlan(idx, mtime)"
                           icon="close"
@@ -103,7 +118,7 @@
                       </div>
 
                       <recipe-card-tooltip
-                        v-if="recipe"
+                        v-if="recipe && $q.screen.gt.xs"
                         :recipe="recipe"
                       ></recipe-card-tooltip>
                     </div>

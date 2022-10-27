@@ -3,10 +3,19 @@ from rest_framework import serializers
 from users.models import User
 from users.serializers import ShortUserSerializer, UserSerializer
 
-from recipes.models import (Ingredient, MealTime, ProductListItem,
-                            ProductListWeek, Recipe, RecipeImage,
-                            RecipeIngredient, RecipePlan, RecipePlanWeek,
-                            RecipeRating, RecipeTag)
+from recipes.models import (
+    Ingredient,
+    MealTime,
+    ProductListItem,
+    ProductListWeek,
+    Recipe,
+    RecipeImage,
+    RecipeIngredient,
+    RecipePlan,
+    RecipePlanWeek,
+    RecipeRating,
+    RecipeTag,
+)
 from recipes.services.measurings import MEASURING_SHORT, MEASURING_TYPES
 
 
@@ -44,6 +53,7 @@ class RecipeIngredientSerializer(
 
     def get_amount_type_str(self, obj: RecipeIngredient):
         return amount_str(obj.amount_type)
+
 
 class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
 
@@ -97,16 +107,15 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
         self.fields["author"] = ShortUserSerializer()
         return super().to_representation(instance)
 
-
     def get_short_description(self, obj: Recipe):
         return obj.get_short_description()
-
 
     def get_last_cooked(self, obj: Recipe):
         return getattr(obj, "last_cooked", None)
 
     def get_cooked_times(self, obj: Recipe):
         return getattr(obj, "cooked_times", None)
+
 
 class RecipeShortSerializer(RecipeSerializer):
     tags = None
@@ -128,6 +137,11 @@ class MealTimeSerializer(serializers.ModelSerializer):
 class RecipePlanSerializer(serializers.ModelSerializer):
     # recipe = RecipeSerializer()
     # meal_time = MealTimeSerializer()
+    full = False
+
+    def __init__(self, *args, **kwargs) -> None:
+        self.full = kwargs.pop("full", False)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         model = RecipePlan
@@ -137,7 +151,10 @@ class RecipePlanSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        representation["recipe"] = RecipeShortSerializer(instance.recipe).data
+        if self.full:
+            representation["recipe"] = RecipeSerializer(instance.recipe).data
+        else:
+            representation["recipe"] = RecipeShortSerializer(instance.recipe).data
         representation["meal_time"] = MealTimeSerializer(instance.meal_time).data
 
         return representation
@@ -146,13 +163,12 @@ class RecipePlanSerializer(serializers.ModelSerializer):
 class RecipePlanWeekSerializer(
     WritableNestedModelSerializer, serializers.ModelSerializer
 ):
-    plans = RecipePlanSerializer(many=True)
+    plans = RecipePlanSerializer(many=True, full=True)
 
     class Meta:
         model = RecipePlanWeek
         fields = "__all__"
         depth = 1
-
 
 
 class RecipePlanWeekShortSerializer(
@@ -176,12 +192,13 @@ class ProductListItemSerializer(
     def get_amount_type_str(self, obj: RecipeIngredient):
         return amount_str(obj.amount_type)
 
-
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
         representation["ingredient"] = IngredientSerializer(instance.ingredient).data
-        representation["ingredients"] = RecipeIngredientWithRecipeSerializer(instance.ingredients, many=True).data
+        representation["ingredients"] = RecipeIngredientWithRecipeSerializer(
+            instance.ingredients, many=True
+        ).data
 
         return representation
 
@@ -196,7 +213,6 @@ class ProductListWeekSerializer(
         fields = "__all__"
         depth = 1
 
-class ProductListWeekShortSerializer(
-    ProductListWeekSerializer
-):
+
+class ProductListWeekShortSerializer(ProductListWeekSerializer):
     items = None

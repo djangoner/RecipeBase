@@ -1,3 +1,4 @@
+from datetime import datetime, date
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 from users.models import User
@@ -92,6 +93,7 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
     short_description = serializers.SerializerMethodField()
     last_cooked = serializers.SerializerMethodField()
     cooked_times = serializers.SerializerMethodField()
+    is_planned = serializers.SerializerMethodField()
     images = RecipeImageSerializer(many=True)
     tags = RecipeTagSerializer(many=True)
     ingredients = RecipeIngredientSerializer(many=True)
@@ -110,11 +112,22 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
     def get_short_description(self, obj: Recipe):
         return obj.get_short_description()
 
-    def get_last_cooked(self, obj: Recipe):
+    def get_last_cooked(self, obj: Recipe) -> date:
         return getattr(obj, "last_cooked", None)
 
     def get_cooked_times(self, obj: Recipe):
         return getattr(obj, "cooked_times", None)
+
+    def get_is_planned(self, obj: Recipe) -> bool:
+        last_cooked = self.get_last_cooked(obj)
+        if not last_cooked:
+            return False
+
+        now = datetime.now()
+        now_week = now.isocalendar()[1]
+
+        recipe_week = last_cooked.isocalendar()[1]
+        return now_week == recipe_week
 
 
 class RecipeShortSerializer(RecipeSerializer):

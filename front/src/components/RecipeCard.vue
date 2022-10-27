@@ -1,6 +1,7 @@
 <template>
   <q-card
-    class="cursor-pointer q-hoverable relative-position"
+    class="recipe-card cursor-pointer q-hoverable relative-position"
+    :class="[recipe.is_planned ? 'recipe-used' : '']"
     v-ripple
     @click="openRecipe(recipe.id)"
   >
@@ -22,11 +23,17 @@
             <div class="absolute-full flex flex-center bg-negative text-white">
               Ошибка загрузки
             </div>
-            <div class="absolute-bottom text-subtitle1 text-center">
+            <div
+              class="absolute-bottom text-subtitle1 text-center"
+              :class="[recipe.is_planned ? 'text-underline' : '']"
+            >
               {{ recipe.title }}
             </div>
           </template>
-          <div class="absolute-bottom text-subtitle1 text-center">
+          <div
+            class="absolute-bottom text-subtitle1 text-center"
+            :class="[recipe.is_planned ? 'text-underline' : '']"
+          >
             {{ recipe.title }}
           </div>
         </q-img>
@@ -67,4 +74,13 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.recipe-card {
+  &.recipe-used {
+    & > .q-focus-helper {
+      background: currentColor;
+      opacity: 0.1;
+    }
+  }
+}
+</style>

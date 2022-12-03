@@ -91,7 +91,7 @@
               :key="recipe.id"
             >
               <!-- Recipe card -->
-              <recipe-card :recipe="recipe"></recipe-card>
+              <recipe-card :recipe="recipe" @updateItem="loadRecipes()"></recipe-card>
             </div>
           </div>
 
@@ -376,6 +376,9 @@ export default {
     if (!this.users) {
       this.loadUsers();
     }
+    if (!this.meal_time) {
+      this.loadMealTime();
+    }
   },
 
   methods: {
@@ -504,6 +507,22 @@ export default {
           this.handleErrors(err, 'Ошибка загрузки ингредиентов');
         });
     },
+    loadMealTime() {
+      let payload = {
+        page_size: 1000,
+      };
+      // this.loading = true;
+
+      this.store
+        .loadMealTime(payload)
+        .then(() => {
+          // this.loading = false;
+        })
+        .catch((err) => {
+          // this.loading = false;
+          this.handleErrors(err, 'Ошибка загрузки времени приема пищи');
+        });
+    },
     loadAmountTypes() {
       let payload = {
         page_size: 1000,
@@ -628,6 +647,9 @@ export default {
     },
     amount_types() {
       return this.store.amount_types;
+    },
+    meal_time() {
+      return this.store.meal_time?.results;
     },
     compilation: {
       get() {

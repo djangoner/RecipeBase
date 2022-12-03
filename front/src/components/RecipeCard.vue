@@ -47,18 +47,21 @@
     <!-- Aside info tooltip -->
 
     <recipe-card-tooltip :recipe="recipe"></recipe-card-tooltip>
+    <recipe-menu :recipe="recipe" @updateItem="$emit('updateItem')"></recipe-menu>
   </q-card>
 </template>
 
 <script>
 import { date } from 'quasar';
 import recipeCardTooltip from 'components/RecipeCardTooltip.vue';
+import RecipeMenu from './RecipeMenu.vue';
 
 export default {
   props: {
     recipe: { required: true },
   },
-  components: { recipeCardTooltip },
+  emits: ['updateItem'],
+  components: { recipeCardTooltip, RecipeMenu },
   data() {
     return {};
   },

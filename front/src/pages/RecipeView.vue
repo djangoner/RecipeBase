@@ -56,6 +56,8 @@
                   <q-btn icon="edit" @click="toggleEdit()" flat>
                     <q-tooltip>Изменить рецепт</q-tooltip>
                   </q-btn>
+
+                  <recipe-menu :recipe="recipe" />
                 </h4>
               </div>
 
@@ -504,6 +506,7 @@ import { useBaseStore } from 'src/stores/base';
 import { date } from 'quasar';
 import RecipeImagesUpload from 'src/components/RecipeImagesUpload.vue';
 import recipeRating from 'src/components/RecipeRating.vue';
+import RecipeMenu from 'src/components/RecipeMenu.vue';
 
 let defaultRecipe = {
   content_source: '',
@@ -518,6 +521,7 @@ export default {
   components: {
     RecipeImagesUpload,
     recipeRating,
+    RecipeMenu,
   },
   data() {
     const store = useBaseStore();

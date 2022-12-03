@@ -54,7 +54,11 @@
                             size="xs"
                             color="primary"
                           >
-                            <q-tooltip class="full-width">
+                            <q-tooltip
+                              anchor="top middle"
+                              self="bottom middle"
+                              :offset="[10, 10]"
+                            >
                               Комментарий:
                               {{ recipe?.comment }}
                             </q-tooltip>

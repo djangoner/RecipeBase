@@ -15,11 +15,58 @@ export const useBaseStore = defineStore("base", {
     product_lists: null,
     product_list_items: null,
     product_list_item: null,
+    tasks: null,
+    task: null,
+    tasks_categories: null,
   }),
 
   getters: {},
 
   actions: {
+    // -- Essentials
+    async loadIngredients(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get("/ingredients/", { params: payload })
+          .then((resp) => {
+            this.ingredients = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadAmountTypes(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get("/ingredients/amount_types/", { params: payload })
+          .then((resp) => {
+            this.amount_types = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadMealTime(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get("meal_time", {
+            params: payload,
+          })
+          .then((resp) => {
+            this.meal_time = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    // -- Recipes
     async loadRecipes(payload) {
       return new Promise((resolve, reject) => {
         api
@@ -97,32 +144,8 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async loadIngredients(payload) {
-      return new Promise((resolve, reject) => {
-        api
-          .get("/ingredients/", { params: payload })
-          .then((resp) => {
-            this.ingredients = resp.data;
-            resolve(resp);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    },
-    async loadAmountTypes(payload) {
-      return new Promise((resolve, reject) => {
-        api
-          .get("/ingredients/amount_types/", { params: payload })
-          .then((resp) => {
-            this.amount_types = resp.data;
-            resolve(resp);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    },
+
+    // Week plans
     async loadWeekPlan(payload) {
       return new Promise((resolve, reject) => {
         api
@@ -166,6 +189,9 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
+
+    // -- Products
+
     async loadProductListWeek(payload, no_save) {
       return new Promise((resolve, reject) => {
         api
@@ -226,21 +252,7 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async loadMealTime(payload) {
-      return new Promise((resolve, reject) => {
-        api
-          .get("meal_time", {
-            params: payload,
-          })
-          .then((resp) => {
-            this.meal_time = resp.data;
-            resolve(resp);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    },
+
     async loadProductListItems(payload) {
       return new Promise((resolve, reject) => {
         api
@@ -303,6 +315,121 @@ export const useBaseStore = defineStore("base", {
       return new Promise((resolve, reject) => {
         api
           .delete(`/product_list_item/${payload.id}/`, payload)
+          .then((resp) => {
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    // Tasks
+
+    async loadTaskCategories(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get("/task_category/", { params: payload })
+          .then((resp) => {
+            this.tasks_categories = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async createTaskCategory(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .post("/task_category/", payload)
+          .then((resp) => {
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async updateTaskCategory(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .patch("/task_category/" + payload.id + "/", payload)
+          .then((resp) => {
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async deleteTaskCategory(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .delete("/task_category/" + payload.id + "/", payload)
+          .then((resp) => {
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadTasks(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get("/task/", { params: payload })
+          .then((resp) => {
+            this.tasks = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadTask(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get("/task/" + payload.id + "/", { params: payload })
+          .then((resp) => {
+            this.task = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async createTask(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .post("/task/", payload)
+          .then((resp) => {
+            this.task = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async updateTask(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .patch("/task/" + payload.id + "/", payload)
+          .then((resp) => {
+            this.task = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async deleteTask(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .delete("/task/" + payload.id + "/", payload)
           .then((resp) => {
             resolve(resp);
           })

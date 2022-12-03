@@ -57,8 +57,9 @@ INSTALLED_APPS = [
     "ckeditor",
     "django_cleanup.apps.CleanupConfig",
     # Custom
-    "recipes.apps.RecipesConfig",
     "users.apps.UsersConfig",
+    "recipes.apps.RecipesConfig",
+    "tasks.apps.TasksConfig",
 ]
 
 MIDDLEWARE = [

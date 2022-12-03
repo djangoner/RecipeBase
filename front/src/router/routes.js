@@ -56,6 +56,17 @@ const routes = [
           },
         },
       },
+      {
+        path: "/tasks",
+        component: () => import("pages/TasksList.vue"),
+        name: "tasks",
+        meta: {
+          requiresAuth: true,
+          query: {
+            task: "int:",
+          },
+        },
+      },
     ],
   },
 

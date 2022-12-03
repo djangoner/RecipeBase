@@ -62,6 +62,10 @@
           ></q-item-section>
           <q-item-section>Список продуктов</q-item-section>
         </q-item>
+        <q-item :to="{ name: 'tasks' }"
+          ><q-item-section avatar><q-icon name="list"></q-icon></q-item-section>
+          <q-item-section>Задачи</q-item-section>
+        </q-item>
 
         <q-item clickable @click="toggleDark">
           <q-item-section avatar>

@@ -21,10 +21,11 @@ from django.views.static import serve
 from recipes.urls import router as router_recipes
 from rest_framework import routers
 from users.urls import router as router_users
+from tasks.urls import router as router_tasks
 from users.views import CustomObtainAuthToken
 
 router = routers.DefaultRouter()
-router_include = [router_recipes, router_users]
+router_include = [router_recipes, router_users, router_tasks]
 
 for sub_router in router_include:
     router.registry.extend(sub_router.registry)

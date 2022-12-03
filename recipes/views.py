@@ -98,7 +98,8 @@ class RecipeFilterSet(filters.FilterSet):
             return qs
         elif value == "long_uncooked":
             qs = queryset.filter(
-                last_cooked__lt=timezone.now() - timezone.timedelta(weeks=4)
+                last_cooked__lt=timezone.now() - timezone.timedelta(weeks=4),
+                last_cooked__gt=timezone.now() - timezone.timedelta(weeks=8)
             )
             return qs
         elif value == "vlong_uncooked":

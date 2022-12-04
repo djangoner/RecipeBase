@@ -31,6 +31,11 @@
             label="Размер упаковки"
             filled
           ></q-input>
+          <q-input
+            v-model.number="ingredient.item_weight"
+            label="Вес одной штуки"
+            filled
+          ></q-input>
 
           <q-input v-model.number="ingredient.price" label="Цена (₺)" filled></q-input>
 

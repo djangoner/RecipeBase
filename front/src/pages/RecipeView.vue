@@ -314,6 +314,35 @@
                   <span><b>Автор:</b> {{ recipe?.author?.username || '?' }}</span>
                 </div>
               </q-expansion-item>
+              <q-expansion-item label="Цены">
+                <q-markup-table flat>
+                  <thead>
+                    <tr>
+                      <th class="text-right">Название</th>
+                      <th class="text-right">Цена (необх.)</th>
+                      <th class="text-right">Цена (полная)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="ing of recipe.ingredients" :key="ing.id">
+                      <td class="text-right">{{ ing.ingredient.title }}</td>
+                      <td class="text-right">
+                        {{ ing.price_part ? ing.price_part + '₺' : '-' }}
+                      </td>
+                      <td class="text-right">
+                        {{ ing.price_full ? ing.price_full + '₺' : '-' }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="text-right">
+                        <b>Итого</b>
+                      </td>
+                      <td class="text-right">{{ pricesPart || '0' }}₺</td>
+                      <td class="text-right">{{ pricesFull || '0' }}₺</td>
+                    </tr>
+                  </tbody>
+                </q-markup-table>
+              </q-expansion-item>
               <!-- Ingredients -->
               <div class="q-my-sm">
                 <div class="text-h6 text-center q-mb-sm">Игредиенты:</div>
@@ -993,6 +1022,12 @@ export default {
     dense() {
       // return this.$q.screen.lt.sm;
       return true;
+    },
+    pricesPart() {
+      return this.recipe.ingredients.map((i) => i.price_part).reduce((a, b) => a + b, 0);
+    },
+    pricesFull() {
+      return this.recipe.ingredients.map((i) => i.price_full).reduce((a, b) => a + b, 0);
     },
   },
 

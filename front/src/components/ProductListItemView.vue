@@ -90,6 +90,9 @@
               {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
             </q-item>
           </q-list>
+          <template v-if="item.price_full">
+            <div>Цена {{ item.price_full }}₺ (~{{ item.price_part }}₺ необходимо)</div>
+          </template>
         </div>
 
         <div class="q-my-md q-col-gutter-x-md row">

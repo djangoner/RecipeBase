@@ -25,16 +25,9 @@
         <!-- Product amount -->
         <template v-if="item.amount">
           (
-          <template v-if="item.ingredient.min_pack_size">
-            ~{{ Math.ceil(item.amount / item.ingredient.min_pack_size) }}
-            {{
-              intFormat(
-                Math.ceil(item.amount / item.ingredient.min_pack_size),
-                'упаковка',
-                'упаковки',
-                'упаковок'
-              )
-            }},
+          <template v-if="item.packs && item.ingredient.item_weight">
+            ~{{ Math.ceil(item.packs) }}
+            {{ intFormat(Math.ceil(item.packs), 'упаковка', 'упаковки', 'упаковок') }},
           </template>
           {{ item.amount }} {{ item.amount_type_str }}
           )
@@ -47,6 +40,7 @@
           </span>
           )
         </template>
+        <template v-if="item.price_full">, ~{{ item.price_full }}₺</template>
       </span>
       <!-- First column bottom row, date -->
       <span class="text-body2" :class="WeekDaysColors[item.day]">

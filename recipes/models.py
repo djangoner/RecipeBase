@@ -105,6 +105,11 @@ class Ingredient(models.Model):
         blank=True,
         help_text=_("Минимальный размер упаковки в граммах / миллилитрах"),
     )
+    item_weight = models.SmallIntegerField(
+        _("Вес одной шт"),
+        null=True,
+        blank=True,
+    )
     price = models.PositiveSmallIntegerField(_("Цена"), null=True, blank=True)
     need_buy = models.BooleanField(_("Требует покупки"), default=True)
     edible = models.BooleanField(_("Съедобный"), default=True)

@@ -10,14 +10,19 @@
 
   <!-- Flat design -->
   <template v-if="flat">
-    <task-item
-      :modelValue="task"
-      @update:modelValue="updateTask(task)"
-      @updateItem="$emit('updateItem', $event)"
-      @click="openChildren(task)"
-      v-for="task of tasks"
-      :key="task.id"
-    ></task-item>
+    <template v-if="tasks?.length > 0">
+      <task-item
+        :modelValue="task"
+        @update:modelValue="updateTask(task)"
+        @updateItem="$emit('updateItem', $event)"
+        @click="openChildren(task)"
+        v-for="task of tasks"
+        :key="task.id"
+      ></task-item>
+    </template>
+    <template v-else>
+      <h6 class="q-my-md">Нет категорий задач. Создайте новую ниже.</h6>
+    </template>
   </template>
 
   <!-- Sorted design -->

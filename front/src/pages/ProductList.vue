@@ -41,7 +41,7 @@
     <!-- Product list -->
     <q-list class="row column q-col-gutter-y-md q-py-md q-px-none q-px-sm-lg">
       <!-- New item -->
-      <div class="row items-center q-px-md q-mb-md">
+      <div class="row items-center q-px-md">
         <div class="col-grow">
           <q-input
             v-model="createItem"
@@ -59,9 +59,16 @@
         >
         </q-btn>
       </div>
+      <!-- Prices total -->
+      <span class="q-px-md q-pt-xs" v-if="pricesTotal"
+        >{{ pricesCompleted }}₺ / {{ pricesTotal }}₺
+
+        <q-tooltip>~ уже потрачено / стоимость продуктов</q-tooltip>
+      </span>
 
       <!-- Product list item -->
       <product-list-items
+        class="q-mt-md"
         v-model="listItems"
         :week="week"
         @openItem="openItem"
@@ -337,6 +344,9 @@ export default {
         this.$query.week = val.week;
       },
     },
+    listItemsRaw() {
+      return this.store.product_list?.items || [];
+    },
     listItems: {
       get() {
         let res = this.store.product_list?.items || [];
@@ -382,6 +392,15 @@ export default {
       set(val) {
         this.canSyncFlag = val;
       },
+    },
+    pricesCompleted() {
+      return this.listItemsRaw
+        .filter((i) => i.is_completed)
+        .map((i) => i.price_full)
+        .reduce((a, b) => a + b, 0);
+    },
+    pricesTotal() {
+      return this.listItemsRaw.map((i) => i.price_full).reduce((a, b) => a + b, 0);
     },
   },
   watch: {

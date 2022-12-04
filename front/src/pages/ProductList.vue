@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <week-select v-model="week" @update:modelValue="loadList()" />
+    <week-select v-model="week" @update:modelValue="onWeekUpd()" />
     <q-linear-progress
       :value="completedPrc"
       :indeterminate="saving"
@@ -137,6 +137,10 @@ export default {
     }
   },
   methods: {
+    onWeekUpd() {
+      this.loadList();
+      this.loadWeekPlan();
+    },
     loadList() {
       if (!this.week?.year || !this.week?.week) {
         return;
@@ -301,6 +305,26 @@ export default {
     selectItemByID(val) {
       let res = this.store.product_list?.items.filter((i) => i.id == val);
       this.viewItem = res[0];
+    },
+    loadWeekPlan() {
+      if (!this.week?.year || !this.week?.week) {
+        return;
+      }
+      let payload = {
+        year: this.week.year,
+        week: this.week.week,
+      };
+      this.loading = true;
+
+      this.store
+        .loadWeekPlan(payload)
+        .then(() => {
+          this.loading = false;
+        })
+        .catch((err) => {
+          this.loading = false;
+          this.handleErrors(err, 'Ошибка загрузки плана');
+        });
     },
   },
   computed: {

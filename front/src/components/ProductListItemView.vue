@@ -80,11 +80,13 @@
           <span class="text-subtitle-1">Используется в рецептах:</span>
           <q-list class="q-my-sm" dense>
             <q-item
+              class="items-center"
               v-for="ing of item.ingredients"
               :key="ing.id"
               clickable
               :to="{ name: 'recipe', params: { id: ing.recipe.id } }"
             >
+              <small>{{ getRecipeDays(ing.recipe)?.join(',') }}.&nbsp;</small>
               {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
             </q-item>
           </q-list>
@@ -200,7 +202,12 @@
 
 <script>
 import { useBaseStore } from 'src/stores/base';
-import { getDateOfISOWeek, WeekDays, getWeekNumber } from 'components/WeekSelect.vue';
+import {
+  getDateOfISOWeek,
+  WeekDays,
+  getWeekNumber,
+  WeekDaysShort,
+} from 'components/WeekSelect.vue';
 import { date } from 'quasar';
 
 let priorityOptions = [
@@ -315,10 +322,20 @@ export default {
       this.showMoveWeek = false;
       this.$emit('update:modelValue', false);
     },
+    getRecipeDays(recipe) {
+      if (!this.plan) {
+        return;
+      }
+      let plans = this.plan.plans.filter((p) => p.recipe.id == recipe?.id);
+      return plans.map((p) => WeekDaysShort[p.day]);
+    },
   },
   computed: {
     item() {
       return this.modelValue || {};
+    },
+    plan() {
+      return this.store.week_plan;
     },
     weeksList() {
       return this.store?.product_lists?.results;

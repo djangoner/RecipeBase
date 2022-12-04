@@ -120,7 +120,7 @@ export default {
 
       let payload = {
         title: this.addTask,
-        parent: parent?.id,
+        parent: this.isCategory ? null : parent?.id,
         category: parent?.category || parent?.id,
       };
       this.store
@@ -166,6 +166,9 @@ export default {
     },
     tasksCompleted() {
       return this.tasks.filter((t) => t.is_completed);
+    },
+    isCategory() {
+      return this.category?.is_completed === undefined;
     },
   },
   watch: {

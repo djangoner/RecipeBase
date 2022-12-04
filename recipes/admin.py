@@ -50,8 +50,8 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ["title", "min_pack_size", "need_buy"]
-    list_filter = ["need_buy"]
+    list_display = ["title", "min_pack_size", "price", "edible", "need_buy"]
+    list_filter = ["need_buy", "edible"]
     search_fields = ["title"]
 
 

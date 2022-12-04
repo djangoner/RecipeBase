@@ -61,7 +61,6 @@
         >
         </q-select>
         <q-select
-          v-if="!item.is_auto"
           v-model.number="item.priority"
           @update:modelValue="$emit('updateItem', item)"
           :options="priorityOptions"
@@ -91,28 +90,55 @@
           </q-list>
         </div>
 
-        <div class="q-my-md row">
-          <q-btn
-            @click="
-              showMoveWeek = true;
-              filterWeeks('', () => {});
-            "
-            v-if="isOnLine"
-            label="Перенести на неделю..."
-            icon="trending_flat"
-            size="sm"
-            color="primary"
-            dense
-          ></q-btn>
+        <div class="q-my-md q-col-gutter-x-md row">
+          <div>
+            <q-btn
+              @click="
+                showMoveWeek = true;
+                filterWeeks('', () => {});
+              "
+              v-if="isOnLine"
+              label="Перенести на неделю..."
+              icon="swap_horiz"
+              size="sm"
+              color="primary"
+              no-caps
+              dense
+            ></q-btn>
+          </div>
+          <div>
+            <q-btn
+              v-if="isOnLine"
+              :to="{ name: 'ingredient', params: { id: item.ingredient.id } }"
+              label="Открыть ингредиент"
+              icon="open_in_new"
+              size="sm"
+              color="primary"
+              no-caps
+              dense
+            ></q-btn>
+          </div>
         </div>
 
-        <!-- Ingredient description -->
+        <!-- Product list ingredient description -->
         <q-input
           v-model="item.description"
           @update:modelValue="$emit('updateItem', item)"
           :debounce="1000"
           type="textarea"
           label="Описание"
+          autogrow
+          input-style="max-height: 5rem;"
+        />
+
+        <!-- Ingredient description -->
+        <q-input
+          v-model="item.ingredient.description"
+          :debounce="1000"
+          type="textarea"
+          label="Описание ингредиента"
+          autogrow
+          readonly
         />
       </q-card-section>
 

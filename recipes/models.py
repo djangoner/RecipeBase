@@ -97,14 +97,17 @@ class RecipeImage(models.Model):
 
 
 class Ingredient(models.Model):
-    title = models.CharField(_("Название"), max_length=100)
+    title = models.CharField(_("Название"), unique=True, max_length=100)
+    description = models.TextField(_("Описание"), null=True, blank=True)
     min_pack_size = models.SmallIntegerField(
         _("Объём упаковки"),
         null=True,
         blank=True,
         help_text=_("Минимальный размер упаковки в граммах / миллилитрах"),
     )
+    price = models.PositiveSmallIntegerField(_("Цена"), null=True, blank=True)
     need_buy = models.BooleanField(_("Требует покупки"), default=True)
+    edible = models.BooleanField(_("Съедобный"), default=True)
 
     class Meta:
         ordering = ["title"]

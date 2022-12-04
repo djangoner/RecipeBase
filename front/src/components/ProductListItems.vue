@@ -57,6 +57,14 @@
         </q-icon>
         <q-icon v-else name="edit"></q-icon>
 
+        <q-icon
+          v-if="item.ingredient.description"
+          class="q-ml-xs"
+          color="primary"
+          size="xs"
+          name="notes"
+        ></q-icon>
+
         <q-badge class="q-mx-sm q-py-xs" :color="priorityColors[item.priority]">
           <q-icon name="flag" size="10px" />
           <span class="q-ml-xs">

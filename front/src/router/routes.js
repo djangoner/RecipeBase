@@ -67,6 +67,22 @@ const routes = [
           },
         },
       },
+      {
+        path: "/ingredients",
+        component: () => import("pages/IngredientsList.vue"),
+        name: "ingredients",
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        path: "/ingredients/:id",
+        component: () => import("pages/IngredientView.vue"),
+        name: "ingredient",
+        meta: {
+          requiresAuth: true,
+        },
+      },
     ],
   },
 

@@ -160,8 +160,10 @@ class RecipeImageViewset(viewsets.ModelViewSet):
 
 
 class IngredientViewset(viewsets.ModelViewSet):
-    queryset = Ingredient.objects.all()
+    queryset = Ingredient.objects.annotate(used_times=Count(F("recipe_ingredients"))).all()
     serializer_class = IngredientSerializer
+    ordering_fields = ["title", "min_pack_size", "price", "need_buy", "edible", "used_times"]
+    search_fields = ["title", "description"]
 
     @decorators.action(["GET"], detail=False)
     def amount_types(self, request):

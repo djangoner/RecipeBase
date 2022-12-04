@@ -37,10 +37,14 @@ class RecipeImageSerializer(WritableNestedModelSerializer, serializers.ModelSeri
 
 
 class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+    used_times = serializers.SerializerMethodField()
+
     class Meta:
         model = Ingredient
         fields = "__all__"
 
+    def get_used_times(self, obj: Recipe):
+        return getattr(obj, "used_times", None)
 
 class RecipeIngredientSerializer(
     WritableNestedModelSerializer, serializers.ModelSerializer

@@ -76,11 +76,11 @@
         <q-input
           v-model="category.description"
           @update:modelValue="updateItem()"
+          :debounce="2000"
           type="textarea"
           label="Описание задачи"
           autogrow
           input-style="max-height: 5rem;"
-          :debounce="2000"
         >
           <template #prepend>
             <q-icon name="notes" size="sm" />

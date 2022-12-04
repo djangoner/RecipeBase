@@ -1,12 +1,11 @@
-import { defineStore } from "pinia";
-import { api } from "src/boot/axios";
+import { defineStore } from 'pinia';
+import { api } from 'src/boot/axios';
 
-export const useBaseStore = defineStore("base", {
+export const useBaseStore = defineStore('base', {
   state: () => ({
     recipes: null,
     recipe: null,
     tags: null,
-    ingredients: null,
     amount_types: null,
     week_plan: null,
     week_plans: null,
@@ -15,6 +14,8 @@ export const useBaseStore = defineStore("base", {
     product_lists: null,
     product_list_items: null,
     product_list_item: null,
+    ingredients: null,
+    ingredient: null,
     tasks: null,
     task: null,
     tasks_categories: null,
@@ -24,23 +25,11 @@ export const useBaseStore = defineStore("base", {
 
   actions: {
     // -- Essentials
-    async loadIngredients(payload) {
-      return new Promise((resolve, reject) => {
-        api
-          .get("/ingredients/", { params: payload })
-          .then((resp) => {
-            this.ingredients = resp.data;
-            resolve(resp);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    },
+
     async loadAmountTypes(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/ingredients/amount_types/", { params: payload })
+          .get('/ingredients/amount_types/', { params: payload })
           .then((resp) => {
             this.amount_types = resp.data;
             resolve(resp);
@@ -53,7 +42,7 @@ export const useBaseStore = defineStore("base", {
     async loadMealTime(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("meal_time", {
+          .get('meal_time', {
             params: payload,
           })
           .then((resp) => {
@@ -70,7 +59,7 @@ export const useBaseStore = defineStore("base", {
     async loadRecipes(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/recipes/", { params: payload })
+          .get('/recipes/', { params: payload })
           .then((resp) => {
             this.recipes = resp.data;
             resolve(resp);
@@ -83,7 +72,7 @@ export const useBaseStore = defineStore("base", {
     async loadRecipe(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/recipes/" + payload.id + "/", { params: payload })
+          .get('/recipes/' + payload.id + '/', { params: payload })
           .then((resp) => {
             this.recipe = resp.data;
             resolve(resp);
@@ -96,7 +85,7 @@ export const useBaseStore = defineStore("base", {
     async saveRecipe(payload, id) {
       return new Promise((resolve, reject) => {
         api
-          .patch("/recipes/" + (payload.id || id) + "/", payload)
+          .patch('/recipes/' + (payload.id || id) + '/', payload)
           .then((resp) => {
             this.recipe = resp.data;
             resolve(resp);
@@ -109,7 +98,7 @@ export const useBaseStore = defineStore("base", {
     async createRecipe(payload) {
       return new Promise((resolve, reject) => {
         api
-          .post("/recipes/", payload)
+          .post('/recipes/', payload)
           .then((resp) => {
             this.recipe = resp.data;
             resolve(resp);
@@ -122,7 +111,7 @@ export const useBaseStore = defineStore("base", {
     async createRecipeImage(payload) {
       return new Promise((resolve, reject) => {
         api
-          .post("/recipe_images/", payload)
+          .post('/recipe_images/', payload)
           .then((resp) => {
             resolve(resp);
           })
@@ -134,7 +123,7 @@ export const useBaseStore = defineStore("base", {
     async loadTags(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/recipe_tags/", { params: payload })
+          .get('/recipe_tags/', { params: payload })
           .then((resp) => {
             this.tags = resp.data;
             resolve(resp);
@@ -256,7 +245,7 @@ export const useBaseStore = defineStore("base", {
     async loadProductListItems(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/product_list_item/", {
+          .get('/product_list_item/', {
             params: payload,
           })
           .then((resp) => {
@@ -323,12 +312,79 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
+    // Ingredients
+
+    async loadIngredients(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get('/ingredients/', { params: payload })
+          .then((resp) => {
+            this.ingredients = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadIngredient(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get('/ingredients/' + payload.id + '/', { params: payload })
+          .then((resp) => {
+            this.ingredient = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async saveIngredient(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .patch('/ingredients/' + payload.id + '/', payload)
+          .then((resp) => {
+            this.ingredient = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async createIngredient(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .post('/ingredients/', payload)
+          .then((resp) => {
+            this.ingredient = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async deleteIngredient(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .delete('/ingredients/' + payload.id + '/', payload)
+          .then((resp) => {
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
     // Tasks
 
     async loadTaskCategories(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/task_category/", { params: payload })
+          .get('/task_category/', { params: payload })
           .then((resp) => {
             this.tasks_categories = resp.data;
             resolve(resp);
@@ -341,7 +397,7 @@ export const useBaseStore = defineStore("base", {
     async createTaskCategory(payload) {
       return new Promise((resolve, reject) => {
         api
-          .post("/task_category/", payload)
+          .post('/task_category/', payload)
           .then((resp) => {
             resolve(resp);
           })
@@ -353,7 +409,7 @@ export const useBaseStore = defineStore("base", {
     async updateTaskCategory(payload) {
       return new Promise((resolve, reject) => {
         api
-          .patch("/task_category/" + payload.id + "/", payload)
+          .patch('/task_category/' + payload.id + '/', payload)
           .then((resp) => {
             resolve(resp);
           })
@@ -365,7 +421,7 @@ export const useBaseStore = defineStore("base", {
     async deleteTaskCategory(payload) {
       return new Promise((resolve, reject) => {
         api
-          .delete("/task_category/" + payload.id + "/", payload)
+          .delete('/task_category/' + payload.id + '/', payload)
           .then((resp) => {
             resolve(resp);
           })
@@ -377,7 +433,7 @@ export const useBaseStore = defineStore("base", {
     async loadTasks(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/task/", { params: payload })
+          .get('/task/', { params: payload })
           .then((resp) => {
             this.tasks = resp.data;
             resolve(resp);
@@ -390,7 +446,7 @@ export const useBaseStore = defineStore("base", {
     async loadTask(payload) {
       return new Promise((resolve, reject) => {
         api
-          .get("/task/" + payload.id + "/", { params: payload })
+          .get('/task/' + payload.id + '/', { params: payload })
           .then((resp) => {
             this.task = resp.data;
             resolve(resp);
@@ -403,7 +459,7 @@ export const useBaseStore = defineStore("base", {
     async createTask(payload) {
       return new Promise((resolve, reject) => {
         api
-          .post("/task/", payload)
+          .post('/task/', payload)
           .then((resp) => {
             this.task = resp.data;
             resolve(resp);
@@ -416,7 +472,7 @@ export const useBaseStore = defineStore("base", {
     async updateTask(payload) {
       return new Promise((resolve, reject) => {
         api
-          .patch("/task/" + payload.id + "/", payload)
+          .patch('/task/' + payload.id + '/', payload)
           .then((resp) => {
             this.task = resp.data;
             resolve(resp);
@@ -429,7 +485,7 @@ export const useBaseStore = defineStore("base", {
     async deleteTask(payload) {
       return new Promise((resolve, reject) => {
         api
-          .delete("/task/" + payload.id + "/", payload)
+          .delete('/task/' + payload.id + '/', payload)
           .then((resp) => {
             resolve(resp);
           })

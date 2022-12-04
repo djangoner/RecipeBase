@@ -57,15 +57,21 @@
           <q-item-section>План</q-item-section>
         </q-item>
         <q-item :to="{ name: 'product_list' }"
+          ><q-item-section avatar><q-icon name="shopping_cart"></q-icon></q-item-section>
+          <q-item-section>Список продуктов</q-item-section>
+        </q-item>
+        <q-item :to="{ name: 'ingredients' }"
           ><q-item-section avatar
             ><q-icon name="shopping_basket"></q-icon
           ></q-item-section>
-          <q-item-section>Список продуктов</q-item-section>
+          <q-item-section>Ингредиенты</q-item-section>
         </q-item>
         <q-item :to="{ name: 'tasks' }"
           ><q-item-section avatar><q-icon name="list"></q-icon></q-item-section>
           <q-item-section>Задачи</q-item-section>
         </q-item>
+
+        <q-separator />
 
         <q-item clickable @click="toggleDark">
           <q-item-section avatar>

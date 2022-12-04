@@ -97,6 +97,10 @@ module.exports = configure(function (/* ctx */) {
           target: "http://127.0.0.1:8000",
           changeOrigin: true,
         },
+        "/admin": {
+          target: "http://127.0.0.1:8000",
+          changeOrigin: true,
+        },
         "/media": {
           target: "http://127.0.0.1:8000",
           changeOrigin: true,
@@ -163,7 +167,7 @@ module.exports = configure(function (/* ctx */) {
 
     // https://v2.quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxMode: "generateSW", // or 'injectManifest'
+      workboxMode: "injectManifest", // or 'injectManifest'
       injectPwaMetaTags: true,
       swFilename: "sw.js",
       manifestFilename: "manifest.json",

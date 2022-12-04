@@ -276,7 +276,7 @@ export default {
     openItem(item) {
       console.debug('Open item: ', item);
       this.viewItem = item;
-      this.$query.task = item.id;
+      // this.$query.task = item.id;
     },
     createNewItem() {
       let payload = {
@@ -361,18 +361,12 @@ export default {
     },
   },
   watch: {
-    viewItem(val, oldVal) {
-      this.$query.task = val?.id;
-    },
-    '$query.task': {
-      handler(val, oldVal) {
-        this.$nextTick(() => {
-          if (val) {
-            this.selectItemByID(val);
-          } else {
-            this.viewItem = null;
-          }
-        });
+    viewItem: {
+      get() {
+        return this.$query.task;
+      },
+      set(val) {
+        this.$query.task = val;
       },
     },
     showCompleted(val, oldVal) {

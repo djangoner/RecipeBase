@@ -820,6 +820,11 @@ export default {
         return r;
       });
 
+      payload.ingredients.map((i) => {
+        i.ingredient = i.ingredient.id;
+        return i;
+      });
+
       console.debug('Saving recipe: ', payload);
 
       method(payload)

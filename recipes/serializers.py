@@ -76,9 +76,7 @@ class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSeria
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-
         representation["category"] = IngredientCategorySerializer(instance.category).data if instance.category else None
-
         return representation
 
     def get_used_times(self, obj: Recipe):
@@ -90,7 +88,8 @@ class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSeria
 class RecipeIngredientSerializer(
     WritableNestedModelSerializer, serializers.ModelSerializer
 ):
-    ingredient = IngredientSerializer()
+    # ingredient = IngredientSerializer()
+    ingredient = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount_type_str = serializers.SerializerMethodField()
     packs = serializers.SerializerMethodField()
     price_part = serializers.SerializerMethodField()
@@ -99,6 +98,11 @@ class RecipeIngredientSerializer(
     class Meta:
         model = RecipeIngredient
         fields = "__all__"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["ingredient"] = IngredientSerializer(instance.ingredient).data if instance.ingredient else None
+        return representation
 
     def get_amount_type_str(self, obj: RecipeIngredient):
         return amount_str(obj.amount_type)

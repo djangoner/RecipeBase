@@ -67,6 +67,14 @@ let tableColumns = [
     sortable: true,
   },
   {
+    name: 'category',
+    label: 'Категория',
+    align: 'left',
+    field: (row) => row?.category?.title || '-',
+    required: true,
+    sortable: true,
+  },
+  {
     name: 'min_pack_size',
     label: 'Размер упаковки',
     field: (row) => (row.min_pack_size ? row.min_pack_size : '-'),

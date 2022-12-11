@@ -33,6 +33,21 @@
           <q-tooltip v-if="!canSync">Нет данных для синхронизации</q-tooltip>
         </q-btn>
       </div>
+
+      <div>
+        <q-select
+          v-model="sortShop"
+          label="Сортировка по магазину"
+          :options="shops"
+          style="width: 150px"
+          option-label="title"
+          option-value="id"
+          map-options
+          emit-value
+          options-dense
+          clearable
+        ></q-select>
+      </div>
       <div>
         <q-toggle v-model="showCompleted" label="Показать завершенные" />
       </div>
@@ -67,13 +82,32 @@
       </span>
 
       <!-- Product list item -->
-      <product-list-items
-        class="q-mt-md"
-        v-model="listItems"
-        :week="week"
-        @openItem="openItem"
-        @updateItem="updateItem"
-      ></product-list-items>
+      <template v-if="sortShop">
+        <template v-for="cat of listItemsCategories" :key="cat.id">
+          <div v-if="cat.items.length > 0">
+            <div class="row q-mx-md">
+              <h5 class="q-my-sm text-primary">{{ cat.title }}</h5>
+            </div>
+
+            <product-list-items
+              :key="cat.id"
+              :listItems="cat.items"
+              :week="week"
+              @openItem="openItem"
+              @updateItem="updateItem"
+            ></product-list-items>
+          </div>
+        </template>
+      </template>
+      <template v-else>
+        <product-list-items
+          :key="0"
+          :listItems="listItems"
+          :week="week"
+          @openItem="openItem"
+          @updateItem="updateItem"
+        ></product-list-items>
+      </template>
     </q-list>
 
     <q-inner-loading :showing="loading"></q-inner-loading>
@@ -131,6 +165,8 @@ export default {
           caption: 'Рекомендуется выполнить синхронизацию изменений с сервером',
         });
       }
+      this.loadShops();
+      this.loadIngredientCategories();
       // if (this.$q.localStorage.has('local_productlist_updated')) {
       //   this.syncLocal();
       // }
@@ -140,6 +176,16 @@ export default {
       let local_cache = this.$q.localStorage.getItem('local_productlist');
       if (local_cache) {
         this.store.product_list = local_cache;
+      }
+
+      let shopsCache = this.$q.localStore.getItem('shops');
+      if (shopsCache) {
+        this.store.shops = shopsCache;
+      }
+
+      let ingCategoryCache = this.$q.localStore.getItem('ing_categories');
+      if (ingCategoryCache) {
+        this.store.ingredient_categories = ingCategoryCache;
       }
     }
   },
@@ -176,6 +222,28 @@ export default {
         .catch((err) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки списка продуктов');
+        });
+    },
+    loadShops() {
+      this.store
+        .loadShops({ page_size: 1000 })
+        .then((resp) => {
+          this.$q.localStorage.set('shops', resp.data);
+        })
+        .catch((err) => {
+          this.handleErrors('Ошибка загрузки списка магазинов');
+          this.store.shops = this.$q.localStorage.getItem('shops', null);
+        });
+    },
+    loadIngredientCategories() {
+      this.store
+        .loadIngredientCategories({ page_size: 1000 })
+        .then((resp) => {
+          this.$q.localStorage.set('ing_categories', resp.data);
+        })
+        .catch((err) => {
+          this.handleErrors('Ошибка загрузки списка категорий ингредиентоа');
+          this.store.shops = this.$q.localStorage.getItem('ing_categories', null);
         });
     },
     syncServer() {
@@ -344,6 +412,14 @@ export default {
         this.$query.week = val.week;
       },
     },
+    sortShop: {
+      get() {
+        return this.$query.shop || null;
+      },
+      set(val) {
+        this.$query.shop = val;
+      },
+    },
     listItemsRaw() {
       return this.store.product_list?.items || [];
     },
@@ -374,6 +450,68 @@ export default {
         }
         // this.store.product_list.items = newValue;
       },
+    },
+    listItemsCategories: {
+      get() {
+        if (!this.ingredientCategories) {
+          return [];
+        }
+        let categories = this.ingredientCategories.slice();
+
+        categories.forEach((item, idx) => (categories[idx].items = [])); // Add items array
+        categories = categories.reduce((obj, cur) => ({ ...obj, [cur.id]: cur }), {}); // Convert to object
+        let items = this.listItems.slice();
+        let itemsCompleted = items.filter((i) => i?.is_completed);
+        items = items.filter((i) => itemsCompleted.indexOf(i) === -1);
+
+        for (let [idx, item] of items.entries()) {
+          let catItem = item?.ingredient?.category;
+          if (!catItem) continue;
+          let cat = categories[catItem?.id];
+          if (!cat) continue;
+          cat.items.push(Object.assign({}, item));
+          delete items[idx];
+        }
+
+        categories[-1] = {
+          title: 'Остальные',
+          items: items.filter((i) => i).slice(),
+          custom: true,
+        };
+        categories[-2] = {
+          title: 'Завершенные',
+          items: itemsCompleted,
+          custom: true,
+        };
+        let categoriesList = [...Object.values(categories)];
+
+        categoriesList.sort((a, b) => {
+          if (a.custom) {
+            return 1;
+          } else if (b.custom) {
+            return -1;
+          }
+
+          let aSort = a.sortings.find((s) => s?.shop?.id == this.sortShop);
+          let bSort = b.sortings.find((s) => s?.shop?.id == this.sortShop);
+
+          return aSort?.num - bSort?.num;
+        });
+
+        return categoriesList;
+      },
+      set(newValue) {
+        if (this.store.product_list.items == newValue) {
+          return;
+        }
+        this.store.product_list.items = newValue;
+      },
+    },
+    shops() {
+      return this.store.shops?.results;
+    },
+    ingredientCategories() {
+      return this.store.ingredient_categories?.results;
     },
     completedPrc() {
       let itemsCompleted = this.store.product_list?.items.filter((i) => i.is_completed)

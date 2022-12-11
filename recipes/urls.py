@@ -28,6 +28,8 @@ from recipes.views import (
     RecipeRatingViewset,
     RecipeTagViewset,
     RecipeViewset,
+    ShopViewset,
+    IngredientCategoryViewset,
 )
 
 router = routers.DefaultRouter()
@@ -36,7 +38,9 @@ router.register("recipe_images", RecipeImageViewset)
 # router.register("recipe_ingredients", RecipeIngredientViewset)
 router.register("recipe_tags", RecipeTagViewset)
 router.register("ingredients", IngredientViewset)
+router.register("ingredient_category", IngredientCategoryViewset)
 router.register("meal_time", MealTimeViewset)
+router.register("shop", ShopViewset)
 router.register("recipe_plan", RecipePlanViewset)
 router.register("recipe_plan_week", RecipePlanWeekViewset)
 router.register("recipe_rating", RecipeRatingViewset)

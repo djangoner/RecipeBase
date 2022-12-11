@@ -51,6 +51,7 @@ const routes = [
           requiresAuth: true,
           query: {
             task: "int:",
+            shop: "int:",
             year: "int:",
             week: "int:",
           },

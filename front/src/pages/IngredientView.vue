@@ -26,6 +26,19 @@
             hide-bottom-space
             filled
           ></q-input>
+          <q-select
+            v-model.number="ingredient.category"
+            :options="ingredientCategories?.results"
+            label="Категория"
+            option-label="title"
+            option-value="id"
+            map-options
+            emit-value
+            options-dense
+            clearable
+            filled
+          >
+          </q-select>
           <q-input
             v-model.number="ingredient.min_pack_size"
             label="Размер упаковки"
@@ -103,6 +116,9 @@ export default {
   },
   mounted() {
     this.loadIngredient();
+    if (!this.ingredientCategories) {
+      this.loadIngredientCategories();
+    }
   },
   beforeRouteUpdate(to) {
     this.loadIngredient(to.params.id);
@@ -129,6 +145,22 @@ export default {
         .catch((err) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки ингредиента');
+        });
+    },
+    loadIngredientCategories() {
+      let payload = {
+        page_size: 1000,
+      };
+      // this.loading = true;
+
+      this.store
+        .loadIngredientCategories(payload)
+        .then(() => {
+          // this.loading = false;
+        })
+        .catch((err) => {
+          // this.loading = false;
+          this.handleErrors(err, 'Ошибка загрузки категорий ингредиентов');
         });
     },
     resetData() {
@@ -204,6 +236,9 @@ export default {
   computed: {
     ingredient() {
       return this.store.ingredient;
+    },
+    ingredientCategories() {
+      return this.store.ingredient_categories;
     },
     exists() {
       return Boolean(this.ingredient?.id);

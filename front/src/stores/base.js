@@ -19,6 +19,8 @@ export const useBaseStore = defineStore('base', {
     tasks: null,
     task: null,
     tasks_categories: null,
+    ingredient_categories: null,
+    shops: null,
   }),
 
   getters: {},
@@ -47,6 +49,36 @@ export const useBaseStore = defineStore('base', {
           })
           .then((resp) => {
             this.meal_time = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadIngredientCategories(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get('ingredient_category', {
+            params: payload,
+          })
+          .then((resp) => {
+            this.ingredient_categories = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadShops(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get('shop', {
+            params: payload,
+          })
+          .then((resp) => {
+            this.shops = resp.data;
             resolve(resp);
           })
           .catch((err) => {

@@ -17,6 +17,9 @@ from recipes.models import (
     RecipePlanWeek,
     RecipeRating,
     RecipeTag,
+    Shop,
+    IngredientCategory,
+    ShopIngredientCategory,
 )
 from recipes.services.measurings import MEASURING_SHORT, MEASURING_TYPES
 
@@ -37,15 +40,51 @@ class RecipeImageSerializer(WritableNestedModelSerializer, serializers.ModelSeri
         fields = "__all__"
 
 
+
+class ShopSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shop
+        exclude = ()
+
+class ShopShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shop
+        exclude = ('category_sort',)
+
+class ShopIngredientCategory(serializers.ModelSerializer):
+    shop = ShopShortSerializer()
+    class Meta:
+        model = ShopIngredientCategory
+        fields = "__all__"
+
+
+class IngredientCategorySerializer(serializers.ModelSerializer):
+    sortings = ShopIngredientCategory(many=True)
+    class Meta:
+        model = IngredientCategory
+        fields = "__all__"
+
+
 class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     used_times = serializers.SerializerMethodField()
+    # category = IngredientCategorySerializer(read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=IngredientCategory.objects.all())
 
     class Meta:
         model = Ingredient
         fields = "__all__"
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        representation["category"] = IngredientCategorySerializer(instance.category).data if instance.category else None
+
+        return representation
+
     def get_used_times(self, obj: Recipe):
         return getattr(obj, "used_times", None)
+
+
 
 
 class RecipeIngredientSerializer(
@@ -64,9 +103,12 @@ class RecipeIngredientSerializer(
     def get_amount_type_str(self, obj: RecipeIngredient):
         return amount_str(obj.amount_type)
 
-
     def get_packs(self, obj: RecipeIngredient):
-        if not(obj.amount and obj.ingredient and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)):
+        if not (
+            obj.amount
+            and obj.ingredient
+            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
+        ):
             return 0
 
         # if obj.amount_type == "items":
@@ -75,8 +117,8 @@ class RecipeIngredientSerializer(
 
     def get_price_part(self, obj: RecipeIngredient):
         if not (
-            obj.ingredient and
-            (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
+            obj.ingredient
+            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
             and obj.ingredient.price
             and obj.amount
         ):
@@ -91,8 +133,8 @@ class RecipeIngredientSerializer(
 
     def get_price_full(self, obj: RecipeIngredient):
         if not (
-            obj.ingredient and
-            (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
+            obj.ingredient
+            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
             and obj.ingredient.price
             and obj.amount
         ):
@@ -101,10 +143,12 @@ class RecipeIngredientSerializer(
         packs = math.ceil(self.get_packs(obj))
         if obj.amount_type == "items" and obj.ingredient.item_weight:
             return round(
-                obj.amount * obj.ingredient.item_weight / obj.ingredient.min_pack_size *obj.ingredient.price
+                obj.amount
+                * obj.ingredient.item_weight
+                / obj.ingredient.min_pack_size
+                * obj.ingredient.price
             )
         return round(packs * obj.ingredient.price)
-
 
 
 class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
@@ -270,7 +314,11 @@ class ProductListItemSerializer(
         return representation
 
     def get_packs(self, obj: RecipeIngredient):
-        if not(obj.amount and obj.ingredient and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)):
+        if not (
+            obj.amount
+            and obj.ingredient
+            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
+        ):
             return 0
 
         # if obj.amount_type == "items":
@@ -279,8 +327,8 @@ class ProductListItemSerializer(
 
     def get_price_part(self, obj: RecipeIngredient):
         if not (
-            obj.ingredient and
-            (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
+            obj.ingredient
+            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
             and obj.ingredient.price
             and obj.amount
         ):
@@ -295,8 +343,8 @@ class ProductListItemSerializer(
 
     def get_price_full(self, obj: RecipeIngredient):
         if not (
-            obj.ingredient and
-            (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
+            obj.ingredient
+            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
             and obj.ingredient.price
             and obj.amount
         ):
@@ -305,7 +353,10 @@ class ProductListItemSerializer(
         packs = math.ceil(self.get_packs(obj))
         if obj.amount_type == "items" and obj.ingredient.item_weight:
             return round(
-                obj.amount * obj.ingredient.item_weight / obj.ingredient.min_pack_size *obj.ingredient.price
+                obj.amount
+                * obj.ingredient.item_weight
+                / obj.ingredient.min_pack_size
+                * obj.ingredient.price
             )
         return round(packs * obj.ingredient.price)
 

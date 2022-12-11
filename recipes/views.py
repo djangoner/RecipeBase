@@ -11,7 +11,7 @@ from rest_framework import (decorators, exceptions, response, serializers,
 from recipes.models import (Ingredient, MealTime, ProductListItem,
                             ProductListWeek, Recipe, RecipeImage,
                             RecipeIngredient, RecipePlan, RecipePlanWeek,
-                            RecipeRating, RecipeTag)
+                            RecipeRating, RecipeTag, IngredientCategory, Shop)
 from recipes.serializers import (IngredientSerializer, MealTimeSerializer,
                                  ProductListItemSerializer,
                                  ProductListWeekSerializer,
@@ -22,7 +22,7 @@ from recipes.serializers import (IngredientSerializer, MealTimeSerializer,
                                  RecipePlanWeekSerializer,
                                  RecipePlanWeekShortSerializer,
                                  RecipeRatingSerializer, RecipeSerializer,
-                                 RecipeTagSerializer)
+                                 RecipeTagSerializer, IngredientCategorySerializer, ShopSerializer)
 from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_SHORT,
                                          MEASURING_TYPES)
 from recipes.services.plans import update_plan_week
@@ -160,7 +160,7 @@ class RecipeImageViewset(viewsets.ModelViewSet):
 
 
 class IngredientViewset(viewsets.ModelViewSet):
-    queryset = Ingredient.objects.annotate(used_times=Count(F("recipe_ingredients"))).all()
+    queryset = Ingredient.objects.prefetch_related("category").annotate(used_times=Count(F("recipe_ingredients"))).all()
     serializer_class = IngredientSerializer
     ordering_fields = ["title", "min_pack_size", "price", "need_buy", "edible", "used_times"]
     search_fields = ["title", "description"]
@@ -329,3 +329,11 @@ class ProductListItemViewset(viewsets.ModelViewSet):
         week_plan.save(update_fields=["week"])
 
         return self.retrieve(request)
+
+class IngredientCategoryViewset(viewsets.ModelViewSet):
+    queryset = IngredientCategory.objects.all()
+    serializer_class = IngredientCategorySerializer
+
+class ShopViewset(viewsets.ModelViewSet):
+    queryset = Shop.objects.all()
+    serializer_class = ShopSerializer

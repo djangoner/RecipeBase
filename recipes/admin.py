@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.db.models import Count, F
 
-from recipes.models import (Ingredient, MealTime, ProductListItem,
-                            ProductListWeek, Recipe, RecipeImage,
-                            RecipeIngredient, RecipePlan, RecipePlanWeek,
-                            RecipeRating, RecipeTag)
+from recipes.models import (Ingredient, IngredientCategory, MealTime,
+                            ProductListItem, ProductListWeek, Recipe,
+                            RecipeImage, RecipeIngredient, RecipePlan,
+                            RecipePlanWeek, RecipeRating, RecipeTag, Shop,
+                            ShopIngredientCategory)
 
 
 class RecipeIngredientsInline(admin.StackedInline):
@@ -30,6 +31,12 @@ class RecipeRatingInline(admin.TabularInline):
     autocomplete_fields = ["recipe", "user"]
 
 
+class ShopIngredientCategoryInline(admin.TabularInline):
+    extra = 0
+    model = ShopIngredientCategory
+    # autocomplete_fields = ["shop", "category"]
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ["title", "created", "edited", "get_cooked_times"]
@@ -50,8 +57,9 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ["title", "min_pack_size", "price", "edible", "need_buy"]
-    list_filter = ["need_buy", "edible"]
+    list_display = ["title", "category", "min_pack_size", "price", "edible", "need_buy"]
+    list_filter = ["need_buy", "edible", "category"]
+    autocomplete_fields = ['category']
     search_fields = ["title"]
 
 
@@ -64,7 +72,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 
 @admin.register(RecipeImage)
 class RecipeImageAdmin(admin.ModelAdmin):
-    list_display = ["id","image", "title"]
+    list_display = ["id", "image", "title"]
     search_fields = ["image", "title"]
 
 
@@ -125,3 +133,16 @@ class ProductListItemAdmin(admin.ModelAdmin):
     search_fields = ["week__year", "week__week", "title", "description"]
     autocomplete_fields = ("author", "assigned", "week", "ingredient")
     filter_horizontal = ("ingredients",)
+
+
+@admin.register(Shop)
+class ShopAdmin(admin.ModelAdmin):
+    list_display = ("id", "title")
+    search_fields = ["title"]
+    inlines = [ShopIngredientCategoryInline]
+
+
+@admin.register(IngredientCategory)
+class IngredientCategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "icon")
+    search_fields = ['title']

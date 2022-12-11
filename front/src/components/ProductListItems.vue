@@ -104,12 +104,12 @@ let priorityColors = {
 };
 
 export default {
-  props: { modelValue: { required: true }, week: {} },
+  props: { listItems: { required: true }, week: {} },
   emits: ['openItem', 'updateItem', 'update:modelValue'],
 
   data() {
     return {
-      listItems: null,
+      // listItems: null,
       WeekDays,
       WeekDaysColors,
       priorityColors,
@@ -148,7 +148,7 @@ export default {
       return isChanged;
     },
     itemCls(item) {
-      if (item.is_completed) {
+      if (item?.is_completed) {
         return this.$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-4';
       }
     },
@@ -159,18 +159,18 @@ export default {
     },
   },
   watch: {
-    listItems(val, oldVal) {
-      if (val == oldVal) {
-        return;
-      }
-      this.$emit('update:modelValue', val);
-    },
-    modelValue(val, oldVal) {
-      if (val == oldVal) {
-        return;
-      }
-      this.listItems = val;
-    },
+    // listItems(val, oldVal) {
+    //   if (val == oldVal) {
+    //     return;
+    //   }
+    //   this.$emit('update:modelValue', val);
+    // },
+    // modelValue(val, oldVal) {
+    //   if (val == oldVal) {
+    //     return;
+    //   }
+    //   this.listItems = val;
+    // },
   },
 };
 </script>

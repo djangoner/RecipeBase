@@ -99,6 +99,14 @@ class RecipeImage(models.Model):
 class Ingredient(models.Model):
     title = models.CharField(_("Название"), unique=True, max_length=100)
     description = models.TextField(_("Описание"), null=True, blank=True)
+    category = models.ForeignKey(
+        'IngredientCategory',
+        models.CASCADE,
+        related_name="recipe_ingredients",
+        verbose_name=_("Категория"),
+        blank=True,
+        null=True,
+    )
     min_pack_size = models.SmallIntegerField(
         _("Объём упаковки"),
         null=True,
@@ -377,3 +385,36 @@ class ProductListItem(models.Model):
 
     def __str__(self) -> str:
         return f"{self.week}.{self.day} {self.title}"
+
+class Shop(models.Model):
+    title = models.CharField(_("Название"), max_length=100)
+    category_sort = models.ManyToManyField('IngredientCategory', through='ShopIngredientCategory', blank=True)
+
+    class Meta:
+        verbose_name = _("Магазин")
+        verbose_name_plural = _("Магазины")
+
+    def __str__(self) -> str:
+        return self.title
+
+
+class IngredientCategory(models.Model):
+    title = models.CharField(_("Название"), max_length=100)
+    icon = models.CharField(_("Иконка"), max_length=100, blank=True, null=True)
+
+    class Meta:
+        verbose_name = _("Категория ингредиента")
+        verbose_name_plural = _("Категории ингредиентов")
+
+    def __str__(self) -> str:
+        return self.title
+
+class ShopIngredientCategory(models.Model):
+    shop = models.ForeignKey(Shop, models.CASCADE, verbose_name=_("Магазин"))
+    category = models.ForeignKey(IngredientCategory, models.CASCADE, related_name='sortings', verbose_name=_("Категория"))
+    num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
+
+    class Meta:
+        ordering = [F('num').asc(nulls_last=True)]
+        verbose_name = _("Магазин сортировка ингредианта")
+        verbose_name_plural = _("Магазин сортировка ингредиента")

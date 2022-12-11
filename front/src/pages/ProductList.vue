@@ -86,7 +86,19 @@
         <template v-for="cat of listItemsCategories" :key="cat.id">
           <div v-if="cat.items.length > 0">
             <div class="row q-mx-md">
-              <h5 class="q-my-sm text-primary">{{ cat.title }}</h5>
+              <h5
+                class="q-my-sm"
+                :class="categoryHasShop(cat) ? 'text-primary' : 'text-orange'"
+              >
+                {{ cat.title }}
+                <q-tooltip v-if="cat.sortings">
+                  <b>Магазины:</b>
+                  <div v-for="sort of cat.sortings" :key="sort.id">
+                    - {{ sort.shop.title }}
+                  </div>
+                  <div v-if="cat.sortings.length < 1">Нет магазинов</div>
+                </q-tooltip>
+              </h5>
             </div>
 
             <product-list-items
@@ -400,6 +412,15 @@ export default {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки плана');
         });
+    },
+    categoryHasShop(cat) {
+      if (cat.custom) {
+        return true;
+      }
+      if (!cat.sortings) {
+        return;
+      }
+      return cat.sortings.find((s) => s.shop.id == this.sortShop);
     },
   },
   computed: {

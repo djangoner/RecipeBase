@@ -30,9 +30,11 @@ from recipes.views import (
     RecipeViewset,
     ShopViewset,
     IngredientCategoryViewset,
+    StatsViewset,
 )
 
 router = routers.DefaultRouter()
+router.register("stats", StatsViewset, basename="stats")
 router.register("recipes", RecipeViewset)
 router.register("recipe_images", RecipeImageViewset)
 # router.register("recipe_ingredients", RecipeIngredientViewset)

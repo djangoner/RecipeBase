@@ -3,6 +3,7 @@ import { api } from 'src/boot/axios';
 
 export const useBaseStore = defineStore('base', {
   state: () => ({
+    stats: null,
     recipes: null,
     recipe: null,
     tags: null,
@@ -28,6 +29,19 @@ export const useBaseStore = defineStore('base', {
   actions: {
     // -- Essentials
 
+    async loadStats(payload) {
+      return new Promise((resolve, reject) => {
+        api
+          .get('/stats/', { params: payload })
+          .then((resp) => {
+            this.stats = resp.data;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
     async loadAmountTypes(payload) {
       return new Promise((resolve, reject) => {
         api

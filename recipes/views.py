@@ -5,26 +5,46 @@ from django.db.models import Count, F, Func, Max, Prefetch, Q, Value
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django_filters import rest_framework as filters
-from rest_framework import (decorators, exceptions, response, serializers,
-                            viewsets)
+from rest_framework import decorators, exceptions, response, serializers, viewsets
 
-from recipes.models import (Ingredient, MealTime, ProductListItem,
-                            ProductListWeek, Recipe, RecipeImage,
-                            RecipeIngredient, RecipePlan, RecipePlanWeek,
-                            RecipeRating, RecipeTag, IngredientCategory, Shop)
-from recipes.serializers import (IngredientSerializer, MealTimeSerializer,
-                                 ProductListItemSerializer,
-                                 ProductListWeekSerializer,
-                                 ProductListWeekShortSerializer,
-                                 RecipeImageSerializer,
-                                 RecipeIngredientSerializer,
-                                 RecipePlanSerializer,
-                                 RecipePlanWeekSerializer,
-                                 RecipePlanWeekShortSerializer,
-                                 RecipeRatingSerializer, RecipeSerializer,
-                                 RecipeTagSerializer, IngredientCategorySerializer, ShopSerializer)
-from recipes.services.measurings import (MEASURING_CONVERT, MEASURING_SHORT,
-                                         MEASURING_TYPES)
+from recipes.models import (
+    Ingredient,
+    MealTime,
+    ProductListItem,
+    ProductListWeek,
+    Recipe,
+    RecipeImage,
+    RecipeIngredient,
+    RecipePlan,
+    RecipePlanWeek,
+    RecipeRating,
+    RecipeTag,
+    IngredientCategory,
+    Shop,
+)
+from tasks.models import Task
+from recipes.serializers import (
+    IngredientSerializer,
+    MealTimeSerializer,
+    ProductListItemSerializer,
+    ProductListWeekSerializer,
+    ProductListWeekShortSerializer,
+    RecipeImageSerializer,
+    RecipeIngredientSerializer,
+    RecipePlanSerializer,
+    RecipePlanWeekSerializer,
+    RecipePlanWeekShortSerializer,
+    RecipeRatingSerializer,
+    RecipeSerializer,
+    RecipeTagSerializer,
+    IngredientCategorySerializer,
+    ShopSerializer,
+)
+from recipes.services.measurings import (
+    MEASURING_CONVERT,
+    MEASURING_SHORT,
+    MEASURING_TYPES,
+)
 from recipes.services.plans import update_plan_week
 
 
@@ -99,7 +119,7 @@ class RecipeFilterSet(filters.FilterSet):
         elif value == "long_uncooked":
             qs = queryset.filter(
                 last_cooked__lt=timezone.now() - timezone.timedelta(weeks=4),
-                last_cooked__gt=timezone.now() - timezone.timedelta(weeks=8)
+                last_cooked__gt=timezone.now() - timezone.timedelta(weeks=8),
             )
             return qs
         elif value == "vlong_uncooked":
@@ -114,7 +134,10 @@ class RecipeFilterSet(filters.FilterSet):
             week_firstday = timezone.now().today()
             while week_firstday.weekday() > 0:
                 week_firstday = week_firstday - timezone.timedelta(days=1)
-            qs = queryset.filter(Q(last_cooked=None) | (Q(last_cooked__gt=week_firstday.date()) & Q(cooked_times=1)))
+            qs = queryset.filter(
+                Q(last_cooked=None)
+                | (Q(last_cooked__gt=week_firstday.date()) & Q(cooked_times=1))
+            )
             return qs
         else:
             logging.warning(f"Unknown compilation: '{value}'")
@@ -160,9 +183,20 @@ class RecipeImageViewset(viewsets.ModelViewSet):
 
 
 class IngredientViewset(viewsets.ModelViewSet):
-    queryset = Ingredient.objects.prefetch_related("category").annotate(used_times=Count(F("recipe_ingredients"))).all()
+    queryset = (
+        Ingredient.objects.prefetch_related("category")
+        .annotate(used_times=Count(F("recipe_ingredients")))
+        .all()
+    )
     serializer_class = IngredientSerializer
-    ordering_fields = ["title", "min_pack_size", "price", "need_buy", "edible", "used_times"]
+    ordering_fields = [
+        "title",
+        "min_pack_size",
+        "price",
+        "need_buy",
+        "edible",
+        "used_times",
+    ]
     search_fields = ["title", "description"]
 
     @decorators.action(["GET"], detail=False)
@@ -330,10 +364,23 @@ class ProductListItemViewset(viewsets.ModelViewSet):
 
         return self.retrieve(request)
 
+
 class IngredientCategoryViewset(viewsets.ModelViewSet):
     queryset = IngredientCategory.objects.all()
     serializer_class = IngredientCategorySerializer
 
+
 class ShopViewset(viewsets.ModelViewSet):
     queryset = Shop.objects.all()
     serializer_class = ShopSerializer
+
+
+class StatsViewset(viewsets.ViewSet):
+    def list(self, request):
+        data = {
+            "recipes": Recipe.objects.filter(is_archived=False).count(),
+            "ingredients": Ingredient.objects.count(),
+            "plans": RecipePlanWeek.objects.filter(plans__gte=1).distinct().count(),
+            "tasks": Task.objects.count(),
+        }
+        return response.Response(data)

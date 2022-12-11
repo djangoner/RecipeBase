@@ -190,12 +190,12 @@ export default {
         this.store.product_list = local_cache;
       }
 
-      let shopsCache = this.$q.localStore.getItem('shops');
+      let shopsCache = this.$q.localStorage.getItem('shops');
       if (shopsCache) {
         this.store.shops = shopsCache;
       }
 
-      let ingCategoryCache = this.$q.localStore.getItem('ing_categories');
+      let ingCategoryCache = this.$q.localStorage.getItem('ing_categories');
       if (ingCategoryCache) {
         this.store.ingredient_categories = ingCategoryCache;
       }

@@ -320,7 +320,9 @@ export default {
       }
       let payload = Object.assign({}, item);
 
-      delete payload['ingredient'];
+      if (payload.ingredient) {
+        payload.ingredient = payload.ingredient?.id || payload.ingredient;
+      }
       delete payload['ingredients'];
 
       this.saving = true;

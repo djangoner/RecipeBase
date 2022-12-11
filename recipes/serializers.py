@@ -292,6 +292,7 @@ class RecipePlanWeekShortSerializer(
 class ProductListItemSerializer(
     WritableNestedModelSerializer, serializers.ModelSerializer
 ):
+    ingredient = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all(), required=False, allow_null=True, default=None)
     amount_type_str = serializers.SerializerMethodField()
     week = serializers.PrimaryKeyRelatedField(queryset=ProductListWeek.objects.all())
     packs = serializers.SerializerMethodField()
@@ -310,7 +311,7 @@ class ProductListItemSerializer(
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        representation["ingredient"] = IngredientSerializer(instance.ingredient).data
+        representation["ingredient"] = IngredientSerializer(instance.ingredient).data if instance.ingredient else None
         representation["ingredients"] = RecipeIngredientWithRecipeSerializer(
             instance.ingredients, many=True
         ).data

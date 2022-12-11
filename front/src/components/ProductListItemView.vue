@@ -25,6 +25,7 @@
               @update:modelValue="$emit('updateItem', item)"
               class="col"
               :debounce="500"
+              :readonly="item.is_auto"
               dense
             />
 
@@ -61,6 +62,22 @@
         >
         </q-select>
         <q-select
+          v-model="item.ingredient"
+          @update:modelValue="$emit('updateItem', item)"
+          label="Ингредиент"
+          @filter="filterIngredients"
+          :options="ingredients"
+          :readonly="item.is_auto"
+          option-label="title"
+          option-value="id"
+          map-options
+          dense
+          options-dense
+          use-input
+          clearable
+        >
+        </q-select>
+        <q-select
           v-model.number="item.priority"
           @update:modelValue="$emit('updateItem', item)"
           :options="priorityOptions"
@@ -73,6 +90,11 @@
           options-dense
           use-input
         >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey"> Нет результатов </q-item-section>
+            </q-item>
+          </template>
         </q-select>
 
         <!-- Used in recipes -->
@@ -113,8 +135,8 @@
           </div>
           <div>
             <q-btn
-              v-if="isOnLine"
-              :to="{ name: 'ingredient', params: { id: item.ingredient.id } }"
+              v-if="isOnLine && item?.ingredient"
+              :to="{ name: 'ingredient', params: { id: item?.ingredient?.id } }"
               label="Открыть ингредиент"
               icon="open_in_new"
               size="sm"
@@ -138,7 +160,8 @@
 
         <!-- Ingredient description -->
         <q-input
-          v-model="item.ingredient.description"
+          v-if="item.ingredient"
+          :modelValue="item?.ingredient?.description"
           :debounce="1000"
           type="textarea"
           label="Описание ингредиента"
@@ -291,6 +314,30 @@ export default {
           update(() => {});
         });
     },
+    loadIngredients(search) {
+      return new Promise((resolve, reject) => {
+        let payload = {
+          page_size: 1000,
+          search: search,
+        };
+        this.store
+          .loadIngredients(payload)
+          .then(() => {
+            resolve();
+            // this.loading = false;
+          })
+          .catch((err) => {
+            reject(err);
+            // this.loading = false;
+            this.handleErrors(err, 'Ошибка загрузки ингредиентов');
+          });
+      });
+    },
+    filterIngredients(val, update, abort) {
+      this.loadIngredients(val).then(() => {
+        update(() => {});
+      });
+    },
     moveWeekDelta(delta) {
       let year = this.week.year.valueOf();
       let week = this.week.week.valueOf();
@@ -339,6 +386,9 @@ export default {
     },
     plan() {
       return this.store.week_plan;
+    },
+    ingredients() {
+      return this.store.ingredients?.results;
     },
     weeksList() {
       return this.store?.product_lists?.results;

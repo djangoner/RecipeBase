@@ -52,7 +52,7 @@
         <q-icon v-else name="edit"></q-icon>
 
         <q-icon
-          v-if="item.ingredient.description"
+          v-if="item?.ingredient?.description"
           class="q-ml-xs"
           color="primary"
           size="xs"

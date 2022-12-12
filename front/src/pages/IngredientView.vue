@@ -173,6 +173,8 @@ export default {
       let isCreating = !this.exists;
       let method = isCreating ? this.store.createIngredient : this.store.saveIngredient;
 
+      payload.category = payload.category?.id || payload.category;
+
       method(payload)
         .then((resp) => {
           this.saving = false;

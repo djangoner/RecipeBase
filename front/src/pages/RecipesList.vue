@@ -189,6 +189,39 @@
                   ></q-select>
                 </div>
                 <div class="q-my-sm">
+                  <h6 class="q-my-sm text-subtitle2 text-bold">Ингредиенты</h6>
+                  <q-select
+                    v-model="filters.ingredients_include"
+                    label="Включить"
+                    @filter="filterIngredientsInclude"
+                    :options="ingredientList"
+                    option-label="title"
+                    option-value="id"
+                    use-input
+                    multiple
+                    use-chips
+                    map-options
+                    emit-value
+                    options-dense
+                    dense
+                  ></q-select>
+                  <q-select
+                    v-model="filters.ingredients_exclude"
+                    label="Исключить"
+                    @filter="filterIngredientsExclude"
+                    :options="ingredientList"
+                    option-label="title"
+                    option-value="id"
+                    use-input
+                    multiple
+                    use-chips
+                    map-options
+                    emit-value
+                    options-dense
+                    dense
+                  ></q-select>
+                </div>
+                <div class="q-my-sm">
                   <h6 class="q-my-sm text-subtitle2 text-bold">Рейтинг</h6>
                 </div>
 
@@ -339,6 +372,8 @@ export default {
       cooking_time: { min: 5, max: 120 },
       tags_include: [],
       tags_exclude: [],
+      ingredients_include: [],
+      ingredients_exclude: [],
       ratings: {},
     };
 
@@ -350,6 +385,7 @@ export default {
       page_size: 20,
       loading: false,
       tagList: null,
+      ingredientList: null,
       ordering: '-created',
       tablePagination: {
         rowsPerPage: 20,
@@ -379,6 +415,9 @@ export default {
     if (!this.meal_time) {
       this.loadMealTime();
     }
+    if (!this.ingredients) {
+      this.loadIngredients();
+    }
   },
 
   methods: {
@@ -400,16 +439,34 @@ export default {
           payload.append('ordering', this.ordering);
           this.tablePagination.sortBy = this.ordering;
         }
-
+        // Compilation
         if (this.compilation) {
           payload.append('compilation', this.compilation);
         }
-
+        // Tags
         if (this.filters.tags_include) {
           for (const tag of this.filters.tags_include) {
             payload.append('tags_include', tag);
           }
         }
+        if (this.filters.tags_exclude) {
+          for (const tag of this.filters.tags_exclude) {
+            payload.append('tags_exclude', tag);
+          }
+        }
+        // Tags
+        if (this.filters.ingredients_include) {
+          for (const ingredient of this.filters.ingredients_include) {
+            payload.append('ingredients_include', ingredient);
+          }
+        }
+        if (this.filters.ingredients_exclude) {
+          for (const ingredient of this.filters.ingredients_exclude) {
+            payload.append('ingredients_exclude', ingredient);
+          }
+        }
+
+        // Cooking time
         if (this.filters.cooking_time) {
           if (this.filters.cooking_time.min > 5) {
             payload.append('cooking_time_gt', this.filters.cooking_time.min);
@@ -418,11 +475,8 @@ export default {
             payload.append('cooking_time_lt', this.filters.cooking_time.max);
           }
         }
-        if (this.filters.tags_exclude) {
-          for (const tag of this.filters.tags_exclude) {
-            payload.append('tags_exclude', tag);
-          }
-        }
+
+        // Ratings
         if (this.filters.ratings) {
           let r = [];
           for (const [user_id, values] of Object.entries(this.filters.ratings)) {
@@ -443,6 +497,8 @@ export default {
           }
           payload.append('rating', r.join(','));
         }
+
+        // Send request
 
         this.loading = true;
 
@@ -582,6 +638,41 @@ export default {
           (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
         );
         // console.debug(needle, this.tagList, tags);
+      });
+    },
+
+    filterIngredientsInclude(val, update, abort) {
+      update(() => {
+        let isUsed = (ingredient) => {
+          return this.filters.ingredients_exclude.some((t) => t == ingredient.id);
+        };
+
+        const needle = val.toLowerCase();
+        let ingredients = this.ingredients?.results;
+
+        this.ingredientList = ingredients
+          ?.filter(
+            (v) => v.title.toLowerCase().indexOf(needle) > -1 // && !isUsed(v)
+          )
+          .slice(0, 20);
+        // console.debug(needle, this.ingredientList, ingredients);
+      });
+    },
+    filterIngredientsExclude(val, update, abort) {
+      update(() => {
+        let isUsed = (ingredient) => {
+          return this.filters.ingredients_include.some((t) => t == ingredient.id);
+        };
+
+        const needle = val.toLowerCase();
+        let ingredients = this.ingredients?.results;
+
+        this.ingredientList = ingredients
+          ?.filter(
+            (v) => v.title.toLowerCase().indexOf(needle) > -1 //  && !isUsed(v)
+          )
+          .slice(0, 20);
+        // console.debug(needle, this.ingredientList, ingredients);
       });
     },
     userRating(user) {

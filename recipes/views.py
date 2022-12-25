@@ -59,6 +59,12 @@ class RecipeFilterSet(filters.FilterSet):
     tags_exclude = filters.ModelMultipleChoiceFilter(
         method="filter_tags_exclude", label="Tags exclude", queryset=RecipeTag.objects
     )
+    ingredients_include = filters.ModelMultipleChoiceFilter(
+        method="filter_ingredients_include", label="Ingredients include", queryset=Ingredient.objects
+    )
+    ingredients_exclude = filters.ModelMultipleChoiceFilter(
+        method="filter_ingredients_exclude", label="Ingredients exclude", queryset=Ingredient.objects
+    )
     cooking_time_gt = filters.NumberFilter("cooking_time", lookup_expr="gte")
     cooking_time_lt = filters.NumberFilter("cooking_time", lookup_expr="lte")
 
@@ -108,6 +114,16 @@ class RecipeFilterSet(filters.FilterSet):
         if not value:
             return queryset
         return queryset.exclude(tags__in=value).distinct()
+
+    def filter_ingredients_include(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(ingredients__ingredient__in=value).distinct()
+
+    def filter_ingredients_exclude(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.exclude(ingredients__ingredient__in=value).distinct()
 
     def filter_compilation(self, queryset, name, value):
         if value != "archive":

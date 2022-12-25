@@ -234,7 +234,7 @@ class RecipePlanWeek(models.Model):
     year = models.SmallIntegerField(_("Год"))
     week = models.SmallIntegerField(_("Неделя"))
 
-    comments = models.JSONField(_("Комментарии"), default=get_default_comments())
+    comments = models.JSONField(_("Комментарии"), default=get_default_comments)
 
     class Meta:
         ordering = ["-year", "-week"]

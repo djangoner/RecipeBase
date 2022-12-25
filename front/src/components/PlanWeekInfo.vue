@@ -36,7 +36,7 @@
               :class="rating >= 3 ? 'bg-positive' : 'bg-orange'"
             >
               <div>
-                {{ rating }}
+                {{ rating > 0 ? rating : '-' }}
               </div>
             </td>
           </tr>

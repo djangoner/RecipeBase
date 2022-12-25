@@ -109,7 +109,7 @@
                         <q-select
                           :model-value="recipe"
                           @update:modelValue="setRecipe(idx, mtime, $event, rec_idx)"
-                          :input-debounce="100"
+                          :input-debounce="300"
                           :options="recipesList"
                           option-label="title"
                           @filter="filterRecipes"

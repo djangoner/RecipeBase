@@ -7,6 +7,7 @@
     :animation-speed="500"
   />
 
+  <!-- Week comment dialog -->
   <q-dialog :model-value="Boolean(openComment)" @update:modelValue="openComment = $event">
     <q-card
       style="min-width: 350px; max-width: 450px; width: 100%"
@@ -190,6 +191,16 @@
           </q-card>
         </div>
       </template>
+
+      <div class="col" v-if="plan">
+        <q-expansion-item label="Доп информация" dense dense-toggle default-opened>
+          <q-card class="q-pt-none q-px-none">
+            <q-card-section class="q-px-xs">
+              <plan-week-info :plan="plan" />
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+      </div>
     </div>
   </q-page>
   <q-inner-loading :showing="loading"></q-inner-loading>
@@ -205,6 +216,7 @@ import weekSelect, {
 import { useBaseStore } from 'src/stores/base';
 import { date } from 'quasar';
 import recipeCardTooltip from 'components/RecipeCardTooltip.vue';
+import PlanWeekInfo from 'src/components/PlanWeekInfo.vue';
 
 let WeekDaysColors = {
   1: 'bg-amber-2',
@@ -215,7 +227,7 @@ let WeekDaysColors = {
 };
 
 export default {
-  components: { weekSelect, recipeCardTooltip },
+  components: { weekSelect, recipeCardTooltip, PlanWeekInfo },
   data() {
     const store = useBaseStore();
     return {

@@ -23,6 +23,10 @@ def recipe_image_upload_to(instance, filename):
     return f"uploads/recipe_images/{instance.recipe.pk}/{uid}.{ext}"
 
 
+def get_default_comments():
+    return {i: "" for i in range(1, 7 + 1)}
+
+
 # // Models \\
 
 
@@ -100,7 +104,7 @@ class Ingredient(models.Model):
     title = models.CharField(_("Название"), unique=True, max_length=100)
     description = models.TextField(_("Описание"), null=True, blank=True)
     category = models.ForeignKey(
-        'IngredientCategory',
+        "IngredientCategory",
         models.CASCADE,
         related_name="recipe_ingredients",
         verbose_name=_("Категория"),
@@ -229,6 +233,8 @@ class RecipeRating(models.Model):
 class RecipePlanWeek(models.Model):
     year = models.SmallIntegerField(_("Год"))
     week = models.SmallIntegerField(_("Неделя"))
+
+    comments = models.JSONField(_("Комментарии"), default=get_default_comments())
 
     class Meta:
         ordering = ["-year", "-week"]
@@ -386,9 +392,12 @@ class ProductListItem(models.Model):
     def __str__(self) -> str:
         return f"{self.week}.{self.day} {self.title}"
 
+
 class Shop(models.Model):
     title = models.CharField(_("Название"), max_length=100)
-    category_sort = models.ManyToManyField('IngredientCategory', through='ShopIngredientCategory', blank=True)
+    category_sort = models.ManyToManyField(
+        "IngredientCategory", through="ShopIngredientCategory", blank=True
+    )
 
     class Meta:
         verbose_name = _("Магазин")
@@ -409,12 +418,18 @@ class IngredientCategory(models.Model):
     def __str__(self) -> str:
         return self.title
 
+
 class ShopIngredientCategory(models.Model):
     shop = models.ForeignKey(Shop, models.CASCADE, verbose_name=_("Магазин"))
-    category = models.ForeignKey(IngredientCategory, models.CASCADE, related_name='sortings', verbose_name=_("Категория"))
+    category = models.ForeignKey(
+        IngredientCategory,
+        models.CASCADE,
+        related_name="sortings",
+        verbose_name=_("Категория"),
+    )
     num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
 
     class Meta:
-        ordering = [F('num').asc(nulls_last=True)]
+        ordering = [F("num").asc(nulls_last=True)]
         verbose_name = _("Магазин сортировка ингредианта")
         verbose_name_plural = _("Магазин сортировка ингредиента")

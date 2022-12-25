@@ -6,6 +6,34 @@
     :instant-feedback="saving"
     :animation-speed="500"
   />
+
+  <q-dialog :model-value="Boolean(openComment)" @update:modelValue="openComment = $event">
+    <q-card
+      style="min-width: 350px; max-width: 450px; width: 100%"
+      v-if="plan && plan?.comments"
+    >
+      <q-card-section class="row">
+        <div class="text-h6">
+          <b>{{ getDay(openComment - 1) }}</b> {{ WeekDays[openComment] }}
+        </div>
+        <q-space />
+        <q-btn class="col-auto" icon="close" flat round dense v-close-popup></q-btn>
+      </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        <q-input
+          v-model="plan.comments[openComment]"
+          @update:modelValue="updateComment(openComment, $event)"
+          :debounce="1000"
+          label="Комментарий дня"
+          type="textarea"
+          autogrow
+          input-style="min-height: 3rem;max-height: 10rem;"
+        ></q-input>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+
   <q-page padding>
     <div
       class="week-select-page row wrap items-start q-col-gutter-x-sm q-col-gutter-y-md"
@@ -23,10 +51,18 @@
             ]"
             style="min-height: 300px"
           >
-            <q-card-section>
+            <q-card-section class="row justify-between">
               <span class="text-h6" :class="isToday(getDay(idx - 1)) ? 'day-active' : ''">
                 <b>{{ getDay(idx - 1) }}</b> {{ day }}
               </span>
+              <q-btn
+                v-if="plan?.comments"
+                @click="openComment = idx"
+                icon="announcement"
+                :color="plan.comments[idx] ? 'red' : 'grey'"
+                flat
+                round
+              ></q-btn>
             </q-card-section>
 
             <q-card-section>
@@ -192,6 +228,7 @@ export default {
       saving: false,
       addMtimeSelect: null,
       meal_time_options: [],
+      openComment: null,
       search: '',
       WeekDays,
       WeekDaysColors,
@@ -395,6 +432,11 @@ export default {
 
         return true;
       });
+    },
+
+    updateComment(idx, comment) {
+      this.plan.comments[idx] = comment;
+      this.saveWeekPlan();
     },
 
     timeFormat(raw) {

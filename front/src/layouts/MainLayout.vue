@@ -79,6 +79,12 @@
           </q-item-section>
           <q-item-section> Тёмная тема </q-item-section>
         </q-item>
+        <q-item clickable dense href="/admin">
+          <q-item-section avatar>
+            <q-icon name="settings"></q-icon>
+          </q-item-section>
+          <q-item-section> Администрирование </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 

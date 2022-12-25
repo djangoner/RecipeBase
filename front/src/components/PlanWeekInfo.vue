@@ -33,7 +33,7 @@
               v-for="(rating, idx) in weekDaysRatings(user)"
               :key="idx"
               class="text-center"
-              :class="rating >= 3 ? 'bg-positive' : 'bg-orange'"
+              :class="weekDayColor(rating)"
             >
               <div>
                 {{ rating > 0 ? rating : '-' }}
@@ -91,19 +91,19 @@ export default {
       let ratings = dayRecipes.map((r) => {
         let items = r?.recipe?.ratings.map((r) => {
           let rate = r.user.id == user.id || r.user == user.id;
-          return rate ? r.rating : 0;
+          return rate ? r.rating : -1;
         });
         if (!items) {
-          return 0;
+          return -1;
         }
-        return Math.max(...items) || 0;
+        return Math.max(...items);
       });
 
-      let rate = ratings.length > 0 ? Math.max(...ratings) : 0;
+      let rate = ratings.length > 0 ? Math.max(...ratings) : -1;
 
-      if (dayRecipes) {
-        console.debug(day_idx, user.username, dayRecipes, ratings);
-      }
+      // if (dayRecipes) {
+      //   console.debug(day_idx, user.username, dayRecipes, ratings);
+      // }
       return rate;
     },
     weekDaysRatings(user) {
@@ -111,6 +111,15 @@ export default {
       return Object.entries(WeekDaysShort).map(([k, v]) => {
         return this.getRating(k, user);
       });
+    },
+    weekDayColor(rating) {
+      if (rating >= 3) {
+        return 'bg-positive';
+      } else if (rating > 0) {
+        return 'bg-orange';
+      } else {
+        return 'bg-cyan';
+      }
     },
   },
   computed: {

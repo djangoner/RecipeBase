@@ -22,6 +22,17 @@
         <!-- Product title -->
         {{ item.title }}
 
+        <!-- Manual ingredient -->
+        <template
+          v-if="
+            !item.is_auto &&
+            item.ingredient &&
+            item.title.toLowerCase() !== item.ingredient.title.toLowerCase()
+          "
+        >
+          ({{ item.ingredient.title }})
+        </template>
+
         <!-- Product amount -->
         <template v-if="item.amount">
           (
@@ -50,6 +61,7 @@
           </q-tooltip>
         </q-icon>
         <q-icon v-else name="edit"></q-icon>
+        <q-icon v-if="!item.is_auto && item.ingredient" name="restaurant"></q-icon>
 
         <q-icon
           v-if="item?.ingredient?.description"

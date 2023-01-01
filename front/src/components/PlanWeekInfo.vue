@@ -49,6 +49,15 @@
 <script>
 import { WeekDaysShort } from 'components/WeekSelect.vue';
 import { useAuthStore } from 'src/stores/auth';
+
+let ratingColors = {
+  5: 'bg-positive',
+  4: 'bg-green-4',
+  3: 'bg-amber',
+  2: 'bg-orange',
+  1: 'bg-deep-orange-4',
+};
+
 export default {
   props: {
     plan: { required: true },
@@ -113,13 +122,7 @@ export default {
       });
     },
     weekDayColor(rating) {
-      if (rating >= 3) {
-        return 'bg-positive';
-      } else if (rating > 0) {
-        return 'bg-orange';
-      } else {
-        return 'bg-cyan';
-      }
+      return ratingColors[rating] || 'bg-cyan';
     },
   },
   computed: {

@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "ckeditor",
     "django_cleanup.apps.CleanupConfig",
+    "adminsortable",
     # Custom
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",

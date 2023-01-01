@@ -9,6 +9,7 @@ from django.db.models import F
 from django.db.models.fields import related
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
+from adminsortable.models import SortableMixin
 
 from recipes.services.measurings import MEASURING_CONVERT, MEASURING_TYPES, short_text
 
@@ -419,7 +420,7 @@ class IngredientCategory(models.Model):
         return self.title
 
 
-class ShopIngredientCategory(models.Model):
+class ShopIngredientCategory(SortableMixin, models.Model):
     shop = models.ForeignKey(Shop, models.CASCADE, verbose_name=_("Магазин"))
     category = models.ForeignKey(
         IngredientCategory,
@@ -430,6 +431,12 @@ class ShopIngredientCategory(models.Model):
     num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
 
     class Meta:
-        ordering = [F("num").asc(nulls_last=True)]
+        # ordering = [F("num").asc(nulls_last=True)]
+        ordering = ["num"]
         verbose_name = _("Магазин сортировка ингредианта")
         verbose_name_plural = _("Магазин сортировка ингредиента")
+        unique_together = (('shop', 'category'),)
+
+    def __str__(self) -> str:
+        # return self.shop.title + " - " + self.category.title'
+        return f"#{self.num}"

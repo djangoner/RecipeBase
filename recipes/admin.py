@@ -6,6 +6,7 @@ from recipes.models import (Ingredient, IngredientCategory, MealTime,
                             RecipeImage, RecipeIngredient, RecipePlan,
                             RecipePlanWeek, RecipeRating, RecipeTag, Shop,
                             ShopIngredientCategory)
+from adminsortable.admin import NonSortableParentAdmin, SortableTabularInline
 
 
 class RecipeIngredientsInline(admin.StackedInline):
@@ -31,9 +32,10 @@ class RecipeRatingInline(admin.TabularInline):
     autocomplete_fields = ["recipe", "user"]
 
 
-class ShopIngredientCategoryInline(admin.TabularInline):
+class ShopIngredientCategoryInline(SortableTabularInline):
     extra = 0
     model = ShopIngredientCategory
+    readonly_fields = ["num"]
     # autocomplete_fields = ["shop", "category"]
 
 
@@ -136,7 +138,7 @@ class ProductListItemAdmin(admin.ModelAdmin):
 
 
 @admin.register(Shop)
-class ShopAdmin(admin.ModelAdmin):
+class ShopAdmin(NonSortableParentAdmin, admin.ModelAdmin):
     list_display = ("id", "title")
     search_fields = ["title"]
     inlines = [ShopIngredientCategoryInline]

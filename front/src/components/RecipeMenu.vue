@@ -12,7 +12,11 @@
           <q-list dense>
             <template v-for="(day, idx) of WeekDays" :key="idx">
               <q-item v-if="idx > 0" clickable>
-                <q-item-section>{{ day }}</q-item-section>
+                <q-item-section
+                  :class="isDayFilled(idx) ? 'text-underline text-bold' : ''"
+                >
+                  {{ day }}
+                </q-item-section>
                 <q-item-section side>
                   <q-icon name="keyboard_arrow_right" />
                 </q-item-section>
@@ -26,7 +30,13 @@
                       clickable
                       v-close-popup
                     >
-                      <q-item-section>{{ mtime.title }}</q-item-section>
+                      <q-item-section
+                        :class="
+                          isMtimeFilled(idx, mtime) ? 'text-underline text-bold' : ''
+                        "
+                      >
+                        {{ mtime.title }}
+                      </q-item-section>
                     </q-item>
                   </q-list>
                 </q-menu>
@@ -68,6 +78,11 @@ export default {
     week_p.year = year;
     week_p.week = week;
     return { store, WeekDays, week: week_p };
+  },
+  mounted() {
+    if (!this.plan) {
+      this.loadWeekPlan();
+    }
   },
   methods: {
     emitUpdated() {
@@ -137,6 +152,25 @@ export default {
               this.handleErrors(err, 'Ошибка изменения плана');
             });
         });
+    },
+
+    isDayFilled(day) {
+      let plans = this.plan?.plans;
+      let plansFilled;
+      if (plans) {
+        plansFilled = plans.filter((p) => p.meal_time.is_primary && p.day == day).length;
+      }
+      let plansTotal = this.meal_time.filter((m) => m.is_primary).length;
+      return plansFilled >= plansTotal;
+    },
+    isMtimeFilled(day, mtime) {
+      let plans = this.plan?.plans;
+      let plansFilled;
+      if (plans) {
+        plansFilled = plans.filter((p) => p.meal_time.id == mtime.id && p.day == day)
+          .length;
+      }
+      return plansFilled > 0;
     },
 
     //

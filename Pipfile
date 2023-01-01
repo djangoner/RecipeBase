@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+drf-spectacular = "*"
+django = "*"
+django-ckeditor = "*"
+djangorestframework = "*"
+django-filter = "*"
+django-cleanup = "*"
+drf-writable-nested = "*"
+python-dotenv = "*"
+pillow = "*"
+psycopg2-binary = "*"
+django-admin-sortable = "*"
+
+[dev-packages]
+mypy = "*"
+
+[requires]
+python_version = "3.11"

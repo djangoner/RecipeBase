@@ -8,7 +8,7 @@ from django.db import models
 from django.db.models import F
 from django.db.models.fields import related
 from django.utils.html import strip_tags
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from recipes.services.measurings import MEASURING_CONVERT, MEASURING_TYPES, short_text
 

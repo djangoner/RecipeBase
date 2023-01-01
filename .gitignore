@@ -12,8 +12,6 @@
 *tmp*
 *cache*
 *.local
-Pipfile
-Pipfile.lock
 __pycache__
 media
 migrations

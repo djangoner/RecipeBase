@@ -14,9 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import include
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from django.views.static import serve
 from recipes.urls import router as router_recipes
 from rest_framework import routers
@@ -43,7 +43,7 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += [
-        url(
+        re_path(
             r"^media/(?P<path>.*)$",
             serve,
             {

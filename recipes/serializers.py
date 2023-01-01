@@ -68,7 +68,7 @@ class IngredientCategorySerializer(serializers.ModelSerializer):
 class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     used_times = serializers.SerializerMethodField()
     # category = IngredientCategorySerializer(read_only=True)
-    category = serializers.PrimaryKeyRelatedField(queryset=IngredientCategory.objects.all())
+    category = serializers.PrimaryKeyRelatedField(queryset=IngredientCategory.objects.all(), required=False)
 
     class Meta:
         model = Ingredient

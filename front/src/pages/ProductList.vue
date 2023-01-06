@@ -27,11 +27,20 @@
           :color="canSync ? 'positive' : 'primary'"
           icon="sync"
           size="sm"
-          @click="syncLocal()"
+          @click="askSyncLocal()"
           :disable="!canSync"
         >
           <q-tooltip v-if="!canSync">Нет данных для синхронизации</q-tooltip>
         </q-btn>
+      </div>
+      <div v-if="canSync">
+        <q-btn
+          label="Очистка синхронизации"
+          color="negative"
+          icon="delete"
+          size="sm"
+          @click="askDiscardSync()"
+        ></q-btn>
       </div>
 
       <div>
@@ -265,6 +274,41 @@ export default {
       if (!this.isOnLine) {
         this.$q.localStorage.set('local_productlist_updated', true);
       }
+    },
+    askSyncLocal() {
+      this.$q
+        .dialog({
+          title: 'Подтверждение',
+          message: `Вы уверены что хотите выполнить синхронизацию? Данные на сервере будут заменены локальным списком продуктов`,
+          cancel: true,
+          persistent: true,
+        })
+        .onOk(() => {
+          this.syncLocal();
+        });
+    },
+    askDiscardSync() {
+      this.$q
+        .dialog({
+          title: 'Подтверждение',
+          message: `Вы уверены что хотите удалить локальные данные синхронизации? Это действие необратимо, локальный список продуктов будет стерт.`,
+          cancel: true,
+          persistent: true,
+        })
+        .onOk(() => {
+          this.discardSync();
+        });
+    },
+    discardSync() {
+      this.$q.localStorage.remove('local_productlist_updated');
+      this.$q.localStorage.remove('local_productlist');
+      this.$q.notify({
+        type: 'warning',
+        caption: 'Данные синхронизации удалены',
+        icon: 'delete',
+      });
+      this.canSync = false;
+      this.syncServer();
     },
     syncLocal() {
       this.$q.notify({

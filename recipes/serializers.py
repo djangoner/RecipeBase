@@ -175,7 +175,7 @@ class RecipeRatingSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-    short_description = serializers.SerializerMethodField()
+    short_description_str = serializers.SerializerMethodField()
     last_cooked = serializers.SerializerMethodField()
     cooked_times = serializers.SerializerMethodField()
     is_planned = serializers.SerializerMethodField()
@@ -194,7 +194,7 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
         self.fields["author"] = ShortUserSerializer()
         return super().to_representation(instance)
 
-    def get_short_description(self, obj: Recipe):
+    def get_short_description_str(self, obj: Recipe):
         return obj.get_short_description()
 
     def get_last_cooked(self, obj: Recipe) -> date:

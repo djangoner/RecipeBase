@@ -41,7 +41,7 @@
     </q-card-section>
 
     <q-card-section>
-      <span class="text-subtitle2">{{ recipe.short_description }}</span>
+      <span class="text-subtitle2">{{ recipe.short_description_str }}</span>
     </q-card-section>
 
     <!-- Aside info tooltip -->

@@ -26,8 +26,10 @@ def debouncer(callback, throttle=1000):
 
     return throttle_f
 
+
 def update_plan_week_current():
     return update_plan_week(get_current_plan_week())
+
 
 ###
 
@@ -37,9 +39,7 @@ debounce_upd_plan = debouncer(update_plan_week, throttle=2000)
 
 def get_current_plan_week():
     now = datetime.now()
-    plan, _ = RecipePlanWeek.objects.get_or_create(
-        year=now.year, week=now.isocalendar()[1]
-    )
+    plan, _ = RecipePlanWeek.objects.get_or_create(year=now.year, week=now.isocalendar()[1])
     return plan
 
 
@@ -58,6 +58,7 @@ def recipe_post_save(sender, instance: Recipe, **kwargs):
 def recipe_plan_post_save(sender, instance: RecipePlan, **kwargs):
     instance.check_date()
     debounce_upd_plan(instance.week)
+
 
 @receiver(post_save, sender=RecipePlanWeek)
 def recipe_plan_week_post_save(sender, instance: RecipePlanWeek, **kwargs):

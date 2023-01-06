@@ -17,7 +17,13 @@ psycopg2-binary = "*"
 django-admin-sortable = "*"
 
 [dev-packages]
-mypy = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-django = "*"
+pytest-xdist = "*"
+coverage = "*"
+factory_boy = "*"
+black = "*"
 
 [requires]
 python_version = "3.11"

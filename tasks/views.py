@@ -2,7 +2,11 @@ from django.shortcuts import render
 from rest_framework import viewsets, permissions
 
 from tasks.models import Task, TaskCategory
-from tasks.serializers import TaskCategorySerializer, TaskSerializer, TaskNestedSerializer
+from tasks.serializers import (
+    TaskCategorySerializer,
+    TaskSerializer,
+    TaskNestedSerializer,
+)
 
 
 class TaskCategoryViewset(viewsets.ModelViewSet):
@@ -12,6 +16,7 @@ class TaskCategoryViewset(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
 
 class TaskViewset(viewsets.ModelViewSet):
     queryset = Task.objects.prefetch_related("childrens").all()

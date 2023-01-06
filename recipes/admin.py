@@ -1,11 +1,22 @@
 from django.contrib import admin
 from django.db.models import Count, F
 
-from recipes.models import (Ingredient, IngredientCategory, MealTime,
-                            ProductListItem, ProductListWeek, Recipe,
-                            RecipeImage, RecipeIngredient, RecipePlan,
-                            RecipePlanWeek, RecipeRating, RecipeTag, Shop,
-                            ShopIngredientCategory)
+from recipes.models import (
+    Ingredient,
+    IngredientCategory,
+    MealTime,
+    ProductListItem,
+    ProductListWeek,
+    Recipe,
+    RecipeImage,
+    RecipeIngredient,
+    RecipePlan,
+    RecipePlanWeek,
+    RecipeRating,
+    RecipeTag,
+    Shop,
+    ShopIngredientCategory,
+)
 from adminsortable.admin import NonSortableParentAdmin, SortableTabularInline
 
 
@@ -61,7 +72,7 @@ class RecipeAdmin(admin.ModelAdmin):
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ["title", "category", "min_pack_size", "price", "edible", "need_buy"]
     list_filter = ["need_buy", "edible", "category"]
-    autocomplete_fields = ['category']
+    autocomplete_fields = ["category"]
     search_fields = ["title"]
 
 
@@ -147,4 +158,4 @@ class ShopAdmin(NonSortableParentAdmin, admin.ModelAdmin):
 @admin.register(IngredientCategory)
 class IngredientCategoryAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "icon")
-    search_fields = ['title']
+    search_fields = ["title"]

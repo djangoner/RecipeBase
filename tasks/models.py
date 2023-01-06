@@ -32,7 +32,12 @@ class TaskCategory(models.Model):
 
 
 class Task(models.Model):
-    category = models.ForeignKey(TaskCategory, models.CASCADE, related_name="childrens", verbose_name=_("Категория"))
+    category = models.ForeignKey(
+        TaskCategory,
+        models.CASCADE,
+        related_name="childrens",
+        verbose_name=_("Категория"),
+    )
     icon = models.CharField(max_length=255, null=True, blank=True)
 
     is_completed = models.BooleanField(_("Завершен"), default=False)
@@ -44,7 +49,14 @@ class Task(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(5)],
     )
     sort = models.PositiveSmallIntegerField(_("Сортировка"), null=True, blank=True)
-    parent = models.ForeignKey("self", models.CASCADE, related_name="childrens", verbose_name=_("Родительская задача"), null=True, blank=True)
+    parent = models.ForeignKey(
+        "self",
+        models.CASCADE,
+        related_name="childrens",
+        verbose_name=_("Родительская задача"),
+        null=True,
+        blank=True,
+    )
     deadline = models.DateTimeField(_("Дата задачи"), null=True, blank=True)
 
     author = models.ForeignKey(

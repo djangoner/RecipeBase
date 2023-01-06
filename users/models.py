@@ -15,7 +15,9 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = _("Профиль пользователя")
         verbose_name_plural = _("Профиль пользователя")
-        ordering = [F("num").asc(nulls_last=True),]
+        ordering = [
+            F("num").asc(nulls_last=True),
+        ]
 
     def __str__(self) -> str:
         return self.user.__str__()

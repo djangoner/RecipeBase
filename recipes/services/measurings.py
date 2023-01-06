@@ -13,13 +13,7 @@ MEASURING_TYPES = (
     ("items", _("Шт")),
 )
 
-MEASURING_SHORT = {
-    "g": "гр",
-    "kg": "кг",
-    "l": "л",
-    "ml": "мл",
-    "items": "шт"
-}
+MEASURING_SHORT = {"g": "гр", "kg": "кг", "l": "л", "ml": "мл", "items": "шт"}
 
 MEASURING_CONVERT = {
     # meas: gramm_count
@@ -31,6 +25,8 @@ MEASURING_CONVERT = {
     "tea_spoon": 10,
 }
 
+MEASURING_LIQUIDS = ["l", "ml"]
+
 
 def short_text(tx: str, length: int = 100):
     if len(tx) < length:
@@ -39,10 +35,10 @@ def short_text(tx: str, length: int = 100):
     return tx[:length] + "..."
 
 
-def amount_to_grams(amount: int, measure: str) -> int:
+def amount_to_grams(amount: int | None, measure: str) -> int:
     multiplier = MEASURING_CONVERT.get(measure)
 
-    if not multiplier:
+    if not multiplier or not amount:
         return None
 
     return int(amount * multiplier)

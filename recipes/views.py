@@ -5,7 +5,14 @@ from django.db.models import Count, F, Func, Max, Prefetch, Q, Value
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django_filters import rest_framework as filters
-from rest_framework import decorators, exceptions, response, serializers, viewsets
+from rest_framework import (
+    decorators,
+    exceptions,
+    response,
+    serializers,
+    viewsets,
+    permissions,
+)
 
 from recipes.models import (
     Ingredient,
@@ -50,9 +57,7 @@ from recipes.services.plans import update_plan_week
 
 class RecipeFilterSet(filters.FilterSet):
     rating = filters.CharFilter(method="filter_rating", label="Rating filter")
-    compilation = filters.CharFilter(
-        method="filter_compilation", label="Compilation filter"
-    )
+    compilation = filters.CharFilter(method="filter_compilation", label="Compilation filter")
     tags_include = filters.ModelMultipleChoiceFilter(
         method="filter_tags_include", label="Tags include", queryset=RecipeTag.objects
     )
@@ -60,10 +65,14 @@ class RecipeFilterSet(filters.FilterSet):
         method="filter_tags_exclude", label="Tags exclude", queryset=RecipeTag.objects
     )
     ingredients_include = filters.ModelMultipleChoiceFilter(
-        method="filter_ingredients_include", label="Ingredients include", queryset=Ingredient.objects
+        method="filter_ingredients_include",
+        label="Ingredients include",
+        queryset=Ingredient.objects,
     )
     ingredients_exclude = filters.ModelMultipleChoiceFilter(
-        method="filter_ingredients_exclude", label="Ingredients exclude", queryset=Ingredient.objects
+        method="filter_ingredients_exclude",
+        label="Ingredients exclude",
+        queryset=Ingredient.objects,
     )
     cooking_time_gt = filters.NumberFilter("cooking_time", lookup_expr="gte")
     cooking_time_lt = filters.NumberFilter("cooking_time", lookup_expr="lte")
@@ -139,9 +148,7 @@ class RecipeFilterSet(filters.FilterSet):
             )
             return qs
         elif value == "vlong_uncooked":
-            qs = queryset.filter(
-                last_cooked__lt=timezone.now() - timezone.timedelta(weeks=8)
-            )
+            qs = queryset.filter(last_cooked__lt=timezone.now() - timezone.timedelta(weeks=8))
             return qs
         elif value == "top10":
             qs = queryset.order_by("-cooked_times").filter(cooked_times__gt=0)
@@ -150,10 +157,7 @@ class RecipeFilterSet(filters.FilterSet):
             week_firstday = timezone.now().today()
             while week_firstday.weekday() > 0:
                 week_firstday = week_firstday - timezone.timedelta(days=1)
-            qs = queryset.filter(
-                Q(last_cooked=None)
-                | (Q(last_cooked__gt=week_firstday.date()) & Q(cooked_times=1))
-            )
+            qs = queryset.filter(Q(last_cooked=None) | (Q(last_cooked__gt=week_firstday.date()) & Q(cooked_times=1)))
             return qs
         else:
             logging.warning(f"Unknown compilation: '{value}'")
@@ -174,6 +178,7 @@ class RecipeViewset(viewsets.ModelViewSet):
         )
         .annotate(cooked_times=Count(F("plans__date")))
         .annotate(last_cooked=Max(F("plans__date")))
+        .order_by(*Recipe._meta.ordering)
         .distinct()
     )
     serializer_class = RecipeSerializer
@@ -202,6 +207,7 @@ class IngredientViewset(viewsets.ModelViewSet):
     queryset = (
         Ingredient.objects.prefetch_related("category")
         .annotate(used_times=Count(F("recipe_ingredients")))
+        .order_by(*Ingredient._meta.ordering)
         .all()
     )
     serializer_class = IngredientSerializer
@@ -230,17 +236,17 @@ class IngredientViewset(viewsets.ModelViewSet):
 
 
 class RecipeIngredientViewset(viewsets.ModelViewSet):
-    queryset = RecipeIngredient.objects.all()
+    queryset = RecipeIngredient.objects.order_by(*RecipeIngredient._meta.ordering).all()
     serializer_class = RecipeIngredientSerializer
 
 
 class RecipeTagViewset(viewsets.ModelViewSet):
-    queryset = RecipeTag.objects.all()
+    queryset = RecipeTag.objects.order_by(*RecipeTag._meta.ordering).all()
     serializer_class = RecipeTagSerializer
 
 
 class MealTimeViewset(viewsets.ModelViewSet):
-    queryset = MealTime.objects.all()
+    queryset = MealTime.objects.order_by(*MealTime._meta.ordering).all()
     serializer_class = MealTimeSerializer
 
 
@@ -273,7 +279,7 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
         year, week = None, None
         if pk in ["current", "now"]:
             year, week = datetime.now().year, datetime.now().isocalendar()[1]
-        elif pk:
+        else:
             try:
                 year, week = pk.split("_")
             except ValueError:
@@ -302,7 +308,7 @@ class RecipePlanViewset(viewsets.ModelViewSet):
 
 
 class RecipeRatingViewset(viewsets.ModelViewSet):
-    queryset = RecipeRating.objects.prefetch_related("user")
+    queryset = RecipeRating.objects.prefetch_related("user").order_by("-id")
     serializer_class = RecipeRatingSerializer
 
 
@@ -332,7 +338,7 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
         year, week = None, None
         if pk in ["current", "now"]:
             year, week = datetime.now().year, datetime.now().isocalendar()[1]
-        elif pk:
+        else:
             try:
                 year, week = pk.split("_")
             except ValueError:
@@ -347,9 +353,7 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
     @decorators.action(["GET"], detail=True)
     def generate(self, request, pk=None):
         week = self.get_object()
-        week_plan, _ = RecipePlanWeek.objects.get_or_create(
-            year=week.year, week=week.week
-        )
+        week_plan, _ = RecipePlanWeek.objects.get_or_create(year=week.year, week=week.week)
         update_plan_week(week_plan)
 
         return self.retrieve(request)
@@ -382,16 +386,18 @@ class ProductListItemViewset(viewsets.ModelViewSet):
 
 
 class IngredientCategoryViewset(viewsets.ModelViewSet):
-    queryset = IngredientCategory.objects.all()
+    queryset = IngredientCategory.objects.order_by(*IngredientCategory._meta.ordering)
     serializer_class = IngredientCategorySerializer
 
 
 class ShopViewset(viewsets.ModelViewSet):
-    queryset = Shop.objects.all()
+    queryset = Shop.objects.order_by(*Shop._meta.ordering)
     serializer_class = ShopSerializer
 
 
 class StatsViewset(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
     def list(self, request):
         data = {
             "recipes": Recipe.objects.filter(is_archived=False).count(),

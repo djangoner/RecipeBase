@@ -18,8 +18,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def getenv_list(name: str, default: str = "") -> list[str]:
     return list(filter(lambda s: s, os.getenv(name, default).split(",")))
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -96,10 +98,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "RecipeBase.wsgi.application"
 
-INTERNAL_IPS = [
-    "127.0.0.1",
-    *os.getenv("INTERNAL_IPS", "").split(",")
-]
+INTERNAL_IPS = ["127.0.0.1", *os.getenv("INTERNAL_IPS", "").split(",")]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1",
@@ -154,6 +153,8 @@ AUTH_PASSWORD_VALIDATORS = [
     # },
 ]
 
+
+AUTHENTICATION_BACKENDS = ['users.backends.CustomAuthorizationBackend']
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
@@ -226,8 +227,8 @@ REST_FRAMEWORK = {
         "users.backends.CsrfExemptSessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-        # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        # "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.DjangoModelPermissions"
     ],
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",

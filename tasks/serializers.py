@@ -9,6 +9,7 @@ class RecursiveField(serializers.Serializer):
         serializer.parent = None
         return serializer.data
 
+
 class TaskNestedSerializer(serializers.ModelSerializer):
     childrens = RecursiveField(many=True, read_only=True)
 
@@ -35,5 +36,5 @@ class TaskCategorySerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['childrens'] = [x for x in representation['childrens'] if not x['parent']]
+        representation["childrens"] = [x for x in representation["childrens"] if not x["parent"]]
         return representation

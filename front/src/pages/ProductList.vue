@@ -91,12 +91,12 @@
                 :class="categoryHasShop(cat) ? 'text-primary' : 'text-orange'"
               >
                 {{ cat.title }}
-                <q-tooltip v-if="cat.sortings">
+                <q-tooltip v-if="cat.sorting">
                   <b>Магазины:</b>
-                  <div v-for="sort of cat.sortings" :key="sort.id">
+                  <div v-for="sort of cat.sorting" :key="sort.id">
                     - {{ sort.shop.title }}
                   </div>
-                  <div v-if="cat.sortings.length < 1">Нет магазинов</div>
+                  <div v-if="cat.sorting.length < 1">Нет магазинов</div>
                 </q-tooltip>
               </h5>
             </div>
@@ -419,10 +419,10 @@ export default {
       if (cat.custom) {
         return true;
       }
-      if (!cat.sortings) {
+      if (!cat.sorting) {
         return;
       }
-      return cat.sortings.find((s) => s.shop.id == this.sortShop);
+      return cat.sorting.find((s) => s.shop.id == this.sortShop);
     },
   },
   computed: {
@@ -515,8 +515,8 @@ export default {
             return -1;
           }
 
-          let aSort = a.sortings.find((s) => s?.shop?.id == this.sortShop);
-          let bSort = b.sortings.find((s) => s?.shop?.id == this.sortShop);
+          let aSort = a.sorting.find((s) => s?.shop?.id == this.sortShop);
+          let bSort = b.sorting.find((s) => s?.shop?.id == this.sortShop);
 
           return aSort?.num - bSort?.num;
         });

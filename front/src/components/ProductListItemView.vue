@@ -170,7 +170,7 @@
         />
       </q-card-section>
 
-      <!-- Botom actions -->
+      <!-- Bottom actions -->
       <!-- <q-card-actions align="center">
         <q-btn flat label="OK" color="primary" v-close-popup />
       </q-card-actions> -->

@@ -40,26 +40,29 @@ class RecipeImageSerializer(WritableNestedModelSerializer, serializers.ModelSeri
         fields = "__all__"
 
 
-
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
         exclude = ()
 
+
 class ShopShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
-        exclude = ('category_sort',)
+        exclude = ("category_sort",)
+
 
 class ShopIngredientCategory(serializers.ModelSerializer):
     shop = ShopShortSerializer()
+
     class Meta:
         model = ShopIngredientCategory
         fields = "__all__"
 
 
 class IngredientCategorySerializer(serializers.ModelSerializer):
-    sortings = ShopIngredientCategory(many=True)
+    sorting = ShopIngredientCategory(many=True)
+
     class Meta:
         model = IngredientCategory
         fields = "__all__"
@@ -83,11 +86,7 @@ class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSeria
         return getattr(obj, "used_times", None)
 
 
-
-
-class RecipeIngredientSerializer(
-    WritableNestedModelSerializer, serializers.ModelSerializer
-):
+class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     # ingredient = IngredientSerializer()
     ingredient = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount_type_str = serializers.SerializerMethodField()
@@ -108,11 +107,7 @@ class RecipeIngredientSerializer(
         return amount_str(obj.amount_type)
 
     def get_packs(self, obj: RecipeIngredient):
-        if not (
-            obj.amount
-            and obj.ingredient
-            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
-        ):
+        if not (obj.amount and obj.ingredient and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)):
             return 0
 
         # if obj.amount_type == "items":
@@ -130,9 +125,7 @@ class RecipeIngredientSerializer(
 
         packs = self.get_packs(obj)
         if obj.amount_type == "items" and obj.ingredient.item_weight:
-            return round(
-                packs * obj.ingredient.item_weight / obj.ingredient.min_pack_size
-            )
+            return round(packs * obj.ingredient.item_weight / obj.ingredient.min_pack_size)
         return round(packs * obj.ingredient.price)
 
     def get_price_full(self, obj: RecipeIngredient):
@@ -146,12 +139,7 @@ class RecipeIngredientSerializer(
 
         packs = math.ceil(self.get_packs(obj))
         if obj.amount_type == "items" and obj.ingredient.item_weight:
-            return round(
-                obj.amount
-                * obj.ingredient.item_weight
-                / obj.ingredient.min_pack_size
-                * obj.ingredient.price
-            )
+            return round(obj.amount * obj.ingredient.item_weight / obj.ingredient.min_pack_size * obj.ingredient.price)
         return round(packs * obj.ingredient.price)
 
 
@@ -163,9 +151,7 @@ class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-
         representation["recipe"] = RecipeShortSerializer(instance.recipe).data
-
         return representation
 
 
@@ -193,10 +179,10 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
     last_cooked = serializers.SerializerMethodField()
     cooked_times = serializers.SerializerMethodField()
     is_planned = serializers.SerializerMethodField()
-    images = RecipeImageSerializer(many=True)
-    tags = RecipeTagSerializer(many=True)
-    ingredients = RecipeIngredientSerializer(many=True)
-    ratings = RecipeRatingSerializer(many=True)
+    images = RecipeImageSerializer(many=True, required=False)
+    tags = RecipeTagSerializer(many=True, required=False)
+    ingredients = RecipeIngredientSerializer(many=True, required=False)
+    ratings = RecipeRatingSerializer(many=True, required=False)
 
     class Meta:
         model = Recipe
@@ -272,9 +258,7 @@ class RecipePlanSerializer(serializers.ModelSerializer):
         return representation
 
 
-class RecipePlanWeekSerializer(
-    WritableNestedModelSerializer, serializers.ModelSerializer
-):
+class RecipePlanWeekSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     plans = RecipePlanSerializer(many=True, full=True)
 
     class Meta:
@@ -283,16 +267,14 @@ class RecipePlanWeekSerializer(
         depth = 1
 
 
-class RecipePlanWeekShortSerializer(
-    RecipePlanWeekSerializer, serializers.ModelSerializer
-):
+class RecipePlanWeekShortSerializer(RecipePlanWeekSerializer, serializers.ModelSerializer):
     plans = None
 
 
-class ProductListItemSerializer(
-    WritableNestedModelSerializer, serializers.ModelSerializer
-):
-    ingredient = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all(), required=False, allow_null=True, default=None)
+class ProductListItemSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+    ingredient = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all(), required=False, allow_null=True, default=None
+    )
     amount_type_str = serializers.SerializerMethodField()
     week = serializers.PrimaryKeyRelatedField(queryset=ProductListWeek.objects.all())
     packs = serializers.SerializerMethodField()
@@ -305,32 +287,26 @@ class ProductListItemSerializer(
         read_only_fields = ("is_auto", "ingredient", "ingredients", "created", "edited")
         # depth = 1
 
-    def get_amount_type_str(self, obj: RecipeIngredient):
+    def get_amount_type_str(self, obj: ProductListItem):
         return amount_str(obj.amount_type)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
         representation["ingredient"] = IngredientSerializer(instance.ingredient).data if instance.ingredient else None
-        representation["ingredients"] = RecipeIngredientWithRecipeSerializer(
-            instance.ingredients, many=True
-        ).data
+        representation["ingredients"] = RecipeIngredientWithRecipeSerializer(instance.ingredients, many=True).data
 
         return representation
 
-    def get_packs(self, obj: RecipeIngredient):
-        if not (
-            obj.amount
-            and obj.ingredient
-            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
-        ):
+    def get_packs(self, obj: ProductListItem):
+        if not (obj.amount and obj.ingredient and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)):
             return 0
 
         # if obj.amount_type == "items":
         #     return obj.amount
         return round(obj.amount / obj.ingredient.min_pack_size, 3)
 
-    def get_price_part(self, obj: RecipeIngredient):
+    def get_price_part(self, obj: ProductListItem):
         if not (
             obj.ingredient
             and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
@@ -341,12 +317,10 @@ class ProductListItemSerializer(
 
         packs = self.get_packs(obj)
         if obj.amount_type == "items" and obj.ingredient.item_weight:
-            return round(
-                packs * obj.ingredient.item_weight / obj.ingredient.min_pack_size
-            )
+            return round(packs * obj.ingredient.item_weight / obj.ingredient.min_pack_size)
         return round(packs * obj.ingredient.price)
 
-    def get_price_full(self, obj: RecipeIngredient):
+    def get_price_full(self, obj: ProductListItem):
         if not (
             obj.ingredient
             and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
@@ -357,18 +331,11 @@ class ProductListItemSerializer(
 
         packs = math.ceil(self.get_packs(obj))
         if obj.amount_type == "items" and obj.ingredient.item_weight:
-            return round(
-                obj.amount
-                * obj.ingredient.item_weight
-                / obj.ingredient.min_pack_size
-                * obj.ingredient.price
-            )
+            return round(obj.amount * obj.ingredient.item_weight / obj.ingredient.min_pack_size * obj.ingredient.price)
         return round(packs * obj.ingredient.price)
 
 
-class ProductListWeekSerializer(
-    WritableNestedModelSerializer, serializers.ModelSerializer
-):
+class ProductListWeekSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     items = ProductListItemSerializer(many=True)
 
     class Meta:

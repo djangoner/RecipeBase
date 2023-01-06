@@ -17,11 +17,13 @@ from recipes.services.measurings import MEASURING_CONVERT, MEASURING_TYPES, shor
 DESC_LENGTH = 80
 User = get_user_model()
 
+def gen_uuid() ->str:
+    return uuid.uuid4()
 
 def recipe_image_upload_to(instance, filename):
     ext = filename.split(".")[-1]
-    uid = uuid.uuid4()
-    return f"uploads/recipe_images/{instance.recipe.pk}/{uid}.{ext}"
+    uuid =gen_uuid()
+    return f"uploads/recipe_images/{instance.recipe.pk}/{uuid}.{ext}"
 
 
 def get_default_comments():
@@ -38,16 +40,10 @@ class Recipe(models.Model):
     short_description = models.TextField(_("Короткое описание"), null=True, blank=True)
     comment = models.TextField(_("Комментарий"), null=True, blank=True)
     portion_count = models.FloatField(_("Кол-во порций"), null=True, blank=True)
-    cooking_time = models.IntegerField(
-        _("Примерное время приготовления"), null=True, blank=True
-    )
+    cooking_time = models.IntegerField(_("Примерное время приготовления"), null=True, blank=True)
 
-    source_link = models.CharField(
-        _("Источника"), max_length=255, blank=True, null=True
-    )
-    tags = models.ManyToManyField(
-        "RecipeTag", "recipes", verbose_name=_("Метки"), blank=True
-    )
+    source_link = models.CharField(_("Источника"), max_length=255, blank=True, null=True)
+    tags = models.ManyToManyField("RecipeTag", "recipes", verbose_name=_("Метки"), blank=True)
 
     created = models.DateTimeField(_("Создан"), auto_now_add=True, null=True)
     edited = models.DateTimeField(_("Изменен"), auto_now=True, null=True)
@@ -69,9 +65,7 @@ class Recipe(models.Model):
         if self.short_description:
             return short_text(self.short_description, length)
 
-        return short_text(
-            strip_tags(self.content) or strip_tags(self.content_source), length
-        )
+        return short_text(strip_tags(self.content) or strip_tags(self.content_source), length)
 
     get_short_description.short_description = _("Краткое содержание")
 
@@ -128,7 +122,7 @@ class Ingredient(models.Model):
     edible = models.BooleanField(_("Съедобный"), default=True)
 
     class Meta:
-        ordering = ["title"]
+        ordering = ["title", "-id"]
         verbose_name = _("Ингредиент")
         verbose_name_plural = _("Ингредиенты")
 
@@ -151,12 +145,8 @@ class RecipeIngredient(models.Model):
         verbose_name=_("Ингредиент"),
     )
     amount = models.FloatField(_("Количество"), max_length=15)
-    amount_grams = models.SmallIntegerField(
-        _("Количество в граммах"), editable=False, blank=True, null=True
-    )
-    amount_type = models.CharField(
-        _("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15
-    )
+    amount_grams = models.SmallIntegerField(_("Количество в граммах"), editable=False, blank=True, null=True)
+    amount_type = models.CharField(_("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15)
     is_main = models.BooleanField(_("Основной игредиент"), default=False)
 
     class Meta:
@@ -171,6 +161,7 @@ class RecipeTag(models.Model):
     title = models.CharField(_("Название метки"), max_length=50)
 
     class Meta:
+        ordering = ["-id"]
         verbose_name = _("Метка рецепта")
         verbose_name_plural = _("Метки рецептов")
 
@@ -208,9 +199,7 @@ class MealTime(models.Model):
 
 class RecipeRating(models.Model):
 
-    user = models.ForeignKey(
-        User, models.CASCADE, related_name="ratings", verbose_name=_("Пользователь")
-    )
+    user = models.ForeignKey(User, models.CASCADE, related_name="ratings", verbose_name=_("Пользователь"))
     recipe = models.ForeignKey(
         Recipe,
         models.CASCADE,
@@ -218,9 +207,7 @@ class RecipeRating(models.Model):
         verbose_name=_("Рецепт"),
         blank=True,
     )
-    rating = models.SmallIntegerField(
-        _("Оценка"), validators=[MinValueValidator(0), MaxValueValidator(5)]
-    )
+    rating = models.SmallIntegerField(_("Оценка"), validators=[MinValueValidator(0), MaxValueValidator(5)])
 
     class Meta:
         verbose_name = _("Оценка рецепта")
@@ -263,9 +250,7 @@ class RecipePlan(models.Model):
     )
     date = models.DateField(_("Дата"), null=True, blank=True)
 
-    meal_time = models.ForeignKey(
-        MealTime, models.CASCADE, verbose_name=_("Время приема пищи")
-    )
+    meal_time = models.ForeignKey(MealTime, models.CASCADE, verbose_name=_("Время приема пищи"))
     recipe = models.ForeignKey(
         Recipe,
         models.SET_NULL,
@@ -284,9 +269,7 @@ class RecipePlan(models.Model):
         return f"{self.week}.{self.day} {self.meal_time}"
 
     def gen_date(self) -> datetime:
-        date = datetime.strptime(
-            " ".join(map(str, [self.week.year, self.week.week, self.day])), "%G %V %u"
-        )
+        date = datetime.strptime(" ".join(map(str, [self.week.year, self.week.week, self.day])), "%G %V %u")
         return date
 
     def check_date(self):
@@ -396,11 +379,10 @@ class ProductListItem(models.Model):
 
 class Shop(models.Model):
     title = models.CharField(_("Название"), max_length=100)
-    category_sort = models.ManyToManyField(
-        "IngredientCategory", through="ShopIngredientCategory", blank=True
-    )
+    category_sort = models.ManyToManyField("IngredientCategory", through="ShopIngredientCategory", blank=True)
 
     class Meta:
+        ordering = ["title"]
         verbose_name = _("Магазин")
         verbose_name_plural = _("Магазины")
 
@@ -413,6 +395,7 @@ class IngredientCategory(models.Model):
     icon = models.CharField(_("Иконка"), max_length=100, blank=True, null=True)
 
     class Meta:
+        ordering = ["id"]
         verbose_name = _("Категория ингредиента")
         verbose_name_plural = _("Категории ингредиентов")
 
@@ -425,7 +408,7 @@ class ShopIngredientCategory(SortableMixin, models.Model):
     category = models.ForeignKey(
         IngredientCategory,
         models.CASCADE,
-        related_name="sortings",
+        related_name="sorting",
         verbose_name=_("Категория"),
     )
     num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
@@ -435,7 +418,7 @@ class ShopIngredientCategory(SortableMixin, models.Model):
         ordering = ["num"]
         verbose_name = _("Магазин сортировка ингредианта")
         verbose_name_plural = _("Магазин сортировка ингредиента")
-        unique_together = (('shop', 'category'),)
+        unique_together = (("shop", "category"),)
 
     def __str__(self) -> str:
         # return self.shop.title + " - " + self.category.title'

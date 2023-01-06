@@ -115,10 +115,10 @@ export default defineComponent({
     const store = useAuthStore();
     const $q = useQuasar();
 
-    const preferedMode = $q.localStorage.getItem('preferedMode');
+    const preferredMode = $q.localStorage.getItem('preferredMode');
 
-    if (preferedMode !== null) {
-      $q.dark.set(preferedMode);
+    if (preferredMode !== null) {
+      $q.dark.set(preferredMode);
     }
 
     return {
@@ -139,7 +139,7 @@ export default defineComponent({
         let newMode = darkModes[idxNew];
         // set
         $q.dark.set(newMode);
-        $q.localStorage.set('preferedMode', newMode);
+        $q.localStorage.set('preferredMode', newMode);
       },
       darkIcon() {
         let mode = $q.dark.mode;

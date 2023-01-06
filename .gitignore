@@ -16,6 +16,9 @@ __pycache__
 media
 migrations
 migrations/*
+.coverage
+coverage*
+!pytest.ini
 
 .DS_Store
 .thumbs.db

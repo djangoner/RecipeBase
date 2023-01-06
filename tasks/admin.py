@@ -2,16 +2,19 @@ from django.contrib import admin
 
 from tasks.models import Task, TaskCategory
 
+
 class TasksInline(admin.StackedInline):
     model = Task
     extra = 0
     classes = ("collapse",)
+
 
 @admin.register(TaskCategory)
 class TaskGroupAdmin(admin.ModelAdmin):
     list_display = ("title", "icon")
     search_fields = ("title",)
     inlines = [TasksInline]
+
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):

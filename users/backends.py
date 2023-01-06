@@ -40,11 +40,9 @@ class CustomAuthorizationBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
 
         try:
-            user = UserModel.objects.get(
-                Q(username=username) | Q(phone=username) | Q(email=username)
-            )
+            user = UserModel.objects.get(Q(username=username) | Q(email=username))
         except UserModel.DoesNotExist:
             pass
         else:
-            if user.check_password(password):
+            if user.check_password(password) and self.user_can_authenticate(user):
                 return user

@@ -157,14 +157,7 @@ class RecipeIngredient(models.Model):
         return f"{self.recipe}: {self.ingredient}"
 
 class RegularIngredient(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        models.CASCADE,
-        related_name="regular_ingredients",
-        verbose_name=_("Рецепт"),
-        blank=True,
-    )
-    ingredient = models.ForeignKey(
+    ingredient = models.OneToOneField(
         Ingredient,
         models.CASCADE,
         related_name="regular_ingredients",
@@ -178,7 +171,7 @@ class RegularIngredient(models.Model):
         verbose_name_plural = _("Регулярные ингредиенты")
 
     def __str__(self):
-        return f"{self.recipe}: {self.ingredient}"
+        return f"{self.ingredient}"
 
 class RecipeTag(models.Model):
     title = models.CharField(_("Название метки"), max_length=50)

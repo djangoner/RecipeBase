@@ -10,6 +10,7 @@ from recipes.models import (
     RecipeIngredient,
     RecipePlan,
     RecipePlanWeek,
+    RegularIngredient,
 )
 from recipes.services.measurings import MEASURING_CONVERT, MEASURING_LIQUIDS, amount_to_grams
 
@@ -57,8 +58,17 @@ def convert_all_to_grams(measurings: List[Tuple[str, int]]) -> Tuple[str, int]:
 
 def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
     """Generate list of ingredients for week"""
+    default_ing = {
+        "measuring": None,
+        "amounts": [],
+        "amount": 0,
+        "min_day": 7,
+        "ingredient": None,
+        "ingredients": [],
+    }
     res = {}
 
+    # Add week plan ingredients
     for plan in week.plans.all():
         plan: RecipePlan
         plan.check_date()
@@ -73,14 +83,8 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
                 continue
 
             if not ing_name in res:  # Create default ingredient
-                res[ing_name] = {
-                    "measuring": None,
-                    "amounts": [],
-                    "amount": 0,
-                    "min_day": 7,
-                    "ingredient": ing.ingredient,
-                    "ingredients": [],
-                }
+                res[ing_name] = default_ing.copy()
+                res[ing_name]["ingredient"] = ing.ingredient
 
             # -- Add ingredient amount
             res[ing_name]["amounts"].append([ing.amount_type, ing.amount])
@@ -89,6 +93,11 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
             # -- Update ingredient min_day
             if plan.day < res[ing_name]["min_day"]:
                 res[ing_name]["min_day"] = plan.day
+
+    # Add regular ingredients
+    for regular_ing in RegularIngredient.objects.all():
+        ing_name = regular_ing.ingredient.title
+        res[ing_name]["amounts"].append([regular_ing.amount_type, regular_ing.amount])
 
     return res
 

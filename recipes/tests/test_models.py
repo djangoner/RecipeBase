@@ -1,5 +1,5 @@
 from django.test import TestCase
-from recipes.models import DESC_LENGTH, gen_uuid, get_default_comments, recipe_image_upload_to
+from recipes.models import DESC_LENGTH, RegularIngredient, gen_uuid, get_default_comments, recipe_image_upload_to
 from recipes.tests.factories import (
     IngredientCategoryFactory,
     IngredientFactory,
@@ -13,6 +13,7 @@ from recipes.tests.factories import (
     RecipePlanWeekFactory,
     RecipeRatingFactory,
     RecipeTagFactory,
+    RegularIngredientFactory,
     ShopFactory,
     ShopIngredientCategoryFactory,
 )
@@ -67,6 +68,10 @@ class ModelsTestCase(TestCase):
     def test_recipe_ingredient(self):
         ing = RecipeIngredientFactory(recipe=RecipeFactory())
         assert str(ing) == f"{ing.recipe}: {ing.ingredient}"
+
+    def test_regular_ingredient(self):
+        ing = RegularIngredientFactory()
+        assert str(ing) == f"{ing.ingredient}"
 
     def test_recipe_tag(self):
         tag = RecipeTagFactory()

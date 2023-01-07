@@ -3,7 +3,7 @@ from django.test import TestCase
 from recipes.models import ProductListItem, ProductListWeek, RecipePlan
 
 from recipes.services import plans, measurings
-from recipes.tests.factories import IngredientFactory, RecipeIngredientFactory, RecipePlanWeekFactory
+from recipes.tests.factories import IngredientFactory, RecipeIngredientFactory, RecipePlanWeekFactory, RegularIngredientFactory
 
 logging.disable(logging.CRITICAL)
 
@@ -94,6 +94,38 @@ class PlansGenerationTestCase(TestCase):
                     "measuring": None,
                     "amount": 0,
                     "amounts": [["g", 100], ["g", 100]],
+                    "min_day": 1,
+                    "ingredient": ingredient,
+                    "ingredients": ings,
+                }
+            },
+        )
+
+    def test_week_regular_ingredient(self):
+        week = RecipePlanWeekFactory.create()
+        week_plans: list[RecipePlan] = week.plans.all()
+        ingredient = IngredientFactory()
+        ings = []
+
+        ings.append(
+            RecipeIngredientFactory(recipe=week_plans[0].recipe, ingredient=ingredient, amount=100, amount_type="g")
+        )
+
+        RecipeIngredientFactory(recipe=week_plans[0].recipe, amount=100, amount_type="g", ingredient__need_buy=False)
+        ings.append(
+            RecipeIngredientFactory(recipe=week_plans[1].recipe, ingredient=ingredient, amount=100, amount_type="g")
+        )
+
+        RegularIngredientFactory(ingredient=ingredient, amount=150, amount_type="g")
+
+        ingredients = plans.get_week_ingredients(week)
+        self.assertDictEqual(
+            ingredients,
+            {
+                ingredient.title: {
+                    "measuring": None,
+                    "amount": 0,
+                    "amounts": [["g", 100], ["g", 100], ["g", 150]],
                     "min_day": 1,
                     "ingredient": ingredient,
                     "ingredients": ings,

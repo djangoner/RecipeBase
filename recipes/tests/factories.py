@@ -14,6 +14,7 @@ from recipes.models import (
     RecipePlanWeek,
     RecipeRating,
     RecipeTag,
+    RegularIngredient,
     Shop,
     ShopIngredientCategory,
     User,
@@ -54,6 +55,15 @@ class RecipeIngredientFactory(DjangoModelFactory):
     amount = 0
     amount_type = "g"
     is_main = True
+
+
+class RegularIngredientFactory(DjangoModelFactory):
+    class Meta:
+        model = RegularIngredient
+
+    ingredient = factory.SubFactory(IngredientFactory)
+    amount = 0
+    amount_type = "g"
 
 
 class RecipeImageFactory(DjangoModelFactory):

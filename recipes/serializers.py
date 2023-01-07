@@ -62,7 +62,7 @@ class ShopIngredientCategorySerializer(serializers.ModelSerializer):
 
 
 class IngredientCategorySerializer(serializers.ModelSerializer):
-    sorting = ShopIngredientCategory(many=True)
+    sorting = ShopIngredientCategorySerializer(many=True)
 
     class Meta:
         model = IngredientCategory

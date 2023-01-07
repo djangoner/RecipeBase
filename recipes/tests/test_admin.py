@@ -1,6 +1,5 @@
 from django.test import TestCase
 from django.contrib.admin.sites import AdminSite
-from django.contrib.admin.options import ModelAdmin
 from recipes.models import Recipe
 from django.db.models.query import QuerySet
 from recipes.admin import RecipeAdmin
@@ -16,7 +15,7 @@ class MockSuperUser:
 
 
 request = MockRequest()
-request.user = MockSuperUser()
+request.user = MockSuperUser()  # type: ignore
 
 
 class RecipesAdminTestCase(TestCase):

@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.conf.urls import include
 from rest_framework import routers
 
 from recipes.views import (
@@ -22,7 +21,6 @@ from recipes.views import (
     ProductListItemViewset,
     ProductListWeekViewset,
     RecipeImageViewset,
-    RecipeIngredientViewset,
     RecipePlanViewset,
     RecipePlanWeekViewset,
     RecipeRatingViewset,
@@ -51,4 +49,4 @@ router.register("recipe_rating", RecipeRatingViewset)
 router.register("product_list_week", ProductListWeekViewset)
 router.register("product_list_item", ProductListItemViewset)
 
-urlpatterns = []
+urlpatterns: list = []

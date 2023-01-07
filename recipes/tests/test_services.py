@@ -1,14 +1,19 @@
 import logging
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from recipes.models import ProductListItem, ProductListWeek, RecipePlan
 
 from recipes.services import plans, measurings
-from recipes.tests.factories import IngredientFactory, RecipeIngredientFactory, RecipePlanWeekFactory, RegularIngredientFactory
+from recipes.tests.factories import (
+    IngredientFactory,
+    RecipeIngredientFactory,
+    RecipePlanWeekFactory,
+    RegularIngredientFactory,
+)
 
 logging.disable(logging.CRITICAL)
 
 
-class MeasuringsTestCase(TestCase):
+class MeasuringsTestCase(SimpleTestCase):
     def test_short_text_short(self):
         assert not (measurings.short_text("X" * 50, 100).endswith("..."))
 
@@ -16,7 +21,7 @@ class MeasuringsTestCase(TestCase):
         assert measurings.short_text("X" * 101, 100).endswith("...")
 
     def test_amount_to_grams(self):
-        assert measurings.amount_to_grams(None, "g") == None
+        assert measurings.amount_to_grams(None, "g") is None
         assert measurings.amount_to_grams(1, "g") == 1
         assert measurings.amount_to_grams(1, "kg") == 1000
         assert measurings.amount_to_grams(4, "cup") == 1000
@@ -24,14 +29,14 @@ class MeasuringsTestCase(TestCase):
 
 
 class PlansConvertTestCase(TestCase):
-    def test_is_convertable_true(self):
-        assert plans.is_convertible("g") == True
-        assert plans.is_convertible("kg") == True
-        assert plans.is_convertible("l") == True
-        assert plans.is_convertible("ml") == True
-        assert plans.is_convertible("unknown") == False
-        assert plans.is_convertible("l", advanced=False) == False
-        assert plans.is_convertible("ml", advanced=False) == False
+    def test_is_convertible_true(self):
+        assert plans.is_convertible("g") is True
+        assert plans.is_convertible("kg") is True
+        assert plans.is_convertible("l") is True
+        assert plans.is_convertible("ml") is True
+        assert plans.is_convertible("unknown") is False
+        assert plans.is_convertible("l", advanced=False) is False
+        assert plans.is_convertible("ml", advanced=False) is False
 
     def test_convert_grams_basic(self):
         # Basic
@@ -133,6 +138,39 @@ class PlansGenerationTestCase(TestCase):
             },
         )
 
+    def test_week_regular_ingredient_only(self):
+        week = RecipePlanWeekFactory.create()
+        # week_plans: list[RecipePlan] = week.plans.all()
+        ingredient = IngredientFactory()
+        ingredient2 = IngredientFactory()
+        ings = []
+
+        RegularIngredientFactory(ingredient=ingredient, day=2, amount=150, amount_type="g")
+        RegularIngredientFactory(ingredient=ingredient2, amount=50, amount_type="g")
+
+        ingredients = plans.get_week_ingredients(week)
+        self.assertDictEqual(
+            ingredients,
+            {
+                ingredient.title: {
+                    "measuring": None,
+                    "amount": 0,
+                    "amounts": [["g", 150]],
+                    "min_day": 2,
+                    "ingredient": ingredient,
+                    "ingredients": ings,
+                },
+                ingredient2.title: {
+                    "measuring": None,
+                    "amount": 0,
+                    "amounts": [["g", 50]],
+                    "min_day": 7,
+                    "ingredient": ingredient2,
+                    "ingredients": ings,
+                },
+            },
+        )
+
     def test_plan_week_basic(self):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
@@ -162,7 +200,6 @@ class PlansGenerationTestCase(TestCase):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
         ingredient = IngredientFactory()
-        ingredient2 = IngredientFactory()
         ings = []
 
         ings.append(
@@ -195,7 +232,6 @@ class PlansGenerationTestCase(TestCase):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
         ingredient = IngredientFactory(item_weight=150)
-        ingredient2 = IngredientFactory()
         ings = []
 
         ings.append(
@@ -228,7 +264,6 @@ class PlansGenerationTestCase(TestCase):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
         ingredient = IngredientFactory(item_weight=150)
-        ingredient2 = IngredientFactory()
         ings = []
 
         ings.append(
@@ -285,9 +320,9 @@ class PlansGenerationTestCase(TestCase):
         assert item.amount_type == "g"
         assert item.ingredient == ingredient
         assert item.title == ingredient.title
-        assert item.is_auto == True
+        assert item.is_auto is True
         assert item.day == 0
-        assert item.is_deleted == False
+        assert item.is_deleted is False
 
         # Test removing from product list
         week.plans.all().delete()

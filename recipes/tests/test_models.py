@@ -1,5 +1,5 @@
 from django.test import TestCase
-from recipes.models import DESC_LENGTH, RegularIngredient, gen_uuid, get_default_comments, recipe_image_upload_to
+from recipes.models import DESC_LENGTH, gen_uuid, get_default_comments, recipe_image_upload_to
 from recipes.tests.factories import (
     IngredientCategoryFactory,
     IngredientFactory,
@@ -55,10 +55,10 @@ class ModelsTestCase(TestCase):
         assert recipe_content2.get_short_description() == "a" * DESC_LENGTH + "..."
 
     def test_recipe_image(self):
-        image_title = RecipeImageFactory.build(title="Title")
+        image_title = RecipeImageFactory(title="Title")
         assert str(image_title) == "Title"
 
-        image_no_title = RecipeImageFactory.build(title="")
+        image_no_title = RecipeImageFactory(title="")
         assert str(image_no_title) == f"#{image_no_title.id} {image_no_title.image}"
 
     def test_ingredient(self):
@@ -78,7 +78,7 @@ class ModelsTestCase(TestCase):
         assert str(tag) == tag.title
         assert tag.recipes_count() == 0
 
-        recipe = RecipeFactory.create()
+        recipe = RecipeFactory()
         recipe.tags.add(tag)
         assert tag.recipes_count() == 1
 

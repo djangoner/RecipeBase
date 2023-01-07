@@ -1,10 +1,8 @@
-from django.shortcuts import render
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 
 from tasks.models import Task, TaskCategory
 from tasks.serializers import (
     TaskCategorySerializer,
-    TaskSerializer,
     TaskNestedSerializer,
 )
 

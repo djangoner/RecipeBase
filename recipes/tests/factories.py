@@ -20,10 +20,11 @@ from recipes.models import (
     User,
 )
 
+
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = User
-        django_get_or_create = ("username", )
+        django_get_or_create = ("username",)
 
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
@@ -112,6 +113,7 @@ class RecipePlanFactory(DjangoModelFactory):
     meal_time = factory.SubFactory(MealTimeFactory)
     recipe = factory.SubFactory(RecipeFactory)
 
+
 class ProductListItemFactory(DjangoModelFactory):
     class Meta:
         model = ProductListItem
@@ -122,6 +124,7 @@ class ProductListItemFactory(DjangoModelFactory):
     is_auto = True
     is_deleted = False
     is_completed = False
+
 
 class RecipePlanWeekFactory(DjangoModelFactory):
     class Meta:
@@ -135,12 +138,15 @@ class RecipePlanWeekFactory(DjangoModelFactory):
 
     @factory.post_generation
     def plans(self, create, extracted):
+        if not create:
+            return
         if extracted:
             for plan in extracted:
                 self.plans.add(plan)
         else:
             for i in range(7):
                 self.plans.add(RecipePlanFactory(week=self, day=i + 1))
+
 
 class ProductListWeekFactory(DjangoModelFactory):
     class Meta:
@@ -159,19 +165,22 @@ class ProductListWeekFactory(DjangoModelFactory):
         for plan in extracted:
             self.items.add(plan)
 
+
 class ShopFactory(DjangoModelFactory):
     class Meta:
         model = Shop
-        django_get_or_create = ("title", )
+        django_get_or_create = ("title",)
 
     title = factory.Faker("name")
+
 
 class IngredientCategoryFactory(DjangoModelFactory):
     class Meta:
         model = IngredientCategory
-        django_get_or_create = ("title", )
+        django_get_or_create = ("title",)
 
     title = factory.Faker("name")
+
 
 class ShopIngredientCategoryFactory(DjangoModelFactory):
     class Meta:

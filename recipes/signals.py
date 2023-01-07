@@ -1,7 +1,7 @@
 from datetime import datetime
 from time import time
 
-from django.db.models.signals import m2m_changed, post_save, pre_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from recipes.models import Recipe, RecipeIngredient, RecipePlan, RecipePlanWeek

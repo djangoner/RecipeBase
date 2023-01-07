@@ -1,15 +1,13 @@
 import logging
 from datetime import datetime
 
-from django.db.models import Count, F, Func, Max, Prefetch, Q, Value
-from django.shortcuts import get_object_or_404, render
+from django.db.models import Count, F, Max, Q
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters import rest_framework as filters
 from rest_framework import (
     decorators,
-    exceptions,
     response,
-    serializers,
     viewsets,
     permissions,
 )
@@ -107,9 +105,9 @@ class RecipeFilterSet(filters.FilterSet):
 
         q = [Q(ratings__user=user)]
 
-        if rating_mode == True:
+        if rating_mode is True:
             q.append(Q(ratings__rating__gte=rating))
-        elif rating_mode == False:
+        elif rating_mode is False:
             q.append(Q(ratings__rating__lte=rating))
         else:
             q.append(Q(ratings__rating=rating))

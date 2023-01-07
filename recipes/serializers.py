@@ -2,7 +2,7 @@ from datetime import datetime, date
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 from users.models import User
-from users.serializers import ShortUserSerializer, UserSerializer
+from users.serializers import ShortUserSerializer
 import math
 
 from recipes.models import (
@@ -53,7 +53,7 @@ class ShopShortSerializer(serializers.ModelSerializer):
         exclude = ("category_sort",)
 
 
-class ShopIngredientCategory(serializers.ModelSerializer):
+class ShopIngredientCategorySerializer(serializers.ModelSerializer):
     shop = ShopShortSerializer()
 
     class Meta:
@@ -149,6 +149,7 @@ class RegularIngredientSerializer(serializers.ModelSerializer):
         model = RegularIngredient
         fields = "__all__"
 
+
 class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
 
     # def to_representation(self, instance):
@@ -192,7 +193,7 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
 
     class Meta:
         model = Recipe
-        exclude = ()
+        exclude: tuple[str] | tuple = ()
         read_only_fields = ("author",)
         depth = 2
 
@@ -203,10 +204,10 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
     def get_short_description_str(self, obj: Recipe):
         return obj.get_short_description()
 
-    def get_last_cooked(self, obj: Recipe) -> date:
+    def get_last_cooked(self, obj: Recipe) -> date | None:
         return getattr(obj, "last_cooked", None)
 
-    def get_cooked_times(self, obj: Recipe):
+    def get_cooked_times(self, obj: Recipe) -> int | None:
         return getattr(obj, "cooked_times", None)
 
     def get_is_planned(self, obj: Recipe) -> bool:
@@ -222,13 +223,13 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
 
 
 class RecipeShortSerializer(RecipeSerializer):
-    tags = None
+    tags = None  # type: ignore
     # ingredients = None
-    ratings = None
-    author = None
+    ratings = None  # type: ignore
+    author = None  # type: ignore
 
     class Meta(RecipeSerializer.Meta):
-        exclude = list(RecipeSerializer.Meta.exclude) + ["author"]
+        exclude = tuple(list(RecipeSerializer.Meta.exclude) + ["author"])
 
 
 class MealTimeSerializer(serializers.ModelSerializer):
@@ -274,7 +275,7 @@ class RecipePlanWeekSerializer(WritableNestedModelSerializer, serializers.ModelS
 
 
 class RecipePlanWeekShortSerializer(RecipePlanWeekSerializer, serializers.ModelSerializer):
-    plans = None
+    plans = None  # type: ignore
 
 
 class ProductListItemSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -351,4 +352,4 @@ class ProductListWeekSerializer(WritableNestedModelSerializer, serializers.Model
 
 
 class ProductListWeekShortSerializer(ProductListWeekSerializer):
-    items = None
+    items = None  # type: ignore

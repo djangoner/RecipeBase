@@ -6,23 +6,24 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import F
-from django.db.models.fields import related
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 from adminsortable.models import SortableMixin
 
-from recipes.services.measurings import MEASURING_CONVERT, MEASURING_TYPES, short_text
+from recipes.services.measurings import MEASURING_TYPES, short_text
 
 # // Helpers
 DESC_LENGTH = 80
 User = get_user_model()
 
-def gen_uuid() ->str:
-    return uuid.uuid4()
 
-def recipe_image_upload_to(instance, filename):
+def gen_uuid() -> str:
+    return str(uuid.uuid4())
+
+
+def recipe_image_upload_to(instance: "RecipeImage", filename: str):
     ext = filename.split(".")[-1]
-    uuid =gen_uuid()
+    uuid = gen_uuid()
     return f"uploads/recipe_images/{instance.recipe.pk}/{uuid}.{ext}"
 
 
@@ -67,7 +68,7 @@ class Recipe(models.Model):
 
         return short_text(strip_tags(self.content) or strip_tags(self.content_source), length)
 
-    get_short_description.short_description = _("Краткое содержание")
+    get_short_description.short_description = _("Краткое содержание")  # type: ignore
 
 
 class RecipeImage(models.Model):
@@ -154,7 +155,8 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = _("Ингредиенты рецептов")
 
     def __str__(self):
-        return f"{self.recipe}: {self.ingredient}"
+        return f"{self.recipe}2: {self.ingredient}"
+
 
 class RegularIngredient(models.Model):
     ingredient = models.OneToOneField(
@@ -179,6 +181,7 @@ class RegularIngredient(models.Model):
     def __str__(self):
         return f"{self.ingredient}"
 
+
 class RecipeTag(models.Model):
     title = models.CharField(_("Название метки"), max_length=50)
 
@@ -193,7 +196,7 @@ class RecipeTag(models.Model):
     def recipes_count(self):
         return self.recipes.count()
 
-    recipes_count.verbose_name = _("Количество рецептов")
+    recipes_count.verbose_name = _("Количество рецептов")  # type: ignore
 
 
 class MealTime(models.Model):

@@ -66,7 +66,7 @@ class RecipeAdmin(admin.ModelAdmin):
     def get_cooked_times(self, obj):
         return getattr(obj, "cooked_times", None)
 
-    get_cooked_times.short_description = "Приготовлений"
+    get_cooked_times.short_description = "Приготовлений"  # type: ignore
 
 
 @admin.register(Ingredient)
@@ -82,6 +82,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
     list_display = ["recipe", "ingredient"]
     search_fields = ["recipe__title", "ingredient__title"]
     autocomplete_fields = ["recipe", "ingredient"]
+
 
 @admin.register(RegularIngredient)
 class RegularIngredientAdmin(admin.ModelAdmin):

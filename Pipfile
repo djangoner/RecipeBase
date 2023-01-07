@@ -24,6 +24,8 @@ pytest-xdist = "*"
 coverage = "*"
 factory_boy = "*"
 black = "*"
+mypy = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.11"

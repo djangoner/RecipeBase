@@ -60,7 +60,7 @@ class ViewsTestCase(TestCase):
         assert resp_json["parent"] == parent_task.id
         created_id = resp_json["id"]
 
-        ## Check parent task
+        # Check parent task
 
         resp = self.client.get(f"/api/v1/task/{parent_task.id}/")
         assert resp.status_code == 200

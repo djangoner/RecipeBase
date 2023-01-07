@@ -3,7 +3,9 @@ from django.contrib.auth.models import User
 import logging
 
 from users.tests.factories import TokenFactory, UserFactory
+
 logging.disable(logging.CRITICAL)
+
 
 class UserViewsTestCase(TestCase):
     user: User
@@ -27,11 +29,13 @@ class UserViewsTestCase(TestCase):
         self.client.logout()
         user: User = UserFactory.create()
 
-        resp = self.client.post("/api/v1/auth/token/", {
-            "username": user.username,
-            "password": "test123",
-        })
-        # print(resp.json())
+        resp = self.client.post(
+            "/api/v1/auth/token/",
+            {
+                "username": user.username,
+                "password": "test123",
+            },
+        )
         assert resp.status_code == 200
         resp_json = resp.json()
 

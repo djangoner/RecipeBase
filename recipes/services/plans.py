@@ -1,10 +1,7 @@
-from datetime import datetime
 import logging
-import math
 from typing import List, Tuple
 
 from recipes.models import (
-    Ingredient,
     ProductListItem,
     ProductListWeek,
     RecipeIngredient,
@@ -22,11 +19,11 @@ def is_convertible(measuring: str, advanced: bool = True) -> bool:
     return measuring in MEASURING_CONVERT or (advanced and measuring in CONVERT_ADVANCED)
 
 
-def convert_all_to_grams(measurings: List[Tuple[str, int]]) -> Tuple[str, int]:
+def convert_all_to_grams(measurings: List[Tuple[str, int]]) -> Tuple[str, int | float]:
     res: float = 0
     all_meas = "g"
 
-    non_empty = list(filter(lambda m: m[1],measurings))
+    non_empty = list(filter(lambda m: m[1], measurings))
     all_liquids = all([meas in MEASURING_LIQUIDS for meas, amount in non_empty])
     all_normal = all([is_convertible(meas, advanced=False) for meas, amount in non_empty])
 
@@ -42,7 +39,7 @@ def convert_all_to_grams(measurings: List[Tuple[str, int]]) -> Tuple[str, int]:
                 res += amount
                 all_meas = "ml"
             else:
-                logging.debug(f"[liquids]Invalid measuring: {meas}") # pragma: no cover
+                logging.debug(f"[liquids]Invalid measuring: {meas}")  # pragma: no cover
         elif all_normal:
             if is_convertible(meas, advanced=False):
                 amount_grams = amount_to_grams(amount, meas)
@@ -50,40 +47,44 @@ def convert_all_to_grams(measurings: List[Tuple[str, int]]) -> Tuple[str, int]:
             # elif meas == "items":
             #     res += amount
             else:
-                logging.debug(f"[grams]Invalid measuring: {meas}")# pragma: no cover
+                logging.debug(f"[grams]Invalid measuring: {meas}")  # pragma: no cover
         else:
             logging.debug(f"[mixed]Invalid measuring: {meas}")
 
     return all_meas, res
 
-def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
-    """Generate list of ingredients for week"""
-    default_ing = {
+
+def get_default_ing() -> dict:
+    return {
         "measuring": None,
-        "amounts": [],
+        "amounts": list(),
         "amount": 0,
         "min_day": 7,
         "ingredient": None,
-        "ingredients": [],
+        "ingredients": list(),
     }
+
+
+def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
+    """Generate list of ingredients for week"""
     res = {}
 
     # Add week plan ingredients
+    plan: RecipePlan
     for plan in week.plans.all():
-        plan: RecipePlan
         plan.check_date()
         recipe = plan.recipe
         ingredients = recipe.ingredients.all()
 
+        ing: RecipeIngredient
         for ing in ingredients:
-            ing: RecipeIngredient
             ing_name = ing.ingredient.title
 
             if not ing.ingredient.need_buy:  # Skip not required to buy ingredients
                 continue
 
-            if not ing_name in res:  # Create default ingredient
-                res[ing_name] = default_ing.copy()
+            if ing_name not in res:  # Create default ingredient
+                res[ing_name] = get_default_ing()
                 res[ing_name]["ingredient"] = ing.ingredient
 
             # -- Add ingredient amount
@@ -97,10 +98,13 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
     # Add regular ingredients
     for regular_ing in RegularIngredient.objects.all():
         ing_name = regular_ing.ingredient.title
+        if ing_name not in res:  # Create default ingredient
+            res[ing_name] = get_default_ing()
+            res[ing_name]["ingredient"] = regular_ing.ingredient
+
         res[ing_name]["amounts"].append([regular_ing.amount_type, regular_ing.amount])
         if regular_ing.day and regular_ing.day < res[ing_name]["min_day"]:
             res[ing_name]["min_day"] = regular_ing.day
-
 
     return res
 
@@ -109,9 +113,8 @@ def get_plan_week_ingredients(week: RecipePlanWeek) -> dict:
     """Get summarized list of products for week"""
 
     ingredients = get_week_ingredients(week)
-    print("2: ", ingredients)
 
-    ## // Analyze amounts
+    # // Analyze amounts
 
     for ing_name, info in ingredients.items():
 
@@ -151,13 +154,14 @@ def update_plan_week(week: RecipePlanWeek):
     plan_week, _ = ProductListWeek.objects.get_or_create(year=week.year, week=week.week)
     edited_plans = []
 
-    if ingredients is None or not isinstance(ingredients, dict):# pragma: no cover
+    if ingredients is None or not isinstance(ingredients, dict):  # pragma: no cover
         log.warning(f"Strange ingredients: {ingredients}")
         return
 
     for ing_name, ing_info in ingredients.items():
-        ing: RecipeIngredient = ing_info["ingredient"]
+        # ing: RecipeIngredient = ing_info["ingredient"]
 
+        plan_item: ProductListItem
         plan_item, _ = plan_week.items.update_or_create(
             ingredient=ing_info["ingredient"],
             is_auto=True,
@@ -169,7 +173,6 @@ def update_plan_week(week: RecipePlanWeek):
                 "is_deleted": False,
             },
         )
-        plan_item: ProductListItem
         plan_item.ingredients.set(ing_info["ingredients"])
         plan_item.save()
         edited_plans.append(plan_item.id)

@@ -1,8 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db.models import F
-from django.shortcuts import render
-from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
-from rest_framework import decorators, permissions, response, serializers, viewsets
+from drf_spectacular.utils import extend_schema
+from rest_framework import decorators, permissions, response, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response

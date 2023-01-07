@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
-from os import environ, getenv
+from os import getenv
 from pathlib import Path
+import sys
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -39,6 +41,7 @@ SECRET_KEY = getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = getenv("DEBUG", False)
 DEBUGBAR = getenv("DEBUGBAR", False)
+TESTING = "pytest" in sys.modules
 
 ALLOWED_HOSTS = getenv("ALLOWED_HOSTS", "*").split(" ")
 
@@ -105,13 +108,18 @@ CSRF_TRUSTED_ORIGINS = [
     *getenv_list("TRUSTED_ORIGINS"),
 ]
 
+if TESTING:
+    PASSWORD_HASHERS = [
+        "django.contrib.auth.hashers.MD5PasswordHasher",
+    ]
+
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 if os.environ.get("USE_DB_ENGINE") or os.environ.get("DB_ENGINE"):
     CONN_MAX_AGE = 100
-    DATABASES = {
+    DATABASES: dict[str, Any] = {
         "default": {
             "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
             "NAME": os.environ.get("DB_NAME", "db.sqlite"),
@@ -124,10 +132,10 @@ if os.environ.get("USE_DB_ENGINE") or os.environ.get("DB_ENGINE"):
     }
 else:
     CONN_MAX_AGE = 5
-    DATABASES = {
+    DATABASES: dict[str, Any] = {  # type: ignore
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": str(BASE_DIR / "db.sqlite3"),
             "OPTIONS": {
                 "timeout": 20,
             },
@@ -154,7 +162,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTHENTICATION_BACKENDS = ['users.backends.CustomAuthorizationBackend']
+AUTHENTICATION_BACKENDS = ["users.backends.CustomAuthorizationBackend"]
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

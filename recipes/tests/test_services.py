@@ -108,15 +108,15 @@ class PlansGenerationTestCase(TestCase):
         ings = []
 
         ings.append(
-            RecipeIngredientFactory(recipe=week_plans[0].recipe, ingredient=ingredient, amount=100, amount_type="g")
-        )
-
-        RecipeIngredientFactory(recipe=week_plans[0].recipe, amount=100, amount_type="g", ingredient__need_buy=False)
-        ings.append(
             RecipeIngredientFactory(recipe=week_plans[1].recipe, ingredient=ingredient, amount=100, amount_type="g")
         )
 
-        RegularIngredientFactory(ingredient=ingredient, amount=150, amount_type="g")
+        RecipeIngredientFactory(recipe=week_plans[1].recipe, amount=100, amount_type="g", ingredient__need_buy=False)
+        ings.append(
+            RecipeIngredientFactory(recipe=week_plans[2].recipe, ingredient=ingredient, amount=100, amount_type="g")
+        )
+
+        RegularIngredientFactory(ingredient=ingredient, day=1, amount=150, amount_type="g")
 
         ingredients = plans.get_week_ingredients(week)
         self.assertDictEqual(

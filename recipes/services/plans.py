@@ -98,6 +98,9 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
     for regular_ing in RegularIngredient.objects.all():
         ing_name = regular_ing.ingredient.title
         res[ing_name]["amounts"].append([regular_ing.amount_type, regular_ing.amount])
+        if regular_ing.day and regular_ing.day < res[ing_name]["min_day"]:
+            res[ing_name]["min_day"] = regular_ing.day
+
 
     return res
 

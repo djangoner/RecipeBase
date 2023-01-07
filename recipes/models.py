@@ -163,6 +163,12 @@ class RegularIngredient(models.Model):
         related_name="regular_ingredients",
         verbose_name=_("Ингредиент"),
     )
+    day = models.PositiveSmallIntegerField(
+        _("День недели"),
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1), MaxValueValidator(7)],
+    )
     amount = models.FloatField(_("Количество"), max_length=15)
     amount_type = models.CharField(_("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15)
 

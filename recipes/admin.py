@@ -85,7 +85,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 
 @admin.register(RegularIngredient)
 class RegularIngredientAdmin(admin.ModelAdmin):
-    list_display = ["ingredient"]
+    list_display = ["ingredient", "amount", "amount_type"]
     search_fields = ["ingredient__title"]
     autocomplete_fields = ["ingredient"]
 

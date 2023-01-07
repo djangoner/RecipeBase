@@ -14,6 +14,7 @@ from recipes.models import (
     RecipePlanWeek,
     RecipeRating,
     RecipeTag,
+    RegularIngredient,
     Shop,
     ShopIngredientCategory,
 )
@@ -78,6 +79,12 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
+    list_display = ["recipe", "ingredient"]
+    search_fields = ["recipe__title", "ingredient__title"]
+    autocomplete_fields = ["recipe", "ingredient"]
+
+@admin.register(RegularIngredient)
+class RegularIngredientAdmin(admin.ModelAdmin):
     list_display = ["recipe", "ingredient"]
     search_fields = ["recipe__title", "ingredient__title"]
     autocomplete_fields = ["recipe", "ingredient"]

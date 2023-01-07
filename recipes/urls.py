@@ -28,6 +28,7 @@ from recipes.views import (
     RecipeRatingViewset,
     RecipeTagViewset,
     RecipeViewset,
+    RegularIngredientViewset,
     ShopViewset,
     IngredientCategoryViewset,
     StatsViewset,
@@ -38,6 +39,7 @@ router.register("stats", StatsViewset, basename="stats")
 router.register("recipes", RecipeViewset)
 router.register("recipe_images", RecipeImageViewset)
 # router.register("recipe_ingredients", RecipeIngredientViewset)
+router.register("regular_ingredients", RegularIngredientViewset)
 router.register("recipe_tags", RecipeTagViewset)
 router.register("ingredients", IngredientViewset)
 router.register("ingredient_category", IngredientCategoryViewset)

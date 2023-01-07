@@ -95,7 +95,7 @@ export default {
       if (!this.plan) {
         return '-';
       }
-      let dayRecipes = this.plan?.plans.filter((plan) => plan.day == day_idx);
+      let dayRecipes = this.plan?.plans.filter((plan) => plan.day == day_idx && !plan.recipe.is_archived);
 
       let ratings = dayRecipes.map((r) => {
         let items = r?.recipe?.ratings.map((r) => {

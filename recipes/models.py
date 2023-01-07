@@ -156,6 +156,29 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         return f"{self.recipe}: {self.ingredient}"
 
+class RegularIngredient(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        models.CASCADE,
+        related_name="regular_ingredients",
+        verbose_name=_("Рецепт"),
+        blank=True,
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        models.CASCADE,
+        related_name="regular_ingredients",
+        verbose_name=_("Ингредиент"),
+    )
+    amount = models.FloatField(_("Количество"), max_length=15)
+    amount_type = models.CharField(_("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15)
+
+    class Meta:
+        verbose_name = _("Регулярный ингредиент")
+        verbose_name_plural = _("Регулярные ингредиенты")
+
+    def __str__(self):
+        return f"{self.recipe}: {self.ingredient}"
 
 class RecipeTag(models.Model):
     title = models.CharField(_("Название метки"), max_length=50)

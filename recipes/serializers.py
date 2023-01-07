@@ -17,6 +17,7 @@ from recipes.models import (
     RecipePlanWeek,
     RecipeRating,
     RecipeTag,
+    RegularIngredient,
     Shop,
     IngredientCategory,
     ShopIngredientCategory,
@@ -142,6 +143,11 @@ class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.Mode
             return round(obj.amount * obj.ingredient.item_weight / obj.ingredient.min_pack_size * obj.ingredient.price)
         return round(packs * obj.ingredient.price)
 
+
+class RegularIngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RegularIngredient
+        fields = "__all__"
 
 class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
 

@@ -27,6 +27,7 @@ from recipes.models import (
     RecipeRating,
     RecipeTag,
     IngredientCategory,
+    RegularIngredient,
     Shop,
 )
 from tasks.models import Task
@@ -45,6 +46,7 @@ from recipes.serializers import (
     RecipeSerializer,
     RecipeTagSerializer,
     IngredientCategorySerializer,
+    RegularIngredientSerializer,
     ShopSerializer,
 )
 from recipes.services.measurings import (
@@ -238,6 +240,11 @@ class IngredientViewset(viewsets.ModelViewSet):
 class RecipeIngredientViewset(viewsets.ModelViewSet):
     queryset = RecipeIngredient.objects.order_by(*RecipeIngredient._meta.ordering).all()
     serializer_class = RecipeIngredientSerializer
+
+
+class RegularIngredientViewset(viewsets.ModelViewSet):
+    queryset = RegularIngredient.objects.order_by(*RegularIngredient._meta.ordering).all()
+    serializer_class = RegularIngredientSerializer
 
 
 class RecipeTagViewset(viewsets.ModelViewSet):

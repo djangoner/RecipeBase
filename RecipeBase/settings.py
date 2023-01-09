@@ -249,6 +249,15 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
 }
 
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Recipe Base API",
+    "DESCRIPTION": "Home base of recipes",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SCHEMA_PATH_PREFIX": "/api/v1",
+    # 'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated'],
+}
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

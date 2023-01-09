@@ -33,7 +33,7 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
 
 
 class CsrfExemptSessionAuthenticationScheme(SessionScheme):
-    target_class = "supervisor.serializers.CsrfExemptSessionAuthentication"
+    target_class = "users.backends.CsrfExemptSessionAuthentication"
 
 
 class CustomAuthorizationBackend(ModelBackend):

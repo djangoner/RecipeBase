@@ -53,6 +53,8 @@ from recipes.services.measurings import (
     MEASURING_TYPES,
 )
 from recipes.services.plans import update_plan_week
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import fields
 
 
 class RecipeFilterSet(filters.FilterSet):
@@ -221,6 +223,11 @@ class IngredientViewset(viewsets.ModelViewSet):
     ]
     search_fields = ["title", "description"]
 
+    @extend_schema(
+        responses=inline_serializer(
+            "AmountTypes", {"types": fields.DictField(), "convert": fields.DictField(), "short": fields.DictField()}
+        )
+    )
     @decorators.action(["GET"], detail=False)
     def amount_types(self, request):
 
@@ -403,6 +410,17 @@ class ShopViewset(viewsets.ModelViewSet):
 class StatsViewset(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        responses=inline_serializer(
+            "StatsList",
+            {
+                "recipes": fields.IntegerField(),
+                "ingredients": fields.IntegerField(),
+                "plans": fields.IntegerField(),
+                "tasks": fields.IntegerField(),
+            },
+        )
+    )
     def list(self, request):
         data = {
             "recipes": Recipe.objects.filter(is_archived=False).count(),

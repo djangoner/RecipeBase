@@ -1,12 +1,14 @@
-from datetime import datetime, date
+import math
+from datetime import date, datetime
+
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
-from users.models import User
-from users.serializers import ShortUserSerializer
-import math
 
 from recipes.models import (
     Ingredient,
+    IngredientCategory,
     MealTime,
     ProductListItem,
     ProductListWeek,
@@ -19,10 +21,11 @@ from recipes.models import (
     RecipeTag,
     RegularIngredient,
     Shop,
-    IngredientCategory,
     ShopIngredientCategory,
 )
 from recipes.services.measurings import MEASURING_SHORT, MEASURING_TYPES
+from users.models import User
+from users.serializers import ShortUserSerializer
 
 
 def amount_str(meas: str):
@@ -83,6 +86,7 @@ class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSeria
         representation["category"] = IngredientCategorySerializer(instance.category).data if instance.category else None
         return representation
 
+    @extend_schema_field(OpenApiTypes.NUMBER)
     def get_used_times(self, obj: Recipe):
         return getattr(obj, "used_times", None)
 
@@ -104,17 +108,20 @@ class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.Mode
         representation["ingredient"] = IngredientSerializer(instance.ingredient).data if instance.ingredient else None
         return representation
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_amount_type_str(self, obj: RecipeIngredient):
         return amount_str(obj.amount_type)
 
+    @extend_schema_field(OpenApiTypes.NUMBER)
     def get_packs(self, obj: RecipeIngredient):
-        if not (obj.amount and obj.ingredient and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)):
+        if not (obj.amount and obj.ingredient and obj.ingredient.min_pack_size):
             return 0
 
         # if obj.amount_type == "items":
         #     return obj.amount
         return round(obj.amount / obj.ingredient.min_pack_size, 3)
 
+    @extend_schema_field(OpenApiTypes.NUMBER)
     def get_price_part(self, obj: RecipeIngredient):
         if not (
             obj.ingredient
@@ -129,6 +136,7 @@ class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.Mode
             return round(packs * obj.ingredient.item_weight / obj.ingredient.min_pack_size)
         return round(packs * obj.ingredient.price)
 
+    @extend_schema_field(OpenApiTypes.NUMBER)
     def get_price_full(self, obj: RecipeIngredient):
         if not (
             obj.ingredient
@@ -201,15 +209,19 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
         self.fields["author"] = ShortUserSerializer()
         return super().to_representation(instance)
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_short_description_str(self, obj: Recipe):
         return obj.get_short_description()
 
+    @extend_schema_field(OpenApiTypes.DATE)
     def get_last_cooked(self, obj: Recipe) -> date | None:
         return getattr(obj, "last_cooked", None)
 
+    @extend_schema_field(OpenApiTypes.NUMBER)
     def get_cooked_times(self, obj: Recipe) -> int | None:
         return getattr(obj, "cooked_times", None)
 
+    @extend_schema_field(OpenApiTypes.BOOL)
     def get_is_planned(self, obj: Recipe) -> bool:
         last_cooked = self.get_last_cooked(obj)
         if not last_cooked:
@@ -294,6 +306,7 @@ class ProductListItemSerializer(WritableNestedModelSerializer, serializers.Model
         read_only_fields = ("is_auto", "ingredient", "ingredients", "created", "edited")
         # depth = 1
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_amount_type_str(self, obj: ProductListItem):
         return amount_str(obj.amount_type)
 
@@ -305,14 +318,16 @@ class ProductListItemSerializer(WritableNestedModelSerializer, serializers.Model
 
         return representation
 
+    @extend_schema_field(OpenApiTypes.NUMBER)
     def get_packs(self, obj: ProductListItem):
-        if not (obj.amount and obj.ingredient and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)):
+        if not (obj.amount and obj.ingredient and obj.ingredient.min_pack_size):
             return 0
 
         # if obj.amount_type == "items":
         #     return obj.amount
         return round(obj.amount / obj.ingredient.min_pack_size, 3)
 
+    @extend_schema_field(OpenApiTypes.NUMBER)
     def get_price_part(self, obj: ProductListItem):
         if not (
             obj.ingredient
@@ -327,6 +342,7 @@ class ProductListItemSerializer(WritableNestedModelSerializer, serializers.Model
             return round(packs * obj.ingredient.item_weight / obj.ingredient.min_pack_size)
         return round(packs * obj.ingredient.price)
 
+    @extend_schema_field(OpenApiTypes.NUMBER)
     def get_price_full(self, obj: ProductListItem):
         if not (
             obj.ingredient

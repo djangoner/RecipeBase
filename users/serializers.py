@@ -22,9 +22,9 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ["last_login", "date_joined", "is_staff"]
         depth = 1
 
-    def get_permissions(self, obj):
-        return obj.get_all_permissions()
+    def get_permissions(self, obj) -> list[str]:
+        return sorted(obj.get_all_permissions())
 
 
 class ShortUserSerializer(UserSerializer):
-    profile = None
+    profile = None  # type: ignore

@@ -132,7 +132,7 @@ class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.Mode
             return
 
         packs = self.get_packs(obj)
-        if obj.amount_type == "items" and obj.ingredient.item_weight:
+        if obj.amount_type == "items" and obj.ingredient.item_weight and obj.ingredient.min_pack_size:
             return round(packs * obj.ingredient.item_weight / obj.ingredient.min_pack_size)
         return round(packs * obj.ingredient.price)
 
@@ -147,7 +147,7 @@ class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.Mode
             return
 
         packs = math.ceil(self.get_packs(obj))
-        if obj.amount_type == "items" and obj.ingredient.item_weight:
+        if obj.amount_type == "items" and obj.ingredient.item_weight and obj.ingredient.min_pack_size:
             return round(obj.amount * obj.ingredient.item_weight / obj.ingredient.min_pack_size * obj.ingredient.price)
         return round(packs * obj.ingredient.price)
 
@@ -338,7 +338,7 @@ class ProductListItemSerializer(WritableNestedModelSerializer, serializers.Model
             return
 
         packs = self.get_packs(obj)
-        if obj.amount_type == "items" and obj.ingredient.item_weight:
+        if obj.amount_type == "items" and obj.ingredient.item_weight and obj.ingredient.min_pack_size:
             return round(packs * obj.ingredient.item_weight / obj.ingredient.min_pack_size)
         return round(packs * obj.ingredient.price)
 
@@ -353,7 +353,7 @@ class ProductListItemSerializer(WritableNestedModelSerializer, serializers.Model
             return
 
         packs = math.ceil(self.get_packs(obj))
-        if obj.amount_type == "items" and obj.ingredient.item_weight:
+        if obj.amount_type == "items" and obj.ingredient.item_weight and obj.ingredient.min_pack_size:
             return round(obj.amount * obj.ingredient.item_weight / obj.ingredient.min_pack_size * obj.ingredient.price)
         return round(packs * obj.ingredient.price)
 

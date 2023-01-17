@@ -53,7 +53,8 @@ from recipes.services.measurings import (
     MEASURING_TYPES,
 )
 from recipes.services.plans import update_plan_week
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from rest_framework import fields
 
 
@@ -180,7 +181,7 @@ class RecipeViewset(viewsets.ModelViewSet):
         )
         .annotate(cooked_times=Count(F("plans__date")))
         .annotate(last_cooked=Max(F("plans__date")))
-        .order_by(*Recipe._meta.ordering)
+        .order_by(*Recipe._meta.ordering or [])
         .distinct()
     )
     serializer_class = RecipeSerializer
@@ -209,7 +210,7 @@ class IngredientViewset(viewsets.ModelViewSet):
     queryset = (
         Ingredient.objects.prefetch_related("category")
         .annotate(used_times=Count(F("recipe_ingredients")))
-        .order_by(*Ingredient._meta.ordering)
+        .order_by(*Ingredient._meta.ordering or [])
         .all()
     )
     serializer_class = IngredientSerializer
@@ -243,25 +244,30 @@ class IngredientViewset(viewsets.ModelViewSet):
 
 
 class RecipeIngredientViewset(viewsets.ModelViewSet):
-    queryset = RecipeIngredient.objects.order_by(*RecipeIngredient._meta.ordering).all()
+    queryset = RecipeIngredient.objects.order_by(*RecipeIngredient._meta.ordering or []).all()
     serializer_class = RecipeIngredientSerializer
 
 
 class RegularIngredientViewset(viewsets.ModelViewSet):
-    queryset = RegularIngredient.objects.order_by(*RegularIngredient._meta.ordering).all()
+    queryset = RegularIngredient.objects.order_by(*RegularIngredient._meta.ordering or []).all()
     serializer_class = RegularIngredientSerializer
 
 
 class RecipeTagViewset(viewsets.ModelViewSet):
-    queryset = RecipeTag.objects.order_by(*RecipeTag._meta.ordering).all()
+    queryset = RecipeTag.objects.order_by(*RecipeTag._meta.ordering or []).all()
     serializer_class = RecipeTagSerializer
 
 
 class MealTimeViewset(viewsets.ModelViewSet):
-    queryset = MealTime.objects.order_by(*MealTime._meta.ordering).all()
+    queryset = MealTime.objects.order_by(*MealTime._meta.ordering or []).all()
     serializer_class = MealTimeSerializer
 
 
+@extend_schema_view(
+    retrieve=extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)]),
+    update=extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)]),
+    destroy=extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)]),
+)
 class RecipePlanWeekViewset(viewsets.ModelViewSet):
     queryset = RecipePlanWeek.objects.prefetch_related(
         "plans",
@@ -324,6 +330,11 @@ class RecipeRatingViewset(viewsets.ModelViewSet):
     serializer_class = RecipeRatingSerializer
 
 
+@extend_schema_view(
+    retrieve=extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)]),
+    update=extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)]),
+    destroy=extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)]),
+)
 class ProductListWeekViewset(viewsets.ModelViewSet):
     queryset = ProductListWeek.objects.prefetch_related(
         "items",
@@ -362,6 +373,7 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
 
         return super().get_object()
 
+    @extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)])
     @decorators.action(["GET"], detail=True)
     def generate(self, request, pk=None):
         week = self.get_object()
@@ -398,12 +410,12 @@ class ProductListItemViewset(viewsets.ModelViewSet):
 
 
 class IngredientCategoryViewset(viewsets.ModelViewSet):
-    queryset = IngredientCategory.objects.order_by(*IngredientCategory._meta.ordering)
+    queryset = IngredientCategory.objects.order_by(*IngredientCategory._meta.ordering or [])
     serializer_class = IngredientCategorySerializer
 
 
 class ShopViewset(viewsets.ModelViewSet):
-    queryset = Shop.objects.order_by(*Shop._meta.ordering)
+    queryset = Shop.objects.order_by(*Shop._meta.ordering or [])
     serializer_class = ShopSerializer
 
 

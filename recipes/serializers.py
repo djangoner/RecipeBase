@@ -72,12 +72,25 @@ class IngredientCategorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class RegularIngredientSerializer(serializers.ModelSerializer):
+    amount_type_str = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RegularIngredient
+        fields = "__all__"
+
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_amount_type_str(self, obj: RecipeIngredient):
+        return amount_str(obj.amount_type)
+
+
 class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     used_times = serializers.SerializerMethodField()
     # category = IngredientCategorySerializer(read_only=True)
     category = serializers.PrimaryKeyRelatedField(
         queryset=IngredientCategory.objects.all(), required=False, allow_null=True, default=None
     )
+    regular_ingredients = RegularIngredientSerializer()
 
     class Meta:
         model = Ingredient
@@ -160,12 +173,6 @@ class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.Mode
 
 class RecipeIngredientReadSerializer(RecipeIngredientSerializer):
     ingredient = IngredientSerializer()
-
-
-class RegularIngredientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RegularIngredient
-        fields = "__all__"
 
 
 class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
@@ -266,6 +273,7 @@ class RecipeShortSerializer(RecipeSerializer):
 
 
 class RecipeIngredientWithRecipeReadSerializer(RecipeIngredientWithRecipeSerializer):
+    ingredient = IngredientReadSerializer()
     recipe = RecipeShortSerializer()
 
 

@@ -108,8 +108,26 @@
               clickable
               :to="{ name: 'recipe', params: { id: ing.recipe.id } }"
             >
-              <small>{{ getRecipeDays(ing.recipe)?.join(',') }}.&nbsp;</small>
+              <small class="ing-day"
+                >{{ getRecipeDays(ing.recipe)?.join(',') }}.&nbsp;</small
+              >
               {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
+            </q-item>
+
+            <q-separator />
+            <q-item
+              v-if="item.ingredient.regular_ingredients"
+              class="items-center q-mt-xs"
+              items_center
+              clickable
+              :to="{
+                name: 'recipe',
+                params: { id: item.ingredient.regular_ingredients.id },
+              }"
+            >
+              <small class="ing-day">-.&nbsp;</small>
+              Регулярный ({{ item.ingredient.regular_ingredients.amount }}
+              {{ item.ingredient.regular_ingredients.amount_type_str }})
             </q-item>
           </q-list>
           <template v-if="item.price_full">
@@ -405,3 +423,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+.ing-day {
+  min-width: 20px;
+}
+</style>

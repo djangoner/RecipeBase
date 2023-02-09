@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { AmountTypeEnum } from './AmountTypeEnum';
+import type { IngredientRead } from './IngredientRead';
 import type { RecipeShort } from './RecipeShort';
 
 /**
@@ -10,7 +11,7 @@ import type { RecipeShort } from './RecipeShort';
  */
 export type RecipeIngredientWithRecipeRead = {
     readonly id: number;
-    ingredient: number;
+    ingredient: IngredientRead;
     readonly amount_type_str: string;
     readonly packs: number;
     readonly price_part: number;

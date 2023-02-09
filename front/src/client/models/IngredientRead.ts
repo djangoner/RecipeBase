@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { IngredientCategory } from './IngredientCategory';
+import type { RegularIngredient } from './RegularIngredient';
 
 /**
  * Adds nested create feature
@@ -11,6 +12,7 @@ export type IngredientRead = {
     readonly id: number;
     readonly used_times: number;
     category: IngredientCategory;
+    regular_ingredients: RegularIngredient;
     title: string;
     description?: string | null;
     /**

@@ -58,11 +58,11 @@ edited?: string,
 /**
  * Ingredients exclude
  */
-ingredientsExclude?: Array<string>,
+ingredientsExclude?: string,
 /**
  * Ingredients include
  */
-ingredientsInclude?: Array<string>,
+ingredientsInclude?: string,
 isArchived?: boolean,
 /**
  * Which field to use when ordering the results.
@@ -90,11 +90,11 @@ sourceLink?: string,
 /**
  * Tags exclude
  */
-tagsExclude?: Array<string>,
+tagsExclude?: string,
 /**
  * Tags include
  */
-tagsInclude?: Array<string>,
+tagsInclude?: string,
 title?: string,
 }): CancelablePromise<PaginatedRecipeReadList> {
         return __request(OpenAPI, {

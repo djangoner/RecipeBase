@@ -2,13 +2,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { RegularIngredient } from './RegularIngredient';
+
 /**
  * Adds nested create feature
  */
 export type Ingredient = {
     readonly id: number;
     readonly used_times: number;
-    category?: number;
+    category?: number | null;
+    regular_ingredients: RegularIngredient;
     title: string;
     description?: string | null;
     /**

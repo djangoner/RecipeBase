@@ -230,7 +230,8 @@ CKEDITOR_CONFIGS = {
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
+        "users.backends.CustomTokenAuthentication",
+        # "rest_framework.authentication.TokenAuthentication",
         # "rest_framework.authentication.SessionAuthentication",
         "users.backends.CsrfExemptSessionAuthentication",
     ],
@@ -256,6 +257,7 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": "/api/v1",
     # 'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated'],
+    "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
 }
 
 LOGGING = {

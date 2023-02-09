@@ -1,38 +1,56 @@
 import { defineStore } from "pinia";
-import { api } from "src/boot/axios";
+import {
+  AuthService,
+  AuthToken,
+  PaginatedUserList,
+  User,
+  UsersService,
+} from "src/client";
+import { OpenAPI } from "src/client";
+
+// eslint-disable-next-line @typescript-eslint/require-await
+const getToken = async () => {
+  return localStorage.getItem("authToken") || "";
+};
+
+OpenAPI.TOKEN = getToken;
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     authToken: localStorage.getItem("authToken"),
-    account: null,
-    users: null,
+    account: null as User | null,
+    users: null as Array<User> | null,
   }),
 
   getters: {
     isAuthenticated(state) {
       return !!state.authToken;
     },
+    permissions(state): Array<string> {
+      return state.account?.permissions || [];
+    },
   },
 
   actions: {
-    async logout() {
-      return new Promise((resolve, reject) => {
+    hasPerm(perm: string): boolean {
+      return this.permissions.includes(perm);
+    },
+
+    async logout(): Promise<void> {
+      return new Promise((resolve) => {
         this.authToken = null;
         localStorage.removeItem("authToken");
-        delete api.defaults.headers.common["Authorization"];
         resolve();
       });
     },
 
-    async login(payload) {
+    async login(payload: AuthToken): Promise<AuthToken> {
       return new Promise((resolve, reject) => {
-        api
-          .post("/auth/token/", payload)
+        AuthService.authTokenCreate({ formData: payload })
           .then((resp) => {
-            const token = resp.data.token;
+            const token: string = resp.token;
 
             localStorage.setItem("authToken", token);
-            api.defaults.headers.common["Authorization"] = "Token  " + token;
             this.authToken = token;
 
             resolve(resp);
@@ -43,12 +61,11 @@ export const useAuthStore = defineStore("auth", {
       });
     },
 
-    async loadAccountInfo() {
+    async loadAccountInfo(): Promise<User> {
       return new Promise((resolve, reject) => {
-        api
-          .get("/users/current_user_info/")
+        UsersService.usersCurrentUserInfoRetrieve()
           .then((resp) => {
-            this.account = resp.data;
+            this.account = resp;
             resolve(resp);
           })
           .catch((err) => {
@@ -57,12 +74,11 @@ export const useAuthStore = defineStore("auth", {
       });
     },
 
-    async loadUsers(payload) {
+    async loadUsers(payload: object): Promise<PaginatedUserList> {
       return new Promise((resolve, reject) => {
-        api
-          .get("/users/", { params: payload })
+        UsersService.usersList(payload)
           .then((resp) => {
-            this.users = resp.data;
+            this.users = resp.results as Array<User>;
             resolve(resp);
           })
           .catch((err) => {
@@ -70,12 +86,11 @@ export const useAuthStore = defineStore("auth", {
           });
       });
     },
-    async updateAccountInfo(payload) {
+    async updateAccountInfo(user: User): Promise<User> {
       return new Promise((resolve, reject) => {
-        api
-          .patch("/auth/account", payload)
+        UsersService.usersUpdate({ id: user?.id, requestBody: user })
           .then((resp) => {
-            Object.assign(this.account, resp.data);
+            this.account = resp;
             resolve(resp);
           })
           .catch((err) => {

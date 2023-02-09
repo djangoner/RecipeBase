@@ -12,7 +12,11 @@
       <div class="flex justify-center items-center" style="min-height: 100px">
         <!-- <q-icon name="restaurant_menu" size="50px" color="grey"></q-icon> -->
         <q-img
-          :src="recipe.images.length > 0 ? recipe.images[0]?.image : '/favicon.png'"
+          :src="
+            recipe?.images && recipe.images.length > 0
+              ? recipe.images[0]?.image
+              : '/favicon.png'
+          "
           placeholder-src="/favicon.png"
           width="100%"
           height="200px"
@@ -51,30 +55,32 @@
   </q-card>
 </template>
 
-<script>
-import { date } from 'quasar';
+<script lang="ts">
 import recipeCardTooltip from 'components/RecipeCardTooltip.vue';
+import { date } from 'quasar';
+import { RecipeRead } from 'src/client';
+import { defineComponent, PropType } from 'vue';
 import RecipeMenu from './RecipeMenu.vue';
 
-export default {
+export default defineComponent({
   props: {
-    recipe: { required: true },
+    recipe: { required: true, type: Object as PropType<RecipeRead> },
   },
   emits: ['updateItem'],
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   components: { recipeCardTooltip, RecipeMenu },
   data() {
     return {};
   },
   methods: {
-    openRecipe(id) {
-      this.$router.push({ name: 'recipe', params: { id: id } }).catch((e) => {});
-    },
-    dateFormat(dt) {
+    dateFormat(dt: Date | string): string {
       return date.formatDate(dt, 'YYYY.MM.DD');
     },
+    openRecipe(id: number) {
+      void this.$router.push({ name: 'recipe', params: { id: id } });
+    },
   },
-  computed: {},
-};
+});
 </script>
 
 <style lang="scss" scoped>

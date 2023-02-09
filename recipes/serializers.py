@@ -3,7 +3,7 @@ from datetime import date, datetime
 
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
-from drf_writable_nested import WritableNestedModelSerializer
+from drf_writable_nested.serializers import WritableNestedModelSerializer
 from rest_framework import serializers
 
 from recipes.models import (
@@ -28,7 +28,7 @@ from users.models import User
 from users.serializers import ShortUserSerializer
 
 
-def amount_str(meas: str):
+def amount_str(meas: str | None):
     meas_types = dict(MEASURING_TYPES)
     if meas in MEASURING_SHORT:
         return MEASURING_SHORT[meas]
@@ -75,7 +75,9 @@ class IngredientCategorySerializer(serializers.ModelSerializer):
 class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     used_times = serializers.SerializerMethodField()
     # category = IngredientCategorySerializer(read_only=True)
-    category = serializers.PrimaryKeyRelatedField(queryset=IngredientCategory.objects.all(), required=False)
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=IngredientCategory.objects.all(), required=False, allow_null=True, default=None
+    )
 
     class Meta:
         model = Ingredient
@@ -89,6 +91,10 @@ class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSeria
     @extend_schema_field(OpenApiTypes.NUMBER)
     def get_used_times(self, obj: Recipe):
         return getattr(obj, "used_times", None)
+
+
+class IngredientReadSerializer(IngredientSerializer):
+    category = IngredientCategorySerializer()
 
 
 class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -152,6 +158,10 @@ class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.Mode
         return round(packs * obj.ingredient.price)
 
 
+class RecipeIngredientReadSerializer(RecipeIngredientSerializer):
+    ingredient = IngredientSerializer()
+
+
 class RegularIngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegularIngredient
@@ -189,6 +199,10 @@ class RecipeRatingSerializer(serializers.ModelSerializer):
         return super().to_representation(instance)
 
 
+class RecipeRatingReadSerializer(RecipeRatingSerializer):
+    user = ShortUserSerializer()
+
+
 class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     short_description_str = serializers.SerializerMethodField()
     last_cooked = serializers.SerializerMethodField()
@@ -198,6 +212,7 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
     tags = RecipeTagSerializer(many=True, required=False)
     ingredients = RecipeIngredientSerializer(many=True, required=False)
     ratings = RecipeRatingSerializer(many=True, required=False)
+    author = ShortUserSerializer()
 
     class Meta:
         model = Recipe
@@ -205,9 +220,9 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
         read_only_fields = ("author",)
         depth = 2
 
-    def to_representation(self, instance):
-        self.fields["author"] = ShortUserSerializer()
-        return super().to_representation(instance)
+    # def to_representation(self, instance):
+    #     self.fields["author"] = ShortUserSerializer()
+    #     return super().to_representation(instance)
 
     @extend_schema_field(OpenApiTypes.STR)
     def get_short_description_str(self, obj: Recipe):
@@ -234,6 +249,12 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
         return now_week == recipe_week
 
 
+class RecipeReadSerializer(RecipeSerializer):
+    author = ShortUserSerializer()
+    ratings = RecipeRatingReadSerializer(many=True, required=False)
+    ingredients = RecipeIngredientReadSerializer(many=True, required=False)
+
+
 class RecipeShortSerializer(RecipeSerializer):
     tags = None  # type: ignore
     # ingredients = None
@@ -244,6 +265,10 @@ class RecipeShortSerializer(RecipeSerializer):
         exclude = tuple(list(RecipeSerializer.Meta.exclude) + ["author"])
 
 
+class RecipeIngredientWithRecipeReadSerializer(RecipeIngredientWithRecipeSerializer):
+    recipe = RecipeShortSerializer()
+
+
 class MealTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = MealTime
@@ -252,12 +277,7 @@ class MealTimeSerializer(serializers.ModelSerializer):
 
 
 class RecipePlanSerializer(serializers.ModelSerializer):
-    # recipe = RecipeSerializer()
-    # meal_time = MealTimeSerializer()
-    full = False
-
     def __init__(self, *args, **kwargs) -> None:
-        self.full = kwargs.pop("full", False)
         super().__init__(*args, **kwargs)
 
     class Meta:
@@ -268,17 +288,36 @@ class RecipePlanSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        if self.full:
-            representation["recipe"] = RecipeSerializer(instance.recipe).data
-        else:
-            representation["recipe"] = RecipeShortSerializer(instance.recipe).data
+        representation["recipe"] = RecipeSerializer(instance.recipe).data
+        # representation["recipe"] = RecipeShortSerializer(instance.recipe).data
         representation["meal_time"] = MealTimeSerializer(instance.meal_time).data
 
         return representation
 
 
+class RecipePlanShortSerializer(RecipePlanSerializer):
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        # representation["recipe"] = RecipeSerializer(instance.recipe).data
+        representation["recipe"] = RecipeShortSerializer(instance.recipe).data
+        representation["meal_time"] = MealTimeSerializer(instance.meal_time).data
+
+        return representation
+
+
+class RecipePlanShortReadSerializer(RecipePlanShortSerializer):
+    recipe = RecipeShortSerializer()
+    meal_time = MealTimeSerializer()
+
+
+class RecipePlanReadSerializer(RecipePlanSerializer):
+    recipe = RecipeReadSerializer()
+    meal_time = MealTimeSerializer()
+
+
 class RecipePlanWeekSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-    plans = RecipePlanSerializer(many=True, full=True)
+    plans = RecipePlanShortSerializer(many=True)
 
     class Meta:
         model = RecipePlanWeek
@@ -288,6 +327,10 @@ class RecipePlanWeekSerializer(WritableNestedModelSerializer, serializers.ModelS
 
 class RecipePlanWeekShortSerializer(RecipePlanWeekSerializer, serializers.ModelSerializer):
     plans = None  # type: ignore
+
+
+class RecipePlanWeekReadSerializer(RecipePlanWeekSerializer):
+    plans = RecipePlanReadSerializer(many=True)
 
 
 class ProductListItemSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -358,6 +401,11 @@ class ProductListItemSerializer(WritableNestedModelSerializer, serializers.Model
         return round(packs * obj.ingredient.price)
 
 
+class ProductListItemReadSerializer(ProductListItemSerializer):
+    ingredient = IngredientReadSerializer()
+    ingredients = RecipeIngredientWithRecipeReadSerializer(many=True)
+
+
 class ProductListWeekSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     items = ProductListItemSerializer(many=True)
 
@@ -365,6 +413,10 @@ class ProductListWeekSerializer(WritableNestedModelSerializer, serializers.Model
         model = ProductListWeek
         fields = "__all__"
         depth = 1
+
+
+class ProductListWeekReadSerializer(ProductListWeekSerializer):
+    items = ProductListItemReadSerializer(many=True)
 
 
 class ProductListWeekShortSerializer(ProductListWeekSerializer):

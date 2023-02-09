@@ -27,21 +27,27 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+const component = defineComponent({
   props: {
     icon: { type: String, default: 'home' },
     iconColor: { type: String, default: 'light-blue-5' },
     title: { type: String, default: 'Card' },
-    value: { type: String, default: '-' },
+    value: { type: [String, Number], default: '-' },
   },
   emits: ['cardClick'],
+  data() {
+    return {};
+  },
+  methods: {},
   computed: {
-    mobile() {
+    mobile(): boolean {
       return this.$q.screen.lt.md;
     },
   },
-};
-</script>
+});
 
-<style></style>
+export default component;
+</script>

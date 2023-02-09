@@ -21,6 +21,7 @@ module.exports = configure(function (/* ctx */) {
       warnings: true,
       errors: true,
     },
+    supportTS: true,
 
     // https://v2.quasar.dev/quasar-cli/prefetch-feature
     // preFetch: true,
@@ -28,7 +29,7 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
-    boot: ["i18n", "axios", "mixinHandleErrors", "querySync"],
+    boot: ["i18n", "mixinHandleErrors", "querySync"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ["app.scss"],

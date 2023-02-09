@@ -30,16 +30,15 @@
   </q-item>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { TaskCategoryCountAll, TaskCategoryCountCompleted } from 'src/modules/Utils';
+import { defineComponent } from 'vue';
+
+export default defineComponent({
   props: { modelValue: { required: true } },
   methods: {
-    getCategoryCompleted(category) {
-      return category.childrens.filter((t) => t.is_completed).length;
-    },
-    getCategoryAll(category) {
-      return category.childrens.length;
-    },
+    getCategoryCompleted: TaskCategoryCountCompleted,
+    getCategoryAll: TaskCategoryCountAll,
   },
   computed: {
     task: {
@@ -52,5 +51,5 @@ export default {
       },
     },
   },
-};
+});
 </script>

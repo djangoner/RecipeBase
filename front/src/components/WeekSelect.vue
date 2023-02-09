@@ -18,92 +18,31 @@
   </q-bar>
 </template>
 
-<script>
+<script lang="ts">
 import { useBaseStore } from 'src/stores/base';
 import { date } from 'quasar';
-export function getWeekNumber(d) {
-  // Copy date so don't modify original
-  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  // Set to nearest Thursday: current date + 4 - current day number
-  // Make Sunday's day number 7
-  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-  // Get first day of year
-  var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  // Calculate full weeks to nearest Thursday
-  var weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-  // Return array of year and week number
-  return [d.getUTCFullYear(), weekNo];
-}
+import { defineComponent, PropType } from 'vue';
+import {
+  DatePicker,
+  YearWeek,
+  YearWeekNullable,
+  WeekDays,
+  getDateOfISOWeek,
+  getFirstDayOfWeek,
+  getWeekNumber,
+  getYearWeek,
+} from 'src/modules/WeekUtils';
 
-export function getFirstDayOfWeek(d) {
-  const date = new Date(d);
-  const day = date.getDay();
-
-  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-
-  return diff;
-  // return new Date(date.setDate(diff));
-}
-
-export function getDateOfISOWeek(y, w) {
-  var simple = new Date(y, 0, 1 + (w - 1) * 7);
-  var dow = simple.getDay();
-  var ISOweekStart = simple;
-  if (dow <= 4) ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
-  else ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
-  return ISOweekStart;
-}
-
-export function getYearWeek() {
-  let today = new Date();
-  let year, week;
-
-  // If today is friday or weekend
-  // console.debug('Today: ', today.getDay());
-  if (today.getDay() >= 5 || today.getDay() == 0) {
-    let date = new Date();
-    date.setDate(date.getDate() + 7);
-    [year, week] = getWeekNumber(date);
-  } else {
-    [year, week] = getWeekNumber(new Date());
-  }
-
-  return [year, week];
-}
-
-export let WeekDays = {
-  0: 'Вс (прошлый)',
-  1: 'Понедельник',
-  2: 'Вторник',
-  3: 'Среда',
-  4: 'Четверг',
-  5: 'Пятница',
-  6: 'Суббота',
-  7: 'Восскресенье',
-};
-export let WeekDaysShort = {
-  1: 'Пн',
-  2: 'Вт',
-  3: 'Ср',
-  4: 'Чт',
-  5: 'Пт',
-  6: 'Сб',
-  7: 'Вс',
-};
-
-export default {
+export default defineComponent({
   props: {
-    modelValue: { required: true },
+    modelValue: { required: true, type: Object as PropType<YearWeek> },
   },
   data() {
     const store = useBaseStore();
     return {
       store,
-      date_picker: null,
-      week_pick: {
-        year: null,
-        week: null,
-      },
+      date_picker: null as DatePicker | null,
+      week_pick: {} as YearWeekNullable,
       week_pick_old: {},
       WeekDays,
     };
@@ -123,9 +62,12 @@ export default {
       this.week_pick.week = week;
       this.changeWeek(0);
     },
-    changeWeek(num) {
+    changeWeek(num: number): void {
       let min = 1;
       let max = 53;
+      if (!this.week_pick.year || !this.week_pick.week) {
+        return;
+      }
 
       this.week_pick.week += num;
 
@@ -139,7 +81,10 @@ export default {
       this.updateDatePicker();
       // this.loadWeekPlan();
     },
-    updateDatePicker() {
+    updateDatePicker(): void {
+      if (!this.week_pick.year || !this.week_pick.week) {
+        return;
+      }
       // let d = new Date();
       let d = getDateOfISOWeek(this.week_pick.year, this.week_pick.week);
       let first = getFirstDayOfWeek(d);
@@ -154,9 +99,9 @@ export default {
         'YYYY/MM/DD'
       );
       this.date_picker = { from: firstday, to: lastday };
-      console.debug('Datepicker upd: ', this.date_picker, this.week_pick.year, this.week);
+      console.debug('Datepicker upd: ', this.date_picker, this.week_pick.year);
     },
-    parseDatePicker() {
+    parseDatePicker(): void {
       if (typeof this.date_picker != 'string') {
         return;
       }
@@ -166,11 +111,14 @@ export default {
       [this.week_pick.year, this.week_pick.week] = getWeekNumber(d);
       this.changeWeek(0);
     },
-    timeFormat(raw) {
-      return raw.slice(0, raw.length - 3);
-    },
-    getDay(idx) {
-      let fday = new Date(this?.date_picker?.from);
+    // timeFormat(raw): string {
+    //   return raw.slice(0, raw.length - 3);
+    // },
+    getDay(idx: number): string | undefined {
+      if (!this.date_picker) {
+        return;
+      }
+      let fday = new Date(this.date_picker.from);
       // let fday = getDateOfISOWeek(this.week_pick.year, this.week_pick.week);
       let day = fday.getDay();
       fday.setDate(fday.getDate() + day + idx - 1);
@@ -183,7 +131,7 @@ export default {
         this.parseDatePicker();
       }
     },
-    modelValue(val, oldVal) {
+    modelValue(val: YearWeek, oldVal: YearWeek) {
       console.debug('modelValue: ', val, oldVal);
       if (val !== oldVal) {
         this.week_pick = val;
@@ -191,7 +139,7 @@ export default {
     },
     week_pick: {
       deep: true,
-      handler: function (val) {
+      handler: function (val: YearWeek) {
         let notChanged = JSON.stringify(val) === JSON.stringify(this.week_pick_old);
         if (notChanged) {
           this.week_pick_old = Object.assign({}, val);
@@ -203,5 +151,5 @@ export default {
       },
     },
   },
-};
+});
 </script>

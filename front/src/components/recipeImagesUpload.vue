@@ -62,21 +62,27 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { RecipeImage } from 'src/client';
+import { defineComponent, PropType } from 'vue';
 import draggable from 'vuedraggable';
 
-export default {
+interface FileInput extends HTMLInputElement {
+  pickFiles: CallableFunction;
+}
+
+export default defineComponent({
   components: {
     draggable,
   },
   props: {
-    modelValue: { required: true },
+    modelValue: { required: true, type: Array as PropType<RecipeImage[]> },
   },
   data() {
     return {
       upload_file: null,
       drag: false,
-      images: [],
+      images: [] as RecipeImage[],
     };
   },
   mounted() {
@@ -85,24 +91,27 @@ export default {
   methods: {
     openFileSelect() {
       // console.debug('Add img: ', this.$refs.upload_field);
-      this.$refs.upload_field.pickFiles();
+      const uploadField = this.$refs.upload_field as FileInput;
+      uploadField.pickFiles();
     },
     onOrderChange() {
       this.images = this.images.map((p, idx) => {
         return { ...p, num: idx + 1 };
       });
     },
-    deleteImg(img) {
+    deleteImg(img: RecipeImage) {
       this.images = this.images.filter((t) => {
         return t.num != img.num;
       });
     },
-    askDelete(elem) {
+    askDelete(elem: RecipeImage) {
       console.debug('askDelete: ', elem);
       this.$q
         .dialog({
           title: 'Подтверждение',
-          message: `Вы уверены что хотите удалить изображение '${elem.title}' ?`,
+          message: `Вы уверены что хотите удалить изображение '${
+            elem.title || 'Новое изображение'
+          }' ?`,
           cancel: true,
           persistent: true,
         })
@@ -121,7 +130,7 @@ export default {
       // }
       this.$emit('update:modelValue', newVal);
     },
-    modelValue(newVal, oldVal) {
+    modelValue(newVal: RecipeImage[], oldVal) {
       console.debug('Updated imagesUpload from recipe!', newVal, oldVal);
       if (newVal != oldVal) {
         return;
@@ -129,12 +138,13 @@ export default {
       this.images = newVal;
       this.onOrderChange();
     },
-    upload_file(val) {
+    upload_file(val: File) {
       if (!val) {
         return;
       }
       this.images.push({
         id: this.images.length + 1,
+        // @ts-expect-error: file will be converted on sending
         image: val,
         upload_preview: URL.createObjectURL(val),
         title: val.name,
@@ -144,5 +154,5 @@ export default {
       this.upload_file = null;
     },
   },
-};
+});
 </script>

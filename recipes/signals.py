@@ -1,10 +1,10 @@
 from datetime import datetime
 from time import time
 
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from recipes.models import Recipe, RecipeIngredient, RecipePlan, RecipePlanWeek
+from recipes.models import RecipeIngredient, RecipePlanWeek
 from recipes.services.measurings import amount_to_grams
 from recipes.services.plans import update_plan_week
 
@@ -49,17 +49,17 @@ def recipe_pre_save(sender: RecipeIngredient, instance, **kwargs):
     instance.amount_grams = amount_to_grams(instance.amount, instance.amount_type)
 
 
-@receiver(post_save, sender=Recipe)
-def recipe_post_save(sender, instance: Recipe, **kwargs):
-    debounce_upd_plan_current_week()
+# @receiver(post_save, sender=Recipe)
+# def recipe_post_save(sender, instance: Recipe, **kwargs):
+#     debounce_upd_plan_current_week()
 
 
-@receiver(post_save, sender=RecipePlan)
-def recipe_plan_post_save(sender, instance: RecipePlan, **kwargs):
-    instance.check_date()
-    debounce_upd_plan(instance.week)
+# @receiver(post_save, sender=RecipePlan)
+# def recipe_plan_post_save(sender, instance: RecipePlan, **kwargs):
+#     instance.check_date()
+#     debounce_upd_plan(instance.week)
 
 
-@receiver(post_save, sender=RecipePlanWeek)
-def recipe_plan_week_post_save(sender, instance: RecipePlanWeek, **kwargs):
-    debounce_upd_plan(instance)
+# @receiver(post_save, sender=RecipePlanWeek)
+# def recipe_plan_week_post_save(sender, instance: RecipePlanWeek, **kwargs):
+#     debounce_upd_plan(instance)

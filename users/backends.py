@@ -3,7 +3,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from drf_spectacular.authentication import SessionScheme
 from rest_framework import pagination
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.response import Response
 
 UserModel = get_user_model()
@@ -44,5 +44,9 @@ class CustomAuthorizationBackend(ModelBackend):
         except UserModel.DoesNotExist:
             pass
         else:
-            if user.check_password(password) and self.user_can_authenticate(user):
+            if password and user.check_password(password) and self.user_can_authenticate(user):
                 return user
+
+
+class CustomTokenAuthentication(TokenAuthentication):
+    keyword = "Bearer"

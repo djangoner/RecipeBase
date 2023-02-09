@@ -10,8 +10,8 @@
 
         <q-menu anchor="top end" self="top start">
           <q-list dense>
-            <template v-for="(day, idx) of WeekDays" :key="idx">
-              <q-item v-if="idx > 0" clickable>
+            <template v-for="(day, idx) of WeekDays">
+              <q-item v-if="idx > 0" clickable :key="idx">
                 <q-item-section
                   :class="isDayFilled(idx) ? 'text-underline text-bold' : ''"
                 >
@@ -57,31 +57,32 @@
   </q-menu>
 </template>
 
-<script>
-import weekSelect, {
-  getDateOfISOWeek,
-  WeekDays,
-  getWeekNumber,
-  getYearWeek,
-} from 'components/WeekSelect.vue';
+<script lang="ts">
+import { getYearWeek, WeekDays, YearWeek } from 'src/modules/WeekUtils';
 import { useBaseStore } from 'src/stores/base';
+import { defineComponent, PropType } from 'vue';
+import { MealTime, RecipeRead } from 'src/client';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import { RecipePlanWeekFromRead } from 'src/Convert';
 
-export default {
+export default defineComponent({
   emits: ['updateItem'],
   props: {
-    recipe: { required: true },
+    recipe: { required: true, type: Object as PropType<RecipeRead> },
   },
+  mixins: [HandleErrorsMixin],
   setup() {
     const store = useBaseStore();
     let [year, week] = getYearWeek();
-    let week_p = {};
-    week_p.year = year;
-    week_p.week = week;
+    let week_p: YearWeek = {
+      year: year,
+      week: week,
+    };
     return { store, WeekDays, week: week_p };
   },
   mounted() {
     if (!this.plan) {
-      this.loadWeekPlan();
+      void this.loadWeekPlan();
     }
   },
   methods: {
@@ -89,31 +90,31 @@ export default {
       this.$emit('updateItem');
     },
     actionArchive() {
+      let recipe_title: string = this.recipe?.title || '';
       this.$q
         .dialog({
           title: 'Подтверждение',
           message: this.recipe.is_archived
-            ? `Вы уверены что хотите убрать рецепт '${this.recipe?.title}' из архива?`
-            : `Вы уверены что хотите перевести рецепт '${this.recipe?.title}' в архив?`,
+            ? `Вы уверены что хотите убрать рецепт '${recipe_title}' из архива?`
+            : `Вы уверены что хотите перевести рецепт '${recipe_title}' в архив?`,
           cancel: true,
           persistent: true,
         })
         .onOk(() => {
-          let recipe = {
-            id: this.recipe.id,
+          const patchRecipe = {
             is_archived: !this.recipe.is_archived,
           };
           this.store
-            .saveRecipe(recipe)
+            .patchRecipe(this.recipe.id, patchRecipe)
             .then(() => {
               this.emitUpdated();
             })
-            .catch((err) => {
+            .catch((err: CustomAxiosError) => {
               this.handleErrors(err, 'Ошибка сохранения рецепта');
             });
         });
     },
-    addToPlan(day, mtime, recipe) {
+    addToPlan(day: number, mtime: MealTime, recipe: RecipeRead) {
       console.debug('Add to plan: ', day, mtime, recipe);
       this.$q
         .dialog({
@@ -126,14 +127,15 @@ export default {
           // Load current plan
           await this.loadWeekPlan();
           // Update plan
-          let plans = this.plan.plans.filter((plan) => {
-            return plan.day == day && plan.meal_time.id == mtime.id;
-          });
-
+          let plans =
+            this.plan?.plans.filter((plan) => {
+              return plan.day == day && plan.meal_time.id == mtime.id;
+            }) || [];
           let plan = plans[0];
           if (plan) {
             plan.recipe = recipe;
           } else {
+            // @ts-expect-error: Plan will be created
             this.plan.plans.push({
               day: day,
               meal_time: mtime,
@@ -148,33 +150,29 @@ export default {
                 message: `План успешно изменен`,
               });
             })
-            .catch((err) => {
+            .catch((err: CustomAxiosError) => {
               this.handleErrors(err, 'Ошибка изменения плана');
             });
         });
     },
 
-    isDayFilled(day) {
+    isDayFilled(day: number): boolean {
       let plans = this.plan?.plans;
-      let plansFilled;
-      if (plans) {
-        plansFilled = plans.filter((p) => p.meal_time.is_primary && p.day == day).length;
-      }
-      let plansTotal = this.meal_time.filter((m) => m.is_primary).length;
-      return plansFilled >= plansTotal;
+      let plansFilled =
+        plans?.filter((p) => p.meal_time.is_primary && p.day === day).length || 0;
+      let plansTotal = plans?.filter((p) => p.day === day).length || 0;
+
+      return plansFilled >= plansTotal && plansTotal > 0;
     },
-    isMtimeFilled(day, mtime) {
+    isMtimeFilled(day: number, mtime: MealTime): boolean {
       let plans = this.plan?.plans;
-      let plansFilled;
-      if (plans) {
-        plansFilled = plans.filter((p) => p.meal_time.id == mtime.id && p.day == day)
-          .length;
-      }
+      let plansFilled =
+        plans?.filter((p) => p.meal_time.id == mtime.id && p.day == day).length || 0;
       return plansFilled > 0;
     },
 
     //
-    loadWeekPlan() {
+    loadWeekPlan(): Promise<void> {
       return new Promise((resolve, reject) => {
         if (!this.week?.year || !this.week?.week) {
           reject();
@@ -189,30 +187,15 @@ export default {
           .then(() => {
             resolve();
           })
-          .catch((err) => {
+          .catch((err: CustomAxiosError) => {
             reject(err);
             this.handleErrors(err, 'Ошибка загрузки плана');
           });
       });
     },
-    saveWeekPlan() {
+    saveWeekPlan(): Promise<void> {
       return new Promise((resolve, reject) => {
-        // let payload = Object.assign({}, this.plan);
-        let payload = JSON.parse(JSON.stringify(this.plan));
-
-        payload.plans.map((p) => {
-          if (typeof p.recipe == 'object') {
-            p.recipe = p.recipe?.id;
-          }
-          if (typeof p.meal_time == 'object') {
-            p.meal_time = p.meal_time.id;
-          }
-        });
-
-        payload.plans = payload.plans.filter((p) => {
-          return p.recipe && p.meal_time;
-        });
-
+        const payload = RecipePlanWeekFromRead(this.plan);
         console.debug('Save plan: ', payload);
 
         this.store
@@ -220,7 +203,7 @@ export default {
           .then(() => {
             resolve();
           })
-          .catch((err) => {
+          .catch((err: CustomAxiosError) => {
             reject();
             this.handleErrors(err, 'Ошибка загрузки плана');
           });
@@ -233,8 +216,8 @@ export default {
       return this.store.week_plan;
     },
     meal_time() {
-      return this.store.meal_time?.results;
+      return this.store.meal_time;
     },
   },
-};
+});
 </script>

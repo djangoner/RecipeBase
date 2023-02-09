@@ -2,7 +2,7 @@
   <q-page padding>
     <q-table
       title="Ингредиенты"
-      :rows="ingredients?.results"
+      :rows="ingredients || []"
       :columns="tableColumns"
       :loading="loading"
       :filter="tableFilter"
@@ -55,8 +55,13 @@
   </q-page>
 </template>
 
-<script>
+<script lang="ts">
 import { useBaseStore } from 'src/stores/base';
+import { IngredientRead } from 'src/client';
+import { defineComponent } from 'vue';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import { TablePagination, TablePropsOnRequest } from 'src/modules/Globals';
+import { QTableProps } from 'quasar';
 let tableColumns = [
   {
     name: 'title',
@@ -70,21 +75,21 @@ let tableColumns = [
     name: 'category',
     label: 'Категория',
     align: 'left',
-    field: (row) => row?.category?.title || '-',
+    field: (row: IngredientRead) => row?.category?.title || '-',
     required: true,
     sortable: true,
   },
   {
     name: 'min_pack_size',
     label: 'Размер упаковки',
-    field: (row) => (row.min_pack_size ? row.min_pack_size : '-'),
+    field: (row: IngredientRead) => (row.min_pack_size ? row.min_pack_size : '-'),
     required: true,
     sortable: true,
   },
   {
     name: 'price',
     label: 'Цена',
-    field: (row) => (row.price ? row.price + ' ₺' : '-'),
+    field: (row: IngredientRead) => (row.price ? String(row.price) + ' ₺' : '-'),
     required: true,
     sortable: true,
   },
@@ -99,7 +104,7 @@ let tableColumns = [
   {
     name: 'need_buy',
     label: 'Требует покупки',
-    field: (row) => (row.need_buy ? 'Да' : 'Нет'),
+    field: (row: IngredientRead) => (row.need_buy ? 'Да' : 'Нет'),
     align: 'center',
     required: true,
     sortable: true,
@@ -108,15 +113,16 @@ let tableColumns = [
   {
     name: 'edible',
     label: 'Съедобен',
-    field: (row) => (row.edible ? 'Да' : 'Нет'),
+    field: (row: IngredientRead) => (row.edible ? 'Да' : 'Нет'),
     align: 'center',
     required: true,
     sortable: true,
     style: 'width: 50px;',
   },
-];
+] as QTableProps['columns'];
 
-export default {
+export default defineComponent({
+  mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
     return {
@@ -129,27 +135,25 @@ export default {
         page: 1,
         sortBy: 'title',
         descending: false,
-      },
+      } as TablePagination,
     };
   },
   mounted() {
     this.loadIngredients();
   },
   methods: {
-    loadIngredients(props) {
+    loadIngredients(props?: TablePropsOnRequest) {
       let payload = {};
       this.loading = true;
 
-      let pagination = Object.assign({}, this.tablePagination);
-      if (props) {
+      let pagination: TablePagination = Object.assign({}, this.tablePagination);
+      if (props && props.pagination) {
         pagination = props.pagination;
-      } else {
-        props = {};
       }
 
       Object.assign(payload, {
-        search: props.filter || this.tableFilter,
-        ordering: (pagination.descending ? '-' : '') + pagination.sortBy,
+        search: this.tableFilter,
+        ordering: (pagination.descending ? '-' : '') + String(pagination.sortBy),
         page_size: pagination.rowsPerPage,
         page: pagination.page,
       });
@@ -159,15 +163,15 @@ export default {
         .then((resp) => {
           this.loading = false;
           this.tablePagination = Object.assign({}, props?.pagination, {
-            rowsNumber: resp.data.count,
+            rowsNumber: resp.count,
           });
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.handleErrors(err, 'Ошибка загрузки ингредиентов');
         });
     },
-    onRowClick(e, row, index) {
-      this.$router.push({ name: 'ingredient', params: { id: row.id } }).catch((e) => {});
+    onRowClick(e: Event, row: IngredientRead) {
+      void this.$router.push({ name: 'ingredient', params: { id: row.id } });
     },
   },
   computed: {
@@ -175,5 +179,5 @@ export default {
       return this.store.ingredients;
     },
   },
-};
+});
 </script>

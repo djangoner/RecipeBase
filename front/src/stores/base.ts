@@ -1,0 +1,593 @@
+import { defineStore } from "pinia";
+import {
+  AmountTypes,
+  Ingredient,
+  IngredientCategory,
+  IngredientCategoryService,
+  IngredientsService,
+  MealTime,
+  MealTimeService,
+  PaginatedIngredientCategoryList,
+  PaginatedIngredientList,
+  PaginatedProductListItemReadList,
+  PaginatedProductListWeekReadList,
+  PaginatedRecipeReadList,
+  PaginatedRecipePlanWeekReadList,
+  PaginatedRecipeTagList,
+  PaginatedShopList,
+  PaginatedTaskCategoryList,
+  PaginatedTaskNestedList,
+  ProductListItem,
+  ProductListItemRead,
+  ProductListItemService,
+  ProductListWeek,
+  ProductListWeekRead,
+  ProductListWeekService,
+  Recipe,
+  RecipeImage,
+  RecipeImagesService,
+  RecipePlanWeek,
+  RecipePlanWeekRead,
+  RecipePlanWeekService,
+  RecipesService,
+  RecipeTag,
+  RecipeTagsService,
+  Shop,
+  ShopService,
+  StatsList,
+  StatsService,
+  Task,
+  TaskCategory,
+  TaskCategoryService,
+  TaskService,
+  RecipeRead,
+  PatchedRecipe,
+} from "src/client";
+
+export const useBaseStore = defineStore("base", {
+  state: () => ({
+    stats: null as StatsList | null,
+    recipes: null as RecipeRead[] | null,
+    recipe: null as RecipeRead | null,
+    tags: null as RecipeTag[] | null,
+    amount_types: null as AmountTypes | null,
+    week_plan: null as RecipePlanWeekRead | null,
+    week_plans: null as RecipePlanWeekRead[] | null,
+    meal_time: null as MealTime[] | null,
+    product_list: null as ProductListWeekRead | null,
+    product_lists: null as ProductListWeekRead[] | null,
+    product_list_items: null as ProductListItemRead[] | null,
+    product_list_item: null as ProductListItemRead | null,
+    ingredients: null as Ingredient[] | null,
+    ingredient: null as Ingredient | null,
+    tasks: null as Task[] | null,
+    task: null as Task | null,
+    tasks_categories: null as TaskCategory[] | null,
+    ingredient_categories: null as IngredientCategory[] | null,
+    shops: null as Shop[] | null,
+  }),
+
+  getters: {},
+
+  actions: {
+    // -- Essentials
+
+    async loadStats(): Promise<StatsList> {
+      return new Promise((resolve, reject) => {
+        StatsService.statsList()
+          .then((resp) => {
+            const stat = resp[0] || resp;
+            this.stats = stat;
+            resolve(stat);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadAmountTypes(): Promise<AmountTypes> {
+      return new Promise((resolve, reject) => {
+        IngredientsService.ingredientsAmountTypesRetrieve()
+          .then((resp) => {
+            this.amount_types = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadMealTime(payload: object): Promise<MealTime[]> {
+      return new Promise((resolve, reject) => {
+        MealTimeService.mealTimeList(payload)
+          .then((resp) => {
+            this.meal_time = resp.results as MealTime[];
+            resolve(resp as MealTime[]);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadIngredientCategories(
+      payload: object
+    ): Promise<PaginatedIngredientCategoryList> {
+      return new Promise((resolve, reject) => {
+        IngredientCategoryService.ingredientCategoryList(payload)
+          .then((resp) => {
+            this.ingredient_categories = resp.results as IngredientCategory[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadShops(payload: object): Promise<PaginatedShopList> {
+      return new Promise((resolve, reject) => {
+        ShopService.shopList(payload)
+          .then((resp) => {
+            this.shops = resp.results as Shop[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    // -- Recipes
+    async loadRecipes(payload: object): Promise<PaginatedRecipeReadList> {
+      return new Promise((resolve, reject) => {
+        RecipesService.recipesList(payload)
+          .then((resp) => {
+            this.recipes = resp.results as RecipeRead[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadRecipe(id: number): Promise<RecipeRead> {
+      return new Promise((resolve, reject) => {
+        RecipesService.recipesRetrieve({ id })
+          .then((resp) => {
+            this.recipe = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async saveRecipe(payload: Recipe): Promise<RecipeRead> {
+      return new Promise((resolve, reject) => {
+        RecipesService.recipesUpdate({ id: payload.id, requestBody: payload })
+          .then((resp) => {
+            this.recipe = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async patchRecipe(id: number, payload: PatchedRecipe): Promise<RecipeRead> {
+      return new Promise((resolve, reject) => {
+        RecipesService.recipesPartialUpdate({
+          id,
+          requestBody: payload,
+        })
+          .then((resp) => {
+            this.recipe = resp as RecipeRead;
+            resolve(resp as RecipeRead);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async createRecipe(payload: Recipe): Promise<RecipeRead> {
+      return new Promise((resolve, reject) => {
+        RecipesService.recipesCreate({ requestBody: payload })
+          .then((resp) => {
+            this.recipe = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async createRecipeImage(payload: RecipeImage): Promise<RecipeImage> {
+      return new Promise((resolve, reject) => {
+        RecipeImagesService.recipeImagesCreate({ requestBody: payload })
+          .then((resp) => {
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadTags(payload: object): Promise<PaginatedRecipeTagList> {
+      return new Promise((resolve, reject) => {
+        RecipeTagsService.recipeTagsList(payload)
+          .then((resp) => {
+            this.tags = resp.results as RecipeTag[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    // Week plans
+    async loadWeekPlan(payload: {
+      year: number;
+      week: number;
+    }): Promise<RecipePlanWeekRead> {
+      const id = `${payload?.year}_${payload?.week}`;
+      return new Promise((resolve, reject) => {
+        RecipePlanWeekService.recipePlanWeekRetrieve({
+          id: id,
+        })
+          .then((resp) => {
+            this.week_plan = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadWeekPlans(
+      payload: object
+    ): Promise<PaginatedRecipePlanWeekReadList> {
+      return new Promise((resolve, reject) => {
+        RecipePlanWeekService.recipePlanWeekList(payload)
+          .then((resp) => {
+            this.week_plans = resp.results as RecipePlanWeekRead[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async saveWeekPlan(payload: RecipePlanWeek): Promise<RecipePlanWeekRead> {
+      const id = `${payload?.year}_${payload?.week}`;
+      return new Promise((resolve, reject) => {
+        RecipePlanWeekService.recipePlanWeekUpdate({
+          id: id,
+          requestBody: payload,
+        })
+          .then((resp) => {
+            this.week_plan = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    // -- Products
+
+    async loadProductListWeek(
+      payload: { year: number; week: number },
+      no_save = false
+    ): Promise<ProductListWeekRead> {
+      const id = `${payload?.year}_${payload?.week}`;
+      return new Promise((resolve, reject) => {
+        ProductListWeekService.productListWeekRetrieve({ id: id })
+          .then((resp) => {
+            if (!no_save) {
+              this.product_list = resp;
+            }
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadProductListWeeks(
+      payload: object
+    ): Promise<PaginatedProductListWeekReadList> {
+      return new Promise((resolve, reject) => {
+        ProductListWeekService.productListWeekList(payload)
+          .then((resp) => {
+            this.product_lists = resp.results as ProductListWeekRead[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async saveProductListWeek(
+      payload: { year: number; week: number } & ProductListWeek
+    ): Promise<ProductListWeekRead> {
+      const id = `${payload?.year}_${payload?.week}`;
+      return new Promise((resolve, reject) => {
+        ProductListWeekService.productListWeekUpdate({
+          id: id,
+          requestBody: payload,
+        })
+          .then((resp) => {
+            this.product_list = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async generateProductListWeek(payload: {
+      year: number;
+      week: number;
+    }): Promise<ProductListWeekRead> {
+      const id = `${payload?.year}_${payload?.week}`;
+      return new Promise((resolve, reject) => {
+        ProductListWeekService.productListWeekGenerateRetrieve({ id: id })
+          .then((resp) => {
+            this.product_list = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    async loadProductListItems(
+      payload: object
+    ): Promise<PaginatedProductListItemReadList> {
+      return new Promise((resolve, reject) => {
+        ProductListItemService.productListItemList(payload)
+          .then((resp) => {
+            this.product_list_items = resp.results as ProductListItemRead[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    async loadProductListItem(id: number): Promise<ProductListItemRead> {
+      return new Promise((resolve, reject) => {
+        ProductListItemService.productListItemRetrieve({ id })
+          .then((resp) => {
+            this.product_list_item = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    async createProductListItem(
+      payload: ProductListItem
+    ): Promise<ProductListItemRead> {
+      return new Promise((resolve, reject) => {
+        ProductListItemService.productListItemCreate({ requestBody: payload })
+          .then((resp) => {
+            this.product_list_item = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async updateProductListItem(
+      payload: ProductListItem
+    ): Promise<ProductListItemRead> {
+      return new Promise((resolve, reject) => {
+        ProductListItemService.productListItemUpdate({
+          id: payload.id,
+          requestBody: payload,
+        })
+          .then((resp) => {
+            this.product_list_item = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async deleteProductListItem(id: number): Promise<void> {
+      return new Promise((resolve, reject) => {
+        ProductListItemService.productListItemDestroy({ id })
+          .then(() => {
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    // Ingredients
+
+    async loadIngredients(payload: object): Promise<PaginatedIngredientList> {
+      return new Promise((resolve, reject) => {
+        IngredientsService.ingredientsList(payload)
+          .then((resp) => {
+            this.ingredients = resp.results as Ingredient[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadIngredient(id: number): Promise<Ingredient> {
+      return new Promise((resolve, reject) => {
+        IngredientsService.ingredientsRetrieve({ id })
+          .then((resp) => {
+            this.ingredient = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async saveIngredient(payload: Ingredient): Promise<Ingredient> {
+      return new Promise((resolve, reject) => {
+        IngredientsService.ingredientsUpdate({
+          id: payload.id,
+          requestBody: payload,
+        })
+          .then((resp) => {
+            this.ingredient = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async createIngredient(payload: Ingredient): Promise<Ingredient> {
+      return new Promise((resolve, reject) => {
+        IngredientsService.ingredientsCreate({ requestBody: payload })
+          .then((resp) => {
+            this.ingredient = resp;
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async deleteIngredient(id: number): Promise<void> {
+      return new Promise((resolve, reject) => {
+        IngredientsService.ingredientsDestroy({ id })
+          .then(() => {
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    // Tasks
+
+    async loadTaskCategories(
+      payload: object
+    ): Promise<PaginatedTaskCategoryList> {
+      return new Promise((resolve, reject) => {
+        TaskCategoryService.taskCategoryList(payload)
+          .then((resp) => {
+            this.tasks_categories = resp.results as TaskCategory[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async createTaskCategory(payload: TaskCategory): Promise<TaskCategory> {
+      return new Promise((resolve, reject) => {
+        TaskCategoryService.taskCategoryCreate({ requestBody: payload })
+          .then((resp) => {
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async updateTaskCategory(payload: TaskCategory): Promise<TaskCategory> {
+      return new Promise((resolve, reject) => {
+        TaskCategoryService.taskCategoryUpdate({
+          id: payload.id,
+          requestBody: payload,
+        })
+          .then((resp) => {
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async deleteTaskCategory(id: number): Promise<void> {
+      return new Promise((resolve, reject) => {
+        TaskCategoryService.taskCategoryDestroy({ id: id })
+          .then(() => {
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadTasks(payload: object): Promise<PaginatedTaskNestedList> {
+      return new Promise((resolve, reject) => {
+        TaskService.taskList(payload)
+          .then((resp) => {
+            this.tasks = resp.results as Task[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async loadTask(id: number): Promise<Task> {
+      return new Promise((resolve, reject) => {
+        TaskService.taskRetrieve({ id })
+          .then((resp) => {
+            this.task = resp as Task;
+            resolve(resp as Task);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async createTask(payload: Task): Promise<Task> {
+      return new Promise((resolve, reject) => {
+        TaskService.taskCreate({ requestBody: payload })
+          .then((resp) => {
+            this.task = resp as Task;
+            resolve(resp as Task);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async updateTask(payload: Task): Promise<Task> {
+      return new Promise((resolve, reject) => {
+        TaskService.taskUpdate({ id: payload.id, requestBody: payload })
+          .then((resp) => {
+            this.task = resp as Task;
+            resolve(resp as Task);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async deleteTask(id: number): Promise<void> {
+      return new Promise((resolve, reject) => {
+        TaskService.taskDestroy({ id })
+          .then(() => {
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+  },
+});

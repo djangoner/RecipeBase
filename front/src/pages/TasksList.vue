@@ -38,19 +38,24 @@
   </q-page>
 </template>
 
-<script>
+<script lang="ts">
 import { useBaseStore } from 'src/stores/base';
 // import taskCategoryView from 'src/components/TaskItemView.vue';
 import taskItemList from 'components/TaskItemList.vue';
+import { defineComponent } from 'vue';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import { TaskOrCategory } from 'src/modules/Globals';
 
-export default {
+export default defineComponent({
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   components: { taskItemList },
+  mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
     return {
       store,
       loading: false,
-      category: null,
+      category: null as TaskOrCategory | null,
       addCategory: '',
     };
   },
@@ -67,20 +72,13 @@ export default {
       this.loading = true;
       this.store
         .loadTaskCategories(payload)
-        .then((resp) => {
+        .then(() => {
           this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузка списка категорий задач');
         });
-    },
-
-    getCategoryCompleted(category) {
-      return category.childrens.filter((t) => t.is_completed).length;
-    },
-    getCategoryAll(category) {
-      return category.childrens.length;
     },
 
     createCategory() {
@@ -92,26 +90,27 @@ export default {
         title: this.addCategory,
       };
       this.store
+        // @ts-expect-error: Task will be created
         .createTaskCategory(payload)
-        .then((resp) => {
+        .then(() => {
           this.loading = false;
           this.addCategory = '';
           this.loadTaskCategories();
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузка создания категории');
         });
     },
-    openCategory(category) {
+    openCategory(category: TaskOrCategory) {
       this.category = category;
     },
   },
 
   computed: {
     taskCategories() {
-      return this.store.tasks_categories?.results;
+      return this.store.tasks_categories;
     },
   },
-};
+});
 </script>

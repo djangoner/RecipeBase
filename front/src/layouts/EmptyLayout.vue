@@ -7,9 +7,7 @@
   </q-layout>
 </template>
 
-<script>
-import { ref } from 'vue';
-
+<script lang="ts">
 export default {
   name: 'EmptyLayout',
 

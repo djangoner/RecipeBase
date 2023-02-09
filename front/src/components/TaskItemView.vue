@@ -1,9 +1,5 @@
 <template>
-  <q-dialog
-    :model-value="!!modelValue"
-    @update:modelValue="setOpened"
-    :no-backdrop-dismiss="$q.screen.gt.md"
-  >
+  <q-dialog :model-value="!!modelValue" @update:modelValue="setOpened">
     <q-card style="width: 700px; max-width: 95vw; height: 80vh">
       <q-linear-progress :indeterminate="saving" :instant-feedback="true" />
 
@@ -126,19 +122,29 @@
   </q-dialog>
 </template>
 
-<script>
+<script lang="ts">
 import taskItemList from 'src/components/TaskItemList.vue';
 import { useBaseStore } from 'src/stores/base';
 import { date } from 'quasar';
+import { defineComponent } from 'vue';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import {
+  isTaskCategory,
+  TaskCategoryCountAll,
+  TaskCategoryCountCompleted,
+} from 'src/modules/Utils';
+import { TaskOrCategory } from 'src/modules/Globals';
 
-export default {
+export default defineComponent({
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   components: { taskItemList },
   props: {
     modelValue: { required: true },
     root: { required: false },
     tree: { required: false },
   },
-  emits: ['reload', 'openParent'],
+  emits: ['reload', 'openParent', 'update:modelValue'],
+  mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
     return {
@@ -149,10 +155,12 @@ export default {
     };
   },
   methods: {
+    getCategoryCompleted: TaskCategoryCountCompleted,
+    getCategoryAll: TaskCategoryCountAll,
     setOpened(val) {
       this.$emit('update:modelValue', val || null);
     },
-    updateItem(item) {
+    updateItem(item: TaskOrCategory) {
       let useThis = false;
       if (!item) {
         item = this.category;
@@ -161,10 +169,9 @@ export default {
       console.debug('Update item', item);
       this.saving = true;
 
-      let method =
-        item?.is_completed !== undefined
-          ? this.store.updateTask
-          : this.store.updateTaskCategory;
+      let method = isTaskCategory(item)
+        ? this.store.updateTaskCategory
+        : this.store.updateTask;
 
       let updateData = Object.assign({}, item);
       if (updateData?.childrens) {
@@ -175,23 +182,17 @@ export default {
         .then((resp) => {
           this.saving = false;
           if (useThis) {
-            this.category = resp.data;
+            this.category = resp;
           } else {
-            item = resp.data;
+            item = resp;
           }
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.saving = false;
           this.handleErrors(err, 'Ошибка сохранения задачи');
         });
     },
-    getCategoryCompleted(category) {
-      return category?.childrens?.filter((t) => t.is_completed)?.length;
-    },
-    getCategoryAll(category) {
-      return category?.childrens?.length;
-    },
-    openParent(target) {
+    openParent(target: TaskOrCategory) {
       console.debug('openParent', target, this.category);
       if (target?.id == this.category?.id && target?.title == this.category?.title) {
         return;
@@ -202,23 +203,22 @@ export default {
       this.$emit('openParent', target);
     },
 
-    deleteTask(item) {
+    deleteTask(item: TaskOrCategory | undefined) {
       if (!item) {
         item = this.category;
       }
-      let method =
-        item?.is_completed !== undefined
-          ? this.store.deleteTask
-          : this.store.deleteTaskCategory;
+      let method = isTaskCategory(item)
+        ? this.store.deleteTaskCategory
+        : this.store.deleteTask;
 
       this.saving = true;
-      method(item)
-        .then((resp) => {
+      method(item.id)
+        .then(() => {
           this.saving = false;
           this.setOpened(null);
           this.$emit('reload');
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.saving = false;
           this.handleErrors(err, 'Ошибка удаления задачи');
         });
@@ -235,14 +235,14 @@ export default {
           this.deleteTask();
         });
     },
-    dateFormat(raw) {
+    dateFormat(raw: Date): string {
       return date.formatDate(raw, 'YYYY.MM.DD hh:mm');
     },
   },
   computed: {
-    category() {
+    category(): TaskOrCategory {
       return this.modelValue;
     },
   },
-};
+});
 </script>

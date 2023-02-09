@@ -1,3 +1,4 @@
+import { AxiosError, AxiosResponse } from "axios";
 import { route } from "quasar/wrappers";
 import { useAuthStore } from "src/stores/auth";
 import {
@@ -7,8 +8,6 @@ import {
   createWebHashHistory,
 } from "vue-router";
 import routes from "./routes";
-import { useQuasar } from "quasar";
-
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
@@ -36,26 +35,42 @@ export default route(function (/* { store, ssrContext } */) {
   });
 
   Router.beforeEach((to, from, next) => {
-    let store = useAuthStore();
-    let isAuthorized = store.isAuthenticated;
+    const store = useAuthStore();
+    const isAuthorized = store.isAuthenticated;
+    const routerLogout = () => {
+      void store.logout().then(() => {
+        void Router.push({
+          name: "login",
+          query: { next: to.fullPath },
+        });
+      });
+    };
 
     if (isAuthorized && !store.account) {
-      store
-        .loadAccountInfo()
-        .then()
-        .catch((err) => {
+      console.debug("Checking user account...");
+      store.loadAccountInfo().catch((err: AxiosError | AxiosResponse) => {
+        if ("response" in err) {
           if (
             !err.response &&
             (!err.code ||
               err.code === "ERR_NETWORK" ||
               err.code == "ERR_INTERNET_DISCONNECTED")
           ) {
+            // Ignore internet errors
           } else {
-            store.logout().then(() => {
-              Router.push({ name: "login", query: { next: to.fullPath } });
-            });
+            console.debug("Unknown error, logging out...");
+            routerLogout();
           }
-        });
+        } else if ("status" in err) {
+          if (err.status == 401) {
+            console.debug("Unauthorized, logging out...");
+            routerLogout();
+          }
+        } else {
+          console.debug("Unknown error type, logging out...");
+          routerLogout();
+        }
+      });
     }
 
     if (

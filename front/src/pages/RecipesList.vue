@@ -62,7 +62,7 @@
       ></q-btn-toggle>
     </div>
 
-    <span v-if="recipes"> Найдено результатов: {{ recipes?.count }} </span>
+    <span v-if="recipes"> Найдено результатов: {{ tablePagination?.rowsNumber }} </span>
 
     <!-- Recipe cards -->
     <div
@@ -73,11 +73,11 @@
         <!-- Cards mode -->
         <template v-if="displayMode == 'cards'">
           <!-- Pagination -->
-          <div>
+          <div v-if="totalPages">
             <div class="flex justify-center q-mb-md">
               <q-pagination
                 v-model="page"
-                :max="recipes.total_pages"
+                :max="totalPages"
                 direction-links
               ></q-pagination>
             </div>
@@ -87,7 +87,7 @@
           <div class="recipes-row row q-col-gutter-x-md q-col-gutter-y-sm">
             <div
               class="col-xs-12 col-sm-6 col-md-4 col-lg-2"
-              v-for="recipe of recipes.results"
+              v-for="recipe of recipes"
               :key="recipe.id"
             >
               <!-- Recipe card -->
@@ -98,12 +98,11 @@
           <q-separator class="q-my-md" />
 
           <!-- Pagination -->
-          <div class="flex justify-center q-mt-md" v-if="recipes.results.length > 0">
-            <q-pagination
-              v-model="page"
-              :max="recipes.total_pages"
-              direction-links
-            ></q-pagination>
+          <div
+            class="flex justify-center q-mt-md"
+            v-if="recipes.length > 0 && totalPages"
+          >
+            <q-pagination v-model="page" :max="totalPages" direction-links></q-pagination>
           </div>
           <!-- /Pagination -->
           <div class="flex justify-center items-center full-height" v-else>
@@ -114,7 +113,7 @@
         <template v-else-if="displayMode == 'table'">
           <q-table
             title="Рецепты"
-            :rows="recipes?.results"
+            :rows="recipes"
             :columns="tableColumns"
             :loading="loading"
             :filter="search"
@@ -161,7 +160,7 @@
                     v-model="filters.tags_include"
                     label="Включить"
                     @filter="filterTagsInclude"
-                    :options="tagList"
+                    :options="tagList || []"
                     option-label="title"
                     option-value="id"
                     use-input
@@ -176,7 +175,7 @@
                     v-model="filters.tags_exclude"
                     label="Исключить"
                     @filter="filterTagsExclude"
-                    :options="tagList"
+                    :options="tagList || []"
                     option-label="title"
                     option-value="id"
                     use-input
@@ -194,7 +193,7 @@
                     v-model="filters.ingredients_include"
                     label="Включить"
                     @filter="filterIngredientsInclude"
-                    :options="ingredientList"
+                    :options="ingredientList || []"
                     option-label="title"
                     option-value="id"
                     use-input
@@ -209,7 +208,7 @@
                     v-model="filters.ingredients_exclude"
                     label="Исключить"
                     @filter="filterIngredientsExclude"
-                    :options="ingredientList"
+                    :options="ingredientList || []"
                     option-label="title"
                     option-value="id"
                     use-input
@@ -226,12 +225,7 @@
                 </div>
 
                 <div class="q-my-sm">
-                  <div
-                    class="q-my-sm"
-                    v-for="user of usersRate"
-                    :key="user.id"
-                    :set="(rating = userRating(user))"
-                  >
+                  <div class="q-my-sm" v-for="user of usersRate" :key="user.id">
                     <div>
                       <div
                         class="row justify-between q-col-gutter-x-sm q-col-gutter-y-sm"
@@ -278,7 +272,7 @@
                     </div>
 
                     <q-range
-                      :modelValue="rating"
+                      :modelValue="userRating(user)"
                       @update:modelValue="userSetRating(user, $event)"
                       class="q-px-md"
                       :min="0"
@@ -308,13 +302,25 @@
   </q-page>
 </template>
 
-<script>
-import { useBaseStore } from 'stores/base.js';
+<script lang="ts">
+import { useQuery } from '@oarepo/vue-query-synchronizer';
 import recipeCard from 'components/RecipeCard.vue';
-import { date, debounce } from 'quasar';
+import { date, debounce, QTableProps } from 'quasar';
+import {
+  Ingredient,
+  PaginatedRecipeReadList,
+  RecipeRead,
+  RecipeTag,
+  User,
+} from 'src/client';
+import { TablePagination, TablePropsOnRequest } from 'src/modules/Globals';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import { clearPayload } from 'src/modules/Utils';
 import { useAuthStore } from 'src/stores/auth';
+import { useBaseStore } from 'src/stores/base.js';
+import { defineComponent } from 'vue';
 
-let orderingOptions = [
+const orderingOptions = [
   { label: 'Создан - по возрастанию', value: 'created' },
   { label: 'Создан - по убыванию', value: '-created' },
   { label: 'Последнее приготовление - по возрастанию', value: 'last_cooked' },
@@ -348,7 +354,7 @@ let tableColumns = [
   {
     name: 'last_cooked',
     label: 'Приготовили',
-    field: (r) => date.formatDate(r.last_cooked, 'YYYY.MM.DD'),
+    field: (r: RecipeRead) => date.formatDate(r.last_cooked, 'YYYY.MM.DD'),
     required: true,
     sortable: true,
     style: 'width: 40px',
@@ -356,15 +362,42 @@ let tableColumns = [
   {
     name: 'created',
     label: 'Создан',
-    field: (r) => date.formatDate(r.created, 'YYYY.MM.DD hh:mm'),
+    field: (r: RecipeRead) =>
+      r.created ? date.formatDate(r.created, 'YYYY.MM.DD hh:mm') : '',
     required: true,
     sortable: true,
     style: 'width: 50px',
   },
-];
+] as QTableProps['columns'];
 
-export default {
+interface RangeValue {
+  min: number;
+  max: number;
+}
+
+interface RecipesFilters {
+  cooking_time: {
+    min: number;
+    max: number;
+  };
+  tags_include: number[];
+  tags_exclude: number[];
+  ingredients_include: number[];
+  ingredients_exclude: number[];
+  ratings: {
+    [key: number]: RangeValue;
+  };
+}
+
+interface QueryInterface {
+  compilation?: string;
+  display: string;
+}
+
+export default defineComponent({
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   components: { recipeCard },
+  mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
@@ -377,102 +410,102 @@ export default {
       ratings: {},
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const emptyFunc = () => {};
+
     return {
       store,
+      $query: useQuery(),
       storeAuth,
       search: '',
       page: 1,
       page_size: 20,
       loading: false,
-      tagList: null,
-      ingredientList: null,
+      tagList: null as RecipeTag[] | null,
+      ingredientList: null as Ingredient[] | null,
       ordering: '-created',
       tablePagination: {
         rowsPerPage: 20,
         page: 1,
         sortBy: 'created',
         descending: true,
-      },
+      } as TablePagination,
       // compilation: this.$query.compilation,
       showFilters: this.$q.localStorage.getItem('recipesShowFilters'),
-      filters: Object.assign({}, filters),
-      filtersDefault: JSON.parse(JSON.stringify(filters)),
+      filters: Object.assign({}, filters) as RecipesFilters,
+      filtersDefault: JSON.parse(JSON.stringify(filters)) as RecipesFilters,
       orderingOptions,
+      debounceLoadRecipes: emptyFunc,
     };
   },
   created() {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     this.debounceLoadRecipes = debounce(this.loadRecipes, 1000);
   },
 
   mounted() {
-    this.loadRecipes();
-    if (!this.tags) {
-      this.loadTags();
-    }
-    if (!this.users) {
-      this.loadUsers();
-    }
-    if (!this.meal_time) {
-      this.loadMealTime();
-    }
-    if (!this.ingredients) {
-      this.loadIngredients();
-    }
+    void this.$nextTick(() => {
+      void this.loadRecipes();
+      if (!this.tags) {
+        this.loadTags();
+      }
+      if (!this.users) {
+        this.loadUsers();
+      }
+      if (!this.meal_time) {
+        this.loadMealTime();
+      }
+      if (!this.ingredients) {
+        this.loadIngredients();
+      }
+    });
   },
 
   methods: {
     loadRecipes() {
       return new Promise((resolve, reject) => {
-        let payload = new URLSearchParams();
+        let payload = {} as { [key: string]: string };
 
-        payload.append('search', this.search);
-        payload.append('page', this.page);
-        payload.append('page_size', this.page_size);
+        payload.search = this.search;
+        payload.page = String(this.page);
+        payload.page_size = String(this.page_size);
 
         if (this.compilation == 'top10') {
-          payload.append('ordering', '');
+          payload.ordering = '';
           if (this.tablePagination.sortBy !== 'cooked_times') {
             this.tablePagination.sortBy = 'cooked_times';
             this.tablePagination.descending = true;
           }
         } else {
-          payload.append('ordering', this.ordering);
+          payload.ordering = this.ordering;
           this.tablePagination.sortBy = this.ordering;
         }
         // Compilation
         if (this.compilation) {
-          payload.append('compilation', this.compilation);
+          payload.compilation = this.compilation;
         }
         // Tags
         if (this.filters.tags_include) {
-          for (const tag of this.filters.tags_include) {
-            payload.append('tags_include', tag);
-          }
+          payload.tagsInclude = this.filters.tags_include.join(',');
         }
         if (this.filters.tags_exclude) {
-          for (const tag of this.filters.tags_exclude) {
-            payload.append('tags_exclude', tag);
-          }
+          payload.tagsExclude = this.filters.tags_exclude.join(',');
         }
         // Tags
         if (this.filters.ingredients_include) {
-          for (const ingredient of this.filters.ingredients_include) {
-            payload.append('ingredients_include', ingredient);
-          }
+          payload.ingredientsInclude = this.filters.ingredients_include.join(',');
         }
         if (this.filters.ingredients_exclude) {
-          for (const ingredient of this.filters.ingredients_exclude) {
-            payload.append('ingredients_exclude', ingredient);
-          }
+          payload.ingredientsExclude = this.filters.ingredients_exclude.join(',');
         }
 
         // Cooking time
         if (this.filters.cooking_time) {
           if (this.filters.cooking_time.min > 5) {
-            payload.append('cooking_time_gt', this.filters.cooking_time.min);
+            payload.cookingTimeGt = String(this.filters.cooking_time.min);
           }
           if (this.filters.cooking_time.max < 120) {
-            payload.append('cooking_time_lt', this.filters.cooking_time.max);
+            payload.cookingTimeLt = String(this.filters.cooking_time.max);
           }
         }
 
@@ -482,20 +515,20 @@ export default {
           for (const [user_id, values] of Object.entries(this.filters.ratings)) {
             if (values.min == values.max) {
               r.push(`${user_id}_${values.min}`);
-              // payload.append('rating', `${user_id}_${values.min}`);
+              // payload.rating = `${user_id}_${values.min}`;
             } else {
               if (values.min > 0) {
                 r.push(`${user_id}_+${values.min}`);
-                // payload.append('rating', `${user_id}_+${values.min}`);
+                // payload.rating = `${user_id}_+${values.min}`;
               }
 
               if (values.max < 5) {
                 r.push(`${user_id}_-${values.max}`);
-                // payload.append('rating', `${user_id}_-${values.max}`);
+                // payload.rating = `${user_id}_-${values.max}`;
               }
             }
           }
-          payload.append('rating', r.join(','));
+          payload.rating = r.join(',');
         }
 
         // Send request
@@ -503,13 +536,13 @@ export default {
         this.loading = true;
 
         this.store
-          .loadRecipes(payload)
-          .then((resp) => {
+          .loadRecipes(clearPayload(payload))
+          .then((resp: PaginatedRecipeReadList) => {
             this.loading = false;
-            this.tablePagination.rowsNumber = this.recipes?.count;
+            this.tablePagination.rowsNumber = resp?.count;
             resolve(resp);
           })
-          .catch((err) => {
+          .catch((err: CustomAxiosError) => {
             console.warn(err);
             reject(err);
             this.loading = false;
@@ -518,19 +551,20 @@ export default {
       });
     },
 
-    loadRecipesTable(props) {
+    loadRecipesTable(props: TablePropsOnRequest) {
       console.debug('tableProps: ', props.pagination);
       this.ordering =
-        (props.pagination.descending && !props.pagination.sortBy.startsWith('-')
+        props?.pagination?.descending && !props?.pagination?.sortBy?.startsWith('-')
           ? '-'
-          : '') + props.pagination.sortBy;
-      this.page = props.pagination.page;
-      this.page_size = props.pagination.rowsPerPage;
-      this.loadRecipes().then((resp) => {
+          : '';
+      this.ordering += props?.pagination?.sortBy;
+      this.page = props?.pagination?.page || 1;
+      this.page_size = props?.pagination?.rowsPerPage || 20;
+      void this.loadRecipes().then(() => {
         Object.assign(this.tablePagination, props.pagination);
       });
     },
-    onRowClick(e, row, index) {
+    onRowClick(e: Event, row: RecipeRead) {
       this.openRecipe(row.id);
     },
 
@@ -543,7 +577,7 @@ export default {
         .then(() => {
           // this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           // this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки меток');
         });
@@ -555,10 +589,10 @@ export default {
       this.store
         .loadIngredients(payload)
         .then(() => {
-          this.ingList = this.ingredients?.results;
+          // this.ingredientList = resp.results;
           // this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           // this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки ингредиентов');
         });
@@ -574,22 +608,19 @@ export default {
         .then(() => {
           // this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           // this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки времени приема пищи');
         });
     },
     loadAmountTypes() {
-      let payload = {
-        page_size: 1000,
-      };
       this.store
-        .loadAmountTypes(payload)
+        .loadAmountTypes()
         .then(() => {
           // this.loading = false;
-          this.amountTypeList = this.amount_types?.types;
+          // this.amountTypeList = this.amount_types?.types;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           // this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки типов измерений');
         });
@@ -604,78 +635,78 @@ export default {
         .then(() => {
           this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки пользователей');
         });
     },
 
-    filterTagsInclude(val, update, abort) {
+    filterTagsInclude(val: string, update: CallableFunction) {
       update(() => {
-        let isUsed = (tag) => {
+        let isUsed = (tag: RecipeTag) => {
           return this.filters.tags_exclude.some((t) => t == tag.id);
         };
 
         const needle = val.toLowerCase();
-        let tags = this.tags?.results;
+        let tags = this.tags;
 
-        this.tagList = tags?.filter(
-          (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
-        );
+        this.tagList =
+          tags?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)) ||
+          [];
         // console.debug(needle, this.tagList, tags);
       });
     },
-    filterTagsExclude(val, update, abort) {
+    filterTagsExclude(val: string, update: CallableFunction) {
       update(() => {
-        let isUsed = (tag) => {
+        let isUsed = (tag: RecipeTag) => {
           return this.filters.tags_include.some((t) => t == tag.id);
         };
 
         const needle = val.toLowerCase();
-        let tags = this.tags?.results;
+        let tags = this.tags;
 
-        this.tagList = tags?.filter(
-          (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
-        );
+        this.tagList =
+          tags?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)) ||
+          [];
         // console.debug(needle, this.tagList, tags);
       });
     },
 
-    filterIngredientsInclude(val, update, abort) {
+    filterIngredientsInclude(val: string, update: CallableFunction) {
       update(() => {
-        let isUsed = (ingredient) => {
-          return this.filters.ingredients_exclude.some((t) => t == ingredient.id);
-        };
+        // let isUsed = (ingredient: Ingredient) => {
+        //   return this.filters.ingredients_exclude.some((t) => t == ingredient.id);
+        // };
 
         const needle = val.toLowerCase();
-        let ingredients = this.ingredients?.results;
+        let ingredients = this.ingredients;
 
-        this.ingredientList = ingredients
-          ?.filter(
+        this.ingredientList = (
+          ingredients?.filter(
             (v) => v.title.toLowerCase().indexOf(needle) > -1 // && !isUsed(v)
-          )
-          .slice(0, 20);
+          ) || []
+        ).slice(0, 20);
         // console.debug(needle, this.ingredientList, ingredients);
       });
     },
-    filterIngredientsExclude(val, update, abort) {
+    filterIngredientsExclude(val: string, update: CallableFunction) {
       update(() => {
-        let isUsed = (ingredient) => {
-          return this.filters.ingredients_include.some((t) => t == ingredient.id);
-        };
+        // let isUsed = (ingredient: Ingredient) => {
+        //   return this.filters.ingredients_include.some((t) => t == ingredient.id);
+        // };
 
         const needle = val.toLowerCase();
-        let ingredients = this.ingredients?.results;
+        let ingredients = this.ingredients;
 
-        this.ingredientList = ingredients
-          ?.filter(
+        this.ingredientList = (
+          ingredients?.filter(
             (v) => v.title.toLowerCase().indexOf(needle) > -1 //  && !isUsed(v)
-          )
-          .slice(0, 20);
+          ) || []
+        ).slice(0, 20);
         // console.debug(needle, this.ingredientList, ingredients);
       });
     },
-    userRating(user) {
+    userRating(user: User) {
       let exists = this.filters?.ratings[user.id];
       // console.debug('userRating: ', user, exists);
 
@@ -685,7 +716,7 @@ export default {
         return { min: 0, max: 5 };
       }
     },
-    userSetRating(user, rating) {
+    userSetRating(user: User, rating: RangeValue) {
       // console.debug('setUserRating: ', user, rating);
 
       this.filters.ratings[user.id] = rating;
@@ -696,16 +727,16 @@ export default {
       console.debug('Reset: ', this.filters);
     },
 
-    openRecipe(id) {
-      this.$router.push({ name: 'recipe', params: { id: id } }).catch((e) => {});
+    openRecipe(id: number | 'new') {
+      void this.$router.push({ name: 'recipe', params: { id: id } });
     },
-    userReadable(user) {
+    userReadable(user: User): string {
       if (user.first_name) {
-        return user.first_name + ' ' + user.last_name;
+        return user.first_name + ' ' + String(user.last_name);
       }
       return user.username;
     },
-    shortText(tx, length = 100) {
+    shortText(tx: string, length = 100): string {
       if (tx.length < length) {
         return tx;
       } else {
@@ -719,7 +750,7 @@ export default {
       return this.store.recipes;
     },
     users() {
-      return this.storeAuth?.users?.results;
+      return this.storeAuth?.users;
     },
     usersRate() {
       let users = this.users;
@@ -740,40 +771,55 @@ export default {
       return this.store.amount_types;
     },
     meal_time() {
-      return this.store.meal_time?.results;
+      return this.store.meal_time;
     },
     compilation: {
       get() {
-        return this.$query.compilation;
+        return (this.$query as QueryInterface).compilation;
       },
-      set(val) {
-        this.$query.compilation = val;
+      set(val: string) {
+        (this.$query as QueryInterface).compilation = val;
       },
     },
     displayMode: {
       get() {
-        return this.$query.display;
+        return (this.$query as QueryInterface).display;
       },
-      set(val) {
-        this.$query.display = val;
+      set(val: string) {
+        (this.$query as QueryInterface).display = val;
       },
     },
+    totalPages(): number | null {
+      if (!this.tablePagination.rowsNumber || !this.tablePagination.rowsPerPage) {
+        return null;
+      }
+      return (
+        Math.floor(
+          this.tablePagination?.rowsNumber / this.tablePagination?.rowsPerPage
+        ) || 1
+      );
+    },
     tableColumns() {
-      let r = tableColumns.slice();
+      let r = tableColumns?.slice() || [];
       if (this.compilation == 'top10') {
         r.unshift({
           name: 'pos',
           label: '#',
-          field: (r) =>
-            this.recipes.results.indexOf(r) + 1 + (this.page - 1) * this.page_size,
+          field: (r: RecipeRead) =>
+            this.recipes
+              ? String(this.recipes.indexOf(r) + 1 + (this.page - 1) * this.page_size)
+              : '-',
           style: 'width: 20px',
+          sortable: false,
+          required: false,
         });
         r.splice(2, 0, {
           name: 'cooked_times',
           label: 'Кол-во',
           field: 'cooked_times',
-          sortable: true,
           style: 'width: 20px',
+          sortable: true,
+          required: false,
         });
       } else if (this.compilation == 'new') {
         r = r.filter((c) => c.name !== 'last_cooked');
@@ -785,29 +831,29 @@ export default {
   watch: {
     search() {
       this.page = 1;
-      this.loadRecipes();
+      void this.loadRecipes();
     },
     ordering() {
-      this.loadRecipes();
+      void this.loadRecipes();
     },
     compilation() {
-      this.loadRecipes();
+      void this.loadRecipes();
     },
     page() {
-      this.loadRecipes();
+      void this.loadRecipes();
     },
     filters: {
       deep: true,
-      handler(val, oldVal) {
+      handler() {
         this.page = 1;
         this.debounceLoadRecipes();
       },
     },
-    showFilters(val, oldVal) {
+    showFilters(val) {
       this.$q.localStorage.set('recipesShowFilters', val);
     },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

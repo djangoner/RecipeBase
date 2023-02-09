@@ -24,7 +24,9 @@ def gen_uuid() -> str:
 def recipe_image_upload_to(instance: "RecipeImage", filename: str):
     ext = filename.split(".")[-1]
     uuid = gen_uuid()
-    return f"uploads/recipe_images/{instance.recipe.pk}/{uuid}.{ext}"
+
+    user_id = (instance.recipe.pk or "new") if instance.recipe else "new"
+    return f"uploads/recipe_images/{user_id}/{uuid}.{ext}"
 
 
 def get_default_comments():
@@ -80,7 +82,7 @@ class RecipeImage(models.Model):
         null=True,
         blank=False,
     )
-    image = models.ImageField(_("Изображение"), upload_to=recipe_image_upload_to)
+    image = models.ImageField(_("Изображение"), upload_to=recipe_image_upload_to)  # type: ignore
     title = models.CharField(_("Заголовок"), max_length=100, blank=True, null=True)
     num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
 
@@ -93,7 +95,7 @@ class RecipeImage(models.Model):
         if self.title:
             return self.title
         else:
-            return f"#{self.id} {self.image}"
+            return f"#{self.pk} {self.image}"
 
 
 class Ingredient(models.Model):
@@ -155,7 +157,7 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = _("Ингредиенты рецептов")
 
     def __str__(self):
-        return f"{self.recipe}2: {self.ingredient}"
+        return f"{self.recipe}: {self.ingredient}"
 
 
 class RegularIngredient(models.Model):
@@ -194,7 +196,7 @@ class RecipeTag(models.Model):
         return self.title
 
     def recipes_count(self):
-        return self.recipes.count()
+        return self.recipes.count()  # type: ignore
 
     recipes_count.verbose_name = _("Количество рецептов")  # type: ignore
 

@@ -80,7 +80,7 @@ export default defineComponent({
   },
   data() {
     return {
-      upload_file: null,
+      upload_file: null as File | null,
       drag: false,
       images: [] as RecipeImage[],
     };

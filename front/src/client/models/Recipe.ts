@@ -2,11 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Nested } from './Nested';
 import type { RecipeImage } from './RecipeImage';
 import type { RecipeIngredient } from './RecipeIngredient';
 import type { RecipeRating } from './RecipeRating';
 import type { RecipeTag } from './RecipeTag';
+import type { ShortUser } from './ShortUser';
 
 /**
  * Adds nested create feature
@@ -21,6 +21,7 @@ export type Recipe = {
     tags?: Array<RecipeTag>;
     ingredients?: Array<RecipeIngredient>;
     ratings?: Array<RecipeRating>;
+    author: ShortUser;
     title: string;
     content?: string;
     content_source?: string;
@@ -32,5 +33,4 @@ export type Recipe = {
     readonly created: string | null;
     readonly edited: string | null;
     is_archived?: boolean;
-    readonly author: Nested;
 };

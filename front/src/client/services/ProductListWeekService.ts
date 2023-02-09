@@ -1,9 +1,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaginatedProductListWeekList } from '../models/PaginatedProductListWeekList';
+import type { PaginatedProductListWeekReadList } from '../models/PaginatedProductListWeekReadList';
 import type { PatchedProductListWeek } from '../models/PatchedProductListWeek';
 import type { ProductListWeek } from '../models/ProductListWeek';
+import type { ProductListWeekRead } from '../models/ProductListWeekRead';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -12,7 +13,7 @@ import { request as __request } from '../core/request';
 export class ProductListWeekService {
 
     /**
-     * @returns PaginatedProductListWeekList 
+     * @returns PaginatedProductListWeekReadList 
      * @throws ApiError
      */
     public static productListWeekList({
@@ -37,7 +38,7 @@ pageSize?: number,
  * A search term.
  */
 search?: string,
-}): CancelablePromise<PaginatedProductListWeekList> {
+}): CancelablePromise<PaginatedProductListWeekReadList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/product_list_week/',
@@ -68,14 +69,14 @@ requestBody: ProductListWeek,
     }
 
     /**
-     * @returns ProductListWeek 
+     * @returns ProductListWeekRead 
      * @throws ApiError
      */
     public static productListWeekRetrieve({
 id,
 }: {
 id: string,
-}): CancelablePromise<ProductListWeek> {
+}): CancelablePromise<ProductListWeekRead> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/product_list_week/{id}/',
@@ -86,7 +87,7 @@ id: string,
     }
 
     /**
-     * @returns ProductListWeek 
+     * @returns ProductListWeekRead 
      * @throws ApiError
      */
     public static productListWeekUpdate({
@@ -95,7 +96,7 @@ requestBody,
 }: {
 id: string,
 requestBody: ProductListWeek,
-}): CancelablePromise<ProductListWeek> {
+}): CancelablePromise<ProductListWeekRead> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/product_list_week/{id}/',
@@ -151,14 +152,14 @@ id: string,
     }
 
     /**
-     * @returns ProductListWeek 
+     * @returns ProductListWeekRead 
      * @throws ApiError
      */
     public static productListWeekGenerateRetrieve({
 id,
 }: {
 id: string,
-}): CancelablePromise<ProductListWeek> {
+}): CancelablePromise<ProductListWeekRead> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/product_list_week/{id}/generate/',

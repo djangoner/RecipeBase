@@ -1,9 +1,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaginatedRecipeList } from '../models/PaginatedRecipeList';
+import type { PaginatedRecipeReadList } from '../models/PaginatedRecipeReadList';
 import type { PatchedRecipe } from '../models/PatchedRecipe';
 import type { Recipe } from '../models/Recipe';
+import type { RecipeRead } from '../models/RecipeRead';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -12,7 +13,7 @@ import { request as __request } from '../core/request';
 export class RecipesService {
 
     /**
-     * @returns PaginatedRecipeList 
+     * @returns PaginatedRecipeReadList 
      * @throws ApiError
      */
     public static recipesList({
@@ -95,7 +96,7 @@ tagsExclude?: Array<string>,
  */
 tagsInclude?: Array<string>,
 title?: string,
-}): CancelablePromise<PaginatedRecipeList> {
+}): CancelablePromise<PaginatedRecipeReadList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/recipes/',
@@ -129,14 +130,14 @@ title?: string,
     }
 
     /**
-     * @returns Recipe 
+     * @returns RecipeRead 
      * @throws ApiError
      */
     public static recipesCreate({
 requestBody,
 }: {
 requestBody: Recipe,
-}): CancelablePromise<Recipe> {
+}): CancelablePromise<RecipeRead> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/recipes/',
@@ -146,7 +147,7 @@ requestBody: Recipe,
     }
 
     /**
-     * @returns Recipe 
+     * @returns RecipeRead 
      * @throws ApiError
      */
     public static recipesRetrieve({
@@ -156,7 +157,7 @@ id,
  * A unique integer value identifying this Рецепт.
  */
 id: number,
-}): CancelablePromise<Recipe> {
+}): CancelablePromise<RecipeRead> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/recipes/{id}/',
@@ -167,7 +168,7 @@ id: number,
     }
 
     /**
-     * @returns Recipe 
+     * @returns RecipeRead 
      * @throws ApiError
      */
     public static recipesUpdate({
@@ -179,7 +180,7 @@ requestBody,
  */
 id: number,
 requestBody: Recipe,
-}): CancelablePromise<Recipe> {
+}): CancelablePromise<RecipeRead> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/recipes/{id}/',

@@ -27,7 +27,7 @@
         <q-btn
           type="submit"
           color="primary"
-          :loading="loginStatus == 'request'"
+          :loading="loading"
           label="Войти"
           size="md"
           form="loginForm"
@@ -38,15 +38,17 @@
   </div>
 </template>
 
-<script>
-import { defineComponent, ref } from 'vue';
-import { useAuthStore } from 'stores/auth.js';
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { useAuthStore } from 'src/stores/auth.js';
+import { AuthToken } from 'src/client';
 
 export default defineComponent({
   data() {
     const store = useAuthStore();
     return {
       store: store,
+      loading: false,
       login: {
         username: '',
         password: '',
@@ -59,14 +61,18 @@ export default defineComponent({
       let payload = {
         username: this.login.username,
         password: this.login.password,
-      };
+      } as AuthToken;
+
+      this.loading = true;
 
       this.store
         .login(payload)
         .then(() => {
-          this.$router.push({ name: 'index' });
+          this.loading = false;
+          void this.$router.push({ name: 'index' });
         })
         .catch((err) => {
+          this.loading = false;
           console.warn(err);
 
           this.$q.notify({
@@ -79,7 +85,7 @@ export default defineComponent({
     },
   },
   computed: {
-    loginStatus() {
+    loginStatus(): boolean {
       return this.store.isAuthenticated;
     },
   },

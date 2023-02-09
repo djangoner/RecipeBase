@@ -1,5 +1,5 @@
 import { boot } from "quasar/wrappers";
-import HandleErrorsMixin from "src/components/HandleErrorsMixin";
+import HandleErrorsMixin from "src/modules/HandleErrorsMixin";
 
 // "async" is optional;
 // more info on params: https://v2.quasar.dev/quasar-cli/boot-files

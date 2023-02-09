@@ -70,20 +70,22 @@
   </q-tooltip>
 </template>
 
-<script>
+<script lang="ts">
+import { RecipeRead } from 'src/client';
+import { defineComponent, PropType } from 'vue';
 import { date } from 'quasar';
 
-export default {
+export default defineComponent({
   props: {
-    recipe: { required: true },
+    recipe: { required: true, type: Object as PropType<RecipeRead> },
   },
   data() {
     return {};
   },
   methods: {
-    dateFormat(dt) {
+    dateFormat(dt: Date | string): string {
       return date.formatDate(dt, 'YYYY.MM.DD');
     },
   },
-};
+});
 </script>

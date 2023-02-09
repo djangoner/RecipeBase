@@ -62,6 +62,13 @@ module.exports = {
     // TypeScript
     // 'quotes': ['warn', 'single'],
     '@typescript-eslint/explicit-function-return-type': 'off',
-    "vue/no-multiple-template-root": "off"
+    "vue/no-multiple-template-root": "off",
+    "@typescript-eslint/no-misused-promises": [
+      "error",
+      {
+        "checksVoidReturn": false
+      }
+    ],
+    "vue/no-v-model-argument": 'off'
   }
 }

@@ -2,11 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ProductListWeek } from './ProductListWeek';
+import type { RecipeRead } from './RecipeRead';
 
-export type PaginatedProductListWeekList = {
+export type PaginatedRecipeReadList = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<ProductListWeek>;
+    results?: Array<RecipeRead>;
 };

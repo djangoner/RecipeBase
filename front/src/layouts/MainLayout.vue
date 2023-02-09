@@ -98,24 +98,27 @@
   </q-layout>
 </template>
 
-<script>
+<script lang="ts">
 import { useQuasar } from 'quasar';
+import { User } from 'src/client';
 import { useAuthStore } from 'src/stores/auth';
 import { defineComponent, ref } from 'vue';
+import IsOnlineMixin from 'src/modules/IsOnlineMixin';
 
-const darkModes = ['auto', true, false];
+type DarkMode = boolean | 'auto';
+const darkModes: Array<DarkMode> = ['auto', true, false];
 
 export default defineComponent({
   name: 'MainLayout',
 
   components: {},
-
+  mixins: [IsOnlineMixin],
   setup() {
     const leftDrawerOpen = ref(false);
     const store = useAuthStore();
     const $q = useQuasar();
 
-    const preferredMode = $q.localStorage.getItem('preferredMode');
+    const preferredMode: DarkMode | null = $q.localStorage.getItem('preferredMode');
 
     if (preferredMode !== null) {
       $q.dark.set(preferredMode);
@@ -136,7 +139,7 @@ export default defineComponent({
         if (idxNew >= darkModes.length) {
           idxNew = 0;
         }
-        let newMode = darkModes[idxNew];
+        let newMode: DarkMode = darkModes[idxNew];
         // set
         $q.dark.set(newMode);
         $q.localStorage.set('preferredMode', newMode);
@@ -171,21 +174,21 @@ export default defineComponent({
         });
     },
     logout() {
-      this.store.logout();
-      this.$router.push({ name: 'login' }).catch(() => {});
+      void this.store.logout();
+      void this.$router.push({ name: 'login' });
     },
   },
 
   computed: {
-    user() {
+    user(): User | null {
       return this.store.account;
     },
-    userReadable() {
+    userReadable(): string | undefined {
       if (!this.user) {
         return;
       }
       return this.user.first_name
-        ? this.user.first_name + ' ' + this.user.last_name
+        ? [this.user.first_name, this.user.last_name].join(' ').trim()
         : '@' + this.user.username;
     },
   },

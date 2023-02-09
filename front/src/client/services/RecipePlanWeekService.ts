@@ -1,9 +1,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaginatedRecipePlanWeekList } from '../models/PaginatedRecipePlanWeekList';
+import type { PaginatedRecipePlanWeekReadList } from '../models/PaginatedRecipePlanWeekReadList';
 import type { PatchedRecipePlanWeek } from '../models/PatchedRecipePlanWeek';
 import type { RecipePlanWeek } from '../models/RecipePlanWeek';
+import type { RecipePlanWeekRead } from '../models/RecipePlanWeekRead';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -12,7 +13,7 @@ import { request as __request } from '../core/request';
 export class RecipePlanWeekService {
 
     /**
-     * @returns PaginatedRecipePlanWeekList 
+     * @returns PaginatedRecipePlanWeekReadList 
      * @throws ApiError
      */
     public static recipePlanWeekList({
@@ -37,7 +38,7 @@ pageSize?: number,
  * A search term.
  */
 search?: string,
-}): CancelablePromise<PaginatedRecipePlanWeekList> {
+}): CancelablePromise<PaginatedRecipePlanWeekReadList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/recipe_plan_week/',
@@ -68,14 +69,14 @@ requestBody: RecipePlanWeek,
     }
 
     /**
-     * @returns RecipePlanWeek 
+     * @returns RecipePlanWeekRead 
      * @throws ApiError
      */
     public static recipePlanWeekRetrieve({
 id,
 }: {
 id: string,
-}): CancelablePromise<RecipePlanWeek> {
+}): CancelablePromise<RecipePlanWeekRead> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/recipe_plan_week/{id}/',
@@ -86,7 +87,7 @@ id: string,
     }
 
     /**
-     * @returns RecipePlanWeek 
+     * @returns RecipePlanWeekRead 
      * @throws ApiError
      */
     public static recipePlanWeekUpdate({
@@ -95,7 +96,7 @@ requestBody,
 }: {
 id: string,
 requestBody: RecipePlanWeek,
-}): CancelablePromise<RecipePlanWeek> {
+}): CancelablePromise<RecipePlanWeekRead> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/recipe_plan_week/{id}/',

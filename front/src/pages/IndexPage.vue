@@ -75,13 +75,18 @@
   </q-page>
 </template>
 
-<script>
+<script lang="ts">
+import { StatsList } from 'src/client';
 import MetricCard from 'src/components/MetricCard.vue';
 import { useBaseStore } from 'src/stores/base';
-import { defineComponent } from 'vue';
+import { Component, DefineComponent, defineComponent } from 'vue';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import IsOnlineMixin from 'src/modules/IsOnlineMixin';
+const card: DefineComponent = (MetricCard as Component) as DefineComponent;
 
 export default defineComponent({
-  components: { MetricCard },
+  components: { metricCard: card },
+  mixins: [HandleErrorsMixin, IsOnlineMixin],
   name: 'IndexPage',
   data() {
     const store = useBaseStore();
@@ -96,17 +101,17 @@ export default defineComponent({
     loadStats() {
       this.store
         .loadStats()
-        .then((resp) => {
+        .then(() => {
           this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки статистики');
         });
     },
   },
   computed: {
-    stats() {
+    stats(): StatsList | null {
       return this.store.stats;
     },
   },

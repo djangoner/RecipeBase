@@ -1,9 +1,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaginatedRecipePlanList } from '../models/PaginatedRecipePlanList';
+import type { PaginatedRecipePlanReadList } from '../models/PaginatedRecipePlanReadList';
 import type { PatchedRecipePlan } from '../models/PatchedRecipePlan';
 import type { RecipePlan } from '../models/RecipePlan';
+import type { RecipePlanRead } from '../models/RecipePlanRead';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -12,7 +13,7 @@ import { request as __request } from '../core/request';
 export class RecipePlanService {
 
     /**
-     * @returns PaginatedRecipePlanList 
+     * @returns PaginatedRecipePlanReadList 
      * @throws ApiError
      */
     public static recipePlanList({
@@ -37,7 +38,7 @@ pageSize?: number,
  * A search term.
  */
 search?: string,
-}): CancelablePromise<PaginatedRecipePlanList> {
+}): CancelablePromise<PaginatedRecipePlanReadList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/recipe_plan/',
@@ -68,7 +69,7 @@ requestBody: RecipePlan,
     }
 
     /**
-     * @returns RecipePlan 
+     * @returns RecipePlanRead 
      * @throws ApiError
      */
     public static recipePlanRetrieve({
@@ -78,7 +79,7 @@ id,
  * A unique integer value identifying this План рецепта.
  */
 id: number,
-}): CancelablePromise<RecipePlan> {
+}): CancelablePromise<RecipePlanRead> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/recipe_plan/{id}/',

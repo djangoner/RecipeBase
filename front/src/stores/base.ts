@@ -8,17 +8,26 @@ import {
   MealTime,
   MealTimeService,
   PaginatedIngredientCategoryList,
-  PaginatedRecipeList,
+  PaginatedIngredientList,
+  PaginatedProductListItemReadList,
+  PaginatedProductListWeekReadList,
+  PaginatedRecipeReadList,
+  PaginatedRecipePlanWeekReadList,
   PaginatedRecipeTagList,
   PaginatedShopList,
+  PaginatedTaskCategoryList,
+  PaginatedTaskNestedList,
   ProductListItem,
+  ProductListItemRead,
   ProductListItemService,
   ProductListWeek,
+  ProductListWeekRead,
   ProductListWeekService,
   Recipe,
   RecipeImage,
   RecipeImagesService,
   RecipePlanWeek,
+  RecipePlanWeekRead,
   RecipePlanWeekService,
   RecipesService,
   RecipeTag,
@@ -31,22 +40,24 @@ import {
   TaskCategory,
   TaskCategoryService,
   TaskService,
+  RecipeRead,
+  PatchedRecipe,
 } from "src/client";
 
 export const useBaseStore = defineStore("base", {
   state: () => ({
     stats: null as StatsList | null,
-    recipes: null as Recipe[] | null,
-    recipe: null as Recipe | null,
+    recipes: null as RecipeRead[] | null,
+    recipe: null as RecipeRead | null,
     tags: null as RecipeTag[] | null,
     amount_types: null as AmountTypes | null,
-    week_plan: null as RecipePlanWeek | null,
-    week_plans: null as RecipePlanWeek[] | null,
-    meal_time: null as MealTime | null,
-    product_list: null as ProductListWeek | null,
-    product_lists: null as ProductListWeek[] | null,
-    product_list_items: null as ProductListItem[] | null,
-    product_list_item: null as ProductListItem | null,
+    week_plan: null as RecipePlanWeekRead | null,
+    week_plans: null as RecipePlanWeekRead[] | null,
+    meal_time: null as MealTime[] | null,
+    product_list: null as ProductListWeekRead | null,
+    product_lists: null as ProductListWeekRead[] | null,
+    product_list_items: null as ProductListItemRead[] | null,
+    product_list_item: null as ProductListItemRead | null,
     ingredients: null as Ingredient[] | null,
     ingredient: null as Ingredient | null,
     tasks: null as Task[] | null,
@@ -86,12 +97,12 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async loadMealTime(id: number): Promise<MealTime> {
+    async loadMealTime(payload: object): Promise<MealTime[]> {
       return new Promise((resolve, reject) => {
-        MealTimeService.mealTimeRetrieve({ id })
+        MealTimeService.mealTimeList(payload)
           .then((resp) => {
-            this.meal_time = resp;
-            resolve(resp);
+            this.meal_time = resp.results as MealTime[];
+            resolve(resp as MealTime[]);
           })
           .catch((err) => {
             reject(err);
@@ -126,11 +137,11 @@ export const useBaseStore = defineStore("base", {
     },
 
     // -- Recipes
-    async loadRecipes(payload: object): Promise<PaginatedRecipeList> {
+    async loadRecipes(payload: object): Promise<PaginatedRecipeReadList> {
       return new Promise((resolve, reject) => {
         RecipesService.recipesList(payload)
           .then((resp) => {
-            this.recipes = resp.results as Recipe[];
+            this.recipes = resp.results as RecipeRead[];
             resolve(resp);
           })
           .catch((err) => {
@@ -138,7 +149,7 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async loadRecipe(id: number): Promise<Recipe> {
+    async loadRecipe(id: number): Promise<RecipeRead> {
       return new Promise((resolve, reject) => {
         RecipesService.recipesRetrieve({ id })
           .then((resp) => {
@@ -150,9 +161,9 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async saveRecipe(id: number, payload: Recipe): Promise<Recipe> {
+    async saveRecipe(payload: Recipe): Promise<RecipeRead> {
       return new Promise((resolve, reject) => {
-        RecipesService.recipesUpdate({ id, requestBody: payload })
+        RecipesService.recipesUpdate({ id: payload.id, requestBody: payload })
           .then((resp) => {
             this.recipe = resp;
             resolve(resp);
@@ -162,7 +173,22 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async createRecipe(payload: Recipe): Promise<Recipe> {
+    async patchRecipe(id: number, payload: PatchedRecipe): Promise<RecipeRead> {
+      return new Promise((resolve, reject) => {
+        RecipesService.recipesPartialUpdate({
+          id,
+          requestBody: payload,
+        })
+          .then((resp) => {
+            this.recipe = resp as RecipeRead;
+            resolve(resp as RecipeRead);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    async createRecipe(payload: Recipe): Promise<RecipeRead> {
       return new Promise((resolve, reject) => {
         RecipesService.recipesCreate({ requestBody: payload })
           .then((resp) => {
@@ -202,7 +228,7 @@ export const useBaseStore = defineStore("base", {
     async loadWeekPlan(payload: {
       year: number;
       week: number;
-    }): Promise<RecipePlanWeek> {
+    }): Promise<RecipePlanWeekRead> {
       const id = `${payload?.year}_${payload?.week}`;
       return new Promise((resolve, reject) => {
         RecipePlanWeekService.recipePlanWeekRetrieve({
@@ -217,19 +243,21 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async loadWeekPlans(payload: object): Promise<RecipePlanWeek[]> {
+    async loadWeekPlans(
+      payload: object
+    ): Promise<PaginatedRecipePlanWeekReadList> {
       return new Promise((resolve, reject) => {
         RecipePlanWeekService.recipePlanWeekList(payload)
           .then((resp) => {
-            this.week_plans = resp.results as RecipePlanWeek[];
-            resolve(resp as RecipePlanWeek[]);
+            this.week_plans = resp.results as RecipePlanWeekRead[];
+            resolve(resp);
           })
           .catch((err) => {
             reject(err);
           });
       });
     },
-    async saveWeekPlan(payload: RecipePlanWeek): Promise<RecipePlanWeek> {
+    async saveWeekPlan(payload: RecipePlanWeek): Promise<RecipePlanWeekRead> {
       const id = `${payload?.year}_${payload?.week}`;
       return new Promise((resolve, reject) => {
         RecipePlanWeekService.recipePlanWeekUpdate({
@@ -251,7 +279,7 @@ export const useBaseStore = defineStore("base", {
     async loadProductListWeek(
       payload: { year: number; week: number },
       no_save = false
-    ): Promise<ProductListWeek> {
+    ): Promise<ProductListWeekRead> {
       const id = `${payload?.year}_${payload?.week}`;
       return new Promise((resolve, reject) => {
         ProductListWeekService.productListWeekRetrieve({ id: id })
@@ -266,12 +294,14 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async loadProductListWeeks(payload: object): Promise<ProductListWeek[]> {
+    async loadProductListWeeks(
+      payload: object
+    ): Promise<PaginatedProductListWeekReadList> {
       return new Promise((resolve, reject) => {
         ProductListWeekService.productListWeekList(payload)
           .then((resp) => {
-            this.product_lists = resp.results as ProductListWeek[];
-            resolve(resp.results as ProductListWeek[]);
+            this.product_lists = resp.results as ProductListWeekRead[];
+            resolve(resp);
           })
           .catch((err) => {
             reject(err);
@@ -280,7 +310,7 @@ export const useBaseStore = defineStore("base", {
     },
     async saveProductListWeek(
       payload: { year: number; week: number } & ProductListWeek
-    ): Promise<ProductListWeek> {
+    ): Promise<ProductListWeekRead> {
       const id = `${payload?.year}_${payload?.week}`;
       return new Promise((resolve, reject) => {
         ProductListWeekService.productListWeekUpdate({
@@ -299,7 +329,7 @@ export const useBaseStore = defineStore("base", {
     async generateProductListWeek(payload: {
       year: number;
       week: number;
-    }): Promise<ProductListWeek> {
+    }): Promise<ProductListWeekRead> {
       const id = `${payload?.year}_${payload?.week}`;
       return new Promise((resolve, reject) => {
         ProductListWeekService.productListWeekGenerateRetrieve({ id: id })
@@ -313,12 +343,14 @@ export const useBaseStore = defineStore("base", {
       });
     },
 
-    async loadProductListItems(payload: object): Promise<ProductListItem[]> {
+    async loadProductListItems(
+      payload: object
+    ): Promise<PaginatedProductListItemReadList> {
       return new Promise((resolve, reject) => {
         ProductListItemService.productListItemList(payload)
           .then((resp) => {
-            this.product_list_items = resp.results as ProductListItem[];
-            resolve(resp as ProductListItem[]);
+            this.product_list_items = resp.results as ProductListItemRead[];
+            resolve(resp);
           })
           .catch((err) => {
             reject(err);
@@ -326,7 +358,7 @@ export const useBaseStore = defineStore("base", {
       });
     },
 
-    async loadProductListItem(id: number): Promise<ProductListItem> {
+    async loadProductListItem(id: number): Promise<ProductListItemRead> {
       return new Promise((resolve, reject) => {
         ProductListItemService.productListItemRetrieve({ id })
           .then((resp) => {
@@ -341,7 +373,7 @@ export const useBaseStore = defineStore("base", {
 
     async createProductListItem(
       payload: ProductListItem
-    ): Promise<ProductListItem> {
+    ): Promise<ProductListItemRead> {
       return new Promise((resolve, reject) => {
         ProductListItemService.productListItemCreate({ requestBody: payload })
           .then((resp) => {
@@ -355,7 +387,7 @@ export const useBaseStore = defineStore("base", {
     },
     async updateProductListItem(
       payload: ProductListItem
-    ): Promise<ProductListItem> {
+    ): Promise<ProductListItemRead> {
       return new Promise((resolve, reject) => {
         ProductListItemService.productListItemUpdate({
           id: payload.id,
@@ -383,12 +415,12 @@ export const useBaseStore = defineStore("base", {
     },
     // Ingredients
 
-    async loadIngredients(payload: object): Promise<Ingredient[]> {
+    async loadIngredients(payload: object): Promise<PaginatedIngredientList> {
       return new Promise((resolve, reject) => {
         IngredientsService.ingredientsList(payload)
           .then((resp) => {
             this.ingredients = resp.results as Ingredient[];
-            resolve(resp.results as Ingredient[]);
+            resolve(resp);
           })
           .catch((err) => {
             reject(err);
@@ -407,9 +439,12 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async saveIngredient(id: number, payload: Ingredient): Promise<Ingredient> {
+    async saveIngredient(payload: Ingredient): Promise<Ingredient> {
       return new Promise((resolve, reject) => {
-        IngredientsService.ingredientsUpdate({ id, requestBody: payload })
+        IngredientsService.ingredientsUpdate({
+          id: payload.id,
+          requestBody: payload,
+        })
           .then((resp) => {
             this.ingredient = resp;
             resolve(resp);
@@ -445,12 +480,14 @@ export const useBaseStore = defineStore("base", {
 
     // Tasks
 
-    async loadTaskCategories(payload: object): Promise<TaskCategory[]> {
+    async loadTaskCategories(
+      payload: object
+    ): Promise<PaginatedTaskCategoryList> {
       return new Promise((resolve, reject) => {
         TaskCategoryService.taskCategoryList(payload)
           .then((resp) => {
             this.tasks_categories = resp.results as TaskCategory[];
-            resolve(resp.results as TaskCategory[]);
+            resolve(resp);
           })
           .catch((err) => {
             reject(err);
@@ -468,12 +505,12 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async updateTaskCategory(
-      id: number,
-      payload: TaskCategory
-    ): Promise<TaskCategory> {
+    async updateTaskCategory(payload: TaskCategory): Promise<TaskCategory> {
       return new Promise((resolve, reject) => {
-        TaskCategoryService.taskCategoryUpdate({ id, requestBody: payload })
+        TaskCategoryService.taskCategoryUpdate({
+          id: payload.id,
+          requestBody: payload,
+        })
           .then((resp) => {
             resolve(resp);
           })
@@ -493,12 +530,12 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async loadTasks(payload: object): Promise<Task[]> {
+    async loadTasks(payload: object): Promise<PaginatedTaskNestedList> {
       return new Promise((resolve, reject) => {
         TaskService.taskList(payload)
           .then((resp) => {
             this.tasks = resp.results as Task[];
-            resolve(resp.results as Task[]);
+            resolve(resp);
           })
           .catch((err) => {
             reject(err);
@@ -529,9 +566,9 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async updateTask(id: number, payload: Task): Promise<Task> {
+    async updateTask(payload: Task): Promise<Task> {
       return new Promise((resolve, reject) => {
-        TaskService.taskUpdate({ id, requestBody: payload })
+        TaskService.taskUpdate({ id: payload.id, requestBody: payload })
           .then((resp) => {
             this.task = resp as Task;
             resolve(resp as Task);

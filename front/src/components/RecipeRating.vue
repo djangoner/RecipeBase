@@ -27,23 +27,28 @@
   </q-markup-table>
 </template>
 
-<script>
+<script lang="ts">
 import { useBaseStore } from 'src/stores/base';
 import { useAuthStore } from 'src/stores/auth';
+import { defineComponent, PropType } from 'vue';
+import { RecipeRead, User } from 'src/client';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
 
 let defaultRating = {};
 
-export default {
+export default defineComponent({
   props: {
-    modelValue: { required: true },
-    edit: { required: true },
+    modelValue: { required: true, type: Object as PropType<RecipeRead> },
+    edit: { required: true, type: Boolean },
   },
+  mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
     return {
       store,
       storeAuth,
+      loading: false,
     };
   },
   mounted() {
@@ -62,14 +67,14 @@ export default {
         .then(() => {
           this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки пользователей');
         });
     },
-    userRating(user) {
+    userRating(user: User) {
       let exists = this.modelValue?.ratings?.filter((r) => {
-        return r.user.id == user.id || r.user == user.id;
+        return typeof r.user == 'number' ? r.user == user.id : r.user.id == user.id;
       });
       // console.debug('userRating: ', user, exists);
 
@@ -79,15 +84,19 @@ export default {
         return -1;
       }
     },
-    userSetRating(user, rating) {
-      let exists = this.modelValue?.ratings.filter((r) => {
-        return r.user.id == user.id;
-      });
+    userSetRating(user: User, rating: number) {
+      if (!this.modelValue || !this.modelValue?.ratings) {
+        return;
+      }
+      let exists =
+        this.modelValue?.ratings.filter((r) => {
+          return r.user.id == user.id;
+        }) || false;
       // console.debug('setUserRating: ', user, rating, exists);
 
-      if (exists && exists.length > 0) {
+      if (exists && exists.length > 0 && this.modelValue.ratings) {
         let mvalue = Object.assign({}, this.modelValue);
-        mvalue.ratings = mvalue.ratings.map((r) => {
+        mvalue.ratings = this.modelValue.ratings.map((r) => {
           if (r.user.id == user.id) {
             r.rating = rating;
           }
@@ -96,7 +105,9 @@ export default {
         this.$emit('update:modelValue', mvalue);
       } else {
         let mvalue = Object.assign({}, this.modelValue);
+        // @ts-expect-error: Rating will be created
         mvalue.ratings.push(
+          // @ts-expect-error: Rating will be created
           Object.assign({}, defaultRating, {
             recipe: this.modelValue.id,
             user: user,
@@ -109,7 +120,7 @@ export default {
   },
   computed: {
     users() {
-      return this.storeAuth?.users?.results;
+      return this.storeAuth?.users;
     },
     usersRate() {
       let users = this.users;
@@ -121,5 +132,5 @@ export default {
       });
     },
   },
-};
+});
 </script>

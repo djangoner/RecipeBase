@@ -35,8 +35,8 @@
                   Этот рецепт был создан автоматически на основе плана на неделю
                 </q-tooltip>
               </q-icon>
-              {{ getDay(item.day) }}
-              {{ WeekDays[item.day] }}
+              {{ item.day ? getDay(item.day) : '' }}
+              {{ item.day ? WeekDays[item.day] : '' }}
             </span>
           </div>
         </div>
@@ -66,7 +66,7 @@
           @update:modelValue="$emit('updateItem', item)"
           label="Ингредиент"
           @filter="filterIngredients"
-          :options="ingredients"
+          :options="ingredients || []"
           :readonly="item.is_auto"
           option-label="title"
           option-value="id"
@@ -190,7 +190,7 @@
           label="Неделя для переноса"
           v-model="moveWeek"
           :input-debounce="100"
-          :options="weeksList"
+          :options="weeksList || []"
           :option-label="(w) => w.year + '.' + w.week"
           @filter="filterWeeks"
           use-input
@@ -226,42 +226,34 @@
   </q-dialog>
 </template>
 
-<script>
+<script lang="ts">
 import { useBaseStore } from 'src/stores/base';
 import {
   getDateOfISOWeek,
   WeekDays,
-  getWeekNumber,
   WeekDaysShort,
-} from 'components/WeekSelect.vue';
+  YearWeek,
+} from 'src/modules/WeekUtils';
 import { date } from 'quasar';
+import { defineComponent, PropType } from 'vue';
+import { priorityOptions } from 'src/modules/Globals';
+import {
+  ProductListItemRead,
+  ProductListWeekRead,
+  RecipeIngredientWithRecipeRead,
+  RecipeRead,
+  RecipeShort,
+} from 'src/client';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import IsOnlineMixin from 'src/modules/IsOnlineMixin';
 
-let priorityOptions = [
-  {
-    id: 1,
-    name: 'Наивысший',
+export default defineComponent({
+  props: {
+    modelValue: { required: false, type: Object as PropType<ProductListItemRead> },
+    week: { required: true, type: Object as PropType<YearWeek> },
   },
-  {
-    id: 2,
-    name: 'Высокий',
-  },
-  {
-    id: 3,
-    name: 'Средний',
-  },
-  {
-    id: 4,
-    name: 'Низкий',
-  },
-  {
-    id: 5,
-    name: 'Низший',
-  },
-];
-
-export default {
-  props: { modelValue: { required: true }, week: {} },
   emits: ['openItem', 'updateItem', 'update:modelValue'],
+  mixins: [HandleErrorsMixin, IsOnlineMixin],
   data() {
     const store = useBaseStore();
     return {
@@ -269,22 +261,27 @@ export default {
       WeekDays,
       showMoveWeek: false,
       searchWeek: '',
-      moveWeek: null,
+      moveWeek: null as null | ProductListWeekRead,
       priorityOptions,
     };
   },
   methods: {
-    getDay(idx) {
+    getDay(idx: number): string {
       let fday = getDateOfISOWeek(this.week.year, this.week.week);
       fday.setDate(fday.getDate() + idx - 1);
       return date.formatDate(fday, 'DD.MM');
     },
-    ingUsingStr(ing) {
+    ingUsingStr(ing: RecipeIngredientWithRecipeRead): string {
       let recipe = ing.recipe;
+      if (!recipe) {
+        return '';
+      }
 
-      let ings = recipe.ingredients.filter((i) => i.id == ing.id);
-      let texts = ings.map((i) => {
-        let r = i.amount + ' ' + i.amount_type_str;
+      let ings = recipe.ingredients
+        ? recipe?.ingredients.filter((i) => i.id == ing.id)
+        : [];
+      let texts: string[] = ings.map((i) => {
+        let r = String(i.amount) + ' ' + i.amount_type_str;
         if (i.is_main) {
           r += ', основной';
         }
@@ -294,7 +291,7 @@ export default {
       return texts.join(', ');
     },
 
-    filterWeeks(val, update, abort) {
+    filterWeeks(val: string, update: CallableFunction) {
       // if (this.searchWeek == val) {
       //   update(() => {});
       //   return;
@@ -308,13 +305,13 @@ export default {
       this.store
         .loadProductListWeeks(payload)
         .then(() => {
-          update(() => {});
+          update();
         })
         .catch(() => {
-          update(() => {});
+          update();
         });
     },
-    loadIngredients(search) {
+    loadIngredients(search: string): Promise<void> {
       return new Promise((resolve, reject) => {
         let payload = {
           page_size: 1000,
@@ -326,19 +323,19 @@ export default {
             resolve();
             // this.loading = false;
           })
-          .catch((err) => {
+          .catch((err: CustomAxiosError) => {
             reject(err);
             // this.loading = false;
             this.handleErrors(err, 'Ошибка загрузки ингредиентов');
           });
       });
     },
-    filterIngredients(val, update, abort) {
-      this.loadIngredients(val).then(() => {
-        update(() => {});
+    filterIngredients(val: string, update: CallableFunction) {
+      void this.loadIngredients(val).then(() => {
+        void update();
       });
     },
-    moveWeekDelta(delta) {
+    moveWeekDelta(delta: number) {
       let year = this.week.year.valueOf();
       let week = this.week.week.valueOf();
 
@@ -355,9 +352,9 @@ export default {
         week: week,
         page_size: 1000,
       };
-      this.store.loadProductListWeek(payload, true).then((resp) => {
-        this.moveWeek = resp.data;
-        delete this.moveWeek['items'];
+      void this.store.loadProductListWeek(payload, true).then((resp) => {
+        this.moveWeek = resp;
+        // delete this.moveWeek['items'];
       });
     },
     itemMoveWeek() {
@@ -372,26 +369,26 @@ export default {
       this.showMoveWeek = false;
       this.$emit('update:modelValue', false);
     },
-    getRecipeDays(recipe) {
+    getRecipeDays(recipe: RecipeRead | RecipeShort): null | string[] {
       if (!this.plan) {
-        return;
+        return null;
       }
       let plans = this.plan.plans.filter((p) => p.recipe.id == recipe?.id);
-      return plans.map((p) => WeekDaysShort[p.day]);
+      return plans.map((p) => (p.day ? WeekDaysShort[p.day] : ('' as string)));
     },
   },
   computed: {
     item() {
-      return this.modelValue || {};
+      return this.modelValue;
     },
     plan() {
       return this.store.week_plan;
     },
     ingredients() {
-      return this.store.ingredients?.results;
+      return this.store.ingredients;
     },
     weeksList() {
-      return this.store?.product_lists?.results;
+      return Object.freeze(this.store?.product_lists);
     },
     weekDaysOptions() {
       return Object.entries(this.WeekDays).map(([id, name]) => {
@@ -406,5 +403,5 @@ export default {
       }
     },
   },
-};
+});
 </script>

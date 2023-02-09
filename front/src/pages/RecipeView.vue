@@ -106,7 +106,7 @@
                   keydown.enter.prevent="addTag()"
                   @filter="filterTags"
                   :input-debounce="0"
-                  :options="tagList"
+                  :options="tagList || []"
                   option-label="title"
                   use-input
                   :options-dense="dense"
@@ -190,7 +190,7 @@
                   height="250px"
                   @mouseenter="autoplay = false"
                   @mouseleave="autoplay = true"
-                  v-if="recipe.images?.length > 0"
+                  v-if="(recipe.images || [])?.length > 0"
                 >
                   <template v-slot:control>
                     <q-carousel-control position="bottom-right" :offset="[18, 18]">
@@ -302,11 +302,11 @@
               <!-- Info -->
               <q-expansion-item label="Подробности">
                 <div class="row column q-px-md q-col-gutter-sm">
-                  <span><b>Дата создания:</b> {{ dateFormat(recipe.created) }}</span>
-                  <span><b>Дата изменения:</b> {{ dateFormat(recipe.edited) }}</span>
+                  <span><b>Дата создания:</b> {{ dateTimeFormat(recipe.created) }}</span>
+                  <span><b>Дата изменения:</b> {{ dateTimeFormat(recipe.edited) }}</span>
                   <span v-if="recipe.last_cooked"
                     ><b>Последний раз приготовлено:</b>
-                    {{ dateOnlyFormat(recipe.last_cooked) }}</span
+                    {{ dateFormat(recipe.last_cooked) }}</span
                   >
                   <span v-if="recipe.cooked_times"
                     ><b>Приготовлено (раз):</b> {{ recipe.cooked_times }}</span
@@ -355,7 +355,7 @@
                   :hide-pagination="true"
                   flat
                   dense
-                  v-if="recipe?.ingredients?.length > 0 || edit"
+                  v-if="(recipe?.ingredients || [])?.length > 0 || edit"
                 >
                   <template #bottom> </template>
                   <!-- Custom fields -->
@@ -366,7 +366,7 @@
                         v-model="slotScope.row.ingredient"
                         v-if="edit"
                         :input-debounce="0"
-                        :options="ingList"
+                        :options="ingList || []"
                         option-label="title"
                         style="max-width: 120px"
                         @filter="filterIngredients"
@@ -436,7 +436,7 @@
                           v-if="edit"
                           label="Ингредиент"
                           :input-debounce="0"
-                          :options="ingList"
+                          :options="ingList || []"
                           option-label="title"
                           style="max-width: 120px"
                           @keydown.enter.prevent="addIngredient()"
@@ -471,7 +471,7 @@
                           @keydown.enter.prevent="addIngredient()"
                           @filter="filterIngredientsAmountType"
                           :input-debounce="0"
-                          :options="amountTypeList"
+                          :options="amountTypeList || []"
                           option-label="title"
                           option-value="id"
                           map-options
@@ -518,7 +518,11 @@
               <div class="q-my-sm">
                 <div class="text-h6 text-center q-mb-sm">Рейтинг:</div>
 
-                <recipe-rating v-model="store.recipe" :edit="edit"></recipe-rating>
+                <recipe-rating
+                  v-model="store.recipe"
+                  :edit="edit"
+                  v-if="store.recipe"
+                ></recipe-rating>
               </div>
             </q-card-section>
           </q-card>
@@ -530,12 +534,24 @@
   </q-page>
 </template>
 
-<script>
+<script lang="ts">
 import { useBaseStore } from 'src/stores/base';
 import { date } from 'quasar';
 import RecipeImagesUpload from 'src/components/RecipeImagesUpload.vue';
 import recipeRating from 'src/components/RecipeRating.vue';
 import RecipeMenu from 'src/components/RecipeMenu.vue';
+import { defineComponent } from 'vue';
+import {
+  AmountTypeEnum,
+  Ingredient,
+  RecipeImage,
+  RecipeIngredientRead,
+  RecipeRead,
+  RecipeTag,
+} from 'src/client';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import { AmountTypesTypes } from 'src/modules/Globals';
+import { RecipeFromRead } from 'src/Convert';
 
 let defaultRecipe = {
   content_source: '',
@@ -544,14 +560,25 @@ let defaultRecipe = {
   images: [],
   ingredients: [],
   ratings: [],
+  portion_count: null,
 };
 
-export default {
+interface PatchedRecipeRead {
+  content: string;
+  content_source: string;
+  images: RecipeImage[];
+}
+
+export default defineComponent({
   components: {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     RecipeImagesUpload,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     recipeRating,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     RecipeMenu,
   },
+  mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
 
@@ -559,7 +586,7 @@ export default {
       {
         name: 'title',
         label: 'Название',
-        field: (row) => row.ingredient.title,
+        field: (row: RecipeIngredientRead) => row.ingredient.title,
         required: true,
         sortable: true,
         style: 'width: 50px',
@@ -575,7 +602,8 @@ export default {
       {
         name: 'amount_rec',
         label: 'Вес (рецепт)',
-        field: (row) => row.amount + '  (' + row.amount_type_str + ')',
+        field: (row: RecipeIngredientRead) =>
+          String(row.amount) + '  (' + row.amount_type_str + ')',
         required: true,
         sortable: true,
         style: 'width: 20px',
@@ -583,7 +611,8 @@ export default {
       {
         name: 'amount_g',
         label: 'Вес (гр.)',
-        field: (row) => (row.amount_grams ? row.amount_grams + ' гр.' : '-'),
+        field: (row: RecipeIngredientRead) =>
+          row.amount_grams ? String(row.amount_grams) + ' гр.' : '-',
         required: true,
         sortable: true,
         style: 'width: 30px',
@@ -599,7 +628,7 @@ export default {
     ];
 
     let ingAddDefault = {
-      select: null,
+      select: null as { id: number | null; title: string } | null,
       amount: null,
       amount_type: 'g',
       is_main: false,
@@ -643,7 +672,6 @@ export default {
           label: this.$q.lang.editor.defaultFont,
           icon: this.$q.iconSet.editor.font,
           fixedIcon: true,
-          fixedIcon: true,
           list: 'no-icons',
           options: [
             'default_font',
@@ -676,7 +704,7 @@ export default {
       verdana: 'Verdana',
     };
 
-    let requiredRule = (val) => !!val || 'Обязательное поле';
+    let requiredRule = (val: string | number) => !!val || 'Обязательное поле';
 
     return {
       store,
@@ -686,13 +714,13 @@ export default {
       autoplay: true,
       fullscreen: false,
       edit: false,
-      tagAddSelect: null,
-      tagList: null,
-      amountTypeList: null,
+      tagAddSelect: null as RecipeTag | null,
+      tagList: null as RecipeTag[] | null,
+      amountTypeList: null as AmountTypesTypes | null,
       saveAndContinue: false,
       ingAddDefault,
       ingAdd: Object.assign({}, ingAddDefault),
-      ingList: null,
+      ingList: null as Ingredient[] | null,
       requiredRule,
       ingredientsColumns,
       editorToolbar,
@@ -716,61 +744,84 @@ export default {
     }
   },
   beforeRouteUpdate(to) {
-    this.loadRecipe(to.params.id);
+    if (to.params.id == 'new') {
+      this.loadRecipe('new');
+    } else {
+      this.loadRecipe(parseInt(to.params?.id as string));
+    }
   },
   methods: {
-    loadRecipe(load_id) {
-      let id = load_id || this.$route.params.id;
+    loadRecipe(load_id?: number | 'new' | undefined) {
+      let id: string | number | 'new' = load_id || (this.$route.params.id as string);
 
       if (id == 'new') {
         this.resetData();
         this.edit = true;
         return;
+      } else {
+        this.edit = false;
       }
 
-      let payload = {
-        id: id,
-      };
+      if (typeof id == 'string') {
+        id = parseInt(id);
+      }
+
       this.loading = true;
 
       this.store
-        .loadRecipe(payload)
+        .loadRecipe(id)
         .then(() => {
           this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки рецептов');
         });
     },
     resetData() {
       console.debug('Recipe resetData');
+      // @ts-expect-error: Default recipe not full
       this.store.recipe = Object.assign({}, defaultRecipe);
       // this.recipe = Object.assign({}, defaultRecipe);
-      this.recipe.tags.length = 0;
-      this.recipe.ingredients.length = 0;
+      if (this.recipe?.tags) {
+        this.recipe.tags.length = 0;
+      }
+      if (this.recipe?.ingredients) {
+        this.recipe.ingredients.length = 0;
+      }
     },
-    async uploadImg(img) {
+    async uploadImg(img: RecipeImage) {
+      if (!this.recipe) {
+        return;
+      }
       return new Promise((resolve, reject) => {
-        let formData = new FormData();
-        formData.append('recipe', this.recipe.id);
-        formData.append('image', img.image);
-        formData.append('title', img.title);
-        formData.append('num', img.num);
+        // let formData = new FormData();
+        // formData.append('recipe', String(this.recipe.id));
+        // formData.append('image', img.image);
+        // formData.append('title', img.title as string);
+        // formData.append('num', string(img.num));
+        let payload = {
+          recipe: String(this.recipe?.id as number),
+          image: img.image,
+          title: img.title as string,
+          num: String(img.num),
+        };
 
         this.store
-          .createRecipeImage(formData)
+          // @ts-expect-error: Recipe image will be created
+          .createRecipeImage(payload)
           .then((resp) => {
-            resolve(resp.data);
+            resolve(resp);
             console.debug('IMG: ', resp);
           })
           .catch((err) => reject(err));
       });
     },
-    async handleImages(payload) {
-      payload.images = await Promise.all(
-        payload.images.map(async (i) => {
+    async handleImages(images_src: RecipeImage[]) {
+      let images = await Promise.all(
+        images_src.map(async (i) => {
           // console.debug('Image upload: ', i, Boolean(i.upload_preview), Boolean(i.id));
+          // @ts-expect-error: Upload preview generation
           if (i.upload_preview) {
             let res = await this.uploadImg(i);
             // (async () => {
@@ -782,12 +833,12 @@ export default {
             // delete res['image'];
           }
           if (i.id) {
-            delete i['image'];
+            i.image = '';
           }
           return i;
         })
       );
-      return payload;
+      return images;
     },
     async saveRecipe() {
       // console.debug('Save recipe');
@@ -795,35 +846,15 @@ export default {
       if (!this.saveAndContinue) {
         this.edit = false;
       }
-
-      let payload = Object.assign({}, this.recipe);
+      let payload = RecipeFromRead(this.recipe);
       let isCreating = !this.exists;
       let method = isCreating ? this.store.createRecipe : this.store.saveRecipe;
 
       if (isCreating) {
         payload.images = [];
       } else {
-        payload = await this.handleImages(payload);
+        payload.images = await this.handleImages(payload.images as RecipeImage[]);
       }
-
-      if (!payload.cooking_time) {
-        payload.cooking_time = 0;
-      }
-      if (!payload.portion_count) {
-        payload.portion_count = 0;
-      }
-
-      payload.ratings = payload.ratings.map((r) => {
-        if (r.user) {
-          r.user = r.user.id;
-        }
-        return r;
-      });
-
-      payload.ingredients.map((i) => {
-        i.ingredient = i.ingredient.id;
-        return i;
-      });
 
       console.debug('Saving recipe: ', payload);
 
@@ -832,8 +863,8 @@ export default {
           this.saving = false;
 
           if (isCreating) {
-            console.debug('Redirecting from created recipe: ', resp.data);
-            this.$router.replace({ name: 'recipe', params: { id: resp.data.id } });
+            console.debug('Redirecting from created recipe: ', resp);
+            void this.$router.replace({ name: 'recipe', params: { id: resp.id } });
             // .catch(() => {});
           }
 
@@ -844,7 +875,7 @@ export default {
           });
           this.loadIngredients();
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.saving = false;
           this.edit = true;
           this.handleErrors(err, 'Ошибка сохранения рецепта');
@@ -859,7 +890,7 @@ export default {
         .then(() => {
           // this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           // this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки меток');
         });
@@ -871,25 +902,22 @@ export default {
       this.store
         .loadIngredients(payload)
         .then(() => {
-          this.ingList = this.ingredients?.results;
+          this.ingList = this.ingredients;
           // this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           // this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки ингредиентов');
         });
     },
     loadAmountTypes() {
-      let payload = {
-        page_size: 1000,
-      };
       this.store
-        .loadAmountTypes(payload)
+        .loadAmountTypes()
         .then(() => {
           // this.loading = false;
-          this.amountTypeList = this.amount_types?.types;
+          this.amountTypeList = this.amount_types?.types as AmountTypesTypes;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           // this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки типов измерений');
         });
@@ -897,15 +925,21 @@ export default {
     toggleEdit() {
       this.edit = !this.edit;
     },
-    removeTag(tag) {
+    removeTag(tag: RecipeTag) {
+      if (!this.recipe) {
+        return;
+      }
       console.debug('Remove tag: ', tag);
-      this.recipe.tags = this.recipe.tags.filter((t) => {
-        return t.title !== tag.title;
-      });
+      this.recipe.tags =
+        this.recipe?.tags?.filter((t) => {
+          return t.title !== tag.title;
+        }) || [];
     },
-    addTag(new_tag, done) {
+    addTag(new_tag?: string) {
+      // , done: CallableFunction
       if (new_tag) {
         this.tagAddSelect = {
+          // @ts-expect-error: Tag will be created
           id: null,
           title: new_tag,
         };
@@ -916,26 +950,26 @@ export default {
       if (!this.tagAddSelect) {
         return;
       }
-      this.recipe.tags.push(this.tagAddSelect);
+      this.recipe?.tags?.push(this.tagAddSelect);
       this.tagAddSelect = null;
     },
-    filterTags(val, update, abort) {
+    filterTags(val: string, update: CallableFunction) {
       update(() => {
-        let isUsed = (tag) => {
-          return this.recipe.tags.some((t) => t.id == tag.id);
+        let isUsed = (tag: RecipeTag) => {
+          return this.recipe?.tags?.some((t) => t.id == tag.id);
         };
 
         const needle = val.toLowerCase();
-        let tags = this.tags?.results;
+        let tags = this.tags;
 
-        this.tagList = tags?.filter(
-          (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
-        );
+        this.tagList =
+          tags?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)) ||
+          [];
         // console.debug(needle, this.tagList, tags);
       });
     },
-    addIngredient(new_val) {
-      if (new_val) {
+    addIngredient(new_val?: string) {
+      if (new_val && this.ingAdd && this.ingAdd.select) {
         this.ingAdd.select = {
           id: null,
           title: new_val,
@@ -947,70 +981,83 @@ export default {
       if (!this.ingAdd.select || !this.ingAdd.amount || !this.ingAdd.amount_type) {
         return;
       }
-      this.recipe.ingredients.push({
+      this.recipe?.ingredients?.push({
+        // @ts-expect-error: Ingredient will be added
         ingredient: this.ingAdd.select,
         amount: this.ingAdd.amount,
-        amount_type: this.ingAdd.amount_type,
+        amount_type: this.ingAdd.amount_type as AmountTypeEnum,
         is_main: false,
       });
       this.ingAdd = Object.assign({}, this.ingAddDefault);
     },
 
-    removeIngredient(row) {
+    removeIngredient(row: RecipeIngredientRead) {
+      if (!this.recipe) {
+        return;
+      }
       console.debug('Remove ingredient: ', row);
       this.$q
         .dialog({
           title: 'Подтверждение удаления ингредиента',
-          message: `Вы уверены что хотите удалить ингредиент '${row.ingredient.title}' ?`,
+          message: `Вы уверены что хотите удалить ингредиент '${
+            row?.ingredient?.title || 'Новый ингредиент'
+          }' ?`,
           cancel: true,
           persistent: true,
         })
         .onOk(() => {
           console.debug('Remove ingredient confirmed');
-          this.recipe.ingredients = this.recipe.ingredients.filter((t) => {
-            return t != row;
-          });
+          if (!this.recipe) {
+            return;
+          }
+          this.recipe.ingredients =
+            this.recipe?.ingredients?.filter((t) => {
+              return t != row;
+            }) || [];
         });
     },
 
-    filterIngredients(val, update, abort) {
+    filterIngredients(val: string, update: CallableFunction) {
       update(() => {
-        let isUsed = (ing) => {
-          // console.debug(ing, this.recipe.ingredients);
-          return this.recipe.ingredients.some((t) => t.ingredient.id == ing.id);
-        };
+        // let isUsed = (ing) => {
+        //   // console.debug(ing, this.recipe.ingredients);
+        //   return this.recipe.ingredients.some((t) => t.ingredient.id == ing.id);
+        // };
         const needle = val.toLowerCase();
-        let ingredients = this.ingredients?.results;
+        let ingredients = this.ingredients;
 
-        this.ingList = ingredients?.filter(
-          (v) => v.title.toLowerCase().indexOf(needle) > -1 // && !isUsed(v)
-        );
+        this.ingList =
+          ingredients?.filter(
+            (v) => v.title.toLowerCase().indexOf(needle) > -1 // && !isUsed(v)
+          ) || [];
         // console.debug(needle, this.tagList, tags);
       });
     },
 
-    filterIngredientsAmountType(val, update, abort) {
+    filterIngredientsAmountType(val: string, update: CallableFunction) {
       update(() => {
         const needle = val.toLowerCase();
-        let amount_types = this.amount_types?.types;
+        let amount_types = (this.amount_types?.types || null) as AmountTypesTypes | null;
 
-        this.amountTypeList = amount_types?.filter(
-          (v) => v.title.toLowerCase().indexOf(needle) > -1
-        );
+        this.amountTypeList =
+          amount_types?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1) || [];
         // console.debug(needle, this.tagList, tags);
       });
     },
-    dateFormat(raw) {
+    dateTimeFormat(raw: Date | string | null): string {
+      if (!raw) {
+        return '-';
+      }
       return date.formatDate(raw, 'YYYY.MM.DD hh:mm');
     },
-    dateOnlyFormat(raw) {
+    dateFormat(raw: Date | string): string {
       return date.formatDate(raw, 'YYYY.MM.DD');
     },
   },
 
   computed: {
     recipe() {
-      return this.store.recipe;
+      return this.store.recipe as (RecipeRead & PatchedRecipeRead) | null;
     },
     tags() {
       return this.store.tags;
@@ -1028,11 +1075,15 @@ export default {
       // return this.$q.screen.lt.sm;
       return true;
     },
-    pricesPart() {
-      return this.recipe.ingredients.map((i) => i.price_part).reduce((a, b) => a + b, 0);
+    pricesPart(): number {
+      return (
+        this.recipe?.ingredients?.map((i) => i.price_part).reduce((a, b) => a + b, 0) || 0
+      );
     },
-    pricesFull() {
-      return this.recipe.ingredients.map((i) => i.price_full).reduce((a, b) => a + b, 0);
+    pricesFull(): number {
+      return (
+        this.recipe?.ingredients?.map((i) => i.price_full).reduce((a, b) => a + b, 0) || 0
+      );
     },
   },
 
@@ -1041,18 +1092,22 @@ export default {
       let column_actions = {
         name: 'actions',
         label: 'Действия',
+        field: () => '',
         required: true,
         sortable: true,
+        style: '',
       };
 
       if (val) {
         this.ingredientsColumns.push(column_actions);
       } else {
-        this.ingredientsColumns.pop(column_actions);
+        this.ingredientsColumns = this.ingredientsColumns?.filter(
+          (i) => i !== column_actions
+        );
       }
     },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

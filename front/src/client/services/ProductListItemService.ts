@@ -1,9 +1,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaginatedProductListItemList } from '../models/PaginatedProductListItemList';
+import type { PaginatedProductListItemReadList } from '../models/PaginatedProductListItemReadList';
 import type { PatchedProductListItem } from '../models/PatchedProductListItem';
 import type { ProductListItem } from '../models/ProductListItem';
+import type { ProductListItemRead } from '../models/ProductListItemRead';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -12,7 +13,7 @@ import { request as __request } from '../core/request';
 export class ProductListItemService {
 
     /**
-     * @returns PaginatedProductListItemList 
+     * @returns PaginatedProductListItemReadList 
      * @throws ApiError
      */
     public static productListItemList({
@@ -43,7 +44,7 @@ pageSize?: number,
  * A search term.
  */
 search?: string,
-}): CancelablePromise<PaginatedProductListItemList> {
+}): CancelablePromise<PaginatedProductListItemReadList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/product_list_item/',
@@ -60,14 +61,14 @@ search?: string,
     }
 
     /**
-     * @returns ProductListItem 
+     * @returns ProductListItemRead 
      * @throws ApiError
      */
     public static productListItemCreate({
 requestBody,
 }: {
 requestBody: ProductListItem,
-}): CancelablePromise<ProductListItem> {
+}): CancelablePromise<ProductListItemRead> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/product_list_item/',
@@ -77,7 +78,7 @@ requestBody: ProductListItem,
     }
 
     /**
-     * @returns ProductListItem 
+     * @returns ProductListItemRead 
      * @throws ApiError
      */
     public static productListItemRetrieve({
@@ -87,7 +88,7 @@ id,
  * A unique integer value identifying this Список покупок.
  */
 id: number,
-}): CancelablePromise<ProductListItem> {
+}): CancelablePromise<ProductListItemRead> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/product_list_item/{id}/',
@@ -98,7 +99,7 @@ id: number,
     }
 
     /**
-     * @returns ProductListItem 
+     * @returns ProductListItemRead 
      * @throws ApiError
      */
     public static productListItemUpdate({
@@ -110,7 +111,7 @@ requestBody,
  */
 id: number,
 requestBody: ProductListItem,
-}): CancelablePromise<ProductListItem> {
+}): CancelablePromise<ProductListItemRead> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/product_list_item/{id}/',

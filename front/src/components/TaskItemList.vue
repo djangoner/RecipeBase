@@ -73,48 +73,57 @@
   </template>
 </template>
 
-<script>
-import { defineAsyncComponent } from 'vue-demi';
+<script lang="ts">
+import { defineAsyncComponent, defineComponent, PropType } from 'vue';
 // import taskItemView from 'components/TaskItemView.vue';
 import taskItem from 'components/TaskItem.vue';
 import { useBaseStore } from 'src/stores/base';
+import { Task, TaskCategory } from 'src/client';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import { isTaskCategory } from 'src/modules/Utils';
+import { TaskOrCategory } from 'src/modules/Globals';
 
-export default {
+type TaskList = TaskOrCategory[];
+
+export default defineComponent({
   components: {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     taskItemView: defineAsyncComponent(() => import('./TaskItemView.vue')),
-    taskItem,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    taskItem: taskItem,
   },
   props: {
-    modelValue: Array,
-    root: { required: false },
-    tree: { required: false },
-    flat: { default: false },
+    modelValue: { type: Array as PropType<TaskList> },
+    root: { required: false, type: Object as PropType<TaskCategory> },
+    tree: { required: false, type: Array as PropType<TaskList> },
+    flat: { default: false, type: Boolean },
   },
   emits: ['updateItem', 'reload', 'openParent'],
+  mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
     return {
       store,
-      children: false,
-      addTask: '',
+      children: false as Task | boolean,
+      addTask: '' as string,
     };
   },
   methods: {
-    updateItem(task) {
+    updateItem(task: Task) {
       console.debug('Update task', task);
       this.$emit('updateItem', task);
     },
-    openChildren(task) {
+    openChildren(task: Task) {
       this.children = task;
     },
-    updateTask(task) {
+    updateTask(task: Task) {
       this.$emit('updateItem', task);
-      this.childrens = this.childrens.map((c) => {
-        if (c.id == task.id) {
-          return task;
-        }
-        return c;
-      });
+      // this.childrens = this.childrens.map((c) => {
+      //   if (c.id == task.id) {
+      //     return task;
+      //   }
+      //   return c;
+      // });
     },
     createTask() {
       if (!this.addTask) {
@@ -125,12 +134,12 @@ export default {
 
       let payload = {
         title: this.addTask,
-        parent: this.isCategory ? null : parent?.id,
-        category: parent?.category || parent?.id,
+        parent: isTaskCategory(parent) ? null : parent?.id,
+        category: isTaskCategory(parent) ? parent.id : parent.category,
       };
       this.store
         .createTask(payload)
-        .then((resp) => {
+        .then(() => {
           this.loading = false;
           this.addTask = '';
 
@@ -142,7 +151,7 @@ export default {
 
           this.$emit('reload');
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузка создания категории');
         });
@@ -152,8 +161,8 @@ export default {
     tasks() {
       return this.modelValue || [];
     },
-    genTree() {
-      let tree;
+    genTree(): TaskList {
+      let tree: TaskList;
       if (this.tree) {
         tree = this.tree.slice();
       } else {
@@ -166,24 +175,21 @@ export default {
         return tree;
       }
     },
-    tasksUnCompleted() {
+    tasksUnCompleted(): TaskList {
       return this.tasks.filter((t) => !t.is_completed);
     },
-    tasksCompleted() {
+    tasksCompleted(): TaskList {
       return this.tasks.filter((t) => t.is_completed);
-    },
-    isCategory() {
-      return this.category?.is_completed === undefined;
     },
   },
   watch: {
     modelValue: {
       deep: true,
-      handler(val, oldVal) {
+      handler() {
         console.debug('Updating tree');
         this.children = this.tasks.find((t) => t.id == this.children?.id);
       },
     },
   },
-};
+});
 </script>

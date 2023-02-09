@@ -2,14 +2,14 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { RecipePlan } from './RecipePlan';
+import type { RecipePlanShort } from './RecipePlanShort';
 
 /**
  * Adds nested create feature
  */
 export type RecipePlanWeek = {
     readonly id: number;
-    plans: Array<RecipePlan>;
+    plans: Array<RecipePlanShort>;
     year: number;
     week: number;
     comments?: Record<string, any>;

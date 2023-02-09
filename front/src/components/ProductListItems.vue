@@ -54,7 +54,7 @@
         <template v-if="item.price_full">, ~{{ item.price_full }}₺</template>
       </span>
       <!-- First column bottom row, date -->
-      <span class="text-body2" :class="WeekDaysColors[item.day]">
+      <span class="text-body2" :class="item.day ? WeekDaysColors[item.day] : ''">
         <q-icon v-if="item.is_auto" name="settings">
           <q-tooltip>
             Этот рецепт был создан автоматически на основе плана на неделю
@@ -71,7 +71,10 @@
           name="notes"
         ></q-icon>
 
-        <q-badge class="q-mx-sm q-py-xs" :color="priorityColors[item.priority]">
+        <q-badge
+          class="q-mx-sm q-py-xs"
+          :color="item.priority ? priorityColors[item.priority] : ''"
+        >
           <q-icon name="flag" size="10px" />
           <span class="q-ml-xs">
             {{ item.priority }}
@@ -79,8 +82,8 @@
         </q-badge>
         <q-icon name="notes" size="17px" color="blue-grey" v-if="item.description" />
 
-        {{ getDay(item.day) }}
-        {{ WeekDays[item.day] }}
+        {{ item.day ? getDay(item.day) : '' }}
+        {{ item.day ? WeekDays[item.day] : '' }}
 
         <span class="text-teal" v-if="isEdited(item)"> [Изменено локально] </span>
       </span>
@@ -88,54 +91,47 @@
   </q-item>
 </template>
 
-<script>
-import weekSelect, {
+<script lang="ts">
+import { date } from 'quasar';
+import { ProductListItemRead, ProductListWeek } from 'src/client';
+import { defineComponent, PropType } from 'vue';
+import {
   getDateOfISOWeek,
   WeekDays,
-  getWeekNumber,
-} from 'components/WeekSelect.vue';
-import { date } from 'quasar';
+  YearWeek,
+  WeekDaysColors,
+  priorityColors,
+} from 'src/modules/WeekUtils';
 
-let WeekDaysColors = {
-  0: 'text-light-green-6',
-  1: 'text-teal',
-  2: 'text-cyan',
-  3: 'text-light-blue',
-  4: 'text-blue-10',
-  5: 'text-indigo',
-  6: 'text-purple',
-  7: 'text-deep-purple',
-};
-
-let priorityColors = {
-  1: 'red',
-  2: 'orange',
-  3: 'yellpw',
-  4: 'green',
-  5: 'grey',
-};
-
-export default {
-  props: { listItems: { required: true }, week: {} },
+export default defineComponent({
+  props: {
+    listItems: { required: true, type: Array as PropType<ProductListItemRead[]> },
+    week: { required: true, type: Object as PropType<YearWeek> },
+  },
   emits: ['openItem', 'updateItem', 'update:modelValue'],
 
   data() {
     return {
       // listItems: null,
-      WeekDays,
+      WeekDays: WeekDays as { [key: number]: string },
       WeekDaysColors,
       priorityColors,
     };
   },
   methods: {
-    getDay(idx) {
-      let fday = getDateOfISOWeek(this.week.year, this.week.week);
+    getDay(idx: number): string | null {
+      if (!this.week) {
+        return null;
+      }
+      // console.debug(this.week, this.week.year, this.week.week);
+      // let fday: Date = getDateOfISOWeek(this.week.year, this.week.week);
+      let fday = getDateOfISOWeek(1, 2);
       fday.setDate(fday.getDate() + idx - 1);
       return date.formatDate(fday, 'DD.MM');
     },
-    intFormat(number, val1, val2, val3) {
+    intFormat(number: number, val1: string, val2: string, val3: string): string {
       let n = number.toString();
-      if (n > 10 && n < 20) {
+      if (number > 10 && number < 20) {
         return val3;
       } else if (n.endsWith('1')) {
         return val1;
@@ -144,9 +140,9 @@ export default {
       } else {
         return val3;
       }
-      return number;
+      // return number;
     },
-    isEdited(item) {
+    isEdited(item: ProductListItemRead): boolean | undefined {
       // let isNotSynced = !!this.$q.localStorage.getItem('local_productlist_updated');
       if (!this.local_cache) {
         return;
@@ -159,15 +155,16 @@ export default {
 
       return isChanged;
     },
-    itemCls(item) {
-      if (item?.is_completed) {
+    itemCls(item: ProductListItemRead): string | undefined {
+      if (item?.is_completed && 'dark' in this.$q) {
         return this.$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-4';
       }
     },
   },
   computed: {
-    local_cache() {
-      return this.$q.localStorage.getItem('local_productlist');
+    local_cache(): ProductListWeek | null {
+      let val = this.$q.localStorage.getItem('local_productlist');
+      return val ? (val as ProductListWeek) : null;
     },
   },
   watch: {
@@ -184,5 +181,5 @@ export default {
     //   this.listItems = val;
     // },
   },
-};
+});
 </script>

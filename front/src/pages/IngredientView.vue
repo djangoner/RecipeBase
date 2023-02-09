@@ -15,7 +15,7 @@
         >
       </div>
     </div>
-    <q-form class="q-mt-md" @submit.prevent="saveIngredient()" v-if="ingredient">
+    <q-form class="q-my-md" @submit.prevent="saveIngredient()" v-if="ingredient">
       <q-card padding>
         <q-card-section class="q-col-gutter-y-md">
           <!-- Main fields -->
@@ -28,7 +28,7 @@
           ></q-input>
           <q-select
             v-model.number="ingredient.category"
-            :options="ingredientCategories?.results"
+            :options="ingredientCategories || []"
             label="Категория"
             option-label="title"
             option-value="id"
@@ -63,7 +63,7 @@
           <q-toggle v-model="ingredient.need_buy" label="Требует покупки"> </q-toggle>
           <q-toggle v-model="ingredient.edible" label="Съедобный"> </q-toggle>
         </q-card-section>
-        <q-card-actions class="q-col-gutter-x-md q-mx-none">
+        <q-card-actions class="q-col-gutter-x-md q-mx-none q-pb-md">
           <div>
             <q-btn
               type="submit"
@@ -93,8 +93,10 @@
   </q-page>
 </template>
 
-<script>
+<script lang="ts">
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
 import { useBaseStore } from 'src/stores/base';
+import { defineComponent } from 'vue';
 
 const defaultIngredient = {
   title: '',
@@ -103,7 +105,8 @@ const defaultIngredient = {
   edible: true,
 };
 
-export default {
+export default defineComponent({
+  mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
     return {
@@ -111,7 +114,7 @@ export default {
       loading: false,
       saving: false,
       deleting: false,
-      requiredRule: (val) => !!val || 'Обязательное поле',
+      requiredRule: (val: string | number | undefined) => !!val || 'Обязательное поле',
     };
   },
   mounted() {
@@ -121,28 +124,28 @@ export default {
     }
   },
   beforeRouteUpdate(to) {
-    this.loadIngredient(to.params.id);
+    this.loadIngredient(parseInt(to.params.id as string));
   },
   methods: {
-    loadIngredient(load_id) {
-      let id = load_id || this.$route.params.id;
+    loadIngredient(load_id?: string | number | undefined) {
+      let id: string | number = load_id || (this.$route.params.id as string);
 
       if (id == 'new') {
         this.resetData();
         return;
       }
 
-      let payload = {
-        id: id,
-      };
-      this.loading = true;
+      if (typeof id == 'string') {
+        id = parseInt(id);
+      }
 
+      this.loading = true;
       this.store
-        .loadIngredient(payload)
+        .loadIngredient(id)
         .then(() => {
           this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки ингредиента');
         });
@@ -158,12 +161,13 @@ export default {
         .then(() => {
           // this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           // this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки категорий ингредиентов');
         });
     },
     resetData() {
+      // @ts-expect-error: Ingredient will be created
       this.store.ingredient = Object.assign({}, defaultIngredient);
     },
     saveIngredient() {
@@ -173,14 +177,18 @@ export default {
       let isCreating = !this.exists;
       let method = isCreating ? this.store.createIngredient : this.store.saveIngredient;
 
-      payload.category = payload.category?.id || payload.category;
+      // payload.category =
+      //   typeof payload.category == 'number' ? payload.category : payload.category?.id;
+      // if (!typeof payload.category == 'number') {
+      //   payload.category = payload.category;
+      // }
 
       method(payload)
         .then((resp) => {
           this.saving = false;
 
           if (isCreating) {
-            this.$router.replace({ name: 'ingredient', params: { id: resp.data.id } });
+            void this.$router.replace({ name: 'ingredient', params: { id: resp.id } });
           }
 
           let created_tx = isCreating ? 'создан' : 'сохранен';
@@ -189,7 +197,7 @@ export default {
             message: `Ингредиент успешно ${created_tx}`,
           });
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.saving = false;
           this.handleErrors(err, 'Ошибка сохранения ингредиента');
         });
@@ -204,30 +212,30 @@ export default {
           persistent: true,
         })
         .onOk(() => {
-          this.deleteIngredient().then(() => {
+          void this.deleteIngredient().then(() => {
             this.$q.notify({
               type: 'positive',
               message: `Ингредиент успешно удален`,
               icon: 'delete',
             });
-            this.$router.replace({ name: 'ingredients' });
+            void this.$router.replace({ name: 'ingredients' });
           });
         });
     },
-    deleteIngredient() {
+    deleteIngredient(): Promise<void> {
       return new Promise((resolve, reject) => {
-        if (!this.exists) {
+        if (!this.exists || !this.ingredient) {
           reject();
           return;
         }
         this.deleting = true;
         this.store
-          .deleteIngredient(this.ingredient)
+          .deleteIngredient(this.ingredient.id)
           .then(() => {
             resolve();
             this.deleting = false;
           })
-          .catch((err) => {
+          .catch((err: CustomAxiosError) => {
             reject();
             this.deleting = false;
             this.handleErrors(err, 'Ошибка удаления ингредиента');
@@ -246,5 +254,5 @@ export default {
       return Boolean(this.ingredient?.id);
     },
   },
-};
+});
 </script>

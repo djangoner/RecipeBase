@@ -1,17 +1,17 @@
 <template>
   <week-select v-model="week" @update:modelValue="loadWeekPlan()" />
   <q-linear-progress
-    :value="fillingPrc"
+    :value="fillingPrc || undefined"
     :indeterminate="saving"
     :instant-feedback="saving"
     :animation-speed="500"
   />
 
   <!-- Week comment dialog -->
-  <q-dialog :model-value="Boolean(openComment)" @update:modelValue="openComment = $event">
+  <q-dialog :model-value="Boolean(openComment)" @update:modelValue="openComment = null">
     <q-card
       style="min-width: 350px; max-width: 450px; width: 100%"
-      v-if="plan && plan?.comments"
+      v-if="plan && plan?.comments && openComment"
     >
       <q-card-section class="row">
         <div class="text-h6">
@@ -24,7 +24,7 @@
       <q-card-section class="q-pt-none">
         <q-input
           v-model="plan.comments[openComment]"
-          @update:modelValue="updateComment(openComment, $event)"
+          @update:modelValue="updateComment(openComment, $event as string)"
           :debounce="1000"
           label="Комментарий дня"
           type="textarea"
@@ -40,8 +40,8 @@
       class="week-select-page row wrap items-start q-col-gutter-x-sm q-col-gutter-y-md"
     >
       <!-- :class="$q.screen.lt.md ? 'column' : ''" -->
-      <template v-for="(day, idx) of WeekDays" :key="idx">
-        <div v-if="idx > 0" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3">
+      <template v-for="(day, idx) of WeekDays">
+        <div v-if="idx > 0" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3" :key="idx">
           <q-card
             class="row column justify-around q-px-xs q-py-sm full-height"
             :class="[
@@ -72,15 +72,15 @@
                 <q-skeleton type="QInput" />
               </div>
               <div class="flex column" v-else>
-                <template v-for="mtime of meal_time" :key="mtime.id">
+                <template v-for="mtime of meal_time">
                   <div
-                    :set="(recipes = getRecipes(idx, mtime))"
-                    v-if="getRecipes(idx, mtime)?.length > 0 || mtime.is_primary"
+                    v-if="getRecipes(idx, mtime).length > 0 || mtime.is_primary"
+                    :key="mtime.id"
                   >
                     <div
                       class="row q-col-gutter-x-sm wrap"
-                      v-for="(recipe, rec_idx) of recipes"
-                      :key="recipe"
+                      v-for="(recipe, rec_idx) of getRecipes(idx, mtime)"
+                      :key="rec_idx"
                     >
                       <div class="col-auto">
                         <span class="text-subtitle1 q-my-none">
@@ -101,7 +101,7 @@
                             </q-tooltip>
                           </q-icon>
                           <q-tooltip>
-                            {{ mtime.title }} - {{ timeFormat(mtime.time) }}
+                            {{ mtime.title }} - {{ timeFormat(mtime.time || null) }}
                           </q-tooltip>
                         </span>
                       </div>
@@ -111,7 +111,7 @@
                           :model-value="recipe"
                           @update:modelValue="setRecipe(idx, mtime, $event, rec_idx)"
                           :input-debounce="300"
-                          :options="recipesList"
+                          :options="recipesList || []"
                           option-label="title"
                           @filter="filterRecipes"
                           use-input
@@ -174,7 +174,7 @@
                 <q-select
                   class="col"
                   :modelValue="null"
-                  :options="meal_time_options"
+                  :options="meal_time_options || []"
                   @update:modelValue="addMtime(idx, $event)"
                   @filter="filterMealTime"
                   :input-debounce="0"
@@ -206,19 +206,20 @@
   <q-inner-loading :showing="loading"></q-inner-loading>
 </template>
 
-<script>
-import weekSelect, {
-  getDateOfISOWeek,
-  WeekDays,
-  getWeekNumber,
-  getYearWeek,
-} from 'components/WeekSelect.vue';
+<script lang="ts">
+import weekSelect from 'components/WeekSelect.vue';
 import { useBaseStore } from 'src/stores/base';
 import { date } from 'quasar';
 import recipeCardTooltip from 'components/RecipeCardTooltip.vue';
 import PlanWeekInfo from 'src/components/PlanWeekInfo.vue';
+import { defineComponent } from 'vue';
+import { getDateOfISOWeek, YearWeek } from 'src/modules/WeekUtils';
+import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import { WeekDays } from 'src/modules/WeekUtils';
+import { MealTime, RecipeRead } from 'src/client';
+import { RecipePlanWeekFromRead } from 'src/Convert';
 
-let WeekDaysColors = {
+const WeekDaysColors: { [key: number]: string } = {
   1: 'bg-amber-2',
   2: 'bg-cyan-3',
   3: 'bg-light-blue-3',
@@ -226,8 +227,12 @@ let WeekDaysColors = {
   5: 'bg-indigo-3',
 };
 
-export default {
+type QueryInterface = YearWeek;
+
+export default defineComponent({
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   components: { weekSelect, recipeCardTooltip, PlanWeekInfo },
+  mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
     return {
@@ -239,15 +244,17 @@ export default {
       loading: false,
       saving: false,
       addMtimeSelect: null,
-      meal_time_options: [],
-      openComment: null,
+      meal_time_options: [] as MealTime[] | null,
+      openComment: null as number | null,
       search: '',
       WeekDays,
       WeekDaysColors,
     };
   },
   mounted() {
-    this.loadMealTime();
+    void this.$nextTick(() => {
+      this.loadMealTime();
+    });
   },
   methods: {
     loadWeekPlan() {
@@ -265,29 +272,15 @@ export default {
         .then(() => {
           this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки плана');
         });
     },
     saveWeekPlan() {
       // let payload = Object.assign({}, this.plan);
-      let payload = JSON.parse(JSON.stringify(this.plan));
+      let payload = RecipePlanWeekFromRead(this.plan);
       this.saving = true;
-
-      payload.plans.map((p) => {
-        if (typeof p.recipe == 'object') {
-          p.recipe = p.recipe?.id;
-        }
-        if (typeof p.meal_time == 'object') {
-          p.meal_time = p.meal_time.id;
-        }
-      });
-
-      payload.plans = payload.plans.filter((p) => {
-        return p.recipe && p.meal_time;
-      });
-
       console.debug('Save: ', payload);
 
       this.store
@@ -295,7 +288,7 @@ export default {
         .then(() => {
           this.saving = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           this.saving = false;
           this.handleErrors(err, 'Ошибка загрузки плана');
         });
@@ -311,7 +304,7 @@ export default {
         .then(() => {
           // this.loading = false;
         })
-        .catch((err) => {
+        .catch((err: CustomAxiosError) => {
           // this.loading = false;
           this.handleErrors(err, 'Ошибка загрузки времени приема пищи');
         });
@@ -328,7 +321,7 @@ export default {
           .then(() => {
             resolve(payload);
           })
-          .catch((err) => {
+          .catch((err: CustomAxiosError) => {
             console.warn(err);
             reject(err);
             this.handleErrors(err, 'Ошибка загрузки рецептов');
@@ -336,40 +329,41 @@ export default {
       });
     },
 
-    filterRecipes(val, update, abort) {
+    filterRecipes(val: string, update: CallableFunction) {
       if (this.search == val && this.recipesList) {
-        update(() => {});
+        update();
         return;
       }
       this.search = val;
       this.loadRecipes()
         .then(() => {
-          update(() => {});
+          update();
         })
         .catch(() => {
-          update(() => {});
+          update();
         });
     },
 
-    filterMealTime(val, update, abort) {
+    filterMealTime(val: string, update: CallableFunction) {
       update(() => {
-        let isUsed = (mtime) => {
-          //   // console.debug(ing, this.recipe.ingredients);
-          return this.plan?.plans.some((plan) => {
-            return plan.meal_time.id == mtime.id;
-          });
-          //   return this.recipe.ingredients.some((t) => t.ingredient.id == ing.id);
-        };
+        // let isUsed = (mtime: MealTime) => {
+        //   //   // console.debug(ing, this.recipe.ingredients);
+        //   return this.plan?.plans.some((plan) => {
+        //     return plan.meal_time.id == mtime.id;
+        //   });
+        //   //   return this.recipe.ingredients.some((t) => t.ingredient.id == ing.id);
+        // };
         const needle = val.toLowerCase();
 
-        this.meal_time_options = this.meal_time.filter(
-          (v) => !v.is_primary && v.title.toLowerCase().indexOf(needle) > -1
-        );
+        this.meal_time_options =
+          this.meal_time?.filter(
+            (v) => !v.is_primary && v.title.toLowerCase().indexOf(needle) > -1
+          ) || [];
         // console.debug(needle, this.tagList, tags);
       });
     },
     // Utils
-    getRecipe(day, mtime) {
+    getRecipe(day: number, mtime: MealTime) {
       if (!this.plan) {
         return;
       }
@@ -378,9 +372,9 @@ export default {
       });
       return recipes[0]?.recipe;
     },
-    getRecipes(day, mtime) {
+    getRecipes(day: number, mtime: MealTime) {
       if (!this.plan) {
-        return;
+        return [];
       }
       let recipes = this.plan?.plans.filter((plan) => {
         return plan.day == day && plan.meal_time.id == mtime.id;
@@ -393,11 +387,12 @@ export default {
       }
       return recipes.map((r) => r.recipe);
     },
-    setRecipe(day, mtime, value, rec_idx) {
+    setRecipe(day: number, mtime: MealTime, value: RecipeRead, rec_idx?: number) {
       console.debug('setRecipe: ', day, mtime, value);
-      let plans = this.plan.plans.filter((plan) => {
-        return plan.day == day && plan.meal_time.id == mtime.id;
-      });
+      let plans =
+        this.plan?.plans?.filter((plan) => {
+          return plan.day == day && plan.meal_time.id == mtime.id;
+        }) || [];
 
       let plan = plans[rec_idx || 0];
       if (plan) {
@@ -410,6 +405,7 @@ export default {
         //   return p;
         // });
       } else {
+        // @ts-expect-error: Plan will be created
         this.plan.plans.push({
           // week: this.id,
           day: day,
@@ -419,49 +415,61 @@ export default {
       }
       this.saveWeekPlan();
     },
-    addMtime(day_idx, mtime) {
+    addMtime(day_idx: string | number, mtime: MealTime) {
       console.debug('addMtime: ', day_idx, mtime);
-      this.plan.plans.push(
+      this.plan?.plans?.push(
+        // @ts-expect-error: Meal time will be added
         Object.assign(
           {},
           {
-            day: parseInt(day_idx),
+            day: typeof day_idx == 'number' ? day_idx : parseInt(day_idx),
             meal_time: mtime,
             recipe: null,
           }
         )
       );
     },
-    delPlan(idx, mtime) {
-      console.debug('delPlan: ', idx, mtime, this.plan.plans);
+    delPlan(idx: number, mtime: MealTime) {
+      if (!this.plan || !this.plan.plans) {
+        return;
+      }
+      console.debug('delPlan: ', idx, mtime, this.plan?.plans);
       let delOne = false;
-      this.plan.plans = this.plan.plans.filter((p) => {
-        let r = p.day != idx || p.meal_time != mtime || p.recipe != null;
-        if (!r && !delOne) {
-          delOne = true;
-          return false;
-        }
+      this.plan.plans =
+        this.plan?.plans?.filter((p) => {
+          let r = p.day != idx || p.meal_time != mtime || p.recipe != null;
+          if (!r && !delOne) {
+            delOne = true;
+            return false;
+          }
 
-        return true;
-      });
+          return true;
+        }) || [];
     },
 
-    updateComment(idx, comment) {
+    updateComment(idx: number | null, comment: string) {
+      if (!this.plan || !this.plan.comments || !idx) {
+        return;
+      }
       this.plan.comments[idx] = comment;
       this.saveWeekPlan();
     },
 
-    timeFormat(raw) {
+    timeFormat(raw: string | null) {
+      if (!raw) {
+        return raw;
+      }
       return raw.slice(0, raw.length - 3);
     },
-    getDay(idx) {
+    getDay(idx: number): string {
       let fday = getDateOfISOWeek(this.week.year, this.week.week);
       fday.setDate(fday.getDate() + idx);
       return date.formatDate(fday, 'DD.MM');
     },
-    isToday(day) {
+    isToday(day: string) {
       let d = new Date();
-      let d_str = d.getDate() + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
+      let d_str =
+        String(d.getDate()) + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
       return day == d_str;
       // return day.getUTCDate() == new Date().getUTCDate();
     },
@@ -469,25 +477,28 @@ export default {
   computed: {
     week: {
       get() {
-        return { year: this.$query?.year, week: this.$query?.week };
+        return {
+          year: (this.$query as QueryInterface)?.year as string | number | null,
+          week: (this.$query as QueryInterface)?.week as string | number | null,
+        } as YearWeek;
       },
-      set(val) {
-        this.$query.year = val?.year;
-        this.$query.week = val?.week;
+      set(val: YearWeek) {
+        (this.$query as QueryInterface).year = val?.year;
+        (this.$query as QueryInterface).week = val?.week;
       },
     },
     plan() {
       return this.store.week_plan;
     },
     meal_time() {
-      return this.store.meal_time?.results;
+      return this.store.meal_time;
     },
     recipesList() {
-      return this.store.recipes?.results;
+      return this.store.recipes;
     },
-    fillingPrc() {
+    fillingPrc(): number | null {
       if (!this.meal_time) {
-        return;
+        return null;
       }
       let plans = this.store.week_plan?.plans;
       let plansFilled;
@@ -503,14 +514,7 @@ export default {
       return plansFilled / plansTotal;
     },
   },
-  watch: {
-    date_picker(val, oldVal) {
-      if (JSON.stringify(val) != JSON.stringify(oldVal)) {
-        this.parseDatePicker();
-      }
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss">

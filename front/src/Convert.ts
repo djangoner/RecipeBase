@@ -73,7 +73,7 @@ export function productListItemFromRead(
 ): ProductListItem {
   const payloadReplaces = {
     ingredients: null,
-    ingredient: source?.ingredient.id,
+    ingredient: source?.ingredient?.id || null,
   };
 
   return Object.assign({}, source, payloadReplaces);

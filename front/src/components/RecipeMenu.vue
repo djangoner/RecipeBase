@@ -1,7 +1,8 @@
 <template>
   <q-menu context-menu>
     <q-list dense>
-      <q-item clickable>
+      <!-- Add to plan -->
+      <q-item clickable @click="addToPlanPreload()">
         <q-item-section side><q-icon name="calendar_month" /></q-item-section>
         <q-item-section>Добавить в план</q-item-section>
         <q-item-section side>
@@ -46,6 +47,7 @@
         </q-menu>
       </q-item>
 
+      <!-- Archive management -->
       <q-item clickable @click="actionArchive()">
         <q-item-section side><q-icon name="archive" /></q-item-section>
         <q-item-section
@@ -79,11 +81,6 @@ export default defineComponent({
       week: week,
     };
     return { store, WeekDays, week: week_p };
-  },
-  mounted() {
-    if (!this.plan) {
-      void this.loadWeekPlan();
-    }
   },
   methods: {
     emitUpdated() {
@@ -156,6 +153,15 @@ export default defineComponent({
         });
     },
 
+    addToPlanPreload() {
+      if (!this.meal_time) {
+        this.loadMealTime();
+      }
+      if (!this.plan) {
+        void this.loadWeekPlan();
+      }
+    },
+
     isDayFilled(day: number): boolean {
       let plans = this.plan?.plans;
       let plansFilled =
@@ -192,6 +198,22 @@ export default defineComponent({
             this.handleErrors(err, 'Ошибка загрузки плана');
           });
       });
+    },
+    loadMealTime() {
+      let payload = {
+        page_size: 1000,
+      };
+      // this.loading = true;
+
+      this.store
+        .loadMealTime(payload)
+        .then(() => {
+          // this.loading = false;
+        })
+        .catch((err: CustomAxiosError) => {
+          // this.loading = false;
+          this.handleErrors(err, 'Ошибка загрузки времени приема пищи');
+        });
     },
     saveWeekPlan(): Promise<void> {
       return new Promise((resolve, reject) => {

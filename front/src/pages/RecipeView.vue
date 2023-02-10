@@ -103,15 +103,16 @@
                   v-model="tagAddSelect"
                   v-if="edit && tags"
                   label="Добавить метку"
-                  keydown.enter.prevent="addTag()"
                   @filter="filterTags"
+                  @new-value="addNewTag"
+                  keydown.enter.prevent="addTag()"
                   :input-debounce="0"
                   :options="tagList || []"
-                  option-label="title"
-                  use-input
                   :options-dense="dense"
                   :dense="dense"
-                  @new-value="addTag"
+                  option-label="title"
+                  use-input
+                  new-value-mode="add-unique"
                 >
                   <template v-slot:no-option>
                     <q-item>
@@ -935,23 +936,47 @@ export default defineComponent({
           return t.title !== tag.title;
         }) || [];
     },
-    addTag(new_tag?: string) {
-      // , done: CallableFunction
-      if (new_tag) {
-        this.tagAddSelect = {
-          // @ts-expect-error: Tag will be created
-          id: null,
-          title: new_tag,
-        };
-        // done(new_tag);
-        // return;
-      }
-      console.debug('Add tag: ', this.tagAddSelect, new_tag);
+    addTag() {
+      console.debug('Add tag: ', this.tagAddSelect);
       if (!this.tagAddSelect) {
         return;
       }
       this.recipe?.tags?.push(this.tagAddSelect);
       this.tagAddSelect = null;
+    },
+    addNewTag(new_tag: string) {
+      // , done: CallableFunction
+      console.debug('Add new tag: ', new_tag);
+      if (!new_tag) {
+        return;
+      }
+      let exists = this.recipe?.tags?.find(
+        (t) => t.title.toLowerCase() === new_tag.toLowerCase()
+      );
+      if (exists) {
+        // If tag with this name already added to recipe
+        console.debug('Tag already exists!');
+        return;
+      }
+
+      let existsNotUsed = this.tags?.find(
+        (t) => t.title.toLowerCase() === new_tag.toLowerCase()
+      );
+      if (existsNotUsed) {
+        // If tag with this name exists in DB
+        console.debug('Using existing tag in DB');
+        this.tagAddSelect = existsNotUsed;
+        this.addTag();
+        return;
+      }
+
+      this.tagAddSelect = {
+        // @ts-expect-error: Tag will be created
+        id: null,
+        title: new_tag,
+      };
+      // done(new_tag, 'add-unique');
+      this.addTag();
     },
     filterTags(val: string, update: CallableFunction) {
       update(() => {
@@ -1105,6 +1130,9 @@ export default defineComponent({
           (i) => i !== column_actions
         );
       }
+    },
+    tagAddSelect() {
+      this.addTag();
     },
   },
 });

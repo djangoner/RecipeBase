@@ -6,35 +6,6 @@
     :instant-feedback="saving"
     :animation-speed="500"
   />
-
-  <!-- Week comment dialog -->
-  <q-dialog :model-value="Boolean(openComment)" @update:modelValue="openComment = null">
-    <q-card
-      style="min-width: 350px; max-width: 450px; width: 100%"
-      v-if="plan && plan?.comments && openComment"
-    >
-      <q-card-section class="row">
-        <div class="text-h6">
-          <b>{{ getDay(openComment - 1) }}</b> {{ WeekDays[openComment] }}
-        </div>
-        <q-space />
-        <q-btn class="col-auto" icon="close" flat round dense v-close-popup></q-btn>
-      </q-card-section>
-
-      <q-card-section class="q-pt-none">
-        <q-input
-          v-model="plan.comments[openComment]"
-          @update:modelValue="updateComment(openComment, $event as string)"
-          :debounce="1000"
-          label="Комментарий дня"
-          type="textarea"
-          autogrow
-          input-style="min-height: 3rem;max-height: 10rem;"
-        ></q-input>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
-
   <q-page padding>
     <div
       class="week-select-page row wrap items-start q-col-gutter-x-sm q-col-gutter-y-md"
@@ -58,7 +29,7 @@
               </span>
               <q-btn
                 v-if="plan?.comments"
-                @click="openComment = idx"
+                @click="openComment(idx)"
                 icon="announcement"
                 :color="plan.comments[idx] ? 'red' : 'grey'"
                 flat
@@ -229,6 +200,10 @@ const WeekDaysColors: { [key: number]: string } = {
 
 type QueryInterface = YearWeek;
 
+interface PlanComments {
+  [id: number]: string;
+}
+
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   components: { weekSelect, recipeCardTooltip, PlanWeekInfo },
@@ -245,7 +220,6 @@ export default defineComponent({
       saving: false,
       addMtimeSelect: null,
       meal_time_options: [] as MealTime[] | null,
-      openComment: null as number | null,
       search: '',
       WeekDays,
       WeekDaysColors,
@@ -447,12 +421,36 @@ export default defineComponent({
         }) || [];
     },
 
-    updateComment(idx: number | null, comment: string) {
-      if (!this.plan || !this.plan.comments || !idx) {
+    openComment(idx: number) {
+      if (!this.plan) {
         return;
       }
-      this.plan.comments[idx] = comment;
-      this.saveWeekPlan();
+      if (!this.plan?.comments) {
+        this.plan.comments = {};
+      }
+      let comments = this.plan?.comments as PlanComments;
+      const startPlanID = this.plan.id;
+
+      this.$q
+        .dialog({
+          title: `Комментарий - ${this.getDay(idx - 1)}. ${WeekDays[idx]}`,
+          prompt: {
+            model: comments[idx],
+            type: 'textarea',
+            autogrow: true,
+            inputStyle: { minHeight: '3rem', maxHeight: '10rem' },
+          },
+          cancel: true,
+          persistent: true,
+        })
+        .onOk((comment: string) => {
+          if (!this.plan || this.plan.id !== startPlanID) {
+            console.debug('Comment update invalidated');
+            return;
+          }
+          (this.plan.comments as PlanComments)[idx] = comment;
+          this.saveWeekPlan();
+        });
     },
 
     timeFormat(raw: string | null) {

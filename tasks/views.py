@@ -8,7 +8,11 @@ from tasks.serializers import (
 
 
 class TaskCategoryViewset(viewsets.ModelViewSet):
-    queryset = TaskCategory.objects.prefetch_related("childrens").filter(childrens__parent__isnull=True).distinct()
+    queryset = (
+        TaskCategory.objects.prefetch_related("childrens", "childrens__childrens", "childrens__childrens__childrens")
+        .filter(childrens__parent__isnull=True)
+        .distinct()
+    )
     serializer_class = TaskCategorySerializer
     # permission_classes = [permissions.IsAuthenticated]
 
@@ -17,7 +21,7 @@ class TaskCategoryViewset(viewsets.ModelViewSet):
 
 
 class TaskViewset(viewsets.ModelViewSet):
-    queryset = Task.objects.prefetch_related("childrens").all()
+    queryset = Task.objects.prefetch_related("childrens", "childrens__childrens", "childrens__childrens").all()
     serializer_class = TaskNestedSerializer
     # permission_classes = [permissions.IsAuthenticated]
 

@@ -24,6 +24,7 @@ export type ProductListItemRead = {
     is_completed?: boolean;
     title: string;
     amount?: number | null;
+    readonly amounts: Record<string, any>;
     amount_type?: AmountTypeEnum | null;
     description?: string | null;
     priority?: number;

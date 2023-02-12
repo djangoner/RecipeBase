@@ -5,6 +5,7 @@
 import type { Nested } from './Nested';
 import type { RecipeImage } from './RecipeImage';
 import type { RecipeIngredient } from './RecipeIngredient';
+import type { RecipeRating } from './RecipeRating';
 
 /**
  * Adds nested create feature
@@ -17,6 +18,7 @@ export type RecipeShort = {
     readonly is_planned: boolean;
     images?: Array<RecipeImage>;
     ingredients?: Array<RecipeIngredient>;
+    ratings?: Array<RecipeRating>;
     title: string;
     content?: string;
     content_source?: string;

@@ -265,6 +265,18 @@ import {
 import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
 import IsOnlineMixin from 'src/modules/IsOnlineMixin';
 
+interface ProductListItemAmount {
+  amount: number;
+  amount_type: string;
+  amount_type_str: string;
+  amount_grams: number;
+  is_main: boolean;
+}
+
+interface ProductListItemAmounts {
+  [id: number]: ProductListItemAmount[];
+}
+
 export default defineComponent({
   props: {
     modelValue: { required: false, type: Object as PropType<ProductListItemRead> },
@@ -295,17 +307,17 @@ export default defineComponent({
         return '';
       }
 
-      let ings = recipe.ingredients
-        ? recipe?.ingredients.filter((i) => i.id == ing.id)
-        : [];
-      let texts: string[] = ings.map((i) => {
+      const amounts = this.item?.amounts as ProductListItemAmounts;
+      const ings = amounts[recipe.id] || [];
+      console.debug(amounts, recipe.id);
+
+      const texts = ings.map((i) => {
         let r = String(i.amount) + ' ' + i.amount_type_str;
         if (i.is_main) {
           r += ', основной';
         }
         return r;
       });
-
       return texts.join(', ');
     },
 

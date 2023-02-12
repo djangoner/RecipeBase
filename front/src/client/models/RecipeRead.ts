@@ -21,7 +21,7 @@ export type RecipeRead = {
     tags?: Array<RecipeTag>;
     ingredients?: Array<RecipeIngredientRead>;
     ratings?: Array<RecipeRatingRead>;
-    author: ShortUser;
+    readonly author: ShortUser;
     title: string;
     content?: string;
     content_source?: string;

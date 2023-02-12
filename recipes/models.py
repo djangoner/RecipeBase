@@ -359,6 +359,7 @@ class ProductListItem(models.Model):
     is_completed = models.BooleanField(_("Завершен"), default=False)
     title = models.CharField(_("Название"), max_length=255)
     amount = models.FloatField(_("Количество"), null=True, blank=True, max_length=15)
+    amounts = models.JSONField(_("Количества в плане"), default=dict)
     amount_type = models.CharField(
         _("Единица измерения"),
         choices=MEASURING_TYPES,

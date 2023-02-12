@@ -21,7 +21,7 @@ export type Recipe = {
     tags?: Array<RecipeTag>;
     ingredients?: Array<RecipeIngredient>;
     ratings?: Array<RecipeRating>;
-    author: ShortUser;
+    readonly author: ShortUser;
     title: string;
     content?: string;
     content_source?: string;

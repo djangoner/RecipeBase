@@ -9,6 +9,7 @@ from recipes.models import (
     RecipePlanWeek,
     RegularIngredient,
 )
+from recipes.serializers import amount_str
 from recipes.services.measurings import MEASURING_CONVERT, MEASURING_LIQUIDS, amount_to_grams
 
 log = logging.getLogger("PlansGen")
@@ -117,7 +118,6 @@ def get_plan_week_ingredients(week: RecipePlanWeek) -> dict:
     # // Analyze amounts
 
     for ing_name, info in ingredients.items():
-
         # List of unique measuring types of ingredient
         ing = info["ingredient"]
         amounts = info["amounts"]
@@ -149,6 +149,25 @@ def get_plan_week_ingredients(week: RecipePlanWeek) -> dict:
     return ingredients
 
 
+def get_ingredients_amounts(ingredients: list[RecipeIngredient]) -> dict[int, list]:
+    amounts: dict[int, list] = {}
+    ing: RecipeIngredient
+    for ing in ingredients:
+        if ing.pk not in amounts:
+            amounts[ing.recipe.pk] = []
+
+        amounts[ing.recipe.pk].append(
+            {
+                "amount": ing.amount,
+                "amount_grams": ing.amount_grams,
+                "amount_type": ing.amount_type,
+                "amount_type_str": amount_str(ing.amount_type),
+                "is_main": ing.is_main,
+            }
+        )
+    return amounts
+
+
 def update_plan_week(week: RecipePlanWeek):
     ingredients = get_plan_week_ingredients(week)
     plan_week, _ = ProductListWeek.objects.get_or_create(year=week.year, week=week.week)
@@ -162,17 +181,21 @@ def update_plan_week(week: RecipePlanWeek):
         # ing: RecipeIngredient = ing_info["ingredient"]
 
         plan_item: ProductListItem
+        amounts = get_ingredients_amounts(ing_info["ingredients"])
+
         plan_item, _ = plan_week.items.update_or_create(
             ingredient=ing_info["ingredient"],
             is_auto=True,
             defaults={
                 "title": ing_name,
                 "amount": ing_info["amount"],
+                "amounts": amounts,
                 "amount_type": ing_info["measuring"],
                 "day": ing_info["min_day"] - 1,
                 "is_deleted": False,
             },
         )
+
         plan_item.ingredients.set(ing_info["ingredients"])
         plan_item.save()
         edited_plans.append(plan_item.id)

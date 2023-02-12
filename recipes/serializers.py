@@ -262,7 +262,7 @@ class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
 
 class RecipeShortSerializer(RecipeSerializer):
     tags = None  # type: ignore
-    ingredients = None  # type: ignore
+    # ingredients = None  # type: ignore
     # ratings = None  # type: ignore
     author = None  # type: ignore
 
@@ -357,7 +357,7 @@ class ProductListItemSerializer(WritableNestedModelSerializer, serializers.Model
     class Meta:
         model = ProductListItem
         fields = "__all__"
-        read_only_fields = ("is_auto", "ingredient", "ingredients", "created", "edited")
+        read_only_fields = ("is_auto", "ingredient", "ingredients", "amounts", "created", "edited")
         # depth = 1
 
     @extend_schema_field(OpenApiTypes.STR)

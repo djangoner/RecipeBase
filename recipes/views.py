@@ -252,7 +252,6 @@ class IngredientViewset(viewsets.ModelViewSet):
     )
     @decorators.action(["GET"], detail=False)
     def amount_types(self, request):
-
         measuring_types = [{"id": k, "title": v} for k, v in MEASURING_TYPES]
 
         return response.Response(
@@ -387,6 +386,7 @@ class RecipeRatingViewset(viewsets.ModelViewSet):
 class ProductListWeekViewset(viewsets.ModelViewSet):
     queryset = ProductListWeek.objects.prefetch_related(
         "items",
+        "items__author",
         "items__ingredients",
         "items__ingredients__ingredient",
         "items__ingredients__recipe",
@@ -394,6 +394,19 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
         "items__ingredients__recipe__ingredients__ingredient",
         "items__ingredients__recipe__tags",
         "items__ingredients__recipe__images",
+        "items__ingredients__recipe__ingredients__ingredient__regular_ingredients",
+        "items__ingredients__recipe__ingredients__ingredient__category",
+        "items__ingredients__recipe__ingredients__ingredient__category__sorting",
+        "items__ingredients__recipe__ingredients__ingredient__category__sorting__shop",
+        "items__ingredients__ingredient__regular_ingredients",
+        "items__ingredients__ingredient__category",
+        "items__ingredients__ingredient__category__sorting",
+        "items__ingredients__ingredient__category__sorting__shop",
+        "items__ingredients__ingredient__regular_ingredients",
+        "items__ingredient__category",
+        "items__ingredient__category__sorting",
+        "items__ingredient__category__sorting__shop",
+        "items__ingredient__regular_ingredients",
     )
     serializer_class = ProductListWeekSerializer
 
@@ -447,6 +460,7 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
 )
 class ProductListItemViewset(viewsets.ModelViewSet):
     queryset = ProductListItem.objects.prefetch_related(
+        "author",
         "ingredients",
         "ingredients__ingredient",
         "ingredients__recipe",
@@ -454,6 +468,19 @@ class ProductListItemViewset(viewsets.ModelViewSet):
         "ingredients__recipe__ingredients__ingredient",
         "ingredients__recipe__tags",
         "ingredients__recipe__images",
+        "ingredients__recipe__ingredients__ingredient__regular_ingredients",
+        "ingredients__recipe__ingredients__ingredient__category",
+        "ingredients__recipe__ingredients__ingredient__category__sorting",
+        "ingredients__recipe__ingredients__ingredient__category__sorting__shop",
+        "ingredients__ingredient__regular_ingredients",
+        "ingredients__ingredient__category",
+        "ingredients__ingredient__category__sorting",
+        "ingredients__ingredient__category__sorting__shop",
+        "ingredients__ingredient__regular_ingredients",
+        "ingredient__category",
+        "ingredient__category__sorting",
+        "ingredient__category__sorting__shop",
+        "ingredient__regular_ingredients",
     )
     serializer_class = ProductListItemSerializer
     filterset_fields = ["is_auto", "is_deleted", "is_completed"]

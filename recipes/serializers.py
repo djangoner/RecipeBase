@@ -171,22 +171,6 @@ class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.Mode
         return round(packs * obj.ingredient.price)
 
 
-class RecipeIngredientReadSerializer(RecipeIngredientSerializer):
-    ingredient = IngredientSerializer()
-
-
-class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
-
-    # def to_representation(self, instance):
-    #     self.fields["recipe"] = RecipeSerializer()
-    #     return super().to_representation(instance)
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation["recipe"] = RecipeShortSerializer(instance.recipe).data
-        return representation
-
-
 class RecipeTagSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     class Meta:
         model = RecipeTag
@@ -194,7 +178,6 @@ class RecipeTagSerializer(WritableNestedModelSerializer, serializers.ModelSerial
 
 
 class RecipeRatingSerializer(serializers.ModelSerializer):
-
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
@@ -256,20 +239,40 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
         return now_week == recipe_week
 
 
+class RecipeIngredientReadSerializer(RecipeIngredientSerializer):
+    ingredient = IngredientSerializer()
+
+
 class RecipeReadSerializer(RecipeSerializer):
     author = ShortUserSerializer(read_only=True)
     ratings = RecipeRatingReadSerializer(many=True, required=False)
     ingredients = RecipeIngredientReadSerializer(many=True, required=False)
 
 
+class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
+    # def to_representation(self, instance):
+    #     self.fields["recipe"] = RecipeSerializer()
+    #     return super().to_representation(instance)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["recipe"] = RecipeForRecipeIngredientSerializer(instance.recipe).data
+        return representation
+
+
 class RecipeShortSerializer(RecipeSerializer):
     tags = None  # type: ignore
-    # ingredients = None
+    ingredients = None  # type: ignore
     # ratings = None  # type: ignore
     author = None  # type: ignore
 
     class Meta(RecipeSerializer.Meta):
         exclude = tuple(list(RecipeSerializer.Meta.exclude) + ["author"])
+
+
+class RecipeForRecipeIngredientSerializer(RecipeShortSerializer):
+    ingredients = None  # type: ignore
+    ratings = None  # type: ignore
 
 
 class RecipeIngredientWithRecipeReadSerializer(RecipeIngredientWithRecipeSerializer):

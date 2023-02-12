@@ -94,6 +94,7 @@
 </template>
 
 <script lang="ts">
+import { ingredientFromRead } from 'src/Convert';
 import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
 import { useBaseStore } from 'src/stores/base';
 import { defineComponent } from 'vue';
@@ -171,7 +172,7 @@ export default defineComponent({
       this.store.ingredient = Object.assign({}, defaultIngredient);
     },
     saveIngredient() {
-      let payload = Object.assign({}, this.ingredient);
+      let payload = ingredientFromRead(this.ingredient);
       this.saving = true;
 
       let isCreating = !this.exists;

@@ -30,6 +30,7 @@ from recipes.models import (
 )
 from tasks.models import Task
 from recipes.serializers import (
+    IngredientReadSerializer,
     IngredientSerializer,
     MealTimeSerializer,
     ProductListItemReadSerializer,
@@ -219,6 +220,13 @@ class RecipeImageViewset(viewsets.ModelViewSet):
     serializer_class = RecipeImageSerializer
 
 
+@extend_schema_view(
+    retrieve=extend_schema(responses=IngredientReadSerializer),
+    create=extend_schema(responses=IngredientReadSerializer),
+    list=extend_schema(responses=IngredientReadSerializer),
+    update=extend_schema(responses=IngredientReadSerializer),
+    patch=extend_schema(responses=IngredientReadSerializer),
+)
 class IngredientViewset(viewsets.ModelViewSet):
     queryset = (
         Ingredient.objects.prefetch_related("category")

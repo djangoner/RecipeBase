@@ -90,7 +90,7 @@ class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSeria
     category = serializers.PrimaryKeyRelatedField(
         queryset=IngredientCategory.objects.all(), required=False, allow_null=True, default=None
     )
-    regular_ingredients = RegularIngredientSerializer()
+    regular_ingredients = RegularIngredientSerializer(read_only=True)
 
     class Meta:
         model = Ingredient

@@ -15,7 +15,7 @@ export type { IngredientRead } from './models/IngredientRead';
 export type { MealTime } from './models/MealTime';
 export type { Nested } from './models/Nested';
 export type { PaginatedIngredientCategoryList } from './models/PaginatedIngredientCategoryList';
-export type { PaginatedIngredientList } from './models/PaginatedIngredientList';
+export type { PaginatedIngredientReadList } from './models/PaginatedIngredientReadList';
 export type { PaginatedMealTimeList } from './models/PaginatedMealTimeList';
 export type { PaginatedProductListItemReadList } from './models/PaginatedProductListItemReadList';
 export type { PaginatedProductListWeekReadList } from './models/PaginatedProductListWeekReadList';

@@ -4,19 +4,21 @@ import {
   Ingredient,
   IngredientCategory,
   IngredientCategoryService,
+  IngredientRead,
   IngredientsService,
   MealTime,
   MealTimeService,
   PaginatedIngredientCategoryList,
-  PaginatedIngredientList,
+  PaginatedIngredientReadList,
   PaginatedProductListItemReadList,
   PaginatedProductListWeekReadList,
-  PaginatedRecipeReadList,
   PaginatedRecipePlanWeekReadList,
+  PaginatedRecipeReadList,
   PaginatedRecipeTagList,
   PaginatedShopList,
   PaginatedTaskCategoryList,
   PaginatedTaskNestedList,
+  PatchedRecipe,
   ProductListItem,
   ProductListItemRead,
   ProductListItemService,
@@ -29,6 +31,7 @@ import {
   RecipePlanWeek,
   RecipePlanWeekRead,
   RecipePlanWeekService,
+  RecipeRead,
   RecipesService,
   RecipeTag,
   RecipeTagsService,
@@ -40,8 +43,6 @@ import {
   TaskCategory,
   TaskCategoryService,
   TaskService,
-  RecipeRead,
-  PatchedRecipe,
 } from "src/client";
 
 export const useBaseStore = defineStore("base", {
@@ -58,8 +59,8 @@ export const useBaseStore = defineStore("base", {
     product_lists: null as ProductListWeekRead[] | null,
     product_list_items: null as ProductListItemRead[] | null,
     product_list_item: null as ProductListItemRead | null,
-    ingredients: null as Ingredient[] | null,
-    ingredient: null as Ingredient | null,
+    ingredients: null as IngredientRead[] | null,
+    ingredient: null as IngredientRead | null,
     tasks: null as Task[] | null,
     task: null as Task | null,
     tasks_categories: null as TaskCategory[] | null,
@@ -415,11 +416,13 @@ export const useBaseStore = defineStore("base", {
     },
     // Ingredients
 
-    async loadIngredients(payload: object): Promise<PaginatedIngredientList> {
+    async loadIngredients(
+      payload: object
+    ): Promise<PaginatedIngredientReadList> {
       return new Promise((resolve, reject) => {
         IngredientsService.ingredientsList(payload)
           .then((resp) => {
-            this.ingredients = resp.results as Ingredient[];
+            this.ingredients = resp.results as IngredientRead[];
             resolve(resp);
           })
           .catch((err) => {
@@ -427,7 +430,7 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async loadIngredient(id: number): Promise<Ingredient> {
+    async loadIngredient(id: number): Promise<IngredientRead> {
       return new Promise((resolve, reject) => {
         IngredientsService.ingredientsRetrieve({ id })
           .then((resp) => {
@@ -439,7 +442,7 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async saveIngredient(payload: Ingredient): Promise<Ingredient> {
+    async saveIngredient(payload: Ingredient): Promise<IngredientRead> {
       return new Promise((resolve, reject) => {
         IngredientsService.ingredientsUpdate({
           id: payload.id,
@@ -454,7 +457,7 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async createIngredient(payload: Ingredient): Promise<Ingredient> {
+    async createIngredient(payload: Ingredient): Promise<IngredientRead> {
       return new Promise((resolve, reject) => {
         IngredientsService.ingredientsCreate({ requestBody: payload })
           .then((resp) => {

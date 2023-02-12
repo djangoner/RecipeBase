@@ -11,7 +11,7 @@ export type PatchedIngredient = {
     readonly id?: number;
     readonly used_times?: number;
     category?: number | null;
-    regular_ingredients?: RegularIngredient;
+    readonly regular_ingredients?: RegularIngredient;
     title?: string;
     description?: string | null;
     /**

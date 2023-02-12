@@ -2,11 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Ingredient } from './Ingredient';
+import type { IngredientRead } from './IngredientRead';
 
-export type PaginatedIngredientList = {
+export type PaginatedIngredientReadList = {
     count?: number;
     next?: string | null;
     previous?: string | null;
-    results?: Array<Ingredient>;
+    results?: Array<IngredientRead>;
 };

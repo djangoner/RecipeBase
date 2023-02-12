@@ -12,7 +12,7 @@ export type IngredientRead = {
     readonly id: number;
     readonly used_times: number;
     category: IngredientCategory;
-    regular_ingredients: RegularIngredient;
+    readonly regular_ingredients: RegularIngredient;
     title: string;
     description?: string | null;
     /**

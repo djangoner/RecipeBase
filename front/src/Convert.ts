@@ -1,4 +1,6 @@
 import {
+  Ingredient,
+  IngredientRead,
   ProductListItem,
   ProductListItemRead,
   ProductListWeek,
@@ -84,6 +86,13 @@ export function productListWeekFromRead(
 ): ProductListWeek {
   const payloadReplaces = {
     items: source?.items.map((i) => productListItemFromRead(i)),
+  };
+  return Object.assign({}, source, payloadReplaces);
+}
+
+export function ingredientFromRead(source: IngredientRead | null): Ingredient {
+  const payloadReplaces = {
+    category: source?.category?.id,
   };
   return Object.assign({}, source, payloadReplaces);
 }

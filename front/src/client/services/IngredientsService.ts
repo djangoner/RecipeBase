@@ -3,7 +3,8 @@
 /* eslint-disable */
 import type { AmountTypes } from '../models/AmountTypes';
 import type { Ingredient } from '../models/Ingredient';
-import type { PaginatedIngredientList } from '../models/PaginatedIngredientList';
+import type { IngredientRead } from '../models/IngredientRead';
+import type { PaginatedIngredientReadList } from '../models/PaginatedIngredientReadList';
 import type { PatchedIngredient } from '../models/PatchedIngredient';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -13,7 +14,7 @@ import { request as __request } from '../core/request';
 export class IngredientsService {
 
     /**
-     * @returns PaginatedIngredientList 
+     * @returns PaginatedIngredientReadList 
      * @throws ApiError
      */
     public static ingredientsList({
@@ -38,7 +39,7 @@ pageSize?: number,
  * A search term.
  */
 search?: string,
-}): CancelablePromise<PaginatedIngredientList> {
+}): CancelablePromise<PaginatedIngredientReadList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/ingredients/',
@@ -52,14 +53,14 @@ search?: string,
     }
 
     /**
-     * @returns Ingredient 
+     * @returns IngredientRead 
      * @throws ApiError
      */
     public static ingredientsCreate({
 requestBody,
 }: {
 requestBody: Ingredient,
-}): CancelablePromise<Ingredient> {
+}): CancelablePromise<IngredientRead> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/ingredients/',
@@ -69,7 +70,7 @@ requestBody: Ingredient,
     }
 
     /**
-     * @returns Ingredient 
+     * @returns IngredientRead 
      * @throws ApiError
      */
     public static ingredientsRetrieve({
@@ -79,7 +80,7 @@ id,
  * A unique integer value identifying this Ингредиент.
  */
 id: number,
-}): CancelablePromise<Ingredient> {
+}): CancelablePromise<IngredientRead> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/ingredients/{id}/',
@@ -90,7 +91,7 @@ id: number,
     }
 
     /**
-     * @returns Ingredient 
+     * @returns IngredientRead 
      * @throws ApiError
      */
     public static ingredientsUpdate({
@@ -102,7 +103,7 @@ requestBody,
  */
 id: number,
 requestBody: Ingredient,
-}): CancelablePromise<Ingredient> {
+}): CancelablePromise<IngredientRead> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/ingredients/{id}/',

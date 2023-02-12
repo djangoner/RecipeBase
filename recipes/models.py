@@ -37,11 +37,11 @@ def get_default_comments():
 
 
 class Recipe(models.Model):
-    title = models.CharField(_("Название"), max_length=100)
-    content = RichTextField(_("Содержание"), blank=True)
+    title = models.CharField(_("Название"), max_length=100, db_index=True)
+    content = RichTextField(_("Содержание"), blank=True, db_index=True)
     content_source = RichTextField(_("Содержание (изначальное) "), blank=True)
     short_description = models.TextField(_("Короткое описание"), null=True, blank=True)
-    comment = models.TextField(_("Комментарий"), null=True, blank=True)
+    comment = models.TextField(_("Комментарий"), null=True, blank=True, db_index=True)
     portion_count = models.FloatField(_("Кол-во порций"), null=True, blank=True)
     cooking_time = models.IntegerField(_("Примерное время приготовления"), null=True, blank=True)
 
@@ -49,7 +49,7 @@ class Recipe(models.Model):
     tags = models.ManyToManyField("RecipeTag", "recipes", verbose_name=_("Метки"), blank=True)
 
     created = models.DateTimeField(_("Создан"), auto_now_add=True, null=True)
-    edited = models.DateTimeField(_("Изменен"), auto_now=True, null=True)
+    edited = models.DateTimeField(_("Изменен"), auto_now=True, null=True, db_index=True)
     author = models.ForeignKey(User, models.SET_NULL, null=True, blank=True)
     is_archived = models.BooleanField(_("Архивирован"), default=False)
 

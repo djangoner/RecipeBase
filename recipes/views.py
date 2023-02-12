@@ -192,6 +192,10 @@ class RecipeViewset(viewsets.ModelViewSet):
             "ingredients__ingredient",
             "tags",
             "images",
+            "ingredients__ingredient__regular_ingredients",
+            "ingredients__ingredient__category",
+            "ingredients__ingredient__category__sorting",
+            "ingredients__ingredient__category__sorting__shop",
         )
         .annotate(cooked_times=Count(F("plans__date")))
         .annotate(last_cooked=Max(F("plans__date")))

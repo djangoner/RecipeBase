@@ -219,7 +219,7 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
     tags = RecipeTagSerializer(many=True, required=False)
     ingredients = RecipeIngredientSerializer(many=True, required=False)
     ratings = RecipeRatingSerializer(many=True, required=False)
-    author = ShortUserSerializer()
+    author = ShortUserSerializer(read_only=True)
 
     class Meta:
         model = Recipe
@@ -257,7 +257,7 @@ class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerialize
 
 
 class RecipeReadSerializer(RecipeSerializer):
-    author = ShortUserSerializer()
+    author = ShortUserSerializer(read_only=True)
     ratings = RecipeRatingReadSerializer(many=True, required=False)
     ingredients = RecipeIngredientReadSerializer(many=True, required=False)
 

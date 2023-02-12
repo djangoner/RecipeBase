@@ -26,6 +26,7 @@ factory_boy = "*"
 black = "*"
 mypy = "*"
 pylint = "*"
+django-debug-toolbar = "*"
 
 [requires]
 python_version = "3.11"

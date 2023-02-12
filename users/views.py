@@ -48,4 +48,4 @@ class UserViewSet(viewsets.ModelViewSet):
     def current_user_info(self, request):
         user = request.user
 
-        return response.Response(UserSerializer(user).data)
+        return response.Response(UserSerializer(user, show_permissions=True).data)

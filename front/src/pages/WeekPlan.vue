@@ -32,6 +32,7 @@
                 @click="openComment(idx)"
                 icon="announcement"
                 :color="plan.comments[idx] ? 'red' : 'grey'"
+                :disable="saving"
                 flat
                 round
               ></q-btn>
@@ -83,6 +84,7 @@
                           @update:modelValue="setRecipe(idx, mtime, $event, rec_idx)"
                           :input-debounce="300"
                           :options="recipesList || []"
+                          :disable="saving"
                           option-label="title"
                           @filter="filterRecipes"
                           use-input
@@ -149,6 +151,7 @@
                   @update:modelValue="addMtime(idx, $event)"
                   @filter="filterMealTime"
                   :input-debounce="0"
+                  :disable="saving"
                   option-value="id"
                   option-label="title"
                   label="Добавить"
@@ -253,7 +256,7 @@ export default defineComponent({
     },
     saveWeekPlan() {
       // let payload = Object.assign({}, this.plan);
-      let payload = RecipePlanWeekFromRead(this.plan);
+      let payload = RecipePlanWeekFromRead(Object.assign({}, this.plan));
       this.saving = true;
       console.debug('Save: ', payload);
 

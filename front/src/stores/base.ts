@@ -60,6 +60,7 @@ export const useBaseStore = defineStore("base", {
     product_list_items: null as ProductListItemRead[] | null,
     product_list_item: null as ProductListItemRead | null,
     ingredients: null as IngredientRead[] | null,
+    ingredients_searched: false,
     ingredient: null as IngredientRead | null,
     tasks: null as Task[] | null,
     task: null as Task | null,
@@ -417,8 +418,10 @@ export const useBaseStore = defineStore("base", {
     // Ingredients
 
     async loadIngredients(
-      payload: object
+      payload: object,
+      search = false
     ): Promise<PaginatedIngredientReadList> {
+      this.ingredients_searched = search;
       return new Promise((resolve, reject) => {
         IngredientsService.ingredientsList(payload)
           .then((resp) => {

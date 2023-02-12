@@ -159,7 +159,7 @@ export default defineComponent({
       });
 
       this.store
-        .loadIngredients(payload)
+        .loadIngredients(payload, true)
         .then((resp) => {
           this.loading = false;
           this.tablePagination = Object.assign({}, props?.pagination, {

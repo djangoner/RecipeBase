@@ -114,21 +114,22 @@
               {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
             </q-item>
 
-            <q-separator />
-            <q-item
-              v-if="item.ingredient.regular_ingredients"
-              class="items-center q-mt-xs"
-              items_center
-              clickable
-              :to="{
-                name: 'recipe',
-                params: { id: item.ingredient.regular_ingredients.id },
-              }"
-            >
-              <small class="ing-day">-.&nbsp;</small>
-              Регулярный ({{ item.ingredient.regular_ingredients.amount }}
-              {{ item.ingredient.regular_ingredients.amount_type_str }})
-            </q-item>
+            <template v-if="item.ingredient.regular_ingredients">
+              <q-separator />
+              <q-item
+                class="items-center q-mt-xs"
+                items_center
+                clickable
+                :to="{
+                  name: 'recipe',
+                  params: { id: item.ingredient.regular_ingredients.id },
+                }"
+              >
+                <small class="ing-day">-.&nbsp;</small>
+                Регулярный ({{ item.ingredient.regular_ingredients.amount }}
+                {{ item.ingredient.regular_ingredients.amount_type_str }})
+              </q-item>
+            </template>
           </q-list>
           <template v-if="item.price_full">
             <div>Цена {{ item.price_full }}₺ (~{{ item.price_part }}₺ необходимо)</div>
@@ -309,7 +310,6 @@ export default defineComponent({
 
       const amounts = this.item?.amounts as ProductListItemAmounts;
       const ings = amounts[recipe.id] || [];
-      console.debug(amounts, recipe.id);
 
       const texts = ings.map((i) => {
         let r = String(i.amount) + ' ' + i.amount_type_str;

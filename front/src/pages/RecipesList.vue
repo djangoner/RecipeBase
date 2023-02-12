@@ -837,6 +837,7 @@ export default defineComponent({
       void this.loadRecipes();
     },
     compilation() {
+      this.page = 1;
       void this.loadRecipes();
     },
     page() {

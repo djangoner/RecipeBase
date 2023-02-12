@@ -34,7 +34,7 @@ export function RecipePlanWeekFromRead(
       if (typeof p.meal_time == "object") {
         replaces.meal_time = p.meal_time.id;
       }
-      return Object.assign(p, replaces) as RecipePlan;
+      return Object.assign({}, p, replaces) as RecipePlan;
     }) || [];
 
   // Exclude empty plans

@@ -544,7 +544,7 @@ import RecipeMenu from 'src/components/RecipeMenu.vue';
 import { defineComponent } from 'vue';
 import {
   AmountTypeEnum,
-  Ingredient,
+  IngredientRead,
   RecipeImage,
   RecipeIngredientRead,
   RecipeRead,
@@ -721,7 +721,7 @@ export default defineComponent({
       saveAndContinue: false,
       ingAddDefault,
       ingAdd: Object.assign({}, ingAddDefault),
-      ingList: null as Ingredient[] | null,
+      ingList: null as IngredientRead[] | null,
       requiredRule,
       ingredientsColumns,
       editorToolbar,
@@ -737,7 +737,7 @@ export default defineComponent({
     if (!this.tags) {
       this.loadTags();
     }
-    if (!this.ingredients) {
+    if (!this.ingredients || this.store.ingredients_searched) {
       this.loadIngredients();
     }
     if (!this.amount_types) {

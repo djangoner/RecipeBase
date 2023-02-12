@@ -12,11 +12,7 @@
       <div class="flex justify-center items-center" style="min-height: 100px">
         <!-- <q-icon name="restaurant_menu" size="50px" color="grey"></q-icon> -->
         <q-img
-          :src="
-            recipe?.images && recipe.images.length > 0
-              ? recipe.images[0]?.image
-              : '/favicon.png'
-          "
+          :src="previewImage"
           placeholder-src="/favicon.png"
           width="100%"
           height="200px"
@@ -78,6 +74,15 @@ export default defineComponent({
     },
     openRecipe(id: number) {
       void this.$router.push({ name: 'recipe', params: { id: id } });
+    },
+  },
+  computed: {
+    previewImage(): string {
+      if (this.recipe?.images && this.recipe?.images?.length > 0) {
+        let img = this.recipe.images[0];
+        return (img.thumbnails['small'] as string) || img.image;
+      }
+      return '/favicon.png';
     },
   },
 });

@@ -93,7 +93,8 @@ class RegularIngredientAdmin(admin.ModelAdmin):
 
 @admin.register(RecipeImage)
 class RecipeImageAdmin(admin.ModelAdmin):
-    list_display = ["id", "image", "title"]
+    list_display = ["id", "image", "title", "recipe_id", "created"]
+    list_filter = ["created"]
     search_fields = ["image", "title"]
 
 

@@ -15,6 +15,7 @@ python-dotenv = "*"
 pillow = "*"
 psycopg2-binary = "*"
 django-admin-sortable = "*"
+django-thumbnails = "*"
 
 [dev-packages]
 pytest = "*"

@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     "ckeditor",
     "django_cleanup.apps.CleanupConfig",
     "adminsortable",
+    "thumbnails",
     # Custom
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
@@ -258,6 +259,22 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": "/api/v1",
     # 'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated'],
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
+}
+
+THUMBNAILS = {
+    "METADATA": {
+        "BACKEND": "RecipeBase.thumbnails_backend.ThumbnailDBBackend",
+    },
+    "STORAGE": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "SIZES": {
+        "small": {
+            "PROCESSORS": [
+                {"PATH": "thumbnails.processors.resize", "width": 200, "height": 200, "method": "fill"},
+            ],
+        },
+    },
 }
 
 LOGGING = {

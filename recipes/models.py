@@ -9,6 +9,7 @@ from django.db.models import F
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 from adminsortable.models import SortableMixin
+from thumbnails.fields import ImageField
 
 from recipes.services.measurings import MEASURING_TYPES, short_text
 
@@ -82,9 +83,10 @@ class RecipeImage(models.Model):
         null=True,
         blank=False,
     )
-    image = models.ImageField(_("Изображение"), upload_to=recipe_image_upload_to)  # type: ignore
+    image = ImageField(_("Изображение"), upload_to=recipe_image_upload_to)  # type: ignore
     title = models.CharField(_("Заголовок"), max_length=100, blank=True, null=True)
     num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
+    created = models.DateTimeField(_("Время создания"), auto_now_add=True, null=True)
 
     class Meta:
         ordering = ["num", "-id"]

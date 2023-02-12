@@ -39,9 +39,19 @@ def amount_str(meas: str | None):
 
 
 class RecipeImageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+    thumbnails = serializers.SerializerMethodField()
+
     class Meta:
         model = RecipeImage
         fields = "__all__"
+        # read_only_fields = ("image", )
+
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_thumbnails(self, recipe: RecipeImage):
+        # return recipe.image.thumbnails.all()  # type: ignore
+        if not recipe.image:
+            return {}
+        return {"small": recipe.image.thumbnails.small.url}  # type: ignore
 
 
 class ShopSerializer(serializers.ModelSerializer):

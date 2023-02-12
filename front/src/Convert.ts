@@ -47,7 +47,7 @@ export function RecipePlanWeekFromRead(
 
 export function RecipeFromRead(source: RecipeRead | null): Recipe {
   const payloadReplaces = {
-    images: [] as RecipeImage[],
+    images: source?.images || [],
     ingredients: [] as RecipeIngredient[],
     ratings: [] as RecipeRating[],
   };

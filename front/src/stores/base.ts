@@ -8,6 +8,7 @@ import {
   IngredientsService,
   MealTime,
   MealTimeService,
+  OpenAPI,
   PaginatedIngredientCategoryList,
   PaginatedIngredientReadList,
   PaginatedProductListItemReadList,
@@ -44,6 +45,7 @@ import {
   TaskCategoryService,
   TaskService,
 } from "src/client";
+import { request } from "src/client/core/request";
 
 export const useBaseStore = defineStore("base", {
   state: () => ({
@@ -165,10 +167,13 @@ export const useBaseStore = defineStore("base", {
     },
     async saveRecipe(payload: Recipe): Promise<RecipeRead> {
       return new Promise((resolve, reject) => {
-        RecipesService.recipesUpdate({ id: payload.id, requestBody: payload })
+        RecipesService.recipesPartialUpdate({
+          id: payload.id,
+          requestBody: payload,
+        })
           .then((resp) => {
-            this.recipe = resp;
-            resolve(resp);
+            this.recipe = resp as RecipeRead;
+            resolve(resp as RecipeRead);
           })
           .catch((err) => {
             reject(err);
@@ -202,11 +207,17 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
-    async createRecipeImage(payload: RecipeImage): Promise<RecipeImage> {
+    async createRecipeImage(payload: FormData): Promise<RecipeImage> {
       return new Promise((resolve, reject) => {
-        RecipeImagesService.recipeImagesCreate({ requestBody: payload })
+        // RecipeImagesService.recipeImagesCreate({ requestBody: payload })
+        request(OpenAPI, {
+          method: "POST",
+          url: "/api/v1/recipe_images/",
+          formData: payload,
+          mediaType: "application/json",
+        })
           .then((resp) => {
-            resolve(resp);
+            resolve(resp as RecipeImage);
           })
           .catch((err) => {
             reject(err);

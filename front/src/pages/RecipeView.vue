@@ -177,21 +177,21 @@
               </div>
 
               <!-- Images carousel -->
-              <div class="images-carousel q-pa-md" v-if="!edit">
+              <div class="images-carousel q-py-md" v-if="!edit">
                 <q-carousel
-                  animated
+                  v-if="(recipe.images || [])?.length > 0"
                   v-model="slide"
                   v-model:fullscreen="fullscreen"
-                  navigation
-                  infinite
-                  :autoplay="autoplay"
-                  arrows
-                  transition-prev="slide-right"
-                  transition-next="slide-left"
-                  height="250px"
                   @mouseenter="autoplay = false"
                   @mouseleave="autoplay = true"
-                  v-if="(recipe.images || [])?.length > 0"
+                  :autoplay="autoplay"
+                  :height="$q.screen.gt.md ? '450px' : '250px'"
+                  transition-prev="slide-right"
+                  transition-next="slide-left"
+                  animated
+                  navigation
+                  infinite
+                  arrows
                 >
                   <template v-slot:control>
                     <q-carousel-control position="bottom-right" :offset="[18, 18]">
@@ -791,16 +791,16 @@ export default defineComponent({
         this.recipe.ingredients.length = 0;
       }
     },
-    async uploadImg(img: RecipeImage) {
-      if (!this.recipe) {
-        return;
-      }
+    async uploadImg(img: RecipeImage): Promise<RecipeImage> {
       return new Promise((resolve, reject) => {
+        if (!this.recipe) {
+          reject();
+        }
         // let formData = new FormData();
-        // formData.append('recipe', String(this.recipe.id));
+        // formData.append('recipe', String(this.recipe?.id as number));
         // formData.append('image', img.image);
         // formData.append('title', img.title as string);
-        // formData.append('num', string(img.num));
+        // formData.append('num', String(img.num));
         let payload = {
           recipe: String(this.recipe?.id as number),
           image: img.image,
@@ -834,7 +834,8 @@ export default defineComponent({
             // delete res['image'];
           }
           if (i.id) {
-            i.image = '';
+            // @ts-expect-error readonly image
+            delete i['image'];
           }
           return i;
         })
@@ -874,7 +875,7 @@ export default defineComponent({
             type: 'positive',
             message: `Рецепт успешно ${created_tx}`,
           });
-          this.loadIngredients();
+          // this.loadIngredients();
         })
         .catch((err: CustomAxiosError) => {
           this.saving = false;

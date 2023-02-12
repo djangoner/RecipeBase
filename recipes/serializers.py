@@ -265,7 +265,7 @@ class RecipeReadSerializer(RecipeSerializer):
 class RecipeShortSerializer(RecipeSerializer):
     tags = None  # type: ignore
     # ingredients = None
-    ratings = None  # type: ignore
+    # ratings = None  # type: ignore
     author = None  # type: ignore
 
     class Meta(RecipeSerializer.Meta):

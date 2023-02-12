@@ -794,9 +794,8 @@ export default defineComponent({
         return null;
       }
       return (
-        Math.floor(
-          this.tablePagination?.rowsNumber / this.tablePagination?.rowsPerPage
-        ) || 1
+        Math.ceil(this.tablePagination?.rowsNumber / this.tablePagination?.rowsPerPage) ||
+        1
       );
     },
     tableColumns() {

@@ -39,7 +39,7 @@ def get_default_comments():
 
 class Recipe(models.Model):
     title = models.CharField(_("Название"), max_length=100, db_index=True)
-    content = RichTextField(_("Содержание"), blank=True, db_index=True)
+    content = RichTextField(_("Содержание"), blank=True)
     content_source = RichTextField(_("Содержание (изначальное) "), blank=True)
     short_description = models.TextField(_("Короткое описание"), null=True, blank=True)
     comment = models.TextField(_("Комментарий"), null=True, blank=True, db_index=True)

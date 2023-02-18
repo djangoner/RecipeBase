@@ -6,7 +6,6 @@ import {
   ProductListWeek,
   ProductListWeekRead,
   Recipe,
-  RecipeImage,
   RecipeIngredient,
   RecipePlan,
   RecipePlanWeek,
@@ -61,11 +60,13 @@ export function RecipeFromRead(source: RecipeRead | null): Recipe {
       return Object.assign({}, r, rep);
     }) || [];
 
-  // payloadReplaces.ingredients =
-  //   source?.ingredients?.map((i) => {
-  //     i.ingredient = i.ingredient.id;
-  //     return i;
-  //   }) || [];
+  payloadReplaces.ingredients =
+    source?.ingredients?.map((r) => {
+      const rep = {
+        ingredient: r.ingredient.id,
+      };
+      return Object.assign({}, r, rep);
+    }) || [];
 
   return Object.assign({}, source, payloadReplaces);
 }

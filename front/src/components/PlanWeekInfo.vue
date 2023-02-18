@@ -33,7 +33,7 @@
               v-for="(rating, idx) in weekDaysRatings(user)"
               :key="idx"
               class="text-center"
-              :class="rating ? weekDayColor(rating) : ''"
+              :class="rating ? weekDayColor(rating) : 'bg-cyan'"
             >
               <div>
                 {{ rating && rating > 0 ? rating : '-' }}

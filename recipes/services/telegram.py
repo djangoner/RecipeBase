@@ -91,6 +91,9 @@ def get_notification_text(name: str) -> Optional[str]:
         plans = get_plan_items_filtered(week_plan)
         i = 0
 
+        if len(plans) < 1:  # No items
+            return None
+
         for plan in plans:
             if not plan.recipe:
                 continue
@@ -122,6 +125,8 @@ def get_notification_text(name: str) -> Optional[str]:
         text = f"<b>Сегодня нужно купить</b> ({today_str}):\n"
         week = get_current_product_week()
         items: list[ProductListItem] = week.items.all()
+        if len(items) < 1:  # No items
+            return None
         for item in items:
             if not item.day or item.day != today_day:
                 continue

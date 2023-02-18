@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "django_cleanup.apps.CleanupConfig",
     "adminsortable",
     "thumbnails",
+    "multiselectfield",
     # Custom
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",

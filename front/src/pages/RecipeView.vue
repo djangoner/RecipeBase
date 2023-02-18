@@ -899,7 +899,7 @@ export default defineComponent({
     },
     loadIngredients() {
       let payload = {
-        page_size: 1000,
+        pageSize: 1000,
       };
       this.store
         .loadIngredients(payload)

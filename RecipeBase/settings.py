@@ -292,6 +292,7 @@ Q_CLUSTER = {
     "timeout": 60,
     "save_limit": 250,
     "queue_limit": 20,
+    "orm": "default"
     # 'cpu_affinity': 1,
 }
 

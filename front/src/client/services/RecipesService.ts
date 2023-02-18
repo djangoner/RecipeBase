@@ -34,6 +34,7 @@ ordering,
 page,
 pageSize,
 portionCount,
+preparationTime,
 rating,
 search,
 shortDescription,
@@ -77,6 +78,7 @@ page?: number,
  */
 pageSize?: number,
 portionCount?: number,
+preparationTime?: number,
 /**
  * Rating filter
  */
@@ -118,6 +120,7 @@ title?: string,
                 'page': page,
                 'page_size': pageSize,
                 'portion_count': portionCount,
+                'preparation_time': preparationTime,
                 'rating': rating,
                 'search': search,
                 'short_description': shortDescription,

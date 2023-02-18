@@ -74,6 +74,7 @@ export type { StatsList } from './models/StatsList';
 export type { Task } from './models/Task';
 export type { TaskCategory } from './models/TaskCategory';
 export type { TaskNested } from './models/TaskNested';
+export { TelegramNotificationsEnum } from './models/TelegramNotificationsEnum';
 export type { User } from './models/User';
 export type { UserProfile } from './models/UserProfile';
 

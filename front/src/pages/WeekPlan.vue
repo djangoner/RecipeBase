@@ -220,6 +220,7 @@ export default defineComponent({
       //   week: null,
       // },
       loading: false,
+      editMode: null as boolean | null,
       saving: false,
       addMtimeSelect: null,
       meal_time_options: [] as MealTime[] | null,
@@ -248,6 +249,9 @@ export default defineComponent({
         .loadWeekPlan(payload)
         .then(() => {
           this.loading = false;
+          if (this.editMode === null) {
+            this.editMode = Boolean(this.plan?.plans.length > 0);
+          }
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;

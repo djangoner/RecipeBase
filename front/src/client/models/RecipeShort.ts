@@ -26,6 +26,7 @@ export type RecipeShort = {
     comment?: string | null;
     portion_count?: number | null;
     cooking_time?: number | null;
+    preparation_time?: number | null;
     source_link?: string | null;
     readonly created: string | null;
     readonly edited: string | null;

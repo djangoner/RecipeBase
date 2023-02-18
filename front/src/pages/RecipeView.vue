@@ -163,6 +163,22 @@
                   Время приготовления: {{ recipe.cooking_time || '-' }}
                 </h6>
               </div>
+              <div>
+                <q-input
+                  v-if="edit"
+                  v-model.number="recipe.preparation_time"
+                  type="number"
+                  label="Время подготовки"
+                  hint="Примерное время подготовки к приготовлению в минутах. Например: настаивание теста, размачивание нута итп."
+                  filled
+                  :dense="dense"
+                >
+                </q-input>
+                <h6 class="text-center q-my-none" v-else-if="recipe.preparation_time">
+                  <q-icon name="timer" color="grey"></q-icon>
+                  Время подготовки: {{ recipe.preparation_time || '-' }}
+                </h6>
+              </div>
               <div v-if="edit">
                 <q-select
                   v-model="recipe.is_archived"
@@ -562,6 +578,7 @@ let defaultRecipe = {
   ingredients: [],
   ratings: [],
   portion_count: null,
+  preparation_time: null,
 };
 
 interface PatchedRecipeRead {
@@ -898,8 +915,7 @@ export default defineComponent({
         });
     },
     loadIngredients() {
-      let payload = {
-      };
+      let payload = {};
       this.store
         .loadIngredients(payload)
         .then(() => {

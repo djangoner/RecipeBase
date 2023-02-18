@@ -153,7 +153,7 @@ def get_ingredients_amounts(ingredients: list[RecipeIngredient]) -> dict[int, li
     amounts: dict[int, list] = {}
     ing: RecipeIngredient
     for ing in ingredients:
-        if ing.pk not in amounts:
+        if ing.recipe.pk not in amounts:
             amounts[ing.recipe.pk] = []
 
         amounts[ing.recipe.pk].append(

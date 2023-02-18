@@ -7,6 +7,8 @@
     :animation-speed="500"
   />
   <q-page padding>
+    <q-toggle v-model="editMode" label="Режим редактирования"></q-toggle>
+
     <div
       class="week-select-page row wrap items-start q-col-gutter-x-sm q-col-gutter-y-md"
     >
@@ -84,7 +86,7 @@
                           @update:modelValue="setRecipe(idx, mtime, $event, rec_idx)"
                           :input-debounce="300"
                           :options="recipesList || []"
-                          :disable="saving"
+                          :readonly="saving || !editMode"
                           option-label="title"
                           @filter="filterRecipes"
                           use-input
@@ -151,7 +153,7 @@
                   @update:modelValue="addMtime(idx, $event)"
                   @filter="filterMealTime"
                   :input-debounce="0"
-                  :disable="saving"
+                  :readonly="saving || !editMode"
                   option-value="id"
                   option-label="title"
                   label="Добавить"
@@ -250,7 +252,7 @@ export default defineComponent({
         .then(() => {
           this.loading = false;
           if (this.editMode === null) {
-            this.editMode = Boolean(this.plan?.plans.length > 0);
+            this.editMode = !(this.plan?.plans && this.plan?.plans?.length > 0);
           }
         })
         .catch((err: CustomAxiosError) => {
@@ -446,6 +448,7 @@ export default defineComponent({
             type: 'textarea',
             autogrow: true,
             inputStyle: { minHeight: '3rem', maxHeight: '10rem' },
+            readOnly: !this.editMode,
           },
           cancel: true,
           persistent: true,
@@ -453,6 +456,9 @@ export default defineComponent({
         .onOk((comment: string) => {
           if (!this.plan || this.plan.id !== startPlanID) {
             console.debug('Comment update invalidated');
+            return;
+          }
+          if (!this.editMode) {
             return;
           }
           (this.plan.comments as PlanComments)[idx] = comment;

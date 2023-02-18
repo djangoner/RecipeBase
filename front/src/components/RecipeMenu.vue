@@ -168,8 +168,6 @@ export default defineComponent({
         plans?.filter((p) => p.meal_time.is_primary && p.day === day).length || 0;
       let plansTotal = plans?.filter((p) => p.day == day).length || 0;
 
-      console.debug('Filled: ', plansFilled, plansTotal, typeof day, plans);
-
       return plansFilled >= plansTotal && plansTotal > 0;
     },
     isMtimeFilled(day: number, mtime: MealTime): boolean {

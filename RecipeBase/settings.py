@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "adminsortable",
     "thumbnails",
     "multiselectfield",
+    "django_q",
     # Custom
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
@@ -272,11 +273,28 @@ THUMBNAILS = {
     "SIZES": {
         "small": {
             "PROCESSORS": [
-                {"PATH": "thumbnails.processors.resize", "width": 200, "height": 200, "method": "fill"},
+                {
+                    "PATH": "thumbnails.processors.resize",
+                    "width": 200,
+                    "height": 200,
+                    "method": "fill",
+                },
             ],
         },
     },
 }
+
+Q_CLUSTER = {
+    # 'name': "recipebase",
+    "label": "Recipe Base",
+    "workers": 1,
+    "recycle": 500,
+    "timeout": 60,
+    "save_limit": 250,
+    "queue_limit": 20,
+    # 'cpu_affinity': 1,
+}
+
 
 LOGGING = {
     "version": 1,

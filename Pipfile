@@ -18,6 +18,7 @@ django-admin-sortable = "*"
 django-thumbnails = "*"
 pytelegrambotapi = "*"
 django-multiselectfield = "*"
+django-q = "*"
 
 [dev-packages]
 pytest = "*"

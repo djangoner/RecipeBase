@@ -23,4 +23,5 @@ export type IngredientRead = {
     price?: number | null;
     need_buy?: boolean;
     edible?: boolean;
+    image?: string | null;
 };

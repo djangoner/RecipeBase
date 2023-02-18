@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import { defineStore } from "pinia";
 import {
   AmountTypes,
   Ingredient,
@@ -28,7 +28,6 @@ import {
   ProductListWeekService,
   Recipe,
   RecipeImage,
-  RecipeImagesService,
   RecipePlanWeek,
   RecipePlanWeekRead,
   RecipePlanWeekService,
@@ -44,10 +43,10 @@ import {
   TaskCategory,
   TaskCategoryService,
   TaskService,
-} from 'src/client';
-import { request } from 'src/client/core/request';
+} from "src/client";
+import { request } from "src/client/core/request";
 
-export const useBaseStore = defineStore('base', {
+export const useBaseStore = defineStore("base", {
   state: () => ({
     stats: null as StatsList | null,
     recipes: null as RecipeRead[] | null,
@@ -211,10 +210,10 @@ export const useBaseStore = defineStore('base', {
       return new Promise((resolve, reject) => {
         // RecipeImagesService.recipeImagesCreate({ requestBody: payload })
         request(OpenAPI, {
-          method: 'POST',
-          url: '/api/v1/recipe_images/',
+          method: "POST",
+          url: "/api/v1/recipe_images/",
           formData: payload,
-          mediaType: 'application/json',
+          mediaType: "application/json",
         })
           .then((resp) => {
             resolve(resp as RecipeImage);
@@ -256,7 +255,9 @@ export const useBaseStore = defineStore('base', {
           });
       });
     },
-    async loadWeekPlans(payload: object): Promise<PaginatedRecipePlanWeekReadList> {
+    async loadWeekPlans(
+      payload: object
+    ): Promise<PaginatedRecipePlanWeekReadList> {
       return new Promise((resolve, reject) => {
         RecipePlanWeekService.recipePlanWeekList(payload)
           .then((resp) => {
@@ -382,7 +383,9 @@ export const useBaseStore = defineStore('base', {
       });
     },
 
-    async createProductListItem(payload: ProductListItem): Promise<ProductListItemRead> {
+    async createProductListItem(
+      payload: ProductListItem
+    ): Promise<ProductListItemRead> {
       return new Promise((resolve, reject) => {
         ProductListItemService.productListItemCreate({ requestBody: payload })
           .then((resp) => {
@@ -394,7 +397,9 @@ export const useBaseStore = defineStore('base', {
           });
       });
     },
-    async updateProductListItem(payload: ProductListItem): Promise<ProductListItemRead> {
+    async updateProductListItem(
+      payload: ProductListItem
+    ): Promise<ProductListItemRead> {
       return new Promise((resolve, reject) => {
         ProductListItemService.productListItemUpdate({
           id: payload.id,
@@ -430,8 +435,10 @@ export const useBaseStore = defineStore('base', {
       return new Promise((resolve, reject) => {
         const defaultPayload = {
           pageSize: 1000,
-        }
-        IngredientsService.ingredientsList(Object.assign({}, defaultPayload, payload))
+        };
+        IngredientsService.ingredientsList(
+          Object.assign({}, defaultPayload, payload)
+        )
           .then((resp) => {
             this.ingredients = resp.results as IngredientRead[];
             resolve(resp);
@@ -494,7 +501,9 @@ export const useBaseStore = defineStore('base', {
 
     // Tasks
 
-    async loadTaskCategories(payload: object): Promise<PaginatedTaskCategoryList> {
+    async loadTaskCategories(
+      payload: object
+    ): Promise<PaginatedTaskCategoryList> {
       return new Promise((resolve, reject) => {
         TaskCategoryService.taskCategoryList(payload)
           .then((resp) => {

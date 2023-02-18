@@ -22,4 +22,5 @@ export type PatchedIngredient = {
     price?: number | null;
     need_buy?: boolean;
     edible?: boolean;
+    image?: string | null;
 };

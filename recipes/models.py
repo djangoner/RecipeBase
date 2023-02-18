@@ -30,6 +30,13 @@ def recipe_image_upload_to(instance: "RecipeImage", filename: str):
     return f"uploads/recipe_images/{user_id}/{uuid}.{ext}"
 
 
+def ingredient_upload_to(instance: "Ingredient", filename: str):
+    ext = filename.split(".")[-1]
+    uuid = gen_uuid()
+
+    return f"uploads/ingredient_images/{uuid}.{ext}"
+
+
 def get_default_comments():
     return {i: "" for i in range(1, 7 + 1)}
 
@@ -126,6 +133,8 @@ class Ingredient(models.Model):
     price = models.PositiveSmallIntegerField(_("Цена"), null=True, blank=True)
     need_buy = models.BooleanField(_("Требует покупки"), default=True)
     edible = models.BooleanField(_("Съедобный"), default=True)
+
+    image = ImageField(_("Изображение"), upload_to=ingredient_upload_to, blank=True, null=True)  # type: ignore
 
     class Meta:
         ordering = ["title", "-id"]

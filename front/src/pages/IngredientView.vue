@@ -60,6 +60,14 @@
             autogrow
           >
           </q-input>
+
+          <q-img
+            v-if="ingredient.image"
+            :src="ingredient.image"
+            height="100px"
+            fit="contain"
+          ></q-img>
+
           <q-toggle v-model="ingredient.need_buy" label="Требует покупки"> </q-toggle>
           <q-toggle v-model="ingredient.edible" label="Съедобный"> </q-toggle>
         </q-card-section>

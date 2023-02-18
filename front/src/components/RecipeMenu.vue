@@ -14,7 +14,7 @@
             <template v-for="(day, idx) of WeekDays">
               <q-item v-if="idx > 0" clickable :key="idx">
                 <q-item-section
-                  :class="isDayFilled(idx) ? 'text-underline text-bold' : ''"
+                  :class="isDayFilled(Number(idx)) ? 'text-underline text-bold' : ''"
                 >
                   {{ day }}
                 </q-item-section>
@@ -166,7 +166,9 @@ export default defineComponent({
       let plans = this.plan?.plans;
       let plansFilled =
         plans?.filter((p) => p.meal_time.is_primary && p.day === day).length || 0;
-      let plansTotal = plans?.filter((p) => p.day === day).length || 0;
+      let plansTotal = plans?.filter((p) => p.day == day).length || 0;
+
+      console.debug('Filled: ', plansFilled, plansTotal, typeof day, plans);
 
       return plansFilled >= plansTotal && plansTotal > 0;
     },

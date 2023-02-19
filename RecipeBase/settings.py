@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "thumbnails",
     "multiselectfield",
     "django_q",
+    "simple_history",
     # Custom
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
@@ -82,6 +83,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 ROOT_URLCONF = "RecipeBase.urls"

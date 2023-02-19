@@ -12,6 +12,7 @@ from adminsortable.models import SortableMixin
 from thumbnails.fields import ImageField
 
 from recipes.services.measurings import MEASURING_TYPES, short_text
+from simple_history.models import HistoricalRecords
 
 # // Helpers
 DESC_LENGTH = 80
@@ -61,6 +62,7 @@ class Recipe(models.Model):
     edited = models.DateTimeField(_("Изменен"), auto_now=True, null=True, db_index=True)
     author = models.ForeignKey(User, models.SET_NULL, null=True, blank=True)
     is_archived = models.BooleanField(_("Архивирован"), default=False)
+    history = HistoricalRecords(excluded_fields=["created", "edited"])
 
     class Meta:
         verbose_name = _("Рецепт")
@@ -135,6 +137,7 @@ class Ingredient(models.Model):
     edible = models.BooleanField(_("Съедобный"), default=True)
 
     image = ImageField(_("Изображение"), upload_to=ingredient_upload_to, blank=True, null=True)  # type: ignore
+    history = HistoricalRecords()
 
     class Meta:
         ordering = ["title", "-id"]
@@ -163,6 +166,7 @@ class RecipeIngredient(models.Model):
     amount_grams = models.SmallIntegerField(_("Количество в граммах"), editable=False, blank=True, null=True)
     amount_type = models.CharField(_("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15)
     is_main = models.BooleanField(_("Основной игредиент"), default=False)
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = _("Ингредиент рецепта")
@@ -187,6 +191,7 @@ class RegularIngredient(models.Model):
     )
     amount = models.FloatField(_("Количество"), max_length=15)
     amount_type = models.CharField(_("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15)
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = _("Регулярный ингредиент")
@@ -247,6 +252,7 @@ class RecipeRating(models.Model):
         blank=True,
     )
     rating = models.SmallIntegerField(_("Оценка"), validators=[MinValueValidator(0), MaxValueValidator(5)])
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = _("Оценка рецепта")
@@ -406,6 +412,12 @@ class ProductListItem(models.Model):
     )
     created = models.DateTimeField(_("Время создания"), auto_now_add=True)
     # edited = models.DateTimeField(_("Время полследнего редактирования"), auto_now=True)
+
+    ingredients = models.ManyToManyField(RecipeIngredient)
+    ratings = models.ManyToManyField(RecipeRating)
+    plans = models.ManyToManyField(RecipePlan)
+    images = models.ManyToManyField(RecipeImage)
+    history = HistoricalRecords(excluded_fields=["created"], m2m_fields=[ingredients, ratings, images])
     ##
 
     class Meta:

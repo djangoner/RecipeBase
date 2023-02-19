@@ -19,6 +19,7 @@ django-thumbnails = "*"
 pytelegrambotapi = "*"
 django-multiselectfield = "*"
 django-q = "*"
+django-simple-history = "*"
 
 [dev-packages]
 pytest = "*"

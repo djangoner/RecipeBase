@@ -19,6 +19,7 @@ from recipes.models import (
     ShopIngredientCategory,
 )
 from adminsortable.admin import NonSortableParentAdmin, SortableTabularInline
+from simple_history.admin import SimpleHistoryAdmin
 
 
 class RecipeIngredientsInline(admin.StackedInline):
@@ -52,7 +53,7 @@ class ShopIngredientCategoryInline(SortableTabularInline):
 
 
 @admin.register(Recipe)
-class RecipeAdmin(admin.ModelAdmin):
+class RecipeAdmin(SimpleHistoryAdmin):
     list_display = ["title", "created", "edited", "get_cooked_times"]
     search_fields = ["title", "content"]
     filter_horizontal = ("tags",)
@@ -70,7 +71,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 @admin.register(Ingredient)
-class IngredientAdmin(admin.ModelAdmin):
+class IngredientAdmin(SimpleHistoryAdmin):
     list_display = ["title", "category", "min_pack_size", "price", "edible", "need_buy"]
     list_filter = ["need_buy", "edible", "category"]
     autocomplete_fields = ["category"]
@@ -78,14 +79,14 @@ class IngredientAdmin(admin.ModelAdmin):
 
 
 @admin.register(RecipeIngredient)
-class RecipeIngredientAdmin(admin.ModelAdmin):
+class RecipeIngredientAdmin(SimpleHistoryAdmin):
     list_display = ["recipe", "ingredient"]
     search_fields = ["recipe__title", "ingredient__title"]
     autocomplete_fields = ["recipe", "ingredient"]
 
 
 @admin.register(RegularIngredient)
-class RegularIngredientAdmin(admin.ModelAdmin):
+class RegularIngredientAdmin(SimpleHistoryAdmin):
     list_display = ["ingredient", "amount", "amount_type"]
     search_fields = ["ingredient__title"]
     autocomplete_fields = ["ingredient"]
@@ -133,7 +134,7 @@ class ProductListWeekAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProductListItem)
-class ProductListItemAdmin(admin.ModelAdmin):
+class ProductListItemAdmin(SimpleHistoryAdmin):
     list_display = [
         "week",
         "title",

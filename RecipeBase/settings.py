@@ -292,9 +292,11 @@ Q_CLUSTER = {
     "workers": 1,
     "recycle": 500,
     "timeout": 60,
+    "retry": 120,
     "save_limit": 250,
     "queue_limit": 20,
-    "orm": "default"
+    "orm": "default",
+    "max_attempts": 10,
     # 'cpu_affinity': 1,
 }
 

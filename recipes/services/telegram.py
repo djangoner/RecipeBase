@@ -66,6 +66,19 @@ def get_plan_items_filtered(week_plan: RecipePlanWeek) -> list[RecipePlan]:
     return res
 
 
+def get_product_list_filtered(week_plan: ProductListWeek) -> list[ProductListItem]:
+    res = []
+    items: list[ProductListItem] = week_plan.items.all()  # type: ignore
+    for item in items:
+        if not item.day or item.day != get_today_day():
+            continue
+        if item.is_completed:
+            continue
+
+        res.append(item)
+    return res
+
+
 def get_recipe_flags(recipe: Recipe):
     recipe_flags: list[str] = []
     if recipe.images.count() < 1:
@@ -124,12 +137,10 @@ def get_notification_text(name: str) -> Optional[str]:
     elif name == "products_reminder":
         text = f"<b>Сегодня нужно купить</b> ({today_str}):\n"
         week = get_current_product_week()
-        items: list[ProductListItem] = week.items.all()
+        items: list[ProductListItem] = get_product_list_filtered(week)
         if len(items) < 1:  # No items
             return None
         for item in items:
-            if not item.day or item.day != today_day:
-                continue
             text += f"\n- {item.title}"
 
             if item.ingredient and item.ingredient.description:

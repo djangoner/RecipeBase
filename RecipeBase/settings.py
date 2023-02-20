@@ -178,7 +178,7 @@ LANGUAGES = [
     # ('en', 'Английский'),
 ]
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Famagusta"
 
 USE_I18N = True
 

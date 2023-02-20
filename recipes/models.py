@@ -62,6 +62,7 @@ class Recipe(models.Model):
     edited = models.DateTimeField(_("Изменен"), auto_now=True, null=True, db_index=True)
     author = models.ForeignKey(User, models.SET_NULL, null=True, blank=True)
     is_archived = models.BooleanField(_("Архивирован"), default=False)
+
     history = HistoricalRecords(excluded_fields=["created", "edited"])
 
     class Meta:
@@ -219,7 +220,6 @@ class RecipeTag(models.Model):
 
 
 class MealTime(models.Model):
-
     title = models.CharField(_("Название"), max_length=255)
     time = models.TimeField(_("Примерное время"), null=True, blank=True)
     num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
@@ -242,7 +242,6 @@ class MealTime(models.Model):
 
 
 class RecipeRating(models.Model):
-
     user = models.ForeignKey(User, models.CASCADE, related_name="ratings", verbose_name=_("Пользователь"))
     recipe = models.ForeignKey(
         Recipe,
@@ -279,7 +278,6 @@ class RecipePlanWeek(models.Model):
 
 
 class RecipePlan(models.Model):
-
     week = models.ForeignKey(
         RecipePlanWeek,
         models.CASCADE,
@@ -339,7 +337,6 @@ class ProductListWeek(models.Model):
 
 
 class ProductListItem(models.Model):
-
     week = models.ForeignKey(
         ProductListWeek,
         models.CASCADE,
@@ -413,11 +410,7 @@ class ProductListItem(models.Model):
     created = models.DateTimeField(_("Время создания"), auto_now_add=True)
     # edited = models.DateTimeField(_("Время полследнего редактирования"), auto_now=True)
 
-    ingredients = models.ManyToManyField(RecipeIngredient)
-    ratings = models.ManyToManyField(RecipeRating)
-    plans = models.ManyToManyField(RecipePlan)
-    images = models.ManyToManyField(RecipeImage)
-    history = HistoricalRecords(excluded_fields=["created"], m2m_fields=[ingredients, ratings, images])
+    history = HistoricalRecords(excluded_fields=["created"])
     ##
 
     class Meta:

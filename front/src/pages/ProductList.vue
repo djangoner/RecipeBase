@@ -102,8 +102,11 @@
         </q-btn>
       </div>
       <!-- Prices total -->
-      <span class="q-px-md q-pt-xs" v-if="pricesTotal"
-        >{{ pricesCompleted }}₺ / {{ pricesTotal }}₺
+      <span class="q-px-md q-pt-xs">
+        {{ pricesCompleted }}₺ / {{ pricesTotal }}₺
+        <template v-if="productsWithoutPrice">
+          ({{ productsWithoutPrice }}/{{ listItemsRaw.length }} продуктов без цены)
+        </template>
 
         <q-tooltip>~ уже потрачено / стоимость продуктов</q-tooltip>
       </span>
@@ -714,6 +717,9 @@ export default defineComponent({
     },
     pricesTotal() {
       return this.listItemsRaw.map((i) => i.price_full).reduce((a, b) => a + b, 0);
+    },
+    productsWithoutPrice() {
+      return this.listItemsRaw.filter((i) => !i.price_full).length;
     },
     // viewItem: {
     //   get() {

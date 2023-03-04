@@ -54,7 +54,10 @@
         <template v-if="item.price_full">, ~{{ item.price_full }}₺</template>
       </span>
       <!-- First column bottom row, date -->
-      <span class="text-body2" :class="item.day ? WeekDaysColors[item.day] : ''">
+      <span
+        class="text-body2"
+        :class="item.day || item.day === 0 ? WeekDaysColors[item.day] : ''"
+      >
         <q-icon v-if="item.is_auto" name="settings">
           <q-tooltip>
             Этот рецепт был создан автоматически на основе плана на неделю

@@ -548,6 +548,7 @@ export default defineComponent({
           });
         })
         .catch((err: CustomAxiosError) => {
+          this.$q.loading.hide('sending');
           this.handleErrors(err, 'Ошибка отправки списка');
         });
     },

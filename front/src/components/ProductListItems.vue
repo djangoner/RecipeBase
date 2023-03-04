@@ -82,8 +82,8 @@
         </q-badge>
         <q-icon name="notes" size="17px" color="blue-grey" v-if="item.description" />
 
-        {{ item.day ? getDay(item.day) : '' }}
-        {{ item.day ? WeekDays[item.day] : '' }}
+        {{ item.day || item.day === 0 ? getDay(item.day) : '' }}
+        {{ item.day || item.day === 0 ? WeekDays[item.day] : '' }}
 
         <span class="text-teal" v-if="isEdited(item)"> [Изменено локально] </span>
       </span>

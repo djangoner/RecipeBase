@@ -35,8 +35,8 @@
                   Этот рецепт был создан автоматически на основе плана на неделю
                 </q-tooltip>
               </q-icon>
-              {{ item.day ? getDay(item.day) : '' }}
-              {{ item.day ? WeekDays[item.day] : '' }}
+              {{ item || item.day === 0 ? getDay(item.day) : '' }}
+              {{ item.day || item.day === 0 ? WeekDays[item.day] : '' }}
             </span>
           </div>
         </div>

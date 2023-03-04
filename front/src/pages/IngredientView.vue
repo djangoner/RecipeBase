@@ -91,11 +91,11 @@
           </q-input>
 
           <!-- Image -->
-          <div>
+          <div v-if="exists">
             <q-separator />
           </div>
 
-          <div class="row q-col-gutter-y-md">
+          <div class="row q-col-gutter-y-md" v-if="exists">
             <div class="col-12 col-md-5 row">
               <div :class="$q.screen.gt.md ? 'col-6' : 'col-grow'">
                 <q-file
@@ -292,8 +292,12 @@ export default defineComponent({
       // if (!typeof payload.category == 'number') {
       //   payload.category = payload.category;
       // }
-      if (!payload.image) {
-        payload.image = '';
+      if (isCreating) {
+        payload.image = null;
+      } else {
+        if (!payload.image) {
+          payload.image = '';
+        }
       }
       console.debug('Payload: ', payload);
       method(payload)

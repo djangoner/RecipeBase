@@ -12,6 +12,7 @@ TELEGRAM_NOTIFICATIONS = [
     ("weekdays_morning", "Будни утром"),
     ("weekend_morning", "Выходные утром"),
     ("products_reminder", "Купить продукты на завтра"),
+    ("products_missed", "Пропущенные продукты"),
 ]
 
 TELEGRAM_NOTIFICATIONS_MANUAL = [

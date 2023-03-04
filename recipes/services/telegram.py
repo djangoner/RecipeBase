@@ -80,6 +80,32 @@ def get_product_list_filtered(week_plan: ProductListWeek) -> list[ProductListIte
     return res
 
 
+def get_product_list_on_week_filtered(week_plan: ProductListWeek) -> list[ProductListItem]:
+    res = []
+    items: list[ProductListItem] = week_plan.items.all()  # type: ignore
+    for item in items:
+        if item.day:
+            continue
+        if item.is_completed:
+            continue
+
+        res.append(item)
+    return res
+
+
+def get_product_list_missed_filtered(week_plan: ProductListWeek) -> list[ProductListItem]:
+    res = []
+    items: list[ProductListItem] = week_plan.items.all()  # type: ignore
+    for item in items:
+        if not item.day or item.day < get_today_day():
+            continue
+        if item.is_completed:
+            continue
+
+        res.append(item)
+    return res
+
+
 def get_recipe_flags(recipe: Recipe):
     recipe_flags: list[str] = []
     if recipe.images.count() < 1:
@@ -89,6 +115,34 @@ def get_recipe_flags(recipe: Recipe):
         recipe_flags.append("нет оценок")
 
     return recipe_flags
+
+
+################################
+def product_item_amount_str(item: ProductListItem):
+    amounts_str = ""
+    if item.amount_type and item.amount:
+        amounts_str = f"({int(item.amount)} {measuring_str(item.amount_type)})"
+    else:
+        amount_l = []
+        ing: RecipeIngredient
+        for ing in item.ingredients.all():
+            amount_l.append(f"{int(ing.amount)} {measuring_str(ing.amount_type)}")
+
+        if amount_l:
+            amounts_str = "(" + ", ".join(amount_l) + ")"
+
+    return amounts_str
+
+
+def render_product_item(item: ProductListItem) -> str:
+    day_str = WEEKDAYS_STR[item.day] if item.day else "-"
+    text = f"\n- [{day_str:<2}] {item.title} {product_item_amount_str(item)}"
+    if item.ingredient and item.ingredient.description:
+        text += f"\n<b>Комментарий:</b> <pre>{item.ingredient.description}</pre>"
+    return text
+
+
+################################
 
 
 def get_notification_text(name: str, **options) -> Optional[str]:
@@ -142,15 +196,29 @@ def get_notification_text(name: str, **options) -> Optional[str]:
         if len(items) < 1:  # No items
             return None
         for item in items:
-            text += f"\n- {item.title}"
+            text += render_product_item(item)
 
-            if item.ingredient and item.ingredient.description:
-                text += f"\n<b>Комментарий:</b> <pre>{item.ingredient.description}</pre>"
+        # Also on week
+        on_week = get_product_list_on_week_filtered(week)
+        if on_week:
+            text += "\nТакже на неделе:\n"
+
+            for item in on_week:
+                text += render_product_item(item)
+
+        return text
+    elif name == "products_missed":
+        text = f"<b>Пропущенные продукты</b> ({today_str}):\n"
+        week = get_current_product_week()
+        items: list[ProductListItem] = get_product_list_missed_filtered(week)
+        if len(items) < 1:  # No items
+            return None
+        for item in items:
+            text += render_product_item(item)
 
         return text
 
     elif name == "product_list":
-
         week_plan = options.get("week_plan")
         if not week_plan:
             week_plan = get_current_product_week()
@@ -163,19 +231,9 @@ def get_notification_text(name: str, **options) -> Optional[str]:
         items.sort(key=lambda x: x.day or 99)
         for item in items:
             state_str = "+" if item.is_completed else "-"
-            amounts_str = ""
-            if item.amount_type and item.amount:
-                amounts_str = f"({int(item.amount)} {measuring_str(item.amount_type)})"
-            else:
-                amount_l = []
-                ing: RecipeIngredient
-                for ing in item.ingredients.all():
-                    amount_l.append(f"{int(ing.amount)} {measuring_str(ing.amount_type)}")
-
-                if amount_l:
-                    amounts_str = "(" + ", ".join(amount_l) + ")"
-
+            amounts_str = product_item_amount_str(item)
             day_str = WEEKDAYS_STR[item.day] if item.day else "-"
+
             text += f"<pre>[{state_str}] [{day_str:<2}] {item.title} {amounts_str}</pre>\n"
 
         return text

@@ -6,6 +6,7 @@ import {
   User,
   UsersService,
 } from "src/client";
+import { LocalStorage } from "quasar";
 import { OpenAPI } from "src/client";
 
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -14,6 +15,9 @@ const getToken = async () => {
 };
 
 OpenAPI.TOKEN = getToken;
+
+const cachedPermissions: string[] =
+  LocalStorage.getItem("cachedPermissions") || [];
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -33,7 +37,8 @@ export const useAuthStore = defineStore("auth", {
 
   actions: {
     hasPerm(perm: string): boolean {
-      return this.permissions.includes(perm);
+      const perms = this.permissions || cachedPermissions;
+      return perms.includes(perm);
     },
 
     async logout(): Promise<void> {
@@ -66,6 +71,7 @@ export const useAuthStore = defineStore("auth", {
         UsersService.usersCurrentUserInfoRetrieve()
           .then((resp) => {
             this.account = resp;
+            LocalStorage.set("cachedPermissions", resp.permissions);
             resolve(resp);
           })
           .catch((err) => {

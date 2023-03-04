@@ -6,6 +6,7 @@
       </div>
       <div v-if="!edit">
         <q-btn
+          v-if="storeAuth.hasPerm('recipes.add_recipe')"
           icon="add"
           size="sm"
           color="positive"
@@ -35,7 +36,12 @@
                   :dense="dense"
                 >
                   <template #after>
-                    <q-btn v-if="exists" icon="edit" @click="toggleEdit()" flat>
+                    <q-btn
+                      v-if="exists && storeAuth.hasPerm('recipes.change_recipe')"
+                      icon="edit"
+                      @click="toggleEdit()"
+                      flat
+                    >
                       <q-tooltip
                         >Предпросмотр рецепта (изменения не будут применены!)</q-tooltip
                       >
@@ -53,7 +59,12 @@
                     <q-tooltip>Этот рецепт архивирован</q-tooltip>
                   </q-icon>
                   {{ recipe.title }}
-                  <q-btn icon="edit" @click="toggleEdit()" flat>
+                  <q-btn
+                    v-if="storeAuth.hasPerm('recipes.change_recipe')"
+                    icon="edit"
+                    @click="toggleEdit()"
+                    flat
+                  >
                     <q-tooltip>Изменить рецепт</q-tooltip>
                   </q-btn>
 
@@ -569,6 +580,7 @@ import {
 import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
 import { AmountTypesTypes } from 'src/modules/Globals';
 import { RecipeFromRead } from 'src/Convert';
+import { useAuthStore } from 'src/stores/auth';
 
 let defaultRecipe = {
   content_source: '',
@@ -599,6 +611,7 @@ export default defineComponent({
   mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
+    const storeAuth = useAuthStore();
 
     let ingredientsColumns = [
       {
@@ -726,6 +739,7 @@ export default defineComponent({
 
     return {
       store,
+      storeAuth,
       loading: false,
       saving: false,
       slide: 1,

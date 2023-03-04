@@ -4,10 +4,14 @@
       <task-item-list
         v-model="taskCategories"
         :flat="true"
+        :canEdit="canEdit"
         @reload="loadTaskCategories()"
       ></task-item-list>
 
-      <q-form @submit.prevent="createCategory()">
+      <q-form
+        v-if="storeAuth.hasPerm('tasks.add_taskcategory')"
+        @submit.prevent="createCategory()"
+      >
         <q-item class="q-mt-lg">
           <q-item-section avatar>
             <q-btn
@@ -45,6 +49,7 @@ import taskItemList from 'components/TaskItemList.vue';
 import { defineComponent } from 'vue';
 import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
 import { TaskOrCategory } from 'src/modules/Globals';
+import { useAuthStore } from 'src/stores/auth';
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -52,8 +57,11 @@ export default defineComponent({
   mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
+    const storeAuth = useAuthStore();
+
     return {
       store,
+      storeAuth,
       loading: false,
       category: null as TaskOrCategory | null,
       addCategory: '',
@@ -110,6 +118,9 @@ export default defineComponent({
   computed: {
     taskCategories() {
       return this.store.tasks_categories;
+    },
+    canEdit() {
+      return this.storeAuth.hasPerm('tasks.change_task');
     },
   },
 });

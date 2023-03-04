@@ -5,6 +5,7 @@
         v-model="task.is_completed"
         checked-icon="task_alt"
         unchecked-icon="radio_button_unchecked"
+        :disable="!canEdit"
         @update:modelValue="$emit('updateItem', task)"
       />
     </q-item-section>
@@ -35,7 +36,7 @@ import { TaskCategoryCountAll, TaskCategoryCountCompleted } from 'src/modules/Ut
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  props: { modelValue: { required: true } },
+  props: { modelValue: { required: true }, canEdit: { default: true, type: Boolean } },
   methods: {
     getCategoryCompleted: TaskCategoryCountCompleted,
     getCategoryAll: TaskCategoryCountAll,

@@ -21,6 +21,7 @@
           <!-- Search & create new -->
           <template v-slot:top-right>
             <q-btn
+              v-if="storeAuth.hasPerm('recipes.add_ingredient')"
               class="q-mx-md"
               @click="$router.push({ name: 'ingredient', params: { id: 'new' } })"
               icon="add"
@@ -193,6 +194,7 @@ import { defineComponent } from 'vue';
 import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
 import { TablePagination, TablePropsOnRequest } from 'src/modules/Globals';
 import { debounce, QTableProps } from 'quasar';
+import { useAuthStore } from 'src/stores/auth';
 let tableColumns = [
   {
     name: 'title',
@@ -288,12 +290,14 @@ export default defineComponent({
   mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
+    const storeAuth = useAuthStore();
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const emptyFunc = () => {};
 
     return {
       store,
+      storeAuth,
       loading: false,
       // tableFilter: '',
       showFilters: this.$q.localStorage.getItem('ingredientsShowFilters'),

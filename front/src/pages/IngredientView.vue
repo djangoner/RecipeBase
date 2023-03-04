@@ -23,7 +23,7 @@
       </div>
       <div>
         <q-btn
-          v-if="exists"
+          v-if="exists && storeAuth.hasPerm('recipes.add_ingredient')"
           icon="add"
           size="sm"
           color="positive"
@@ -40,6 +40,7 @@
             v-model="ingredient.title"
             label="Название ингредиента"
             :rules="[requiredRule]"
+            :readonly="!canEdit"
             hide-bottom-space
             filled
           ></q-input>
@@ -48,6 +49,7 @@
             @filter="filterCategories"
             :options="ingredientCategories || []"
             :input-debounce="0"
+            :readonly="!canEdit"
             label="Категория"
             option-label="title"
             option-value="id"
@@ -60,19 +62,27 @@
           </q-select>
           <q-input
             v-model.number="ingredient.min_pack_size"
+            :readonly="!canEdit"
             label="Размер упаковки"
             filled
           ></q-input>
           <q-input
             v-model.number="ingredient.item_weight"
+            :readonly="!canEdit"
             label="Вес одной штуки"
             filled
           ></q-input>
 
-          <q-input v-model.number="ingredient.price" label="Цена (₺)" filled></q-input>
+          <q-input
+            v-model.number="ingredient.price"
+            :readonly="!canEdit"
+            label="Цена (₺)"
+            filled
+          ></q-input>
 
           <q-input
             v-model="ingredient.description"
+            :readonly="!canEdit"
             type="textarea"
             label="Описание"
             filled
@@ -90,6 +100,7 @@
               <div :class="$q.screen.gt.md ? 'col-6' : 'col-grow'">
                 <q-file
                   v-model="uploadFile"
+                  :readonly="!canEdit"
                   class="full-width"
                   ref="upload_field"
                   label="Загрузка изображения"
@@ -101,7 +112,7 @@
               <div>
                 <q-btn
                   @click="confirmClearImage()"
-                  v-if="ingredient.image"
+                  v-if="ingredient.image && canEdit"
                   align="left"
                   label="Очистить"
                   color="primary"
@@ -136,8 +147,14 @@
           </div>
 
           <div class="row">
-            <q-toggle v-model="ingredient.need_buy" label="Требует покупки"> </q-toggle>
-            <q-toggle v-model="ingredient.edible" label="Съедобный"> </q-toggle>
+            <q-toggle
+              v-model="ingredient.need_buy"
+              :readonly="!canEdit"
+              label="Требует покупки"
+            >
+            </q-toggle>
+            <q-toggle v-model="ingredient.edible" :readonly="!canEdit" label="Съедобный">
+            </q-toggle>
           </div>
         </q-card-section>
 
@@ -145,6 +162,7 @@
         <q-card-actions class="q-col-gutter-x-md q-mx-none q-pb-md">
           <div>
             <q-btn
+              v-if="canEdit"
               type="submit"
               icon="save"
               color="positive"
@@ -155,7 +173,7 @@
           </div>
           <div>
             <q-btn
-              v-if="exists"
+              v-if="exists && storeAuth.hasPerm('recipes.delete_ingredient')"
               @click="askDelete()"
               icon="delete"
               color="negative"
@@ -175,6 +193,7 @@
 <script lang="ts">
 import { ingredientFromRead } from 'src/Convert';
 import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import { useAuthStore } from 'src/stores/auth';
 import { useBaseStore } from 'src/stores/base';
 import { defineComponent } from 'vue';
 
@@ -189,8 +208,11 @@ export default defineComponent({
   mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
+    const storeAuth = useAuthStore();
+
     return {
       store,
+      storeAuth,
       loading: false,
       saving: false,
       deleting: false,
@@ -369,6 +391,9 @@ export default defineComponent({
     },
     previewImage() {
       return this.uploadPreview || this.ingredient?.image;
+    },
+    canEdit() {
+      return this.storeAuth.hasPerm('recipes.change_ingredient');
     },
   },
   watch: {

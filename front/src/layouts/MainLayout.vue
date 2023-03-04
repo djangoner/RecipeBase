@@ -48,25 +48,31 @@
           ><q-item-section avatar><q-icon name="home"></q-icon></q-item-section>
           <q-item-section>Главная</q-item-section>
         </q-item>
-        <q-item :to="{ name: 'recipes' }"
+        <q-item :to="{ name: 'recipes' }" v-if="store.hasPerm('recipes.view_recipe')"
           ><q-item-section avatar><q-icon name="article"></q-icon></q-item-section>
           <q-item-section>Рецепты</q-item-section>
         </q-item>
-        <q-item :to="{ name: 'week_plan' }"
+        <q-item
+          :to="{ name: 'week_plan' }"
+          v-if="store.hasPerm('recipes.view_recipeplanweek')"
           ><q-item-section avatar><q-icon name="calendar_month"></q-icon></q-item-section>
           <q-item-section>План</q-item-section>
         </q-item>
-        <q-item :to="{ name: 'product_list' }"
+        <q-item
+          :to="{ name: 'product_list' }"
+          v-if="store.hasPerm('recipes.view_productlistweek')"
           ><q-item-section avatar><q-icon name="shopping_cart"></q-icon></q-item-section>
           <q-item-section>Список продуктов</q-item-section>
         </q-item>
-        <q-item :to="{ name: 'ingredients' }"
+        <q-item
+          :to="{ name: 'ingredients' }"
+          v-if="store.hasPerm('recipes.view_ingredient')"
           ><q-item-section avatar
             ><q-icon name="shopping_basket"></q-icon
           ></q-item-section>
           <q-item-section>Ингредиенты</q-item-section>
         </q-item>
-        <q-item :to="{ name: 'tasks' }"
+        <q-item :to="{ name: 'tasks' }" v-if="store.hasPerm('tasks.view_task')"
           ><q-item-section avatar><q-icon name="list"></q-icon></q-item-section>
           <q-item-section>Задачи</q-item-section>
         </q-item>
@@ -79,7 +85,7 @@
           </q-item-section>
           <q-item-section> Тёмная тема </q-item-section>
         </q-item>
-        <q-item clickable dense href="/admin">
+        <q-item clickable dense href="/admin" v-if="user?.is_staff">
           <q-item-section avatar>
             <q-icon name="settings"></q-icon>
           </q-item-section>

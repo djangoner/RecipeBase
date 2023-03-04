@@ -4,6 +4,7 @@
     v-model="children"
     @reload="$emit('reload')"
     @openParent="$emit('openParent', $event)"
+    :canEdit="canEdit"
     :root="root || children"
     :tree="genTree"
   ></task-item-view>
@@ -34,11 +35,12 @@
       @updateItem="$emit('updateItem', $event)"
       @click="openChildren(task)"
       v-for="task of tasksUnCompleted"
+      :canEdit="canEdit"
       :key="task.id"
     ></task-item>
 
     <!-- Add task item -->
-    <q-item>
+    <q-item v-if="canEdit">
       <q-item-section avatar>
         <q-btn
           @click="createTask()"
@@ -68,6 +70,7 @@
       @updateItem="$emit('updateItem', $event)"
       @click="openChildren(task)"
       v-for="task of tasksCompleted"
+      :canEdit="canEdit"
       :key="task.id"
     ></task-item>
   </template>
@@ -97,6 +100,7 @@ export default defineComponent({
     root: { required: false, type: Object as PropType<TaskCategory> },
     tree: { required: false, type: Array as PropType<TaskList> },
     flat: { default: false, type: Boolean },
+    canEdit: { default: true, type: Boolean },
   },
   emits: ['updateItem', 'reload', 'openParent'],
   mixins: [HandleErrorsMixin],

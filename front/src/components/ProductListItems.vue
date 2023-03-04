@@ -13,6 +13,7 @@
       checked-icon="task_alt"
       unchecked-icon="radio_button_unchecked"
       size="lg"
+      :disable="!canEdit"
       @update:modelValue="$emit('updateItem', item)"
     />
 
@@ -110,6 +111,7 @@ export default defineComponent({
   props: {
     listItems: { required: true, type: Array as PropType<ProductListItemRead[]> },
     week: { required: true, type: Object as PropType<YearWeek> },
+    canEdit: { default: true, type: Boolean },
   },
   emits: ['openItem', 'updateItem', 'update:modelValue'],
 

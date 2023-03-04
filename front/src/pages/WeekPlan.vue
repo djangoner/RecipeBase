@@ -7,7 +7,11 @@
     :animation-speed="500"
   />
   <q-page padding>
-    <q-toggle v-model="editMode" label="Режим редактирования"></q-toggle>
+    <q-toggle
+      v-model="editMode"
+      label="Режим редактирования"
+      :readonly="!canEdit"
+    ></q-toggle>
 
     <div
       class="week-select-page row wrap items-start q-col-gutter-x-sm q-col-gutter-y-md"
@@ -86,7 +90,7 @@
                           @update:modelValue="setRecipe(idx, mtime, $event, rec_idx)"
                           :input-debounce="300"
                           :options="recipesList || []"
-                          :readonly="saving || !editMode"
+                          :readonly="saving || !editMode || !canEdit"
                           option-label="title"
                           @filter="filterRecipes"
                           use-input
@@ -107,6 +111,7 @@
 
                       <div class="flex flex-center col-auto" v-if="recipe">
                         <q-btn
+                          v-if="storeAuth.hasPerm('recipes.view_recipe')"
                           :to="{ name: 'recipe', params: { id: recipe.id } }"
                           icon="open_in_new"
                           size="sm"
@@ -153,7 +158,7 @@
                   @update:modelValue="addMtime(idx, $event)"
                   @filter="filterMealTime"
                   :input-debounce="0"
-                  :readonly="saving || !editMode"
+                  :readonly="saving || !editMode || !canEdit"
                   option-value="id"
                   option-label="title"
                   label="Добавить"
@@ -194,6 +199,7 @@ import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMix
 import { WeekDays } from 'src/modules/WeekUtils';
 import { MealTime, RecipeRead } from 'src/client';
 import { RecipePlanWeekFromRead } from 'src/Convert';
+import { useAuthStore } from 'src/stores/auth';
 
 const WeekDaysColors: { [key: number]: string } = {
   1: 'bg-amber-2',
@@ -215,8 +221,10 @@ export default defineComponent({
   mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
+    const storeAuth = useAuthStore();
     return {
       store,
+      storeAuth,
       // week: {
       //   year: null,
       //   week: null,
@@ -458,7 +466,7 @@ export default defineComponent({
             console.debug('Comment update invalidated');
             return;
           }
-          if (!this.editMode) {
+          if (!this.editMode || !this.canEdit) {
             return;
           }
           (this.plan.comments as PlanComments)[idx] = comment;
@@ -523,6 +531,9 @@ export default defineComponent({
       }
 
       return plansFilled / plansTotal;
+    },
+    canEdit() {
+      return this.storeAuth.hasPerm('recipes.change_recipeweekplan');
     },
   },
 });

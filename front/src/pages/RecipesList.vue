@@ -32,6 +32,7 @@
 
     <div class="row q-gutter-x-md items-center">
       <q-btn
+        v-if="storeAuth.hasPerm('recipes.add_recipe')"
         class="q-my-sm"
         icon="add"
         color="secondary"

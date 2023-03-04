@@ -7,7 +7,12 @@
       :instant-feedback="saving"
       :animation-speed="500"
     />
-    <product-list-item-view v-model="viewItem" :week="week" @updateItem="updateItem" />
+    <product-list-item-view
+      v-model="viewItem"
+      :week="week"
+      :canEdit="canEdit"
+      @updateItem="updateItem"
+    />
 
     <div
       class="row items-center q-mt-sm q-ml-sm q-col-gutter-sm q-mr-md"
@@ -15,6 +20,7 @@
     >
       <div>
         <q-btn
+          v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
           label="Обновить автоматический список"
           class="q-ml-none"
           color="primary"
@@ -26,6 +32,7 @@
       </div>
       <div>
         <q-btn
+          v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
           label="Синхронизация"
           :color="canSync ? 'positive' : 'primary'"
           icon="sync"
@@ -86,6 +93,7 @@
       <div class="row items-center q-px-md">
         <div class="col-grow">
           <q-input
+            v-if="storeAuth.hasPerm('recipes.add_productlistitem')"
             v-model="createItem"
             label="Добавить задачу"
             @keypress.enter="createNewItem()"
@@ -135,6 +143,7 @@
               :key="cat.id"
               :listItems="cat.items"
               :week="week"
+              :canEdit="canEdit"
               @openItem="openItem"
               @updateItem="updateItem"
             ></product-list-items>
@@ -146,6 +155,7 @@
           :key="0"
           :listItems="listItems"
           :week="week"
+          :canEdit="canEdit"
           @openItem="openItem"
           @updateItem="updateItem"
         ></product-list-items>
@@ -174,6 +184,7 @@ import { useBaseStore } from 'src/stores/base';
 import { defineComponent } from 'vue';
 import { getYearWeek } from 'src/modules/WeekUtils';
 import { productListItemFromRead, productListWeekFromRead } from 'src/Convert';
+import { useAuthStore } from 'src/stores/auth';
 
 type CustomIngredientCategory = IngredientCategory & {
   items?: ProductListItemRead[];
@@ -203,6 +214,7 @@ export default defineComponent({
   mixins: [HandleErrorsMixin, IsOnlineMixin],
   data() {
     const store = useBaseStore();
+    const storeAuth = useAuthStore();
 
     let showCompleted = this.$q.localStorage.getItem('productsShowCompleted');
     if (showCompleted === null) {
@@ -211,6 +223,7 @@ export default defineComponent({
 
     return {
       store,
+      storeAuth,
       // $query: useQuery(),
       loading: false,
       updating: false,
@@ -719,6 +732,9 @@ export default defineComponent({
     },
     productsWithoutPrice() {
       return this.listItemsRaw.filter((i) => !i.price_full).length;
+    },
+    canEdit() {
+      return this.storeAuth.hasPerm('recipes.change_productlistitem');
     },
     // viewItem: {
     //   get() {

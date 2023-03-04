@@ -14,6 +14,7 @@
             unchecked-icon="radio_button_unchecked"
             indeterminate-icon="help"
             size="lg"
+            :disable="!canEdit"
             @update:modelValue="$emit('updateItem', item)"
           />
           <div class="row column col">
@@ -25,7 +26,7 @@
               @update:modelValue="$emit('updateItem', item)"
               class="col"
               :debounce="500"
-              :readonly="item.is_auto"
+              :readonly="item.is_auto || !canEdit"
               dense
             />
 
@@ -50,6 +51,7 @@
           v-model.number="item.day"
           @update:modelValue="$emit('updateItem', item)"
           :options="weekDaysOptions"
+          :readonly="item.is_auto || !canEdit"
           label="День недели"
           option-label="name"
           option-value="id"
@@ -67,7 +69,7 @@
           label="Ингредиент"
           @filter="filterIngredients"
           :options="ingredients || []"
-          :readonly="item.is_auto"
+          :readonly="item.is_auto || !canEdit"
           option-label="title"
           option-value="id"
           map-options
@@ -81,6 +83,7 @@
           v-model.number="item.priority"
           @update:modelValue="$emit('updateItem', item)"
           :options="priorityOptions"
+          :readonly="item.is_auto || !canEdit"
           label="Приоритет"
           option-label="name"
           option-value="id"
@@ -143,7 +146,7 @@
                 showMoveWeek = true;
                 filterWeeks('', () => {});
               "
-              v-if="isOnLine"
+              v-if="isOnLine && canEdit"
               label="Перенести на неделю..."
               icon="swap_horiz"
               size="sm"
@@ -171,6 +174,7 @@
           v-model="item.description"
           @update:modelValue="$emit('updateItem', item)"
           :debounce="1000"
+          :readonly="!canEdit"
           type="textarea"
           label="Описание"
           autogrow
@@ -287,6 +291,7 @@ export default defineComponent({
   props: {
     modelValue: { required: false, type: Object as PropType<ProductListItemRead> },
     week: { required: true, type: Object as PropType<YearWeek> },
+    canEdit: { default: true, type: Boolean },
   },
   emits: ['openItem', 'updateItem', 'update:modelValue'],
   mixins: [HandleErrorsMixin, IsOnlineMixin],

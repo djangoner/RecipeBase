@@ -8,6 +8,7 @@
         <q-checkbox
           v-if="category?.is_completed !== undefined"
           v-model="category.is_completed"
+          :disable="!canEdit"
           checked-icon="task_alt"
           unchecked-icon="radio_button_unchecked"
           indeterminate-icon="help"
@@ -16,6 +17,7 @@
         />
         <q-input
           v-model="category.title"
+          :readonly="!canEdit"
           @update:modelValue="updateItem()"
           class="col"
           :debounce="500"
@@ -35,6 +37,7 @@
               </q-item>
               <q-separator />
               <q-item
+                v-if="canEdit"
                 @click="askDeleteTask()"
                 class="text-negative"
                 clickable
@@ -73,6 +76,7 @@
           v-model="category.description"
           @update:modelValue="updateItem()"
           :debounce="2000"
+          :readonly="!canEdit"
           type="textarea"
           label="Описание задачи"
           autogrow
@@ -111,6 +115,7 @@
               @updateItem="updateItem"
               @reload="$emit('reload')"
               @openParent="openParent"
+              :canEdit="canEdit"
               :root="root"
               :tree="tree"
             >
@@ -142,6 +147,7 @@ export default defineComponent({
     modelValue: { required: true },
     root: { required: false },
     tree: { required: false },
+    canEdit: { required: true, type: Boolean },
   },
   emits: ['reload', 'openParent', 'update:modelValue'],
   mixins: [HandleErrorsMixin],

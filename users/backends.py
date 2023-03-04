@@ -5,6 +5,7 @@ from drf_spectacular.authentication import SessionScheme
 from rest_framework import pagination
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.response import Response
+from rest_framework import permissions
 
 UserModel = get_user_model()
 
@@ -38,7 +39,6 @@ class CsrfExemptSessionAuthenticationScheme(SessionScheme):
 
 class CustomAuthorizationBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
-
         try:
             user = UserModel.objects.get(Q(username=username) | Q(email=username))
         except UserModel.DoesNotExist:
@@ -50,3 +50,15 @@ class CustomAuthorizationBackend(ModelBackend):
 
 class CustomTokenAuthentication(TokenAuthentication):
     keyword = "Bearer"
+
+
+class CustomModelPermissions(permissions.DjangoModelPermissions):
+    perms_map = {
+        "GET": ["%(app_label)s.view_%(model_name)s"],
+        "OPTIONS": ["%(app_label)s.view_%(model_name)s"],
+        "HEAD": ["%(app_label)s.view_%(model_name)s"],
+        "POST": ["%(app_label)s.add_%(model_name)s"],
+        "PUT": ["%(app_label)s.change_%(model_name)s"],
+        "PATCH": ["%(app_label)s.change_%(model_name)s"],
+        "DELETE": ["%(app_label)s.delete_%(model_name)s"],
+    }

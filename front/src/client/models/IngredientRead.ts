@@ -13,6 +13,7 @@ export type IngredientRead = {
     readonly used_times: number;
     category: IngredientCategory;
     readonly regular_ingredients: RegularIngredient;
+    image?: string | null;
     title: string;
     description?: string | null;
     /**
@@ -23,5 +24,4 @@ export type IngredientRead = {
     price?: number | null;
     need_buy?: boolean;
     edible?: boolean;
-    image?: string | null;
 };

@@ -18,11 +18,21 @@ export class IngredientsService {
      * @throws ApiError
      */
     public static ingredientsList({
+category,
+categoryIsnull,
+edibleIsnull,
+needBuyIsnull,
 ordering,
 page,
 pageSize,
+priceIsnull,
+recipesIsnull,
 search,
 }: {
+category?: number,
+categoryIsnull?: boolean,
+edibleIsnull?: boolean,
+needBuyIsnull?: boolean,
 /**
  * Which field to use when ordering the results.
  */
@@ -35,6 +45,8 @@ page?: number,
  * Number of results to return per page.
  */
 pageSize?: number,
+priceIsnull?: boolean,
+recipesIsnull?: boolean,
 /**
  * A search term.
  */
@@ -44,9 +56,15 @@ search?: string,
             method: 'GET',
             url: '/api/v1/ingredients/',
             query: {
+                'category': category,
+                'category__isnull': categoryIsnull,
+                'edible__isnull': edibleIsnull,
+                'need_buy__isnull': needBuyIsnull,
                 'ordering': ordering,
                 'page': page,
                 'page_size': pageSize,
+                'price__isnull': priceIsnull,
+                'recipes__isnull': recipesIsnull,
                 'search': search,
             },
         });

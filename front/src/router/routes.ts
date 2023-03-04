@@ -76,6 +76,12 @@ const routes = [
           requiresAuth: true,
           query: {
             q: "string:",
+            hasPrice: "string:",
+            hasRecipes: "string:",
+            hasCategory: "string:",
+            category: "string:",
+            needBuy: "string:",
+            edible: "string:",
           },
         },
       },

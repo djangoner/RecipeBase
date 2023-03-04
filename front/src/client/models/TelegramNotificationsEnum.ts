@@ -6,4 +6,5 @@ export enum TelegramNotificationsEnum {
     WEEKDAYS_MORNING = 'weekdays_morning',
     WEEKEND_MORNING = 'weekend_morning',
     PRODUCTS_REMINDER = 'products_reminder',
+    PRODUCTS_MISSED = 'products_missed',
 }

@@ -227,6 +227,21 @@ class RecipeImageViewset(viewsets.ModelViewSet):
     serializer_class = RecipeImageSerializer
 
 
+class IngredientFilterSet(filters.FilterSet):
+    # recipes__isnull = filters.BooleanFilter(method="filter_recipes", label="Рецепт is null")
+    recipes__isnull = filters.BooleanFilter(field_name="recipe_ingredients", lookup_expr="isnull")
+
+    class Meta:
+        model = Ingredient
+        fields = {
+            "price": ["isnull"],
+            # "recipes": ["isnull"],
+            "need_buy": ["isnull"],
+            "edible": ["isnull"],
+            "category": ["exact", "isnull"],
+        }
+
+
 @extend_schema_view(
     retrieve=extend_schema(responses=IngredientReadSerializer),
     create=extend_schema(responses=IngredientReadSerializer),
@@ -253,6 +268,7 @@ class IngredientViewset(viewsets.ModelViewSet):
         "used_times",
     ]
     search_fields = ["title", "description"]
+    filterset_class = IngredientFilterSet
 
     @extend_schema(
         responses=inline_serializer(

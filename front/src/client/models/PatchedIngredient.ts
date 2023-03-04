@@ -12,6 +12,7 @@ export type PatchedIngredient = {
     readonly used_times?: number;
     category?: number | null;
     readonly regular_ingredients?: RegularIngredient;
+    image?: string | null;
     title?: string;
     description?: string | null;
     /**
@@ -22,5 +23,4 @@ export type PatchedIngredient = {
     price?: number | null;
     need_buy?: boolean;
     edible?: boolean;
-    image?: string | null;
 };

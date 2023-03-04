@@ -48,6 +48,8 @@ import { request } from "src/client/core/request";
 
 export const useBaseStore = defineStore("base", {
   state: () => ({
+    printMode: false,
+
     stats: null as StatsList | null,
     recipes: null as RecipeRead[] | null,
     recipe: null as RecipeRead | null,

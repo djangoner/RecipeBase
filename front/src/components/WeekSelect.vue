@@ -1,5 +1,5 @@
 <template>
-  <q-bar>
+  <q-bar class="bar_week_select">
     <div class="col text-bold">
       <div class="row justify-center items-center q-col-gutter-x-md">
         <q-btn icon="chevron_left" flat @click="changeWeek(-1)"></q-btn>

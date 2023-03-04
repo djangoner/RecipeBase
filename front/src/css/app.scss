@@ -5,3 +5,24 @@
 .bg-none {
   background: none !important;
 }
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+  }
+  .bar_week_select {
+    background: white;
+  }
+  html,
+  body {
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  @page {
+    size: auto; /* auto is the initial value */
+    margin: 0; /* this affects the margin in the printer settings */
+  }
+}

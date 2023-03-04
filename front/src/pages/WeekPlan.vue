@@ -6,12 +6,21 @@
     :instant-feedback="saving"
     :animation-speed="500"
   />
-  <q-page padding>
-    <q-toggle
-      v-model="editMode"
-      label="Режим редактирования"
-      :readonly="!canEdit"
-    ></q-toggle>
+  <q-page id="week_plan_print" padding>
+    <div class="row items-center q-col-gutter-x-md print-hide">
+      <div>
+        <q-toggle
+          v-model="editMode"
+          label="Режим редактирования"
+          :readonly="!canEdit"
+        ></q-toggle>
+      </div>
+      <div>
+        <q-btn @click="onPrint()" icon="print" color="primary" size="sm" no-caps
+          >Распечатать план</q-btn
+        >
+      </div>
+    </div>
 
     <div
       class="week-select-page row wrap items-start q-col-gutter-x-sm q-col-gutter-y-md"
@@ -200,6 +209,8 @@ import { WeekDays } from 'src/modules/WeekUtils';
 import { MealTime, RecipeRead } from 'src/client';
 import { RecipePlanWeekFromRead } from 'src/Convert';
 import { useAuthStore } from 'src/stores/auth';
+// import VueHtmlToPaper from 'vue-html-to-paper';
+import { Directive } from 'vue';
 
 const WeekDaysColors: { [key: number]: string } = {
   1: 'bg-amber-2',
@@ -219,6 +230,9 @@ export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   components: { weekSelect, recipeCardTooltip, PlanWeekInfo },
   mixins: [HandleErrorsMixin],
+  directives: {
+    print: print as Directive,
+  },
   data() {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
@@ -245,6 +259,15 @@ export default defineComponent({
     });
   },
   methods: {
+    onPrint() {
+      console.debug('Print before');
+      this.store.printMode = true;
+      void this.$nextTick(() => {
+        window.print();
+        this.store.printMode = false;
+        console.debug('Print after');
+      });
+    },
     loadWeekPlan() {
       if (!this.week?.year || !this.week?.week) {
         return;

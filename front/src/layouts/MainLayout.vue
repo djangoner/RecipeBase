@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+    <q-header class="print-hide" elevated>
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
 
@@ -14,6 +14,7 @@
       v-model="leftDrawerOpen"
       :width="220"
       :breakpoint="1200"
+      class="print-hide"
       show-if-above
       bordered
     >
@@ -48,31 +49,31 @@
           ><q-item-section avatar><q-icon name="home"></q-icon></q-item-section>
           <q-item-section>Главная</q-item-section>
         </q-item>
-        <q-item :to="{ name: 'recipes' }" v-if="store.hasPerm('recipes.view_recipe')"
+        <q-item :to="{ name: 'recipes' }" v-if="storeAuth.hasPerm('recipes.view_recipe')"
           ><q-item-section avatar><q-icon name="article"></q-icon></q-item-section>
           <q-item-section>Рецепты</q-item-section>
         </q-item>
         <q-item
           :to="{ name: 'week_plan' }"
-          v-if="store.hasPerm('recipes.view_recipeplanweek')"
+          v-if="storeAuth.hasPerm('recipes.view_recipeplanweek')"
           ><q-item-section avatar><q-icon name="calendar_month"></q-icon></q-item-section>
           <q-item-section>План</q-item-section>
         </q-item>
         <q-item
           :to="{ name: 'product_list' }"
-          v-if="store.hasPerm('recipes.view_productlistweek')"
+          v-if="storeAuth.hasPerm('recipes.view_productlistweek')"
           ><q-item-section avatar><q-icon name="shopping_cart"></q-icon></q-item-section>
           <q-item-section>Список продуктов</q-item-section>
         </q-item>
         <q-item
           :to="{ name: 'ingredients' }"
-          v-if="store.hasPerm('recipes.view_ingredient')"
+          v-if="storeAuth.hasPerm('recipes.view_ingredient')"
           ><q-item-section avatar
             ><q-icon name="shopping_basket"></q-icon
           ></q-item-section>
           <q-item-section>Ингредиенты</q-item-section>
         </q-item>
-        <q-item :to="{ name: 'tasks' }" v-if="store.hasPerm('tasks.view_task')"
+        <q-item :to="{ name: 'tasks' }" v-if="storeAuth.hasPerm('tasks.view_task')"
           ><q-item-section avatar><q-icon name="list"></q-icon></q-item-section>
           <q-item-section>Задачи</q-item-section>
         </q-item>
@@ -110,6 +111,7 @@ import { User } from 'src/client';
 import { useAuthStore } from 'src/stores/auth';
 import { defineComponent, ref } from 'vue';
 import IsOnlineMixin from 'src/modules/IsOnlineMixin';
+import { useBaseStore } from 'src/stores/base';
 
 type DarkMode = boolean | 'auto';
 const darkModes: Array<DarkMode> = ['auto', true, false];
@@ -121,7 +123,8 @@ export default defineComponent({
   mixins: [IsOnlineMixin],
   setup() {
     const leftDrawerOpen = ref(false);
-    const store = useAuthStore();
+    const store = useBaseStore();
+    const storeAuth = useAuthStore();
     const $q = useQuasar();
 
     const preferredMode: DarkMode | null = $q.localStorage.getItem('preferredMode');
@@ -132,6 +135,7 @@ export default defineComponent({
 
     return {
       store,
+      storeAuth,
       leftDrawerOpen,
       darkModes,
 
@@ -180,14 +184,14 @@ export default defineComponent({
         });
     },
     logout() {
-      void this.store.logout();
+      void this.storeAuth.logout();
       void this.$router.push({ name: 'login' });
     },
   },
 
   computed: {
     user(): User | null {
-      return this.store.account;
+      return this.storeAuth.account;
     },
     userReadable(): string | undefined {
       if (!this.user) {
@@ -196,6 +200,18 @@ export default defineComponent({
       return this.user.first_name
         ? [this.user.first_name, this.user.last_name].join(' ').trim()
         : '@' + this.user.username;
+    },
+  },
+  watch: {
+    'store.printMode': {
+      handler(val) {
+        if (val) {
+          sessionStorage.setItem('leftDrawerOpen', this.leftDrawerOpen ? '1' : '0');
+          this.leftDrawerOpen = false;
+        } else {
+          this.leftDrawerOpen = sessionStorage.getItem('leftDrawerOpen') !== '0';
+        }
+      },
     },
   },
 });

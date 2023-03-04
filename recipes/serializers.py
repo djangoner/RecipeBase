@@ -31,9 +31,9 @@ from users.serializers import ShortUserSerializer
 def amount_str(meas: str | None):
     meas_types = dict(MEASURING_TYPES)
     if meas in MEASURING_SHORT:
-        return MEASURING_SHORT[meas]
+        return str(MEASURING_SHORT[meas])
     elif meas in meas_types:
-        return meas_types[meas]
+        return str(meas_types[meas])
 
     return meas
 

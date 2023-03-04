@@ -187,6 +187,11 @@
           autogrow
           readonly
         />
+
+        <div v-if="item.ingredient.image" class="q-mt-md">
+          <div class="text-subtitle1 text-grey q-mb-sm">Изображение рецепта</div>
+          <q-img :src="item.ingredient.image" fit="contain"></q-img>
+        </div>
       </q-card-section>
 
       <!-- Bottom actions -->

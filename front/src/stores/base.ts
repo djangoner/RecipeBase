@@ -478,13 +478,22 @@ export const useBaseStore = defineStore("base", {
     },
     async saveIngredient(payload: Ingredient): Promise<IngredientRead> {
       return new Promise((resolve, reject) => {
-        IngredientsService.ingredientsUpdate({
-          id: payload.id,
-          requestBody: payload,
+        request(OpenAPI, {
+          method: "PUT",
+          url: "/api/v1/ingredients/{id}/",
+          path: {
+            id: payload.id,
+          },
+          formData: payload,
+          mediaType: "application/json",
         })
+          // IngredientsService.ingredientsUpdate({
+          //   id: payload.id,
+          //   requestBody: payload,
+          // })
           .then((resp) => {
-            this.ingredient = resp;
-            resolve(resp);
+            this.ingredient = resp as IngredientRead;
+            resolve(resp as IngredientRead);
           })
           .catch((err) => {
             reject(err);

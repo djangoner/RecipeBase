@@ -101,6 +101,7 @@ class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSeria
         queryset=IngredientCategory.objects.all(), required=False, allow_null=True, default=None
     )
     regular_ingredients = RegularIngredientSerializer(read_only=True)
+    image = serializers.ImageField(max_length=None, allow_empty_file=True, allow_null=True, required=False)
 
     class Meta:
         model = Ingredient

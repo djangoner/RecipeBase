@@ -28,12 +28,14 @@
           ></q-input>
           <q-select
             v-model.number="ingredient.category"
+            @filter="filterCategories"
             :options="ingredientCategories || []"
+            :input-debounce="0"
             label="Категория"
             option-label="title"
             option-value="id"
+            use-input
             map-options
-            emit-value
             options-dense
             clearable
             filled
@@ -123,6 +125,7 @@ export default defineComponent({
       loading: false,
       saving: false,
       deleting: false,
+      searchCategory: '',
       requiredRule: (val: string | number | undefined) => !!val || 'Обязательное поле',
     };
   },
@@ -178,6 +181,10 @@ export default defineComponent({
     resetData() {
       // @ts-expect-error: Ingredient will be created
       this.store.ingredient = Object.assign({}, defaultIngredient);
+    },
+    filterCategories(search: string, update: CallableFunction) {
+      this.searchCategory = search;
+      update();
     },
     saveIngredient() {
       let payload = ingredientFromRead(this.ingredient);
@@ -257,7 +264,15 @@ export default defineComponent({
       return this.store.ingredient;
     },
     ingredientCategories() {
-      return this.store.ingredient_categories;
+      if (this.searchCategory) {
+        return (
+          this.store.ingredient_categories?.filter(
+            (c) => c.title.toLowerCase().indexOf(this.searchCategory) > -1
+          ) || []
+        );
+      } else {
+        return this.store.ingredient_categories;
+      }
     },
     exists() {
       return Boolean(this.ingredient?.id);

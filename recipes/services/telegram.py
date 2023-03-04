@@ -17,7 +17,7 @@ SITE_DOMAIN = os.getenv("SITE_DOMAIN", "")
 log = logging.getLogger("Telegram")
 
 WEEKDAYS_STR = {
-    -1: "Прошл",
+    0: "Прошл",
     1: "Пн",
     2: "Вт",
     3: "Ср",

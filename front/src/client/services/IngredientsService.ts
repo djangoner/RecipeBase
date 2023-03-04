@@ -20,8 +20,8 @@ export class IngredientsService {
     public static ingredientsList({
 category,
 categoryIsnull,
-edibleIsnull,
-needBuyIsnull,
+edible,
+needBuy,
 ordering,
 page,
 pageSize,
@@ -31,8 +31,8 @@ search,
 }: {
 category?: number,
 categoryIsnull?: boolean,
-edibleIsnull?: boolean,
-needBuyIsnull?: boolean,
+edible?: boolean,
+needBuy?: boolean,
 /**
  * Which field to use when ordering the results.
  */
@@ -58,8 +58,8 @@ search?: string,
             query: {
                 'category': category,
                 'category__isnull': categoryIsnull,
-                'edible__isnull': edibleIsnull,
-                'need_buy__isnull': needBuyIsnull,
+                'edible': edible,
+                'need_buy': needBuy,
                 'ordering': ordering,
                 'page': page,
                 'page_size': pageSize,

@@ -137,7 +137,7 @@
                   </h6>
                   <q-select
                     v-model="filters.hasRecipes"
-                    :options="optionsIsTrue"
+                    :options="optionsIsTrueReversed"
                     class="q-px-md"
                     options-dense
                     dense
@@ -280,8 +280,8 @@ const filters = {
 const filtersRemap = {
   hasPrice: 'priceIsnull',
   hasRecipes: 'recipesIsnull',
-  needBuy: 'needBuyIsnull',
-  edible: 'edibleIsnull',
+  needBuy: 'needBuy',
+  edible: 'edible',
   hasCategory: 'categoryIsnull',
   category: 'category',
 };
@@ -310,6 +310,11 @@ export default defineComponent({
         { label: '-', value: null },
         { label: 'Да', value: true },
         { label: 'Нет', value: false },
+      ],
+      optionsIsTrueReversed: [
+        { label: '-', value: null },
+        { label: 'Да', value: false },
+        { label: 'Нет', value: true },
       ],
       tableColumns,
       tablePagination: {

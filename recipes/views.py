@@ -236,8 +236,8 @@ class IngredientFilterSet(filters.FilterSet):
         fields = {
             "price": ["isnull"],
             # "recipes": ["isnull"],
-            "need_buy": ["isnull"],
-            "edible": ["isnull"],
+            "need_buy": ["exact"],
+            "edible": ["exact"],
             "category": ["exact", "isnull"],
         }
 

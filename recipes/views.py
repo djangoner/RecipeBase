@@ -236,7 +236,7 @@ class RecipeImageViewset(viewsets.ModelViewSet):
 )
 class IngredientViewset(viewsets.ModelViewSet):
     queryset = (
-        Ingredient.objects.prefetch_related("category")
+        Ingredient.objects.prefetch_related("category", "regular_ingredients")
         .annotate(used_times=Count(F("recipe_ingredients")))
         .order_by(*Ingredient._meta.ordering or [])
         .all()

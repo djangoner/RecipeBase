@@ -13,6 +13,11 @@
   .bar_week_select {
     background: white;
   }
+  .print-week-hide {
+    display: none;
+    width: 0 !important;
+    height: 0 !important;
+  }
   html,
   body {
     height: 100%;
@@ -24,5 +29,10 @@
   @page {
     size: auto; /* auto is the initial value */
     margin: 0; /* this affects the margin in the printer settings */
+  }
+
+  .weekday-col-6,
+  .weekday-col-7 {
+    order: 10;
   }
 }

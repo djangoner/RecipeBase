@@ -27,11 +27,11 @@
     >
       <!-- :class="$q.screen.lt.md ? 'column' : ''" -->
       <template v-for="(day, idx) of WeekDays">
-        <div v-if="idx > 0" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3" :key="idx">
+        <div v-if="idx > 0" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3" :class="`weekday-col-${idx}`" :key="idx">
           <q-card
             class="row column justify-around q-px-xs q-py-sm full-height"
             :class="[
-              idx >= 6 ? 'bg-grey-3' : '',
+              idx >= 6 ? 'bg-grey-3 print-hide print-week-hide' : '',
               WeekDaysColors[idx],
               isToday(getDay(idx - 1)) ? 'shadow-5' : '',
               `weekday-${idx}`,
@@ -182,7 +182,7 @@
         </div>
       </template>
 
-      <div class="col" v-if="plan">
+      <div class="col weekplan_info" v-if="plan">
         <q-expansion-item label="Доп информация" dense dense-toggle default-opened>
           <q-card class="q-pt-none q-px-none">
             <q-card-section class="q-px-xs">

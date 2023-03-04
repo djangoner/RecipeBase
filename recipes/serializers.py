@@ -442,3 +442,7 @@ class ProductListWeekReadSerializer(ProductListWeekSerializer):
 
 class ProductListWeekShortSerializer(ProductListWeekSerializer):
     items = None  # type: ignore
+
+
+class StatusOkSerializer(serializers.Serializer):
+    ok = serializers.BooleanField(default=True)

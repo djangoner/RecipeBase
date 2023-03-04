@@ -71,6 +71,7 @@ export type { ShopIngredientCategory } from './models/ShopIngredientCategory';
 export type { ShopShort } from './models/ShopShort';
 export type { ShortUser } from './models/ShortUser';
 export type { StatsList } from './models/StatsList';
+export type { StatusOk } from './models/StatusOk';
 export type { Task } from './models/Task';
 export type { TaskCategory } from './models/TaskCategory';
 export type { TaskNested } from './models/TaskNested';

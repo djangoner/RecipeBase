@@ -12,6 +12,7 @@ from rest_framework import (
     permissions,
 )
 
+# from django_q.tasks import async_task
 from recipes.models import (
     Ingredient,
     MealTime,
@@ -28,6 +29,7 @@ from recipes.models import (
     RegularIngredient,
     Shop,
 )
+from recipes.services.telegram import send_product_list
 from tasks.models import Task
 from recipes.serializers import (
     IngredientReadSerializer,
@@ -52,6 +54,7 @@ from recipes.serializers import (
     IngredientCategorySerializer,
     RegularIngredientSerializer,
     ShopSerializer,
+    StatusOkSerializer,
 )
 from recipes.services.measurings import (
     MEASURING_CONVERT,
@@ -448,6 +451,20 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
         week = self.get_object()
         week_plan, _ = RecipePlanWeek.objects.get_or_create(year=week.year, week=week.week)
         update_plan_week(week_plan)
+
+        return self.retrieve(request)
+
+    @extend_schema(
+        parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)],
+        responses=StatusOkSerializer,
+    )
+    @decorators.action(["GET"], detail=True)
+    def send_list(self, request, pk=None):
+        week = self.get_object()
+        week_plan, _ = ProductListWeek.objects.get_or_create(year=week.year, week=week.week)
+
+        # async_task("recipes.services.telegram.send_product_list", week_plan, request.user)
+        send_product_list(week_plan, request.user)
 
         return self.retrieve(request)
 

@@ -14,6 +14,10 @@ TELEGRAM_NOTIFICATIONS = [
     ("products_reminder", "Купить продукты на завтра"),
 ]
 
+TELEGRAM_NOTIFICATIONS_MANUAL = [
+    ("product_list", "Список продуктов"),
+]
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, models.CASCADE, related_name="profile")

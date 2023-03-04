@@ -5,6 +5,7 @@ import type { PaginatedProductListWeekReadList } from '../models/PaginatedProduc
 import type { PatchedProductListWeek } from '../models/PatchedProductListWeek';
 import type { ProductListWeek } from '../models/ProductListWeek';
 import type { ProductListWeekRead } from '../models/ProductListWeekRead';
+import type { StatusOk } from '../models/StatusOk';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -163,6 +164,24 @@ id: string,
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/product_list_week/{id}/generate/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+
+    /**
+     * @returns StatusOk 
+     * @throws ApiError
+     */
+    public static productListWeekSendListRetrieve({
+id,
+}: {
+id: string,
+}): CancelablePromise<StatusOk> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/product_list_week/{id}/send_list/',
             path: {
                 'id': id,
             },

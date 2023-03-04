@@ -354,6 +354,21 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
+    async productListSend(payload: {
+      year: number;
+      week: number;
+    }): Promise<void> {
+      return new Promise<void>((resolve, reject) => {
+        const id = `${payload?.year}_${payload?.week}`;
+        ProductListWeekService.productListWeekSendListRetrieve({ id })
+          .then(() => {
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
 
     async loadProductListItems(
       payload: object
@@ -425,6 +440,7 @@ export const useBaseStore = defineStore("base", {
           });
       });
     },
+
     // Ingredients
 
     async loadIngredients(

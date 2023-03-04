@@ -6,9 +6,10 @@ from typing import Optional
 import telebot
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from recipes.models import ProductListItem, ProductListWeek, Recipe, RecipePlan, RecipePlanWeek
-from users.models import TELEGRAM_NOTIFICATIONS, UserProfile
-
+from recipes.models import ProductListItem, ProductListWeek, Recipe, RecipeIngredient, RecipePlan, RecipePlanWeek
+from recipes.services.measurings import measuring_str
+from users.models import TELEGRAM_NOTIFICATIONS, TELEGRAM_NOTIFICATIONS_MANUAL, UserProfile
+from django.contrib.auth.models import User
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 SITE_DOMAIN = os.getenv("SITE_DOMAIN", "")
@@ -39,7 +40,7 @@ def get_today_day():
 
 
 def get_notifications_dict():
-    return {k: v for k, v in TELEGRAM_NOTIFICATIONS}
+    return {**dict(TELEGRAM_NOTIFICATIONS), **dict(TELEGRAM_NOTIFICATIONS_MANUAL)}
 
 
 def get_current_plan_week():
@@ -90,7 +91,7 @@ def get_recipe_flags(recipe: Recipe):
     return recipe_flags
 
 
-def get_notification_text(name: str) -> Optional[str]:
+def get_notification_text(name: str, **options) -> Optional[str]:
     now = datetime.now()
     today_day = now.weekday() + 1
     today_str = now.strftime("%d.%m.%Y")
@@ -148,6 +149,37 @@ def get_notification_text(name: str) -> Optional[str]:
 
         return text
 
+    elif name == "product_list":
+
+        week_plan = options.get("week_plan")
+        if not week_plan:
+            week_plan = get_current_product_week()
+        date_start, date_end = week_plan.week_dates
+        # fmt = '%m.%d'
+        fmt = "%d.%m"
+        text = f"<b>Список продуктов ({date_start.strftime(fmt)}-{date_end.strftime(fmt)})</b>:\n\n"
+
+        items: list[ProductListItem] = list(week_plan.items.all())  # type: ignore
+        items.sort(key=lambda x: x.day or 99)
+        for item in items:
+            state_str = "+" if item.is_completed else "-"
+            amounts_str = ""
+            if item.amount_type and item.amount:
+                amounts_str = f"({int(item.amount)} {measuring_str(item.amount_type)})"
+            else:
+                amount_l = []
+                ing: RecipeIngredient
+                for ing in item.ingredients.all():
+                    amount_l.append(f"{int(ing.amount)} {measuring_str(ing.amount_type)}")
+
+                if amount_l:
+                    amounts_str = "(" + ", ".join(amount_l) + ")"
+
+            day_str = WEEKDAYS_STR[item.day] if item.day else "-"
+            text += f"<pre>[{state_str}] [{day_str:<2}] {item.title} {amounts_str}</pre>\n"
+
+        return text
+
     return None
 
 
@@ -174,12 +206,12 @@ def get_notification_keyboard(name: str):
     return keyboard
 
 
-def send_notification_profile(name: str, profile: UserProfile):
+def send_notification_profile(name: str, profile: UserProfile, **text_kwargs):
     assert name in get_notifications_dict().keys(), "Invalid notification name"
     log.debug(f"Sending notification {name} for {profile}")
 
     bot = get_bot()
-    text = get_notification_text(name)
+    text = get_notification_text(name, **text_kwargs)
     keyboard = get_notification_keyboard(name)
     user_id = profile.telegram_id
 
@@ -193,12 +225,19 @@ def send_notification_profile(name: str, profile: UserProfile):
     bot.send_message(user_id, text, reply_markup=keyboard)
 
 
-def send_notification(name: str):
+def send_notification(name: str, force: bool = False):
     assert name in get_notifications_dict().keys(), "Invalid notification name"
     log.info(f"Sending notification: {name}")
 
     for profile in UserProfile.objects.all():
         log.debug(f"Checking profile: {profile}")
 
-        if name in profile.telegram_notifications:
+        if name in profile.telegram_notifications or force:
             send_notification_profile(name, profile)
+
+
+def send_product_list(week: ProductListWeek, user: User):
+    if not user.profile:
+        return
+
+    send_notification_profile("product_list", user.profile, week_plan=week)

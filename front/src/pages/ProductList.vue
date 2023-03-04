@@ -9,7 +9,10 @@
     />
     <product-list-item-view v-model="viewItem" :week="week" @updateItem="updateItem" />
 
-    <div class="row items-center q-mt-sm q-ml-sm q-col-gutter-sm">
+    <div
+      class="row items-center q-mt-sm q-ml-sm q-col-gutter-sm q-mr-md"
+      :class="$q.screen.lt.md ? 'justify-between' : ''"
+    >
       <div>
         <q-btn
           label="Обновить автоматический список"
@@ -46,7 +49,7 @@
       <div>
         <q-select
           v-model="sortShop"
-          label="Сортировка по магазину"
+          label="Группировать по магазину"
           :options="shops || []"
           style="width: 150px"
           option-label="title"
@@ -55,10 +58,25 @@
           emit-value
           options-dense
           clearable
+          dense
         ></q-select>
       </div>
       <div>
         <q-toggle v-model="showCompleted" label="Показать завершенные" />
+      </div>
+
+      <q-space />
+      <div>
+        <q-btn icon="menu" size="md" flat round dense>
+          <q-menu>
+            <q-list dense>
+              <q-item clickable v-close-popup @click="sendList()">
+                <q-item-section avatar><q-icon name="send" /> </q-item-section>
+                <q-item-section>Отправить в телеграмм</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </div>
     </div>
 
@@ -508,6 +526,30 @@ export default defineComponent({
         return;
       }
       return cat.sorting.find((s) => s.shop.id == this.sortShop);
+    },
+    sendList() {
+      let payload = {
+        year: this.week?.year,
+        week: this.week?.week,
+      };
+      this.$q.loading.show({
+        group: 'sending',
+        message: 'Отправка списка...',
+        delay: 400, // ms
+      });
+
+      this.store
+        .productListSend(payload)
+        .then(() => {
+          this.$q.loading.hide('sending');
+          this.$q.notify({
+            type: 'positive',
+            message: `Список успешно отправлен`,
+          });
+        })
+        .catch((err: CustomAxiosError) => {
+          this.handleErrors(err, 'Ошибка отправки списка');
+        });
     },
   },
   computed: {

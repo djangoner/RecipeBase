@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from ckeditor.fields import RichTextField
 from django.contrib.auth import get_user_model
@@ -276,6 +276,21 @@ class RecipePlanWeek(models.Model):
     def __str__(self) -> str:
         return f"{self.year}-{self.week}"
 
+    @property
+    def week_dates(self):
+        dt = datetime.now()
+        start = dt - timedelta(days=dt.weekday())
+        end = start + timedelta(days=6)
+        return start, end
+
+    @property
+    def week_start_str(self):
+        return self.week_dates[0].strftime("%Y-%m-%d")
+
+    @property
+    def week_end_str(self):
+        return self.week_dates[1].strftime("%Y-%m-%d")
+
 
 class RecipePlan(models.Model):
     week = models.ForeignKey(
@@ -334,6 +349,21 @@ class ProductListWeek(models.Model):
 
     def __str__(self) -> str:
         return f"{self.year}-{self.week}"
+
+    @property
+    def week_dates(self):
+        dt = datetime.now()
+        start = dt - timedelta(days=dt.weekday())
+        end = start + timedelta(days=6)
+        return start, end
+
+    @property
+    def week_start_str(self):
+        return self.week_dates[0].strftime("%Y-%m-%d")
+
+    @property
+    def week_end_str(self):
+        return self.week_dates[1].strftime("%Y-%m-%d")
 
 
 class ProductListItem(models.Model):

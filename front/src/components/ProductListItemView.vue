@@ -344,7 +344,7 @@ export default defineComponent({
     loadIngredients(search: string): Promise<void> {
       return new Promise((resolve, reject) => {
         let payload = {
-          page_size: 1000,
+          pageSize: 20,
           search: search,
         };
         this.store
@@ -380,7 +380,6 @@ export default defineComponent({
       let payload = {
         year: year,
         week: week,
-        page_size: 1000,
       };
       void this.store.loadProductListWeek(payload, true).then((resp) => {
         this.moveWeek = resp;

@@ -280,7 +280,6 @@ export default defineComponent({
       let payload = {
         year: this.week?.year,
         week: this.week?.week,
-        page_size: 1000,
       };
       this.loading = true;
 
@@ -305,7 +304,7 @@ export default defineComponent({
     },
     loadShops() {
       this.store
-        .loadShops({ page_size: 1000 })
+        .loadShops({ pageSize: 1000 })
         .then((resp) => {
           this.$q.localStorage.set('shops', resp);
         })
@@ -316,7 +315,7 @@ export default defineComponent({
     },
     loadIngredientCategories() {
       this.store
-        .loadIngredientCategories({ page_size: 1000 })
+        .loadIngredientCategories({ pageSize: 1000 })
         .then((resp) => {
           this.$q.localStorage.set('ing_categories', resp);
         })

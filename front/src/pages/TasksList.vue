@@ -67,7 +67,7 @@ export default defineComponent({
   methods: {
     loadTaskCategories() {
       let payload = {
-        page_size: 1000,
+        pageSize: 1000,
       };
       this.loading = true;
       this.store

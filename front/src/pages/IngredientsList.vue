@@ -154,7 +154,7 @@ export default defineComponent({
       Object.assign(payload, {
         search: this.tableFilter,
         ordering: (pagination.descending ? '-' : '') + String(pagination.sortBy),
-        page_size: pagination.rowsPerPage,
+        pageSize: pagination.rowsPerPage,
         page: pagination.page,
       });
 

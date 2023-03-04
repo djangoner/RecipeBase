@@ -902,7 +902,7 @@ export default defineComponent({
     },
     loadTags() {
       let payload = {
-        page_size: 1000,
+        pageSize: 1000,
       };
       this.store
         .loadTags(payload)

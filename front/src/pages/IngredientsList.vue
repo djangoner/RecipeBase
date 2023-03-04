@@ -121,6 +121,10 @@ let tableColumns = [
   },
 ] as QTableProps['columns'];
 
+interface QueryInterface {
+  q?: string;
+}
+
 export default defineComponent({
   mixins: [HandleErrorsMixin],
   data() {
@@ -128,7 +132,7 @@ export default defineComponent({
     return {
       store,
       loading: false,
-      tableFilter: '',
+      // tableFilter: '',
       tableColumns,
       tablePagination: {
         rowsPerPage: 20,
@@ -177,6 +181,14 @@ export default defineComponent({
   computed: {
     ingredients() {
       return this.store.ingredients;
+    },
+    tableFilter: {
+      get() {
+        return (this.$query as QueryInterface).q || null;
+      },
+      set(val: string | null) {
+        (this.$query as QueryInterface).q = val || undefined;
+      },
     },
   },
 });

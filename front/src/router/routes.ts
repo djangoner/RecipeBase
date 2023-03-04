@@ -74,6 +74,9 @@ const routes = [
         name: "ingredients",
         meta: {
           requiresAuth: true,
+          query: {
+            q: "string:",
+          },
         },
       },
       {

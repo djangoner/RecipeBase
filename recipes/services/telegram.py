@@ -17,6 +17,7 @@ SITE_DOMAIN = os.getenv("SITE_DOMAIN", "")
 log = logging.getLogger("Telegram")
 
 WEEKDAYS_STR = {
+    -1: "Прошл",
     1: "Пн",
     2: "Вт",
     3: "Ср",
@@ -228,11 +229,11 @@ def get_notification_text(name: str, **options) -> Optional[str]:
         text = f"<b>Список продуктов ({date_start.strftime(fmt)}-{date_end.strftime(fmt)})</b>:\n\n"
 
         items: list[ProductListItem] = list(week_plan.items.all())  # type: ignore
-        items.sort(key=lambda x: x.day or 99)
+        items.sort(key=lambda x: x.day if x.day is not None else 99)
         for item in items:
             state_str = "+" if item.is_completed else "-"
             amounts_str = product_item_amount_str(item)
-            day_str = WEEKDAYS_STR[item.day] if item.day else "-"
+            day_str = WEEKDAYS_STR[item.day] if item.day is not None else "-"
 
             text += f"<pre>[{state_str}] [{day_str:<2}] {item.title} {amounts_str}</pre>\n"
 

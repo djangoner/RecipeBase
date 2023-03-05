@@ -67,6 +67,9 @@ export interface AmountType {
 }
 
 export type AmountTypesTypes = AmountType[];
+export interface AmountTypesConvert {
+  [id: string]: number;
+}
 
 export const WeekDaysColors: { [key: number]: string } = {
   0: "text-light-green-6",

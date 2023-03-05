@@ -23,7 +23,9 @@
             <q-btn
               v-if="storeAuth.hasPerm('recipes.add_ingredient')"
               class="q-mx-md"
-              @click="$router.push({ name: 'ingredient', params: { id: 'new' } })"
+              @click="
+                $router.push({ name: 'ingredient', params: { id: 'new' } })
+              "
               icon="add"
               size="sm"
               color="positive"
@@ -89,11 +91,14 @@
               >
                 <div>
                   <span class="text-subtitle2"
-                    >Найдено результатов: {{ tablePagination.rowsNumber || '-' }}</span
+                    >Найдено результатов:
+                    {{ tablePagination.rowsNumber || "-" }}</span
                   >
                 </div>
                 <div>
-                  <h6 class="q-my-sm text-subtitle2 text-bold">Категория заполнена</h6>
+                  <h6 class="q-my-sm text-subtitle2 text-bold">
+                    Категория заполнена
+                  </h6>
                   <q-select
                     v-model="filters.hasCategory"
                     :options="optionsIsFilled"
@@ -146,7 +151,9 @@
                   />
                 </div>
                 <div>
-                  <h6 class="q-my-sm text-subtitle2 text-bold">Требует покупки</h6>
+                  <h6 class="q-my-sm text-subtitle2 text-bold">
+                    Требует покупки
+                  </h6>
                   <q-select
                     v-model="filters.needBuy"
                     :options="optionsIsTrue"
@@ -188,71 +195,75 @@
 </template>
 
 <script lang="ts">
-import { useBaseStore } from 'src/stores/base';
-import { IngredientRead } from 'src/client';
-import { defineComponent } from 'vue';
-import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
-import { TablePagination, TablePropsOnRequest } from 'src/modules/Globals';
-import { debounce, QTableProps } from 'quasar';
-import { useAuthStore } from 'src/stores/auth';
+import { useBaseStore } from "src/stores/base";
+import { IngredientRead } from "src/client";
+import { defineComponent } from "vue";
+import HandleErrorsMixin, {
+  CustomAxiosError,
+} from "src/modules/HandleErrorsMixin";
+import { TablePagination, TablePropsOnRequest } from "src/modules/Globals";
+import { debounce, QTableProps } from "quasar";
+import { useAuthStore } from "src/stores/auth";
 let tableColumns = [
   {
-    name: 'title',
-    label: 'Название',
-    align: 'left',
-    field: 'title',
+    name: "title",
+    label: "Название",
+    align: "left",
+    field: "title",
     required: true,
     sortable: true,
   },
   {
-    name: 'category',
-    label: 'Категория',
-    align: 'left',
-    field: (row: IngredientRead) => row?.category?.title || '-',
+    name: "category",
+    label: "Категория",
+    align: "left",
+    field: (row: IngredientRead) => row?.category?.title || "-",
     required: true,
     sortable: true,
   },
   {
-    name: 'min_pack_size',
-    label: 'Размер упаковки',
-    field: (row: IngredientRead) => (row.min_pack_size ? row.min_pack_size : '-'),
+    name: "min_pack_size",
+    label: "Размер упаковки",
+    field: (row: IngredientRead) =>
+      row.min_pack_size ? row.min_pack_size : "-",
     required: true,
     sortable: true,
   },
   {
-    name: 'price',
-    label: 'Цена',
-    field: (row: IngredientRead) => (row.price ? String(row.price) + ' ₺' : '-'),
+    name: "price",
+    label: "Цена",
+    field: (row: IngredientRead) =>
+      row.price ? String(row.price) + " ₺" : "-",
     required: true,
     sortable: true,
   },
   {
-    name: 'used_times',
-    label: 'В рецептах',
-    field: 'used_times',
+    name: "used_times",
+    label: "В рецептах",
+    field: "used_times",
     required: true,
     sortable: true,
-    style: 'width: 50px;',
+    style: "width: 50px;",
   },
   {
-    name: 'need_buy',
-    label: 'Требует покупки',
-    field: (row: IngredientRead) => (row.need_buy ? 'Да' : 'Нет'),
-    align: 'center',
+    name: "need_buy",
+    label: "Требует покупки",
+    field: (row: IngredientRead) => (row.need_buy ? "Да" : "Нет"),
+    align: "center",
     required: true,
     sortable: true,
-    style: 'width: 50px;',
+    style: "width: 50px;",
   },
   {
-    name: 'edible',
-    label: 'Съедобен',
-    field: (row: IngredientRead) => (row.edible ? 'Да' : 'Нет'),
-    align: 'center',
+    name: "edible",
+    label: "Съедобен",
+    field: (row: IngredientRead) => (row.edible ? "Да" : "Нет"),
+    align: "center",
     required: true,
     sortable: true,
-    style: 'width: 50px;',
+    style: "width: 50px;",
   },
-] as QTableProps['columns'];
+] as QTableProps["columns"];
 
 interface QueryInterface {
   [id: string]: string;
@@ -278,12 +289,12 @@ const filters = {
 } as IngredientFilters;
 
 const filtersRemap = {
-  hasPrice: 'priceIsnull',
-  hasRecipes: 'recipesIsnull',
-  needBuy: 'needBuy',
-  edible: 'edible',
-  hasCategory: 'categoryIsnull',
-  category: 'category',
+  hasPrice: "priceIsnull",
+  hasRecipes: "recipesIsnull",
+  needBuy: "needBuy",
+  edible: "edible",
+  hasCategory: "categoryIsnull",
+  category: "category",
 };
 
 export default defineComponent({
@@ -300,27 +311,27 @@ export default defineComponent({
       storeAuth,
       loading: false,
       // tableFilter: '',
-      showFilters: this.$q.localStorage.getItem('ingredientsShowFilters'),
+      showFilters: this.$q.localStorage.getItem("ingredientsShowFilters"),
       optionsIsFilled: [
-        { label: '-', value: null },
-        { label: 'Заполнено', value: false },
-        { label: 'Не заполнено', value: true },
+        { label: "-", value: null },
+        { label: "Заполнено", value: false },
+        { label: "Не заполнено", value: true },
       ],
       optionsIsTrue: [
-        { label: '-', value: null },
-        { label: 'Да', value: true },
-        { label: 'Нет', value: false },
+        { label: "-", value: null },
+        { label: "Да", value: true },
+        { label: "Нет", value: false },
       ],
       optionsIsTrueReversed: [
-        { label: '-', value: null },
-        { label: 'Да', value: false },
-        { label: 'Нет', value: true },
+        { label: "-", value: null },
+        { label: "Да", value: false },
+        { label: "Нет", value: true },
       ],
       tableColumns,
       tablePagination: {
         rowsPerPage: 20,
         page: 1,
-        sortBy: 'title',
+        sortBy: "title",
         descending: false,
       } as TablePagination,
       filters: Object.assign({}, filters),
@@ -351,7 +362,8 @@ export default defineComponent({
 
       Object.assign(payload, {
         search: this.tableFilter,
-        ordering: (pagination.descending ? '-' : '') + String(pagination.sortBy),
+        ordering:
+          (pagination.descending ? "-" : "") + String(pagination.sortBy),
         pageSize: pagination.rowsPerPage,
         page: pagination.page,
       });
@@ -375,7 +387,7 @@ export default defineComponent({
           });
         })
         .catch((err: CustomAxiosError) => {
-          this.handleErrors(err, 'Ошибка загрузки ингредиентов');
+          this.handleErrors(err, "Ошибка загрузки ингредиентов");
         });
     },
     loadIngredientCategories() {
@@ -391,7 +403,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           // this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки категорий ингредиентов');
+          this.handleErrors(err, "Ошибка загрузки категорий ингредиентов");
         });
     },
     updateQueryParam(field: string, value: unknown) {
@@ -403,13 +415,13 @@ export default defineComponent({
     handleQueryChange(query: QueryInterface) {
       for (const filterName of Object.keys(filtersRemap)) {
         let val: string | boolean | null = query[filterName];
-        if (val === 'false') {
+        if (val === "false") {
           val = false;
-        } else if (val === 'true') {
+        } else if (val === "true") {
           val = true;
-        } else if (val === 'null') {
+        } else if (val === "null") {
           val = null;
-        } else if (val === '') {
+        } else if (val === "") {
           val = null;
         }
 
@@ -419,11 +431,11 @@ export default defineComponent({
       }
     },
     onRowClick(e: Event, row: IngredientRead) {
-      void this.$router.push({ name: 'ingredient', params: { id: row.id } });
+      void this.$router.push({ name: "ingredient", params: { id: row.id } });
     },
     resetFilters() {
       this.filters = Object.assign({}, this.filtersDefault);
-      console.debug('Reset: ', this.filters);
+      console.debug("Reset: ", this.filters);
     },
   },
   computed: {
@@ -438,7 +450,7 @@ export default defineComponent({
         return (this.$query as QueryInterface).q || null;
       },
       set(val: string | null) {
-        (this.$query as QueryInterface).q = val || '';
+        (this.$query as QueryInterface).q = val || "";
       },
     },
   },
@@ -451,11 +463,11 @@ export default defineComponent({
       },
     },
     showFilters(val) {
-      this.$q.localStorage.set('ingredientsShowFilters', val);
+      this.$q.localStorage.set("ingredientsShowFilters", val);
     },
     $query: {
       deep: true,
-      handler(val: QueryInterface, oldval) {
+      handler(val: QueryInterface) {
         this.handleQueryChange(val);
       },
     },

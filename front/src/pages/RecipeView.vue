@@ -37,13 +37,16 @@
                 >
                   <template #after>
                     <q-btn
-                      v-if="exists && storeAuth.hasPerm('recipes.change_recipe')"
+                      v-if="
+                        exists && storeAuth.hasPerm('recipes.change_recipe')
+                      "
                       icon="edit"
                       @click="toggleEdit()"
                       flat
                     >
                       <q-tooltip
-                        >Предпросмотр рецепта (изменения не будут применены!)</q-tooltip
+                        >Предпросмотр рецепта (изменения не будут
+                        применены!)</q-tooltip
                       >
                     </q-btn>
                   </template></q-input
@@ -84,7 +87,10 @@
                 </q-input>
                 <h6 class="text-center q-my-none" v-else>
                   <q-btn
-                    v-if="recipe.source_link && recipe.source_link.startsWith('http')"
+                    v-if="
+                      recipe.source_link &&
+                      recipe.source_link.startsWith('http')
+                    "
                     :href="recipe.source_link"
                     target="_blank"
                     icon="open_in_new"
@@ -92,7 +98,7 @@
                     >Открыть источник</q-btn
                   >
                   <h6 class="text-center q-my-none" v-else>
-                    Источник: {{ recipe.source_link || '-' }}
+                    Источник: {{ recipe.source_link || "-" }}
                   </h6>
                 </h6>
               </div>
@@ -127,7 +133,9 @@
                 >
                   <template v-slot:no-option>
                     <q-item>
-                      <q-item-section class="text-grey"> Нет результатов </q-item-section>
+                      <q-item-section class="text-grey">
+                        Нет результатов
+                      </q-item-section>
                     </q-item>
                   </template>
                   <template #after>
@@ -153,9 +161,12 @@
                   :dense="dense"
                 >
                 </q-input>
-                <h6 class="text-center q-my-none" v-else-if="recipe.portion_count">
+                <h6
+                  class="text-center q-my-none"
+                  v-else-if="recipe.portion_count"
+                >
                   <q-icon name="pie_chart_outline" color="grey"></q-icon>
-                  Порций: {{ recipe.portion_count || '-' }}
+                  Порций: {{ recipe.portion_count || "-" }}
                 </h6>
               </div>
               <div>
@@ -169,9 +180,12 @@
                   :dense="dense"
                 >
                 </q-input>
-                <h6 class="text-center q-my-none" v-else-if="recipe.cooking_time">
+                <h6
+                  class="text-center q-my-none"
+                  v-else-if="recipe.cooking_time"
+                >
                   <q-icon name="timer" color="grey"></q-icon>
-                  Время приготовления: {{ recipe.cooking_time || '-' }}
+                  Время приготовления: {{ recipe.cooking_time || "-" }}
                 </h6>
               </div>
               <div>
@@ -185,9 +199,12 @@
                   :dense="dense"
                 >
                 </q-input>
-                <h6 class="text-center q-my-none" v-else-if="recipe.preparation_time">
+                <h6
+                  class="text-center q-my-none"
+                  v-else-if="recipe.preparation_time"
+                >
                   <q-icon name="timer" color="grey"></q-icon>
-                  Время подготовки: {{ recipe.preparation_time || '-' }}
+                  Время подготовки: {{ recipe.preparation_time || "-" }}
                 </h6>
               </div>
               <div v-if="edit">
@@ -221,7 +238,10 @@
                   arrows
                 >
                   <template v-slot:control>
-                    <q-carousel-control position="bottom-right" :offset="[18, 18]">
+                    <q-carousel-control
+                      position="bottom-right"
+                      :offset="[18, 18]"
+                    >
                       <q-btn
                         push
                         round
@@ -267,7 +287,11 @@
                 />
 
                 <h6 class="q-my-sm">Комментарий</h6>
-                <q-input v-model="recipe.comment" type="textarea" label="Комментарий" />
+                <q-input
+                  v-model="recipe.comment"
+                  type="textarea"
+                  label="Комментарий"
+                />
               </div>
               <div v-else>
                 <div v-if="recipe.content_source">
@@ -295,7 +319,10 @@
               <div v-if="!edit && recipe.comment">
                 <span class="text-h6 q-my-sm text-primary">Комментарий</span>
 
-                <div class="recipe-text format-spaces" v-html="recipe.comment"></div>
+                <div
+                  class="recipe-text format-spaces"
+                  v-html="recipe.comment"
+                ></div>
                 <q-separator />
               </div>
 
@@ -336,8 +363,14 @@
               <!-- Info -->
               <q-expansion-item label="Подробности">
                 <div class="row column q-px-md q-col-gutter-sm">
-                  <span><b>Дата создания:</b> {{ dateTimeFormat(recipe.created) }}</span>
-                  <span><b>Дата изменения:</b> {{ dateTimeFormat(recipe.edited) }}</span>
+                  <span
+                    ><b>Дата создания:</b>
+                    {{ dateTimeFormat(recipe.created) }}</span
+                  >
+                  <span
+                    ><b>Дата изменения:</b>
+                    {{ dateTimeFormat(recipe.edited) }}</span
+                  >
                   <span v-if="recipe.last_cooked"
                     ><b>Последний раз приготовлено:</b>
                     {{ dateFormat(recipe.last_cooked) }}</span
@@ -345,7 +378,9 @@
                   <span v-if="recipe.cooked_times"
                     ><b>Приготовлено (раз):</b> {{ recipe.cooked_times }}</span
                   >
-                  <span><b>Автор:</b> {{ recipe?.author?.username || '?' }}</span>
+                  <span
+                    ><b>Автор:</b> {{ recipe?.author?.username || "?" }}</span
+                  >
                 </div>
               </q-expansion-item>
               <q-expansion-item label="Цены">
@@ -359,20 +394,22 @@
                   </thead>
                   <tbody>
                     <tr v-for="ing of recipe.ingredients" :key="ing.id">
-                      <td class="text-right">{{ ing.ingredient?.title || '-' }}</td>
                       <td class="text-right">
-                        {{ ing.price_part ? ing.price_part + '₺' : '-' }}
+                        {{ ing.ingredient?.title || "-" }}
                       </td>
                       <td class="text-right">
-                        {{ ing.price_full ? ing.price_full + '₺' : '-' }}
+                        {{ ing.price_part ? ing.price_part + "₺" : "-" }}
+                      </td>
+                      <td class="text-right">
+                        {{ ing.price_full ? ing.price_full + "₺" : "-" }}
                       </td>
                     </tr>
                     <tr>
                       <td class="text-right">
                         <b>Итого</b>
                       </td>
-                      <td class="text-right">{{ pricesPart || '0' }}₺</td>
-                      <td class="text-right">{{ pricesFull || '0' }}₺</td>
+                      <td class="text-right">{{ pricesPart || "0" }}₺</td>
+                      <td class="text-right">{{ pricesFull || "0" }}₺</td>
                     </tr>
                   </tbody>
                 </q-markup-table>
@@ -401,7 +438,7 @@
                         v-if="edit"
                         :input-debounce="0"
                         :options="ingList || []"
-                        :rules="[val => val || 'Обязательное поле']"
+                        :rules="[(val) => val || 'Обязательное поле']"
                         option-label="title"
                         @filter="filterIngredients"
                         use-input
@@ -449,15 +486,21 @@
                   </template>
 
                   <!-- Custom columns -->
-                  <template v-if="edit" v-slot:body-cell-amount_type="slotProps">
-                    <q-td class="q-py-none" style="width: 120px; max-width: 120px">
+                  <template
+                    v-if="edit"
+                    v-slot:body-cell-amount_type="slotProps"
+                  >
+                    <q-td
+                      class="q-py-none"
+                      style="width: 120px; max-width: 120px"
+                    >
                       <q-select
-                        v-model="slotProps.row.amount_type"
                         v-if="edit"
+                        v-model="slotProps.row.amount_type"
                         @filter="filterIngredientsAmountType"
                         :input-debounce="0"
                         :options="amountTypeList || []"
-                        :rules="[val => !!val || 'Обязательное поле']"
+                        :rules="[(val) => !!val || 'Обязательное поле']"
                         use-input
                         option-label="title"
                         option-value="id"
@@ -507,7 +550,7 @@
                           options-dense
                           use-input
                           dense
-                        flat
+                          flat
                         >
                           <template v-slot:no-option>
                             <q-item>
@@ -553,27 +596,29 @@
 </template>
 
 <script lang="ts">
-import { useBaseStore } from 'src/stores/base';
-import { date } from 'quasar';
-import RecipeImagesUpload from 'src/components/RecipeImagesUpload.vue';
-import recipeRating from 'src/components/RecipeRating.vue';
-import RecipeMenu from 'src/components/RecipeMenu.vue';
-import { defineComponent } from 'vue';
+import { useBaseStore } from "src/stores/base";
+import { date } from "quasar";
+import RecipeImagesUpload from "src/components/RecipeImagesUpload.vue";
+import recipeRating from "src/components/RecipeRating.vue";
+import RecipeMenu from "src/components/RecipeMenu.vue";
+import { defineComponent } from "vue";
 import {
   IngredientRead,
   RecipeImage,
   RecipeIngredientRead,
   RecipeRead,
   RecipeTag,
-} from 'src/client';
-import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
-import { AmountTypesTypes } from 'src/modules/Globals';
-import { RecipeFromRead } from 'src/Convert';
-import { useAuthStore } from 'src/stores/auth';
+} from "src/client";
+import HandleErrorsMixin, {
+  CustomAxiosError,
+} from "src/modules/HandleErrorsMixin";
+import { AmountTypesConvert, AmountTypesTypes } from "src/modules/Globals";
+import { RecipeFromRead } from "src/Convert";
+import { useAuthStore } from "src/stores/auth";
 
 let defaultRecipe = {
-  content_source: '',
-  content: '',
+  content_source: "",
+  content: "",
   tags: [],
   images: [],
   ingredients: [],
@@ -604,12 +649,12 @@ export default defineComponent({
 
     let ingredientsColumns = [
       {
-        name: 'title',
-        label: 'Название',
+        name: "title",
+        label: "Название",
         field: (row: RecipeIngredientRead) => row.ingredient?.title,
         required: true,
         sortable: true,
-        style: 'width: 50px',
+        style: "width: 50px",
       },
       // {
       //   name: 'amount_type',
@@ -620,37 +665,37 @@ export default defineComponent({
       //   style: 'width: 20px',
       // },
       {
-        name: 'amount_rec',
-        label: 'Вес (рецепт)',
+        name: "amount_rec",
+        label: "Вес (рецепт)",
         field: (row: RecipeIngredientRead) =>
-          String(row.amount) + '  (' + row.amount_type_str + ')',
+          String(row.amount) + "  (" + row.amount_type_str + ")",
         required: true,
         sortable: true,
-        style: 'width: 20px',
+        style: "width: 20px",
       },
       {
-        name: 'amount_g',
-        label: 'Вес (гр.)',
+        name: "amount_g",
+        label: "Вес (гр.)",
         field: (row: RecipeIngredientRead) =>
-          row.amount_grams ? String(row.amount_grams) + ' гр.' : '-',
+          row.amount_grams ? String(row.amount_grams) + " гр." : "-",
         required: true,
         sortable: true,
-        style: 'width: 30px',
+        style: "width: 30px",
       },
       {
-        name: 'is_main',
-        label: 'Основной',
-        field: 'is_main',
+        name: "is_main",
+        label: "Основной",
+        field: "is_main",
         required: true,
         sortable: true,
-        style: 'width: 30px',
+        style: "width: 30px",
       },
     ];
 
     let ingAddDefault = {
       select: null as { id: number | null; title: string } | null,
       amount: null,
-      amount_type: 'g',
+      amount_type: "g",
       is_main: false,
     };
 
@@ -660,71 +705,79 @@ export default defineComponent({
           label: this.$q.lang.editor.align,
           icon: this.$q.iconSet.editor.align,
           fixedLabel: true,
-          list: 'only-icons',
-          options: ['left', 'center', 'right', 'justify'],
+          list: "only-icons",
+          options: ["left", "center", "right", "justify"],
         },
         {
           label: this.$q.lang.editor.align,
           icon: this.$q.iconSet.editor.align,
           fixedLabel: true,
-          options: ['left', 'center', 'right', 'justify'],
+          options: ["left", "center", "right", "justify"],
         },
       ],
-      ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript'],
-      ['token', 'hr', 'link', 'custom_btn'],
-      ['print', 'fullscreen'],
+      ["bold", "italic", "strike", "underline", "subscript", "superscript"],
+      ["token", "hr", "link", "custom_btn"],
+      ["print", "fullscreen"],
       [
         {
           label: this.$q.lang.editor.formatting,
           icon: this.$q.iconSet.editor.formatting,
-          list: 'no-icons',
-          options: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code'],
+          list: "no-icons",
+          options: ["p", "h1", "h2", "h3", "h4", "h5", "h6", "code"],
         },
         {
           label: this.$q.lang.editor.fontSize,
           icon: this.$q.iconSet.editor.fontSize,
           fixedLabel: true,
           fixedIcon: true,
-          list: 'no-icons',
-          options: ['size-1', 'size-2', 'size-3', 'size-4', 'size-5', 'size-6', 'size-7'],
+          list: "no-icons",
+          options: [
+            "size-1",
+            "size-2",
+            "size-3",
+            "size-4",
+            "size-5",
+            "size-6",
+            "size-7",
+          ],
         },
         {
           label: this.$q.lang.editor.defaultFont,
           icon: this.$q.iconSet.editor.font,
           fixedIcon: true,
-          list: 'no-icons',
+          list: "no-icons",
           options: [
-            'default_font',
-            'arial',
-            'arial_black',
-            'comic_sans',
-            'courier_new',
-            'impact',
-            'lucida_grande',
-            'times_new_roman',
-            'verdana',
+            "default_font",
+            "arial",
+            "arial_black",
+            "comic_sans",
+            "courier_new",
+            "impact",
+            "lucida_grande",
+            "times_new_roman",
+            "verdana",
           ],
         },
-        'removeFormat',
+        "removeFormat",
       ],
-      ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
+      ["quote", "unordered", "ordered", "outdent", "indent"],
 
-      ['undo', 'redo'],
-      ['viewsource'],
+      ["undo", "redo"],
+      ["viewsource"],
     ];
 
     let editorFonts = {
-      arial: 'Arial',
-      arial_black: 'Arial Black',
-      comic_sans: 'Comic Sans MS',
-      courier_new: 'Courier New',
-      impact: 'Impact',
-      lucida_grande: 'Lucida Grande',
-      times_new_roman: 'Times New Roman',
-      verdana: 'Verdana',
+      arial: "Arial",
+      arial_black: "Arial Black",
+      comic_sans: "Comic Sans MS",
+      courier_new: "Courier New",
+      impact: "Impact",
+      lucida_grande: "Lucida Grande",
+      times_new_roman: "Times New Roman",
+      verdana: "Verdana",
     };
 
-    let requiredRule = (val: string | number) => !!val || 'Обязательное поле';
+    let requiredRule = (val: string | number) => !!val || "Обязательное поле";
 
     return {
       store,
@@ -738,6 +791,7 @@ export default defineComponent({
       tagAddSelect: null as RecipeTag | null,
       tagList: null as RecipeTag[] | null,
       amountTypeList: null as AmountTypesTypes | null,
+      amountTypeConvert: null as AmountTypesConvert | null,
       saveAndContinue: false,
       ingAddDefault,
       addIngredientSelect: null as IngredientRead | null,
@@ -747,8 +801,8 @@ export default defineComponent({
       editorToolbar,
       editorFonts,
       archivedOptions: [
-        { label: 'Не архивирован', value: false },
-        { label: 'Архивирован', value: true },
+        { label: "Не архивирован", value: false },
+        { label: "Архивирован", value: true },
       ],
     };
   },
@@ -764,20 +818,21 @@ export default defineComponent({
       this.loadAmountTypes();
     }
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    this.filterIngredientsAmountType('', () => {});
+    this.filterIngredientsAmountType("", () => {});
   },
   beforeRouteUpdate(to) {
-    if (to.params.id == 'new') {
-      this.loadRecipe('new');
+    if (to.params.id == "new") {
+      this.loadRecipe("new");
     } else {
       this.loadRecipe(parseInt(to.params?.id as string));
     }
   },
   methods: {
-    loadRecipe(load_id?: number | 'new' | undefined) {
-      let id: string | number | 'new' = load_id || (this.$route.params.id as string);
+    loadRecipe(load_id?: number | "new" | undefined) {
+      let id: string | number | "new" =
+        load_id || (this.$route.params.id as string);
 
-      if (id == 'new') {
+      if (id == "new") {
         this.resetData();
         this.edit = true;
         return;
@@ -785,7 +840,7 @@ export default defineComponent({
         this.edit = false;
       }
 
-      if (typeof id == 'string') {
+      if (typeof id == "string") {
         id = parseInt(id);
       }
 
@@ -798,11 +853,11 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки рецептов');
+          this.handleErrors(err, "Ошибка загрузки рецептов");
         });
     },
     resetData() {
-      console.debug('Recipe resetData');
+      console.debug("Recipe resetData");
       // @ts-expect-error: Default recipe not full
       this.store.recipe = Object.assign({}, defaultRecipe);
       // this.recipe = Object.assign({}, defaultRecipe);
@@ -835,7 +890,7 @@ export default defineComponent({
           .createRecipeImage(payload)
           .then((resp) => {
             resolve(resp);
-            console.debug('IMG: ', resp);
+            console.debug("IMG: ", resp);
           })
           .catch((err) => reject(err));
       });
@@ -850,14 +905,14 @@ export default defineComponent({
             // (async () => {
             // await ...
             // })();
-            console.debug('IMG uploaded: ', res, i);
+            console.debug("IMG uploaded: ", res, i);
 
             Object.assign(i, res);
             // delete res['image'];
           }
           if (i.id) {
             // @ts-expect-error readonly image
-            delete i['image'];
+            delete i["image"];
           }
           return i;
         })
@@ -877,24 +932,29 @@ export default defineComponent({
       if (isCreating) {
         payload.images = [];
       } else {
-        payload.images = await this.handleImages(payload.images as RecipeImage[]);
+        payload.images = await this.handleImages(
+          payload.images as RecipeImage[]
+        );
       }
 
-      console.debug('Saving recipe: ', payload);
+      console.debug("Saving recipe: ", payload);
 
       method(payload)
         .then((resp) => {
           this.saving = false;
 
           if (isCreating) {
-            console.debug('Redirecting from created recipe: ', resp);
-            void this.$router.replace({ name: 'recipe', params: { id: resp.id } });
+            console.debug("Redirecting from created recipe: ", resp);
+            void this.$router.replace({
+              name: "recipe",
+              params: { id: resp.id },
+            });
             // .catch(() => {});
           }
 
-          let created_tx = isCreating ? 'создан' : 'сохранен';
+          let created_tx = isCreating ? "создан" : "сохранен";
           this.$q.notify({
-            type: 'positive',
+            type: "positive",
             message: `Рецепт успешно ${created_tx}`,
           });
           // this.loadIngredients();
@@ -902,7 +962,7 @@ export default defineComponent({
         .catch((err: CustomAxiosError) => {
           this.saving = false;
           this.edit = true;
-          this.handleErrors(err, 'Ошибка сохранения рецепта');
+          this.handleErrors(err, "Ошибка сохранения рецепта");
         });
     },
     loadTags() {
@@ -916,7 +976,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           // this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки меток');
+          this.handleErrors(err, "Ошибка загрузки меток");
         });
     },
     loadIngredients() {
@@ -929,7 +989,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           // this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки ингредиентов');
+          this.handleErrors(err, "Ошибка загрузки ингредиентов");
         });
     },
     loadAmountTypes() {
@@ -938,10 +998,12 @@ export default defineComponent({
         .then(() => {
           // this.loading = false;
           this.amountTypeList = this.amount_types?.types as AmountTypesTypes;
+          this.amountTypeConvert = this.amount_types
+            ?.convert as AmountTypesConvert;
         })
         .catch((err: CustomAxiosError) => {
           // this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки типов измерений');
+          this.handleErrors(err, "Ошибка загрузки типов измерений");
         });
     },
     toggleEdit() {
@@ -951,14 +1013,14 @@ export default defineComponent({
       if (!this.recipe) {
         return;
       }
-      console.debug('Remove tag: ', tag);
+      console.debug("Remove tag: ", tag);
       this.recipe.tags =
         this.recipe?.tags?.filter((t) => {
           return t.title !== tag.title;
         }) || [];
     },
     addTag() {
-      console.debug('Add tag: ', this.tagAddSelect);
+      console.debug("Add tag: ", this.tagAddSelect);
       if (!this.tagAddSelect) {
         return;
       }
@@ -967,7 +1029,7 @@ export default defineComponent({
     },
     addNewTag(new_tag: string) {
       // , done: CallableFunction
-      console.debug('Add new tag: ', new_tag);
+      console.debug("Add new tag: ", new_tag);
       if (!new_tag) {
         return;
       }
@@ -976,7 +1038,7 @@ export default defineComponent({
       );
       if (exists) {
         // If tag with this name already added to recipe
-        console.debug('Tag already exists!');
+        console.debug("Tag already exists!");
         return;
       }
 
@@ -985,7 +1047,7 @@ export default defineComponent({
       );
       if (existsNotUsed) {
         // If tag with this name exists in DB
-        console.debug('Using existing tag in DB');
+        console.debug("Using existing tag in DB");
         this.tagAddSelect = existsNotUsed;
         this.addTag();
         return;
@@ -1009,8 +1071,9 @@ export default defineComponent({
         let tags = this.tags;
 
         this.tagList =
-          tags?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)) ||
-          [];
+          tags?.filter(
+            (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
+          ) || [];
         // console.debug(needle, this.tagList, tags);
       });
     },
@@ -1020,7 +1083,7 @@ export default defineComponent({
         ingredient = this.addIngredientSelect;
       }
 
-      console.debug('Add ingredient: ', ingredient);
+      console.debug("Add ingredient: ", ingredient);
       this.recipe?.ingredients?.push(
         // @ts-expect-error: Ingredient will be added
         Object.assign({}, this.ingAddDefault, {
@@ -1030,7 +1093,7 @@ export default defineComponent({
       this.addIngredientSelect = null;
     },
     addIngredientNew(name: string) {
-      console.debug('Add new: ', name);
+      console.debug("Add new: ", name);
       this.addIngredientSelect = {
         // @ts-expect-error new ingredient creation
         id: null,
@@ -1044,7 +1107,7 @@ export default defineComponent({
         return;
       }
 
-      console.debug('Remove ingredient: ', row);
+      console.debug("Remove ingredient: ", row);
 
       if (force) {
         this.recipe.ingredients =
@@ -1055,15 +1118,15 @@ export default defineComponent({
       }
       this.$q
         .dialog({
-          title: 'Подтверждение удаления ингредиента',
+          title: "Подтверждение удаления ингредиента",
           message: `Вы уверены что хотите удалить ингредиент '${
-            row?.ingredient?.title || 'Новый ингредиент'
+            row?.ingredient?.title || "Новый ингредиент"
           }' ?`,
           cancel: true,
           persistent: true,
         })
         .onOk(() => {
-          console.debug('Remove ingredient confirmed');
+          console.debug("Remove ingredient confirmed");
           if (!this.recipe) {
             return;
           }
@@ -1094,21 +1157,42 @@ export default defineComponent({
     filterIngredientsAmountType(val: string, update: CallableFunction) {
       update(() => {
         const needle = val.toLowerCase();
-        let amount_types = (this.amount_types?.types || null) as AmountTypesTypes | null;
+        let amount_types = (this.amount_types?.types ||
+          null) as AmountTypesTypes | null;
 
         this.amountTypeList =
-          amount_types?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1) || [];
+          amount_types?.filter(
+            (v) => v.title.toLowerCase().indexOf(needle) > -1
+          ) || [];
         // console.debug(needle, this.tagList, tags);
       });
     },
+    calculateIngredientsGrams() {
+      if (!this.edit || !this.amountTypeConvert) return;
+      this.recipe?.ingredients?.map((i) => {
+        if (!this.amountTypeConvert) return i;
+        let coef = this.amountTypeConvert[i.amount_type || "g"];
+        let newGrams = 0;
+        if (coef) {
+          newGrams = i.amount * coef;
+        } else if (i.amount_type == "items" && i.ingredient.item_weight) {
+          newGrams = i.amount * i.ingredient.item_weight;
+        }
+        // @ts-expect-error Pre-compute ingredient grams
+        i.amount_grams = Math.round(newGrams * 100) / 100;
+        // console.debug("Ing: ", i);
+        return i;
+      });
+      // console.debug("Calculating grams...");
+    },
     dateTimeFormat(raw: Date | string | null): string {
       if (!raw) {
-        return '-';
+        return "-";
       }
-      return date.formatDate(raw, 'YYYY.MM.DD hh:mm');
+      return date.formatDate(raw, "YYYY.MM.DD hh:mm");
     },
     dateFormat(raw: Date | string): string {
-      return date.formatDate(raw, 'YYYY.MM.DD');
+      return date.formatDate(raw, "YYYY.MM.DD");
     },
   },
 
@@ -1134,12 +1218,16 @@ export default defineComponent({
     },
     pricesPart(): number {
       return (
-        this.recipe?.ingredients?.map((i) => i.price_part).reduce((a, b) => a + b, 0) || 0
+        this.recipe?.ingredients
+          ?.map((i) => i.price_part)
+          .reduce((a, b) => a + b, 0) || 0
       );
     },
     pricesFull(): number {
       return (
-        this.recipe?.ingredients?.map((i) => i.price_full).reduce((a, b) => a + b, 0) || 0
+        this.recipe?.ingredients
+          ?.map((i) => i.price_full)
+          .reduce((a, b) => a + b, 0) || 0
       );
     },
   },
@@ -1147,20 +1235,20 @@ export default defineComponent({
   watch: {
     edit(val) {
       let column_actions = {
-        name: 'actions',
-        label: 'Действия',
-        field: () => '',
+        name: "actions",
+        label: "Действия",
+        field: () => "",
         required: true,
         sortable: false,
-        style: 'width: 75px',
+        style: "width: 75px",
       };
       let column_amount_type = {
-        name: 'amount_type',
-        label: 'Единица измерения',
-        field: () => '',
+        name: "amount_type",
+        label: "Единица измерения",
+        field: () => "",
         required: true,
         sortable: false,
-        style: 'width: 120px',
+        style: "width: 120px",
       };
 
       if (val) {
@@ -1168,9 +1256,17 @@ export default defineComponent({
         this.ingredientsColumns.splice(1, 0, column_amount_type);
       } else {
         this.ingredientsColumns = this.ingredientsColumns?.filter(
-          (i) => i.name !== column_actions.name && i.name !== column_amount_type.name
+          (i) =>
+            i.name !== column_actions.name && i.name !== column_amount_type.name
         );
       }
+    },
+    "recipe.ingredients": {
+      deep: true,
+      handler(val: RecipeIngredientRead[]) {
+        if (!this.edit || !val) return;
+        this.calculateIngredientsGrams();
+      },
     },
     tagAddSelect() {
       this.addTag();

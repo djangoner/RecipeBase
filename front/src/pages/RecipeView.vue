@@ -17,7 +17,7 @@
     </div>
 
     <q-form class="q-mt-md" @submit.prevent="saveRecipe()">
-      <div class="row q-gutter-y-lg q-col-gutter-x-md" v-if="recipe">
+      <div class="row q-col-gutter-y-lg q-col-gutter-x-md" v-if="recipe">
         <div class="col-xs-12 col-md-6">
           <!--  col-lg-8 -->
           <q-card>
@@ -299,30 +299,36 @@
                 <q-separator />
               </div>
 
-              <div class="flex justify-around">
-                <q-btn
-                  @click="saveAndContinue = false"
-                  type="submit"
-                  icon="save"
-                  color="positive"
-                  :loading="saving"
-                  v-if="edit"
-                  >Сохранить</q-btn
-                >
-                <q-btn
-                  @click="saveAndContinue = true"
-                  type="submit"
-                  icon="save"
-                  color="positive"
-                  :loading="saving"
-                  v-if="edit"
-                  >Сохранить и продолжить</q-btn
-                >
+              <div class="flex q-col-gutter-md justify-around q-mt-md">
+                <div>
+                  <q-btn
+                    @click="saveAndContinue = false"
+                    type="submit"
+                    icon="save"
+                    color="positive"
+                    :loading="saving"
+                    v-if="edit"
+                  >
+                    Сохранить
+                  </q-btn>
+                </div>
+                <div>
+                  <q-btn
+                    @click="saveAndContinue = true"
+                    type="submit"
+                    icon="save"
+                    color="positive"
+                    :loading="saving"
+                    v-if="edit"
+                  >
+                    Сохранить и продолжить
+                  </q-btn>
+                </div>
               </div>
             </q-card-section>
           </q-card>
         </div>
-        <div class="col-xs-12 col-md-6 q-mt-sm q-gutter-y-sm">
+        <div class="col-xs-12 col-md-6 q-gutter-y-sm">
           <!--  col-lg-4 -->
           <!-- Aside information -->
           <q-card class="q-mt-none position-sticky">
@@ -353,7 +359,7 @@
                   </thead>
                   <tbody>
                     <tr v-for="ing of recipe.ingredients" :key="ing.id">
-                      <td class="text-right">{{ ing.ingredient.title }}</td>
+                      <td class="text-right">{{ ing.ingredient?.title || '-' }}</td>
                       <td class="text-right">
                         {{ ing.price_part ? ing.price_part + '₺' : '-' }}
                       </td>
@@ -395,12 +401,12 @@
                         v-if="edit"
                         :input-debounce="0"
                         :options="ingList || []"
+                        :rules="[val => val || 'Обязательное поле']"
                         option-label="title"
-                        style="max-width: 120px"
                         @filter="filterIngredients"
-                        @new-value="addIngredient"
                         use-input
                         options-dense
+                        flat
                         dense
                       >
                         <template v-slot:no-option>
@@ -442,9 +448,37 @@
                     </td>
                   </template>
 
-                  <!-- Bottom row -->
+                  <!-- Custom columns -->
+                  <template v-if="edit" v-slot:body-cell-amount_type="slotProps">
+                    <q-td class="q-py-none" style="width: 120px; max-width: 120px">
+                      <q-select
+                        v-model="slotProps.row.amount_type"
+                        v-if="edit"
+                        @filter="filterIngredientsAmountType"
+                        :input-debounce="0"
+                        :options="amountTypeList || []"
+                        :rules="[val => !!val || 'Обязательное поле']"
+                        use-input
+                        option-label="title"
+                        option-value="id"
+                        map-options
+                        emit-value
+                        options-dense
+                        dense
+                        flat
+                      >
+                        <template v-slot:no-option>
+                          <q-item>
+                            <q-item-section class="text-grey">
+                              Нет результатов
+                            </q-item-section>
+                          </q-item>
+                        </template>
+                      </q-select>
+                    </q-td>
+                  </template>
                   <template v-if="edit" v-slot:body-cell-actions="slotProps">
-                    <q-td class="q-py-none">
+                    <q-td class="q-py-none" style="width: 50px">
                       <div class="row justify-around">
                         <q-btn
                           icon="delete"
@@ -456,23 +490,24 @@
                       </div>
                     </q-td>
                   </template>
+                  <!-- Bottom row -->
                   <template v-if="edit" #bottom-row>
                     <q-tr>
-                      <q-td>
+                      <td colspan="3">
                         <q-select
-                          v-model="ingAdd.select"
+                          v-model="addIngredientSelect"
                           v-if="edit"
-                          label="Ингредиент"
+                          label="Добавить ингредиент"
                           :input-debounce="0"
                           :options="ingList || []"
                           option-label="title"
-                          style="max-width: 120px"
                           @keydown.enter.prevent="addIngredient()"
                           @filter="filterIngredients"
-                          @new-value="addIngredient"
+                          @new-value="addIngredientNew"
                           options-dense
                           use-input
                           dense
+                        flat
                         >
                           <template v-slot:no-option>
                             <q-item>
@@ -482,52 +517,7 @@
                             </q-item>
                           </template>
                         </q-select>
-                      </q-td>
-                      <q-td>
-                        <q-input
-                          v-model.number="ingAdd.amount"
-                          type="number"
-                          label="Вес"
-                          step="0.1"
-                        ></q-input>
-                      </q-td>
-                      <q-td>
-                        <q-select
-                          v-model="ingAdd.amount_type"
-                          v-if="edit"
-                          use-input
-                          @keydown.enter.prevent="addIngredient()"
-                          @filter="filterIngredientsAmountType"
-                          :input-debounce="0"
-                          :options="amountTypeList || []"
-                          option-label="title"
-                          option-value="id"
-                          map-options
-                          emit-value
-                          options-dense
-                          dense
-                          style="max-width: 100px"
-                        >
-                          <template v-slot:no-option>
-                            <q-item>
-                              <q-item-section class="text-grey">
-                                Нет результатов
-                              </q-item-section>
-                            </q-item>
-                          </template>
-                        </q-select>
-                      </q-td>
-
-                      <q-td>
-                        <div class="flex justify-center items-center">
-                          <q-btn
-                            color="positive"
-                            icon="add"
-                            size="sm"
-                            @click="addIngredient()"
-                          ></q-btn>
-                        </div>
-                      </q-td>
+                      </td>
                     </q-tr>
                   </template>
                 </q-table>
@@ -570,7 +560,6 @@ import recipeRating from 'src/components/RecipeRating.vue';
 import RecipeMenu from 'src/components/RecipeMenu.vue';
 import { defineComponent } from 'vue';
 import {
-  AmountTypeEnum,
   IngredientRead,
   RecipeImage,
   RecipeIngredientRead,
@@ -617,7 +606,7 @@ export default defineComponent({
       {
         name: 'title',
         label: 'Название',
-        field: (row: RecipeIngredientRead) => row.ingredient.title,
+        field: (row: RecipeIngredientRead) => row.ingredient?.title,
         required: true,
         sortable: true,
         style: 'width: 50px',
@@ -751,7 +740,7 @@ export default defineComponent({
       amountTypeList: null as AmountTypesTypes | null,
       saveAndContinue: false,
       ingAddDefault,
-      ingAdd: Object.assign({}, ingAddDefault),
+      addIngredientSelect: null as IngredientRead | null,
       ingList: null as IngredientRead[] | null,
       requiredRule,
       ingredientsColumns,
@@ -774,6 +763,8 @@ export default defineComponent({
     if (!this.amount_types) {
       this.loadAmountTypes();
     }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    this.filterIngredientsAmountType('', () => {});
   },
   beforeRouteUpdate(to) {
     if (to.params.id == 'new') {
@@ -1023,34 +1014,45 @@ export default defineComponent({
         // console.debug(needle, this.tagList, tags);
       });
     },
-    addIngredient(new_val?: string) {
-      if (new_val && this.ingAdd && this.ingAdd.select) {
-        this.ingAdd.select = {
-          id: null,
-          title: new_val,
-        };
-        // done(new_val);
-        return;
+    addIngredient(ingredient?: IngredientRead) {
+      if (!ingredient) {
+        if (!this.addIngredientSelect) return;
+        ingredient = this.addIngredientSelect;
       }
-      console.debug('Add ingredient: ', this.ingAdd, new_val);
-      if (!this.ingAdd.select || !this.ingAdd.amount || !this.ingAdd.amount_type) {
-        return;
-      }
-      this.recipe?.ingredients?.push({
+
+      console.debug('Add ingredient: ', ingredient);
+      this.recipe?.ingredients?.push(
         // @ts-expect-error: Ingredient will be added
-        ingredient: this.ingAdd.select,
-        amount: this.ingAdd.amount,
-        amount_type: this.ingAdd.amount_type as AmountTypeEnum,
-        is_main: false,
-      });
-      this.ingAdd = Object.assign({}, this.ingAddDefault);
+        Object.assign({}, this.ingAddDefault, {
+          ingredient: ingredient,
+        })
+      );
+      this.addIngredientSelect = null;
+    },
+    addIngredientNew(name: string) {
+      console.debug('Add new: ', name);
+      this.addIngredientSelect = {
+        // @ts-expect-error new ingredient creation
+        id: null,
+        title: name,
+      };
+      this.addIngredient();
     },
 
-    removeIngredient(row: RecipeIngredientRead) {
+    removeIngredient(row: RecipeIngredientRead, force = false) {
       if (!this.recipe) {
         return;
       }
+
       console.debug('Remove ingredient: ', row);
+
+      if (force) {
+        this.recipe.ingredients =
+          this.recipe?.ingredients?.filter((t) => {
+            return t != row;
+          }) || [];
+        return;
+      }
       this.$q
         .dialog({
           title: 'Подтверждение удаления ингредиента',
@@ -1149,20 +1151,34 @@ export default defineComponent({
         label: 'Действия',
         field: () => '',
         required: true,
-        sortable: true,
-        style: '',
+        sortable: false,
+        style: 'width: 75px',
+      };
+      let column_amount_type = {
+        name: 'amount_type',
+        label: 'Единица измерения',
+        field: () => '',
+        required: true,
+        sortable: false,
+        style: 'width: 120px',
       };
 
       if (val) {
         this.ingredientsColumns.push(column_actions);
+        this.ingredientsColumns.splice(1, 0, column_amount_type);
       } else {
         this.ingredientsColumns = this.ingredientsColumns?.filter(
-          (i) => i !== column_actions
+          (i) => i.name !== column_actions.name && i.name !== column_amount_type.name
         );
       }
     },
     tagAddSelect() {
       this.addTag();
+    },
+    addIngredientSelect(val: IngredientRead | null) {
+      if (val) {
+        this.addIngredient(val);
+      }
     },
   },
 });

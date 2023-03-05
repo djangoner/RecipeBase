@@ -13,23 +13,28 @@ const routes = [
       },
       {
         path: "/recipes",
-        component: () => import("src/pages/RecipesList.vue"),
-        name: "recipes",
-        meta: {
-          requiresAuth: true,
-          query: {
-            compilation: "string:",
-            display: "string:cards",
+        children: [
+          {
+            path: "",
+            component: () => import("src/pages/RecipesList.vue"),
+            name: "recipes",
+            meta: {
+              requiresAuth: true,
+              query: {
+                compilation: "string:",
+                display: "string:cards",
+              },
+            },
           },
-        },
-      },
-      {
-        path: "/recipes/:id",
-        component: () => import("pages/RecipeView.vue"),
-        name: "recipe",
-        meta: {
-          requiresAuth: true,
-        },
+          {
+            path: ":id",
+            component: () => import("pages/RecipeView.vue"),
+            name: "recipe",
+            meta: {
+              requiresAuth: true,
+            },
+          },
+        ],
       },
       {
         path: "/week_plan",
@@ -58,6 +63,36 @@ const routes = [
         },
       },
       {
+        path: "/ingredients",
+        children: [
+          {
+            path: "",
+            component: () => import("pages/IngredientsList.vue"),
+            name: "ingredients",
+            meta: {
+              requiresAuth: true,
+              query: {
+                q: "string:",
+                hasPrice: "string:",
+                hasRecipes: "string:",
+                hasCategory: "string:",
+                category: "string:",
+                needBuy: "string:",
+                edible: "string:",
+              },
+            },
+          },
+          {
+            path: "/:id",
+            component: () => import("pages/IngredientView.vue"),
+            name: "ingredient",
+            meta: {
+              requiresAuth: true,
+            },
+          },
+        ],
+      },
+      {
         path: "/tasks",
         component: () => import("pages/TasksList.vue"),
         name: "tasks",
@@ -66,31 +101,6 @@ const routes = [
           query: {
             task: "int:",
           },
-        },
-      },
-      {
-        path: "/ingredients",
-        component: () => import("pages/IngredientsList.vue"),
-        name: "ingredients",
-        meta: {
-          requiresAuth: true,
-          query: {
-            q: "string:",
-            hasPrice: "string:",
-            hasRecipes: "string:",
-            hasCategory: "string:",
-            category: "string:",
-            needBuy: "string:",
-            edible: "string:",
-          },
-        },
-      },
-      {
-        path: "/ingredients/:id",
-        component: () => import("pages/IngredientView.vue"),
-        name: "ingredient",
-        meta: {
-          requiresAuth: true,
         },
       },
     ],

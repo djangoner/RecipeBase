@@ -183,7 +183,7 @@
 
         <!-- Ingredient description -->
         <q-input
-          v-if="item.ingredient"
+          v-if="item?.ingredient"
           :modelValue="item?.ingredient?.description"
           :debounce="1000"
           type="textarea"
@@ -192,7 +192,7 @@
           readonly
         />
 
-        <div v-if="item.ingredient.image" class="q-mt-md">
+        <div v-if="item?.ingredient?.image" class="q-mt-md">
           <div class="text-subtitle1 text-grey q-mb-sm">Изображение рецепта</div>
           <q-img :src="item.ingredient.image" fit="contain"></q-img>
         </div>

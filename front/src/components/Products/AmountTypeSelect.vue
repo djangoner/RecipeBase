@@ -41,27 +41,24 @@ export default defineComponent({
     const store = useBaseStore();
     return {
       store,
-      amountTypeList: null as AmountTypesTypes | null,
-      amountTypeConvert: null as AmountTypesConvert | null,
+      loading: false,
     };
   },
   mounted() {
-    if (!this.amount_types || this.amount_types.length < 1) {
+    if (!this.amount_types) {
       this.loadAmountTypes();
     }
   },
   methods: {
     loadAmountTypes() {
+      this.loading = true;
       this.store
         .loadAmountTypes()
         .then(() => {
-          // this.loading = false;
-          this.amountTypeList = this.amount_types?.types as AmountTypesTypes;
-          this.amountTypeConvert = this.amount_types
-            ?.convert as AmountTypesConvert;
+          this.loading = false;
         })
         .catch((err: CustomAxiosError) => {
-          // this.loading = false;
+          this.loading = false;
           this.handleErrors(err, "Ошибка загрузки типов измерений");
         });
     },
@@ -69,6 +66,12 @@ export default defineComponent({
   computed: {
     amount_types() {
       return this.store.amount_types;
+    },
+    amountTypeList() {
+      return this.amount_types?.types as AmountTypesTypes;
+    },
+    amountTypeConvert() {
+      return this.amount_types?.convert as AmountTypesConvert;
     },
   },
 });

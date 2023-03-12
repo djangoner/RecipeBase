@@ -23,50 +23,15 @@
     <!-- Contents -->
 
     <div
-      class="row items-center q-mt-sm q-ml-sm q-col-gutter-sm q-mr-md"
+      class="row items-center q-mt-sm q-ml-sm q-col-gutter-sm q-mr-md no-wrap"
       :class="$q.screen.lt.md ? 'justify-between' : ''"
     >
       <div>
-        <q-btn
-          v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
-          label="Обновить автоматический список"
-          class="q-ml-none"
-          color="primary"
-          icon="refresh"
-          size="sm"
-          @click="regenerateList()"
-          :disable="!isOnLine"
-        ></q-btn>
-      </div>
-      <div>
-        <q-btn
-          v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
-          label="Синхронизация"
-          :color="canSync ? 'positive' : 'primary'"
-          icon="sync"
-          size="sm"
-          @click="askSyncLocal()"
-          :disable="!canSync"
-        >
-          <q-tooltip v-if="!canSync">Нет данных для синхронизации</q-tooltip>
-        </q-btn>
-      </div>
-      <div v-if="canSync">
-        <q-btn
-          label="Очистка синхронизации"
-          color="negative"
-          icon="delete"
-          size="sm"
-          @click="askDiscardSync()"
-        ></q-btn>
-      </div>
-
-      <div>
         <q-select
           v-model="sortShop"
-          label="Группировать по магазину"
+          label="Группировать"
           :options="shops || []"
-          style="width: 150px"
+          style="width: 120px"
           option-label="title"
           option-value="id"
           map-options
@@ -77,26 +42,68 @@
         ></q-select>
       </div>
       <div>
-        <q-toggle v-model="showCompleted" label="Показать завершенные" />
+        <q-toggle v-model="showCompleted" label="Показать завершенные" dense />
       </div>
 
-      <q-space />
+      <!-- <q-space /> -->
       <div>
         <q-btn icon="menu" size="md" flat round dense>
           <q-menu>
             <q-list dense>
               <q-item tag="label" v-ripple>
+                <q-item-section side>
+                  <q-toggle v-model="markAlreadyCompleted" dense />
+                </q-item-section>
                 <q-item-section>
                   <q-item-label>Отметить что уже есть</q-item-label>
                 </q-item-section>
-                <q-item-section side>
-                  <q-toggle v-model="markAlreadyCompleted" />
+              </q-item>
+
+              <q-item
+                v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
+                @click="regenerateList()"
+                :disable="!isOnLine"
+                clickable
+              >
+                <q-item-section avatar>
+                  <q-icon name="refresh" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label> Обновить автоматический список </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item
+                v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
+                @click="askSyncLocal()"
+                :disable="!canSync"
+                clickable
+              >
+                <q-item-section avatar>
+                  <q-icon name="sync" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label> Синхронизация </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item
+                v-if="canSync"
+                @click="askDiscardSync()"
+                :disable="!canSync"
+                clickable
+              >
+                <q-item-section avatar>
+                  <q-icon name="delete" color="negative" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label> Очистка синхронизации </q-item-label>
                 </q-item-section>
               </q-item>
 
               <q-item clickable v-close-popup @click="sendList()">
                 <q-item-section avatar><q-icon name="send" /> </q-item-section>
-                <q-item-section>Отправить в телеграмм</q-item-section>
+                <q-item-section>
+                  <q-item-label> Отправить в телеграмм </q-item-label>
+                </q-item-section>
               </q-item>
             </q-list>
           </q-menu>

@@ -45,7 +45,7 @@
         <q-toggle v-model="showCompleted" label="Показать завершенные" dense />
       </div>
 
-      <!-- <q-space /> -->
+      <q-space />
       <div>
         <q-btn icon="menu" size="md" flat round dense>
           <q-menu>

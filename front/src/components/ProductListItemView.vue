@@ -86,56 +86,71 @@
           clearable
         >
         </q-select>
-        <q-select
-          v-model.number="item.priority"
-          @update:modelValue="$emit('updateItem', item)"
-          :options="priorityOptions"
-          :readonly="item.is_auto || !canEdit"
-          label="Приоритет"
-          option-label="name"
-          option-value="id"
-          map-options
-          emit-value
-          dense
-          options-dense
-          use-input
-        >
-          <template v-slot:no-option>
-            <q-item>
-              <q-item-section class="text-grey">
-                Нет результатов
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select>
 
-        <!-- Manual amount -->
-        <div class="row justify-between items-center" v-if="!item.is_auto">
-          <q-input
-            v-model.number="item.amount"
+        <q-expansion-item label="Дополнительно" dense>
+          <q-toggle
+            v-model="item.already_completed"
+            label="Уже есть"
             @update:modelValue="$emit('updateItem', item)"
-            :debounce="2000"
-            class="col-3"
-            type="number"
-            label="Количество"
+          >
+            <q-tooltip
+              >Продукт уже есть на начало недели и его не требуется
+              покупать</q-tooltip
+            >
+          </q-toggle>
+          <q-select
+            v-model.number="item.priority"
+            @update:modelValue="$emit('updateItem', item)"
+            :options="priorityOptions"
+            :readonly="item.is_auto || !canEdit"
+            label="Приоритет"
+            option-label="name"
+            option-value="id"
+            map-options
+            emit-value
             dense
-          />
-          <amount-type-select
-            v-model="item.amount_type"
-            @update:modelValue="$emit('updateItem', item)"
-            :readonly="!canEdit"
-            class="col-grow"
-          />
-        </div>
+            options-dense
+            use-input
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  Нет результатов
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
 
-        <!-- Completed amount -->
-        <amount-completed-input
-          v-model.number="item.amount_completed"
-          @update:modelValue="$emit('updateItem', item)"
-          :max="item.amount || 1"
-          :readonly="!canEdit"
-          :amount_type="item.amount_type || ''"
-        />
+          <!-- Manual amount -->
+          <div class="row justify-between items-center" v-if="!item.is_auto">
+            <q-input
+              v-model.number="item.amount"
+              @update:modelValue="$emit('updateItem', item)"
+              :debounce="2000"
+              class="col-3"
+              type="number"
+              label="Количество"
+              dense
+            />
+            <amount-type-select
+              v-model="item.amount_type"
+              @update:modelValue="$emit('updateItem', item)"
+              :readonly="!canEdit"
+              class="col-grow"
+            />
+          </div>
+
+          <!-- Completed amount -->
+
+          <amount-completed-input
+            v-if="item?.amount"
+            v-model.number="item.amount_completed"
+            @update:modelValue="$emit('updateItem', item)"
+            :max="item.amount || 1"
+            :readonly="!canEdit"
+            :amount_type="item.amount_type || ''"
+          />
+        </q-expansion-item>
 
         <!-- Used in recipes -->
         <div class="q-my-md" v-if="item.is_auto && item.ingredients">

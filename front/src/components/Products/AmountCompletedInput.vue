@@ -15,7 +15,6 @@
       @update:modelValue="$emit('update:modelValue', $event)"
       class="col-grow q-px-md"
       marker-labels
-      :markers="markersCount"
       :debounce="2000"
       :readonly="readonly"
       :min="0"
@@ -55,7 +54,7 @@ export default defineComponent({
       return 1;
     },
     markersCount(): number {
-      return Math.floor(this.max / 10);
+      return Math.max(Math.floor(this.max / 10), 1);
     },
   },
 });
@@ -73,6 +72,7 @@ export default defineComponent({
   .q-slider__marker-labels-container {
     order: -1;
     padding-top: 5px;
+    padding-bottom: 0;
   }
 }
 </style>

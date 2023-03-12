@@ -1,5 +1,6 @@
 <template>
   <q-page>
+    <!-- Top bar -->
     <week-select v-model="week" @update:modelValue="onWeekUpd()" />
     <q-linear-progress
       :value="completedPrc"
@@ -7,12 +8,19 @@
       :instant-feedback="saving"
       :animation-speed="500"
     />
+    <!-- Top warnings -->
+    <q-item v-if="markAlreadyCompleted" class="bg-info text-white">
+      <q-item-section avatar><q-icon name="info"></q-icon></q-item-section>
+      <q-item-section>Режим "отметить что уже есть"</q-item-section>
+    </q-item>
+    <!-- Modals -->
     <product-list-item-view
       v-model="viewItem"
       :week="week"
       :canEdit="canEdit"
       @updateItem="updateItem"
     />
+    <!-- Contents -->
 
     <div
       class="row items-center q-mt-sm q-ml-sm q-col-gutter-sm q-mr-md"
@@ -77,6 +85,15 @@
         <q-btn icon="menu" size="md" flat round dense>
           <q-menu>
             <q-list dense>
+              <q-item tag="label" v-ripple>
+                <q-item-section>
+                  <q-item-label>Отметить что уже есть</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-toggle v-model="markAlreadyCompleted" />
+                </q-item-section>
+              </q-item>
+
               <q-item clickable v-close-popup @click="sendList()">
                 <q-item-section avatar><q-icon name="send" /> </q-item-section>
                 <q-item-section>Отправить в телеграмм</q-item-section>
@@ -233,6 +250,7 @@ export default defineComponent({
       saving: false,
       showCompleted: Boolean(showCompleted),
       createItem: "",
+      markAlreadyCompleted: false,
       // week: {
       //   year: null,
       //   week: null,
@@ -428,6 +446,13 @@ export default defineComponent({
     updateItem(item: ProductListItemRead, reload: boolean) {
       if (!item) {
         return;
+      }
+      if (this.markAlreadyCompleted) {
+        if (item.is_completed) {
+          item.already_completed = item.is_completed;
+        }
+      } else if (item.already_completed) {
+        item.is_completed = true;
       }
       if (!this.isOnLine) {
         console.debug("Upd item: ", item);
@@ -743,12 +768,13 @@ export default defineComponent({
     },
     pricesCompleted() {
       return this.listItemsRaw
-        .filter((i) => i.is_completed)
+        .filter((i) => i.is_completed && !i.already_completed)
         .map((i) => i.price_full)
         .reduce((a, b) => a + b, 0);
     },
     pricesTotal() {
       return this.listItemsRaw
+        .filter((i) => !i.already_completed)
         .map((i) => i.price_full)
         .reduce((a, b) => a + b, 0);
     },

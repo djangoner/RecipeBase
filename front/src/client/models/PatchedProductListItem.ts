@@ -19,6 +19,7 @@ export type PatchedProductListItem = {
     readonly is_auto?: boolean;
     is_deleted?: boolean;
     is_completed?: boolean;
+    already_completed?: boolean;
     amount_completed?: number | null;
     title?: string;
     amount?: number | null;

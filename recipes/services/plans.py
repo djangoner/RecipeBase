@@ -1,7 +1,9 @@
+from dataclasses import dataclass, field
 import logging
-from typing import List, Tuple
+from typing import Optional, Tuple, TypeAlias
 
 from recipes.models import (
+    Ingredient,
     ProductListItem,
     ProductListWeek,
     RecipeIngredient,
@@ -16,27 +18,41 @@ log = logging.getLogger("PlansGen")
 CONVERT_ADVANCED = ["l", "ml"]
 
 
+IngredientAmounts: TypeAlias = list[tuple[str, int | float | None]]
+
+
+@dataclass
+class WeekIngredientInfo:
+    ingredient: Ingredient
+    ingredients: list[RecipeIngredient] = field(default_factory=list)
+    measuring: Optional[str] = None
+    amounts: IngredientAmounts = field(default_factory=list)
+    amount: Optional[int | float] = None
+    min_day: int = field(default=7)
+
+
 def is_convertible(measuring: str, advanced: bool = True) -> bool:
     return measuring in MEASURING_CONVERT or (advanced and measuring in CONVERT_ADVANCED)
 
 
-def convert_all_to_grams(measurings: List[Tuple[str, int | None]]) -> Tuple[str, int | float]:
+def convert_all_to_grams(measurings: IngredientAmounts) -> Tuple[str, int | float]:
     res: float = 0
     all_meas = "g"
 
     non_empty = list(filter(lambda m: m[1], measurings))
     all_liquids = all([meas in MEASURING_LIQUIDS for meas, amount in non_empty])
+    all_grams = all([meas == "g" for meas, amount in non_empty])
     all_normal = all([is_convertible(meas, advanced=False) for meas, amount in non_empty])
 
     for meas, amount in measurings:
         if not amount:
             continue
 
-        if all_liquids:
+        if all_liquids and not all_grams:
             if meas == "l":
                 res += amount * 1000
                 all_meas = "ml"
-            elif meas == "ml":
+            elif meas in ["ml", "g"]:
                 res += amount
                 all_meas = "ml"
             else:
@@ -44,7 +60,8 @@ def convert_all_to_grams(measurings: List[Tuple[str, int | None]]) -> Tuple[str,
         elif all_normal:
             if is_convertible(meas, advanced=False):
                 amount_grams = amount_to_grams(amount, meas)
-                res += amount_grams
+                if amount_grams:
+                    res += amount_grams
             # elif meas == "items":
             #     res += amount
             else:
@@ -66,9 +83,13 @@ def get_default_ing() -> dict:
     }
 
 
-def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
+def get_ingredient_key(ing: RecipeIngredient):
+    return ing.ingredient.title
+
+
+def get_week_ingredients(week: RecipePlanWeek) -> dict[str, WeekIngredientInfo]:
     """Generate list of ingredients for week"""
-    res = {}
+    res: dict[str, WeekIngredientInfo] = {}
 
     # Add week plan ingredients
     plan: RecipePlan
@@ -78,53 +99,54 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
         assert recipe is not None
         ingredients = recipe.ingredients.all()
 
-        ing: RecipeIngredient
         for ing in ingredients:
-            ing_name = ing.ingredient.title
+            ing_key = get_ingredient_key(ing)
 
             if not ing.ingredient.need_buy:  # Skip not required to buy ingredients
                 continue
 
-            if ing_name not in res:  # Create default ingredient
-                res[ing_name] = get_default_ing()
-                res[ing_name]["ingredient"] = ing.ingredient
+            if ing_key not in res:  # Create default ingredient
+                res[ing_key] = WeekIngredientInfo(ingredient=ing.ingredient)
+            ing_info = res[ing_key]
 
             # -- Add ingredient amount
             if ing.amount_type == "items" and ing.ingredient.item_weight:  # Convert items to grams
-                res[ing_name]["amounts"].append(["g", int(ing.amount * ing.ingredient.item_weight)])
+                ing_info.amounts.append(("g", int(ing.amount * ing.ingredient.item_weight)))
             else:
-                res[ing_name]["amounts"].append([ing.amount_type, ing.amount])
-            res[ing_name]["ingredients"].append(ing)
+                ing_info.amounts.append((ing.amount_type, ing.amount))
+
+            ing_info.ingredients.append(ing)
 
             # -- Update ingredient min_day
-            if plan.day < res[ing_name]["min_day"]:
-                res[ing_name]["min_day"] = plan.day
+            if plan.day and plan.day < ing_info.min_day:
+                ing_info.min_day = plan.day
 
     # Add regular ingredients
     for regular_ing in RegularIngredient.objects.all():
-        ing_name = regular_ing.ingredient.title
-        if ing_name not in res:  # Create default ingredient
-            res[ing_name] = get_default_ing()
-            res[ing_name]["ingredient"] = regular_ing.ingredient
+        ing_key = regular_ing.ingredient.title
+        if ing_key not in res:  # Create default ingredient
+            res[ing_key] = WeekIngredientInfo(ingredient=regular_ing.ingredient)
+        ing_info = res[ing_key]
 
-        res[ing_name]["amounts"].append([regular_ing.amount_type, regular_ing.amount])
-        if regular_ing.day and regular_ing.day < res[ing_name]["min_day"]:
-            res[ing_name]["min_day"] = regular_ing.day
+        ing_info.amounts.append((regular_ing.amount_type, regular_ing.amount))
+        if regular_ing.day and regular_ing.day < ing_info.min_day:
+            ing_info.min_day = regular_ing.day
 
     return res
 
 
-def get_plan_week_ingredients(week: RecipePlanWeek) -> dict:
+def get_plan_week_ingredients(week: RecipePlanWeek) -> dict[str, WeekIngredientInfo]:
     """Get summarized list of products for week"""
 
     ingredients = get_week_ingredients(week)
 
     # // Analyze amounts
 
+    ing_name: str
+    info: WeekIngredientInfo
     for ing_name, info in ingredients.items():
         # List of unique measuring types of ingredient
-        ing = info["ingredient"]
-        amounts = info["amounts"]
+        amounts = info.amounts
         meas_types = list({measuring for measuring, amount in amounts})
         all_convert = all([is_convertible(m) for m in meas_types])
         all_any = len(meas_types) == 1
@@ -134,13 +156,13 @@ def get_plan_week_ingredients(week: RecipePlanWeek) -> dict:
         # )
         if all_convert:  # If can convert all measurings to one
             meas, amount = convert_all_to_grams(amounts)
-            info["measuring"] = meas
-            info["amount"] = amount
+            info.measuring = meas
+            info.amount = amount
         elif all_any:  # If all measurings are any
-            info["measuring"] = meas_types[0]
-            info["amount"] = sum([amount for meas, amount in amounts])
+            info.measuring = meas_types[0]
+            info.amount = sum([amount for meas, amount in amounts if amount])
         else:
-            log.warning(f"Can't convert all measurings of {ing} ({meas_types}) to one!")
+            log.warning(f"Can't convert all measurings of {info.ingredient} ({meas_types}) to one!")
 
         # -- Check min pack size
         # if ing.min_pack_size:
@@ -185,24 +207,24 @@ def update_plan_week(week: RecipePlanWeek):
         # ing: RecipeIngredient = ing_info["ingredient"]
 
         plan_item: ProductListItem
-        amounts = get_ingredients_amounts(ing_info["ingredients"])
+        amounts = get_ingredients_amounts(ing_info.ingredients)
 
         plan_item, _ = plan_week.items.update_or_create(
-            ingredient=ing_info["ingredient"],
+            ingredient=ing_info.ingredient,
             is_auto=True,
             defaults={
                 "title": ing_name,
-                "amount": ing_info["amount"],
+                "amount": ing_info.amount,
                 "amounts": amounts,
-                "amount_type": ing_info["measuring"],
-                "day": ing_info["min_day"] - 1,
+                "amount_type": ing_info.measuring,
+                "day": ing_info.min_day - 1,
                 "is_deleted": False,
             },
         )
 
-        plan_item.ingredients.set(ing_info["ingredients"])
+        plan_item.ingredients.set(ing_info.ingredients)
         plan_item.save()
-        edited_plans.append(plan_item.id)
+        edited_plans.append(plan_item.pk)
 
     old_items = plan_week.items.filter(is_auto=True).exclude(id__in=edited_plans)
     # old_items.update(is_deleted=True)

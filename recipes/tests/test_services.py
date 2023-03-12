@@ -1,6 +1,6 @@
 import logging
 from django.test import SimpleTestCase, TestCase
-from recipes.models import ProductListWeek, RecipePlan
+from recipes.models import Ingredient, ProductListWeek, RecipePlan
 
 from recipes.services import plans, measurings
 from recipes.tests.factories import (
@@ -62,15 +62,13 @@ class PlansConvertTestCase(TestCase):
         assert plans.convert_all_to_grams([("g", None)]) == ("g", 0)
         assert plans.convert_all_to_grams([("g", None), ("cup", 1)]) == ("g", 250)
         assert plans.convert_all_to_grams([("ml", None)]) == ("g", 0)
-        assert plans.convert_all_to_grams([("g", 1), ("ml", 1)]) == ("g", 0)
+        assert plans.convert_all_to_grams([("g", 1), ("ml", 1)]) == ("ml", 2)
         assert plans.convert_all_to_grams([("cup", 1), ("l", 1)]) == ("g", 0)
         assert plans.convert_all_to_grams([("unknown", 1)]) == ("g", 0)
         assert plans.convert_all_to_grams([("unknown", 1)]) == ("g", 0)
 
 
 class PlansGenerationTestCase(TestCase):
-    maxDiff = None
-
     def test_week_ingredients_basic(self):
         week = RecipePlanWeekFactory.create()
         assert week.plans.count() == 7
@@ -81,7 +79,7 @@ class PlansGenerationTestCase(TestCase):
     def test_week_ingredients_advanced(self):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
-        ingredient = IngredientFactory()
+        ingredient: Ingredient = IngredientFactory.create()
         ings = []
 
         ings.append(
@@ -94,24 +92,21 @@ class PlansGenerationTestCase(TestCase):
         )
 
         ingredients = plans.get_week_ingredients(week)
-        self.assertDictEqual(
-            ingredients,
-            {
-                ingredient.title: {
-                    "measuring": None,
-                    "amount": 0,
-                    "amounts": [["g", 100], ["g", 100]],
-                    "min_day": 1,
-                    "ingredient": ingredient,
-                    "ingredients": ings,
-                }
-            },
-        )
+        assert ingredients == {
+            ingredient.title: plans.WeekIngredientInfo(
+                ingredient=ingredient,
+                ingredients=ings,
+                measuring=None,
+                amount=None,
+                amounts=[("g", 100.0), ("g", 100.0)],
+                min_day=1,
+            )
+        }
 
     def test_week_ingredients_items(self):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
-        ingredient = IngredientFactory(min_pack_size=200, item_weight=100)
+        ingredient: Ingredient = IngredientFactory.create(min_pack_size=200, item_weight=100)
         ings = []
 
         ings.append(
@@ -123,24 +118,21 @@ class PlansGenerationTestCase(TestCase):
         )
 
         ingredients = plans.get_week_ingredients(week)
-        self.assertDictEqual(
-            ingredients,
-            {
-                ingredient.title: {
-                    "measuring": None,
-                    "amount": 0,
-                    "amounts": [["g", 100], ["g", 200]],
-                    "min_day": 1,
-                    "ingredient": ingredient,
-                    "ingredients": ings,
-                }
-            },
-        )
+        assert ingredients == {
+            ingredient.title: plans.WeekIngredientInfo(
+                ingredient=ingredient,
+                ingredients=ings,
+                measuring=None,
+                amount=None,
+                amounts=[("g", 100.0), ("g", 200.0)],
+                min_day=1,
+            )
+        }
 
     def test_week_regular_ingredient(self):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
-        ingredient = IngredientFactory()
+        ingredient: Ingredient = IngredientFactory.create()
         ings = []
 
         ings.append(
@@ -155,57 +147,45 @@ class PlansGenerationTestCase(TestCase):
         RegularIngredientFactory(ingredient=ingredient, day=1, amount=150, amount_type="g")
 
         ingredients = plans.get_week_ingredients(week)
-        self.assertDictEqual(
-            ingredients,
-            {
-                ingredient.title: {
-                    "measuring": None,
-                    "amount": 0,
-                    "amounts": [["g", 100], ["g", 100], ["g", 150]],
-                    "min_day": 1,
-                    "ingredient": ingredient,
-                    "ingredients": ings,
-                }
-            },
-        )
+        assert ingredients == {
+            ingredient.title: plans.WeekIngredientInfo(
+                ingredient=ingredient,
+                ingredients=ings,
+                amounts=[("g", 100), ("g", 100), ("g", 150)],
+                min_day=1,
+            )
+        }
 
     def test_week_regular_ingredient_only(self):
         week = RecipePlanWeekFactory.create()
         # week_plans: list[RecipePlan] = week.plans.all()
-        ingredient = IngredientFactory()
-        ingredient2 = IngredientFactory()
+        ingredient: Ingredient = IngredientFactory.create()
+        ingredient2: Ingredient = IngredientFactory.create()
         ings = []
 
         RegularIngredientFactory(ingredient=ingredient, day=2, amount=150, amount_type="g")
         RegularIngredientFactory(ingredient=ingredient2, amount=50, amount_type="g")
 
         ingredients = plans.get_week_ingredients(week)
-        self.assertDictEqual(
-            ingredients,
-            {
-                ingredient.title: {
-                    "measuring": None,
-                    "amount": 0,
-                    "amounts": [["g", 150]],
-                    "min_day": 2,
-                    "ingredient": ingredient,
-                    "ingredients": ings,
-                },
-                ingredient2.title: {
-                    "measuring": None,
-                    "amount": 0,
-                    "amounts": [["g", 50]],
-                    "min_day": 7,
-                    "ingredient": ingredient2,
-                    "ingredients": ings,
-                },
-            },
-        )
+        assert ingredients == {
+            ingredient.title: plans.WeekIngredientInfo(
+                ingredient=ingredient,
+                ingredients=ings,
+                amounts=[("g", 150.0)],
+                min_day=2,
+            ),
+            ingredient2.title: plans.WeekIngredientInfo(
+                ingredient=ingredient2,
+                ingredients=ings,
+                amounts=[("g", 50.0)],
+                min_day=7,
+            ),
+        }
 
     def test_plan_week_basic(self):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
-        ingredient = IngredientFactory()
+        ingredient: Ingredient = IngredientFactory.create()
         ings = []
 
         ings.append(
@@ -213,24 +193,21 @@ class PlansGenerationTestCase(TestCase):
         )
 
         plan_result = plans.get_plan_week_ingredients(week)
-        self.assertDictEqual(
-            plan_result,
-            {
-                ingredient.title: {
-                    "measuring": "g",
-                    "amount": 100,
-                    "amounts": [["g", 100]],
-                    "min_day": 1,
-                    "ingredient": ingredient,
-                    "ingredients": ings,
-                }
-            },
-        )
+        assert plan_result == {
+            ingredient.title: plans.WeekIngredientInfo(
+                ingredient=ingredient,
+                ingredients=ings,
+                measuring="g",
+                amount=100,
+                amounts=[("g", 100)],
+                min_day=1,
+            )
+        }
 
     def test_plan_week_liquids(self):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
-        ingredient = IngredientFactory()
+        ingredient: Ingredient = IngredientFactory.create(item_weight=100)
         ings = []
 
         ings.append(
@@ -243,26 +220,28 @@ class PlansGenerationTestCase(TestCase):
                 recipe=week_plans[1].recipe, ingredient=ingredient, amount=100, amount_type="ml"
             )
         )
+        ings.append(
+            RecipeIngredientFactory.create(
+                recipe=week_plans[1].recipe, ingredient=ingredient, amount=1, amount_type="items"
+            )
+        )
 
         plan_result = plans.get_plan_week_ingredients(week)
-        self.assertDictEqual(
-            plan_result,
-            {
-                ingredient.title: {
-                    "measuring": "ml",
-                    "amount": 1100,
-                    "amounts": [["l", 1], ["ml", 100]],
-                    "min_day": 1,
-                    "ingredient": ingredient,
-                    "ingredients": ings,
-                }
-            },
-        )
+        assert plan_result == {
+            ingredient.title: plans.WeekIngredientInfo(
+                ingredient=ingredient,
+                ingredients=ings,
+                measuring="ml",
+                amount=1200,
+                amounts=[("l", 1), ("ml", 100), ("g", 100)],
+                min_day=1,
+            )
+        }
 
     def test_plan_week_items(self):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
-        ingredient = IngredientFactory(item_weight=150)
+        ingredient: Ingredient = IngredientFactory.create(item_weight=150)
         ings = []
 
         ings.append(
@@ -277,24 +256,21 @@ class PlansGenerationTestCase(TestCase):
         )
 
         plan_result = plans.get_plan_week_ingredients(week)
-        self.assertDictEqual(
-            plan_result,
-            {
-                ingredient.title: {
-                    "measuring": "g",
-                    "amount": 250,
-                    "amounts": [["g", 150], ["g", 100]],
-                    "min_day": 1,
-                    "ingredient": ingredient,
-                    "ingredients": ings,
-                }
-            },
-        )
+        assert plan_result == {
+            ingredient.title: plans.WeekIngredientInfo(
+                ingredient=ingredient,
+                ingredients=ings,
+                measuring="g",
+                amount=250,
+                amounts=[("g", 150), ("g", 100)],
+                min_day=1,
+            )
+        }
 
     def test_plan_week_any(self):
         week = RecipePlanWeekFactory.create()
         week_plans: list[RecipePlan] = week.plans.all()
-        ingredient = IngredientFactory(item_weight=150)
+        ingredient: Ingredient = IngredientFactory.create(item_weight=150)
         ings = []
 
         ings.append(
@@ -309,19 +285,16 @@ class PlansGenerationTestCase(TestCase):
         )
 
         plan_result = plans.get_plan_week_ingredients(week)
-        self.assertDictEqual(
-            plan_result,
-            {
-                ingredient.title: {
-                    "measuring": "head",
-                    "amount": 5,
-                    "amounts": [["head", 1], ["head", 4]],
-                    "min_day": 1,
-                    "ingredient": ingredient,
-                    "ingredients": ings,
-                }
-            },
-        )
+        assert plan_result == {
+            ingredient.title: plans.WeekIngredientInfo(
+                ingredient=ingredient,
+                ingredients=ings,
+                min_day=1,
+                measuring="head",
+                amount=5.0,
+                amounts=[("head", 1.0), ("head", 4.0)],
+            )
+        }
 
     def test_update_plan_week_invalid(self):
         week = RecipePlanWeekFactory.create()

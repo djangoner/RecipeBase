@@ -25,7 +25,7 @@ MEASURING_CONVERT = {
     "tea_spoon": 10,
 }
 
-MEASURING_LIQUIDS = ["l", "ml"]
+MEASURING_LIQUIDS = ["l", "ml", "g"]
 
 
 def short_text(tx: str, length: int = 100):
@@ -35,7 +35,7 @@ def short_text(tx: str, length: int = 100):
     return tx[:length] + "..."
 
 
-def amount_to_grams(amount: int | None, measure: str) -> int:
+def amount_to_grams(amount: int | float | None, measure: str) -> int | None:
     multiplier = MEASURING_CONVERT.get(measure)
 
     if not multiplier or not amount:

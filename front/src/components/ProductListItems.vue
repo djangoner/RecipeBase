@@ -40,14 +40,7 @@
             (
             <template v-if="item.packs && item.ingredient.item_weight">
               ~{{ Math.ceil(item.packs) }}
-              {{
-                intFormat(
-                  Math.ceil(item.packs),
-                  "упаковка",
-                  "упаковки",
-                  "упаковок"
-                )
-              }},
+              шт -
             </template>
             {{ item.amount }} {{ item.amount_type_str }}
             )

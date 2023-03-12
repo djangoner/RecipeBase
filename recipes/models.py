@@ -344,7 +344,7 @@ class RecipePlan(models.Model):
 class ProductListWeek(models.Model):
     year = models.SmallIntegerField(_("Год"))
     week = models.SmallIntegerField(_("Неделя"))
-    items: models.QuerySet["ProductListItem"]
+    # items: models.QuerySet["ProductListItem"]
 
     class Meta:
         ordering = ["-year", "-week"]
@@ -377,6 +377,7 @@ class ProductListItem(models.Model):
         verbose_name=_("Список продуктов недели"),
         blank=True,
         related_name="items",
+        db_index=True,
     )
     day = models.PositiveSmallIntegerField(
         _("День недели"),

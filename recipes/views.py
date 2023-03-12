@@ -412,8 +412,10 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
     queryset = ProductListWeek.objects.prefetch_related(
         "items",
         "items__author",
+        "items__ingredient",
         "items__ingredients",
         "items__ingredients__ingredient",
+        "items__ingredients__category",
         "items__ingredients__recipe",
         "items__ingredients__recipe__ingredients",
         "items__ingredients__recipe__ingredients__ingredient",
@@ -432,7 +434,8 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
         "items__ingredient__category__sorting",
         "items__ingredient__category__sorting__shop",
         "items__ingredient__regular_ingredients",
-    )
+    ).distinct()
+
     serializer_class = ProductListWeekSerializer
 
     def get_serializer_class(self):
@@ -455,7 +458,7 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
                 pass
 
         if year or week:
-            plan_week, _ = ProductListWeek.objects.get_or_create(year=year, week=week)
+            plan_week, _ = self.queryset.get_or_create(year=year, week=week)
             return plan_week
 
         return super().get_object()

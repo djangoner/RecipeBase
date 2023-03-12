@@ -7,6 +7,9 @@
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
+    "dev": "quasar dev",
+    "build": "quasar build",
+    "build:pwa": "quasar build -m pwa",
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "generate-client": "openapi --input http://localhost:8000/api/schema/ --output ./src/client --client axios --useOptions"
@@ -14,9 +17,11 @@
   "dependencies": {
     "@oarepo/vue-query-synchronizer": "^3.0.0",
     "@quasar/extras": "^1.15.10",
+    "@quasar/fastclick": "^1.1.5",
     "axios": "^0.21.1",
     "pinia": "^2.0.11",
     "quasar": "^2.11.5",
+    "register-service-worker": "^1.7.2",
     "vue": "^3.0.0",
     "vue-i18n": "^9.0.0",
     "vue-router": "^4.0.0",

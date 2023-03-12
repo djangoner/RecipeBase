@@ -1,7 +1,9 @@
 version: "3"
 services:
     web:
-        build: .
+        build:
+            context: .
+            dockerfile: Dockerfile.django
         ports:
             - "8085:8080"
         volumes:
@@ -12,7 +14,7 @@ services:
         tty: true
         build:
             context: .
-            dockerfile: Dockerfile-quasar
+            dockerfile: Dockerfile.quasar
 #          target: 'production-stage'
         ports:
             - '8086:80'

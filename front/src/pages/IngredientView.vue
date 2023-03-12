@@ -1,6 +1,15 @@
 <template>
-  <q-dialog v-model="imageFullscreen" full-height full-width v-if="previewImage">
-    <q-card class="column full-height q-pa-none" style="background: transparent" flat>
+  <q-dialog
+    v-model="imageFullscreen"
+    full-height
+    full-width
+    v-if="previewImage"
+  >
+    <q-card
+      class="column full-height q-pa-none"
+      style="background: transparent"
+      flat
+    >
       <div class="absolute-top-right">
         <q-btn
           class="bg-white"
@@ -32,7 +41,11 @@
         >
       </div>
     </div>
-    <q-form class="q-my-md" @submit.prevent="saveIngredient()" v-if="ingredient">
+    <q-form
+      class="q-my-md"
+      @submit.prevent="saveIngredient()"
+      v-if="ingredient"
+    >
       <q-card padding>
         <q-card-section class="q-col-gutter-y-md">
           <!-- Main fields -->
@@ -64,18 +77,21 @@
             v-model.number="ingredient.min_pack_size"
             :readonly="!canEdit"
             label="Размер упаковки"
+            type="number"
             filled
           ></q-input>
           <q-input
             v-model.number="ingredient.item_weight"
             :readonly="!canEdit"
             label="Вес одной штуки"
+            type="number"
             filled
           ></q-input>
 
           <q-input
             v-model.number="ingredient.price"
             :readonly="!canEdit"
+            type="number"
             label="Цена (₺)"
             filled
           ></q-input>
@@ -153,7 +169,11 @@
               label="Требует покупки"
             >
             </q-toggle>
-            <q-toggle v-model="ingredient.edible" :readonly="!canEdit" label="Съедобный">
+            <q-toggle
+              v-model="ingredient.edible"
+              :readonly="!canEdit"
+              label="Съедобный"
+            >
             </q-toggle>
           </div>
         </q-card-section>
@@ -191,15 +211,17 @@
 </template>
 
 <script lang="ts">
-import { ingredientFromRead } from 'src/Convert';
-import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
-import { useAuthStore } from 'src/stores/auth';
-import { useBaseStore } from 'src/stores/base';
-import { defineComponent } from 'vue';
+import { ingredientFromRead } from "src/Convert";
+import HandleErrorsMixin, {
+  CustomAxiosError,
+} from "src/modules/HandleErrorsMixin";
+import { useAuthStore } from "src/stores/auth";
+import { useBaseStore } from "src/stores/base";
+import { defineComponent } from "vue";
 
 const defaultIngredient = {
-  title: '',
-  description: '',
+  title: "",
+  description: "",
   need_buy: true,
   edible: true,
 };
@@ -216,11 +238,12 @@ export default defineComponent({
       loading: false,
       saving: false,
       deleting: false,
-      searchCategory: '',
+      searchCategory: "",
       uploadFile: null,
       uploadPreview: null as string | null,
       imageFullscreen: false,
-      requiredRule: (val: string | number | undefined) => !!val || 'Обязательное поле',
+      requiredRule: (val: string | number | undefined) =>
+        !!val || "Обязательное поле",
     };
   },
   mounted() {
@@ -236,12 +259,12 @@ export default defineComponent({
     loadIngredient(load_id?: string | number | undefined) {
       let id: string | number = load_id || (this.$route.params.id as string);
 
-      if (id == 'new') {
+      if (id == "new") {
         this.resetData();
         return;
       }
 
-      if (typeof id == 'string') {
+      if (typeof id == "string") {
         id = parseInt(id);
       }
 
@@ -253,7 +276,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки ингредиента');
+          this.handleErrors(err, "Ошибка загрузки ингредиента");
         });
     },
     loadIngredientCategories() {
@@ -269,7 +292,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           // this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки категорий ингредиентов');
+          this.handleErrors(err, "Ошибка загрузки категорий ингредиентов");
         });
     },
     resetData() {
@@ -285,7 +308,9 @@ export default defineComponent({
       this.saving = true;
 
       let isCreating = !this.exists;
-      let method = isCreating ? this.store.createIngredient : this.store.saveIngredient;
+      let method = isCreating
+        ? this.store.createIngredient
+        : this.store.saveIngredient;
 
       // payload.category =
       //   typeof payload.category == 'number' ? payload.category : payload.category?.id;
@@ -296,27 +321,30 @@ export default defineComponent({
         payload.image = null;
       } else {
         if (!payload.image) {
-          payload.image = '';
+          payload.image = "";
         }
       }
-      console.debug('Payload: ', payload);
+      console.debug("Payload: ", payload);
       method(payload)
         .then((resp) => {
           this.saving = false;
 
           if (isCreating) {
-            void this.$router.replace({ name: 'ingredient', params: { id: resp.id } });
+            void this.$router.replace({
+              name: "ingredient",
+              params: { id: resp.id },
+            });
           }
 
-          let created_tx = isCreating ? 'создан' : 'сохранен';
+          let created_tx = isCreating ? "создан" : "сохранен";
           this.$q.notify({
-            type: 'positive',
+            type: "positive",
             message: `Ингредиент успешно ${created_tx}`,
           });
         })
         .catch((err: CustomAxiosError) => {
           this.saving = false;
-          this.handleErrors(err, 'Ошибка сохранения ингредиента');
+          this.handleErrors(err, "Ошибка сохранения ингредиента");
         });
     },
     confirmClearImage() {
@@ -324,7 +352,7 @@ export default defineComponent({
 
       this.$q
         .dialog({
-          title: 'Подтверждение',
+          title: "Подтверждение",
           message: `Вы уверены что хотите удалить изображение рецепта?`,
           cancel: true,
           persistent: true,
@@ -337,20 +365,20 @@ export default defineComponent({
     askDelete() {
       this.$q
         .dialog({
-          title: 'Подтверждение',
+          title: "Подтверждение",
           message:
-            'Вы уверены что хотите удалить этот ингредиент? Он будет удален из всех используемых рецептов и из списка продуктов.',
+            "Вы уверены что хотите удалить этот ингредиент? Он будет удален из всех используемых рецептов и из списка продуктов.",
           cancel: true,
           persistent: true,
         })
         .onOk(() => {
           void this.deleteIngredient().then(() => {
             this.$q.notify({
-              type: 'positive',
+              type: "positive",
               message: `Ингредиент успешно удален`,
-              icon: 'delete',
+              icon: "delete",
             });
-            void this.$router.replace({ name: 'ingredients' });
+            void this.$router.replace({ name: "ingredients" });
           });
         });
     },
@@ -370,7 +398,7 @@ export default defineComponent({
           .catch((err: CustomAxiosError) => {
             reject();
             this.deleting = false;
-            this.handleErrors(err, 'Ошибка удаления ингредиента');
+            this.handleErrors(err, "Ошибка удаления ингредиента");
           });
       });
     },
@@ -397,7 +425,7 @@ export default defineComponent({
       return this.uploadPreview || this.ingredient?.image;
     },
     canEdit() {
-      return this.storeAuth.hasPerm('recipes.change_ingredient');
+      return this.storeAuth.hasPerm("recipes.change_ingredient");
     },
   },
   watch: {

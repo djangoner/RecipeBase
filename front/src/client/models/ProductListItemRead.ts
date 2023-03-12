@@ -22,6 +22,7 @@ export type ProductListItemRead = {
     readonly is_auto: boolean;
     is_deleted?: boolean;
     is_completed?: boolean;
+    amount_completed?: number | null;
     title: string;
     amount?: number | null;
     readonly amounts: Record<string, any>;

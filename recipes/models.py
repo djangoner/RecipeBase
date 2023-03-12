@@ -402,6 +402,8 @@ class ProductListItem(models.Model):
     ##
 
     is_completed = models.BooleanField(_("Завершен"), default=False)
+    amount_completed = models.FloatField(_("Купленное кол-во"), null=True, blank=True, max_length=15)
+
     title = models.CharField(_("Название"), max_length=255)
     amount = models.FloatField(_("Количество"), null=True, blank=True, max_length=15)
     amounts = models.JSONField(_("Количества в плане"), default=dict)

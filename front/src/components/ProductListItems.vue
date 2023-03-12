@@ -40,7 +40,7 @@
             (
             <template v-if="item.packs && item.ingredient.item_weight">
               ~{{ Math.ceil(item.packs) }}
-              шт -
+              {{ item.ingredient.item_weight === 1000 ? "кг" : "шт" }}:
             </template>
             {{ item.amount }} {{ item.amount_type_str }}
             )

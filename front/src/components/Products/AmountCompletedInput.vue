@@ -12,10 +12,9 @@
     />
     <q-slider
       :model-value="modelValue"
-      @update:modelValue="$emit('update:modelValue', $event)"
+      @update:modelValue="debouncedUpdate"
       class="col-grow q-px-md"
       marker-labels
-      :debounce="2000"
       :readonly="readonly"
       :min="0"
       :max="max"
@@ -25,6 +24,7 @@
 </template>
 
 <script lang="ts">
+import { debounce } from "quasar";
 import { defineComponent, PropType } from "vue";
 
 export default defineComponent({
@@ -44,6 +44,17 @@ export default defineComponent({
       type: String,
       required: false,
     },
+  },
+  data() {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    const emptyFn = ($ev: number | null) => {};
+    return { debouncedUpdate: emptyFn as (value: number | null) => void };
+  },
+  created() {
+    this.debouncedUpdate = debounce(
+      ($ev) => this.$emit("update:modelValue", $ev),
+      1000
+    );
   },
   computed: {
     sliderStep(): number {

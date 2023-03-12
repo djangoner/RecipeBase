@@ -37,7 +37,11 @@ export const useAuthStore = defineStore("auth", {
 
   actions: {
     hasPerm(perm: string): boolean {
-      const perms = this.permissions || cachedPermissions;
+      if (this.account?.is_superuser) {
+        return true;
+      }
+      const perms =
+        this.permissions.length > 0 ? this.permissions : cachedPermissions;
       return perms.includes(perm);
     },
 

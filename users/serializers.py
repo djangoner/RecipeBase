@@ -24,8 +24,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        exclude = ["groups", "user_permissions", "is_superuser", "password"]
-        read_only_fields = ["last_login", "date_joined", "is_staff"]
+        exclude = ["groups", "user_permissions", "password"]
+        read_only_fields = ["last_login", "date_joined", "is_staff", "is_superuser"]
         depth = 1
 
     def get_permissions(self, obj) -> list[str]:

@@ -10,6 +10,10 @@ export type User = {
     readonly permissions: Array<string>;
     readonly last_login: string | null;
     /**
+     * Указывает, что пользователь имеет все права без явного их назначения.
+     */
+    readonly is_superuser: boolean;
+    /**
      * Обязательное поле. Не более 150 символов. Только буквы, цифры и символы @/./+/-/_.
      */
     username: string;

@@ -207,7 +207,9 @@ if DEBUGBAR:
     INSTALLED_APPS += ["debug_toolbar"]
     MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
 
-SHOW_TOOLBAR_CALLBACK = "users.backends.toolbar_callback"
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": "users.backends.toolbar_callback",
+}
 
 CKEDITOR_CONFIGS = {
     "default": {

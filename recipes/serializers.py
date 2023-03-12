@@ -109,7 +109,6 @@ class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSeria
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["category"] = IngredientCategorySerializer(instance.category).data if instance.category else None
         return representation
 
     @extend_schema_field(OpenApiTypes.NUMBER)
@@ -118,7 +117,8 @@ class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSeria
 
 
 class IngredientReadSerializer(IngredientSerializer):
-    category = IngredientCategorySerializer()
+    pass
+    # category = IngredientCategorySerializer()
 
 
 class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):

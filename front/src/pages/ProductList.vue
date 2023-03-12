@@ -696,7 +696,7 @@ export default defineComponent({
         for (let [idx, item] of items.entries()) {
           let catItem = item?.ingredient?.category;
           if (!catItem) continue;
-          let cat = categories[catItem?.id];
+          let cat = categories[catItem];
           if (!cat || !cat.items) continue;
           cat.items.push(Object.assign({}, item));
           delete items[idx];

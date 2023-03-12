@@ -217,7 +217,6 @@ let tableColumns = [
     name: "category",
     label: "Категория",
     align: "left",
-    field: (row: IngredientRead) => row?.category?.title || "-",
     required: true,
     sortable: true,
   },
@@ -305,6 +304,12 @@ export default defineComponent({
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const emptyFunc = () => {};
+
+    if (tableColumns) {
+      tableColumns[1].field = (row: IngredientRead) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        this.getCategoryById(row.category);
+    }
 
     return {
       store,
@@ -429,6 +434,10 @@ export default defineComponent({
         // @ts-expect-error Custom filters
         this.filters[filterName] = val;
       }
+    },
+    getCategoryById(id: number | null): string | number | null {
+      const cat = this.ingredientCategories?.find((i) => i.id == id);
+      return cat?.title || id;
     },
     onRowClick(e: Event, row: IngredientRead) {
       void this.$router.push({ name: "ingredient", params: { id: row.id } });

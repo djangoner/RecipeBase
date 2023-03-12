@@ -2,7 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IngredientCategory } from './IngredientCategory';
 import type { RegularIngredient } from './RegularIngredient';
 
 /**
@@ -11,7 +10,7 @@ import type { RegularIngredient } from './RegularIngredient';
 export type IngredientRead = {
     readonly id: number;
     readonly used_times: number;
-    category: IngredientCategory;
+    category?: number | null;
     readonly regular_ingredients: RegularIngredient;
     image?: string | null;
     title: string;

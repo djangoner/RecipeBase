@@ -93,7 +93,7 @@ export function productListWeekFromRead(
 
 export function ingredientFromRead(source: IngredientRead | null): Ingredient {
   const payloadReplaces = {
-    category: source?.category?.id,
+    // category: source?.category?.id,
   };
   return Object.assign({}, source, payloadReplaces);
 }

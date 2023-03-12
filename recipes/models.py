@@ -377,7 +377,6 @@ class ProductListItem(models.Model):
         verbose_name=_("Список продуктов недели"),
         blank=True,
         related_name="items",
-        db_index=True,
     )
     day = models.PositiveSmallIntegerField(
         _("День недели"),

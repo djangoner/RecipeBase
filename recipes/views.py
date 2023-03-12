@@ -415,7 +415,6 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
         "items__ingredient",
         "items__ingredients",
         "items__ingredients__ingredient",
-        "items__ingredients__category",
         "items__ingredients__recipe",
         "items__ingredients__recipe__ingredients",
         "items__ingredients__recipe__ingredients__ingredient",

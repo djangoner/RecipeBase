@@ -6,6 +6,7 @@ from rest_framework import pagination
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import permissions
+from django.http.request import HttpRequest
 
 UserModel = get_user_model()
 
@@ -62,3 +63,9 @@ class CustomModelPermissions(permissions.DjangoModelPermissions):
         "PATCH": ["%(app_label)s.change_%(model_name)s"],
         "DELETE": ["%(app_label)s.delete_%(model_name)s"],
     }
+
+
+def toolbar_callback(request: HttpRequest) -> bool:
+    if not request.user:
+        return False
+    return request.user.is_superuser  # type: ignore

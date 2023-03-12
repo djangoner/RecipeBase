@@ -87,6 +87,13 @@ def get_ingredient_key(ing: RecipeIngredient):
     return ing.ingredient.title
 
 
+def extract_ingredient_amount(ing: RecipeIngredient | RegularIngredient):
+    if ing.amount_type == "items" and ing.ingredient.item_weight:  # Convert items to grams
+        return ("g", int(ing.amount * ing.ingredient.item_weight))
+    else:
+        return (ing.amount_type, ing.amount)
+
+
 def get_week_ingredients(week: RecipePlanWeek) -> dict[str, WeekIngredientInfo]:
     """Generate list of ingredients for week"""
     res: dict[str, WeekIngredientInfo] = {}
@@ -110,10 +117,7 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, WeekIngredientInfo]:
             ing_info = res[ing_key]
 
             # -- Add ingredient amount
-            if ing.amount_type == "items" and ing.ingredient.item_weight:  # Convert items to grams
-                ing_info.amounts.append(("g", int(ing.amount * ing.ingredient.item_weight)))
-            else:
-                ing_info.amounts.append((ing.amount_type, ing.amount))
+            ing_info.amounts.append(extract_ingredient_amount(ing))
 
             ing_info.ingredients.append(ing)
 
@@ -128,7 +132,7 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, WeekIngredientInfo]:
             res[ing_key] = WeekIngredientInfo(ingredient=regular_ing.ingredient)
         ing_info = res[ing_key]
 
-        ing_info.amounts.append((regular_ing.amount_type, regular_ing.amount))
+        ing_info.amounts.append(extract_ingredient_amount(regular_ing))
         if regular_ing.day and regular_ing.day < ing_info.min_day:
             ing_info.min_day = regular_ing.day
 

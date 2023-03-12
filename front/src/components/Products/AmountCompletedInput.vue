@@ -54,7 +54,11 @@ export default defineComponent({
       return 1;
     },
     markersCount(): number {
-      return Math.max(Math.floor(this.max / 10), 1);
+      if (this.max < 1000) {
+        return Math.max(Math.floor(this.max / 10), 1);
+      } else {
+        return Math.max(Math.floor(this.max / 5), 1);
+      }
     },
   },
 });

@@ -20,7 +20,7 @@ def is_convertible(measuring: str, advanced: bool = True) -> bool:
     return measuring in MEASURING_CONVERT or (advanced and measuring in CONVERT_ADVANCED)
 
 
-def convert_all_to_grams(measurings: List[Tuple[str, int]]) -> Tuple[str, int | float]:
+def convert_all_to_grams(measurings: List[Tuple[str, int | None]]) -> Tuple[str, int | float]:
     res: float = 0
     all_meas = "g"
 
@@ -75,6 +75,7 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
     for plan in week.plans.all():
         plan.check_date()
         recipe = plan.recipe
+        assert recipe is not None
         ingredients = recipe.ingredients.all()
 
         ing: RecipeIngredient
@@ -89,7 +90,10 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, dict]:
                 res[ing_name]["ingredient"] = ing.ingredient
 
             # -- Add ingredient amount
-            res[ing_name]["amounts"].append([ing.amount_type, ing.amount])
+            if ing.amount_type == "items" and ing.ingredient.item_weight:  # Convert items to grams
+                res[ing_name]["amounts"].append(["g", int(ing.amount * ing.ingredient.item_weight)])
+            else:
+                res[ing_name]["amounts"].append([ing.amount_type, ing.amount])
             res[ing_name]["ingredients"].append(ing)
 
             # -- Update ingredient min_day

@@ -6,7 +6,8 @@ from django.dispatch import receiver
 
 from recipes.models import RecipeIngredient, RecipePlanWeek
 from recipes.services.measurings import amount_to_grams
-from recipes.services.plans import update_plan_week
+
+# from recipes.services.plans import update_plan_week
 
 
 def get_current_time_milli():
@@ -14,7 +15,6 @@ def get_current_time_milli():
 
 
 def debouncer(callback, throttle=1000):
-
     last_millis = get_current_time_milli()
 
     def throttle_f(*args, **kwargs):
@@ -27,14 +27,14 @@ def debouncer(callback, throttle=1000):
     return throttle_f
 
 
-def update_plan_week_current():
-    return update_plan_week(get_current_plan_week())
+# def update_plan_week_current():
+#     return update_plan_week(get_current_plan_week())
 
 
 ###
 
-debounce_upd_plan_current_week = debouncer(update_plan_week_current, throttle=2000)
-debounce_upd_plan = debouncer(update_plan_week, throttle=2000)
+# debounce_upd_plan_current_week = debouncer(update_plan_week_current, throttle=2000)
+# debounce_upd_plan = debouncer(update_plan_week, throttle=2000)
 
 
 def get_current_plan_week():
@@ -45,7 +45,6 @@ def get_current_plan_week():
 
 @receiver(pre_save, sender=RecipeIngredient)
 def recipe_pre_save(sender: RecipeIngredient, instance, **kwargs):
-
     instance.amount_grams = amount_to_grams(instance.amount, instance.amount_type)
 
 

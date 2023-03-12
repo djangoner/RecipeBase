@@ -65,6 +65,8 @@ class Recipe(models.Model):
 
     history = HistoricalRecords(excluded_fields=["created", "edited"])
 
+    ingredients: models.QuerySet["RecipeIngredient"]
+
     class Meta:
         verbose_name = _("Рецепт")
         verbose_name_plural = _("Рецепты")
@@ -267,6 +269,7 @@ class RecipePlanWeek(models.Model):
     week = models.SmallIntegerField(_("Неделя"))
 
     comments = models.JSONField(_("Комментарии"), default=get_default_comments)
+    plans: models.QuerySet["RecipePlan"]
 
     class Meta:
         ordering = ["-year", "-week"]
@@ -341,6 +344,7 @@ class RecipePlan(models.Model):
 class ProductListWeek(models.Model):
     year = models.SmallIntegerField(_("Год"))
     week = models.SmallIntegerField(_("Неделя"))
+    items: models.QuerySet["ProductListItem"]
 
     class Meta:
         ordering = ["-year", "-week"]

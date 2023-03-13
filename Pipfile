@@ -20,6 +20,8 @@ pytelegrambotapi = "*"
 django-multiselectfield = "*"
 django-q = "*"
 django-simple-history = "*"
+drf-flex-fields = "*"
+pytest-mock = "*"
 
 [dev-packages]
 pytest = "*"

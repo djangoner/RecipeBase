@@ -1,3 +1,4 @@
+from enum import Enum
 import logging
 import os
 from datetime import datetime
@@ -26,6 +27,11 @@ WEEKDAYS_STR = {
     6: "Сб",
     7: "Вс",
 }
+
+
+class RecipeFlags(Enum):
+    no_images = "нет фото"
+    no_ratings = "нет оценок"
 
 
 def get_bot():
@@ -98,7 +104,7 @@ def get_product_list_missed_filtered(week_plan: ProductListWeek) -> list[Product
     res = []
     items: list[ProductListItem] = week_plan.items.all()  # type: ignore
     for item in items:
-        if not item.day or item.day < get_today_day():
+        if not item.day or item.day > get_today_day():
             continue
         if item.is_completed:
             continue
@@ -108,12 +114,12 @@ def get_product_list_missed_filtered(week_plan: ProductListWeek) -> list[Product
 
 
 def get_recipe_flags(recipe: Recipe):
-    recipe_flags: list[str] = []
+    recipe_flags: list[RecipeFlags] = []
     if recipe.images.count() < 1:
-        recipe_flags.append("нет фото")
+        recipe_flags.append(RecipeFlags.no_images)
 
     if recipe.ratings.count() < 3:
-        recipe_flags.append("нет оценок")
+        recipe_flags.append(RecipeFlags.no_ratings)
 
     return recipe_flags
 
@@ -172,7 +178,7 @@ def get_notification_text(name: str, **options) -> Optional[str]:
                 text += "\n"
             i += 1
             recipe_flags = get_recipe_flags(plan.recipe)
-            recipe_flags_str = f"({', '.join(recipe_flags)})" if recipe_flags else ""
+            recipe_flags_str = f"({', '.join([f.value for f in recipe_flags])})" if recipe_flags else ""
 
             text += f"<b>{plan.meal_time.title}</b>: {plan.recipe.title} <u><i>{recipe_flags_str}</i></u>"
             log.debug(f"WeekPlan: {week_plan}, today: {today_day}, {plan.pk}")

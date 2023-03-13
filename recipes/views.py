@@ -50,6 +50,7 @@ from recipes.serializers import (
     RecipeRatingSerializer,
     RecipeReadSerializer,
     RecipeSerializer,
+    RecipeShortSerializer,
     RecipeTagSerializer,
     IngredientCategorySerializer,
     RegularIngredientSerializer,
@@ -65,6 +66,11 @@ from recipes.services.plans import update_plan_week
 from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import fields
+
+
+class SerializerKeyedMixin(viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        self.request.GET.get("fields")
 
 
 class RecipeFilterSet(filters.FilterSet):
@@ -217,6 +223,14 @@ class RecipeViewset(viewsets.ModelViewSet):
         "cooking_time",
         "last_cooked",
     ]
+
+    def get_serializer_class(self):
+        short = self.request.GET.get("short")
+
+        if short:
+            return RecipeShortSerializer
+
+        return self.serializer_class
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

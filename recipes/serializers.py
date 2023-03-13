@@ -26,6 +26,7 @@ from recipes.models import (
 from recipes.services.measurings import MEASURING_SHORT, MEASURING_TYPES
 from users.models import User
 from users.serializers import ShortUserSerializer
+from rest_flex_fields import FlexFieldsModelSerializer
 
 
 def amount_str(meas: str | None):
@@ -94,7 +95,7 @@ class RegularIngredientSerializer(serializers.ModelSerializer):
         return amount_str(obj.amount_type)
 
 
-class IngredientSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class IngredientSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):
     used_times = serializers.SerializerMethodField()
     # category = IngredientCategorySerializer(read_only=True)
     category = serializers.PrimaryKeyRelatedField(
@@ -121,7 +122,7 @@ class IngredientReadSerializer(IngredientSerializer):
     # category = IngredientCategorySerializer()
 
 
-class RecipeIngredientSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class RecipeIngredientSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):
     # ingredient = IngredientSerializer()
     ingredient = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount_type_str = serializers.SerializerMethodField()
@@ -204,7 +205,7 @@ class RecipeRatingReadSerializer(RecipeRatingSerializer):
     user = ShortUserSerializer()
 
 
-class RecipeSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class RecipeSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):
     short_description_str = serializers.SerializerMethodField()
     last_cooked = serializers.SerializerMethodField()
     cooked_times = serializers.SerializerMethodField()
@@ -276,6 +277,10 @@ class RecipeShortSerializer(RecipeSerializer):
     # ingredients = None  # type: ignore
     # ratings = None  # type: ignore
     author = None  # type: ignore
+    content = None  # type: ignore
+    content_source = None  # type: ignore
+    images = None  # type: ignore
+    # is_planned = None  # type: ignore
 
     class Meta(RecipeSerializer.Meta):
         exclude = tuple(list(RecipeSerializer.Meta.exclude) + ["author"])
@@ -355,7 +360,7 @@ class RecipePlanWeekReadSerializer(RecipePlanWeekSerializer):
     plans = RecipePlanReadSerializer(many=True)
 
 
-class ProductListItemSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class ProductListItemSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):
     ingredient = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(), required=False, allow_null=True, default=None
     )

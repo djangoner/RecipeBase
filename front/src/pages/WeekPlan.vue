@@ -345,6 +345,7 @@ export default defineComponent({
       return new Promise((resolve, reject) => {
         let payload = {
           search: this.search,
+          fields: "id,title",
           // page_size: 1,
         };
 

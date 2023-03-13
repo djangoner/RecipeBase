@@ -66,6 +66,8 @@ class Recipe(models.Model):
     history = HistoricalRecords(excluded_fields=["created", "edited"])
 
     ingredients: models.QuerySet["RecipeIngredient"]
+    images: models.QuerySet["RecipeImage"]
+    ratings: models.QuerySet["RecipeRating"]
 
     class Meta:
         verbose_name = _("Рецепт")

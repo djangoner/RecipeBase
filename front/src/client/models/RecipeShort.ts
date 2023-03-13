@@ -3,12 +3,14 @@
 /* eslint-disable */
 
 import type { Nested } from './Nested';
-import type { RecipeImage } from './RecipeImage';
 import type { RecipeIngredient } from './RecipeIngredient';
 import type { RecipeRating } from './RecipeRating';
 
 /**
- * Adds nested create feature
+ * A ModelSerializer that takes additional arguments for
+ * "fields", "omit" and "expand" in order to
+ * control which fields are displayed, and whether to replace simple
+ * values with complex, nested serializations
  */
 export type RecipeShort = {
     readonly id: number;
@@ -16,7 +18,6 @@ export type RecipeShort = {
     readonly last_cooked: string;
     readonly cooked_times: number;
     readonly is_planned: boolean;
-    images?: Array<RecipeImage>;
     ingredients?: Array<RecipeIngredient>;
     ratings?: Array<RecipeRating>;
     title: string;

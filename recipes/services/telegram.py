@@ -91,7 +91,7 @@ def get_product_list_on_week_filtered(week_plan: ProductListWeek) -> list[Produc
     res = []
     items: list[ProductListItem] = week_plan.items.all()  # type: ignore
     for item in items:
-        if item.day:
+        if item.day and item.day + 1 < get_today_day():
             continue
         if item.is_completed:
             continue

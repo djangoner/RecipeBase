@@ -9,6 +9,7 @@ from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from recipes.models import ProductListItem, ProductListWeek, Recipe, RecipeIngredient, RecipePlan, RecipePlanWeek
 from recipes.services.measurings import measuring_str
+from recipes.services.plans import get_ingredient_packs
 from users.models import TELEGRAM_NOTIFICATIONS, TELEGRAM_NOTIFICATIONS_MANUAL, UserProfile
 from django.contrib.auth.models import User
 
@@ -142,8 +143,15 @@ def product_item_amount_str(item: ProductListItem):
 
 
 def render_product_item(item: ProductListItem) -> str:
+    if not item.ingredient:
+        return ""
     day_str = WEEKDAYS_STR[item.day] if item.day else "-"
-    text = f"\n- [{day_str:<2}] {item.title} {product_item_amount_str(item)}"
+    packs = get_ingredient_packs(item)
+
+    packs_pref = "кг" if item.ingredient.min_pack_size == 1000 else "шт"
+    item_packs_str = f"<u>~{packs} {packs_pref}</u>" if packs else ""
+
+    text = f"\n- [{day_str:<2}] {item.title} {item_packs_str} {product_item_amount_str(item)}"
     if item.ingredient and item.ingredient.description:
         text += f"\n<b>Комментарий:</b> <pre>{item.ingredient.description}</pre>"
     return text
@@ -208,7 +216,7 @@ def get_notification_text(name: str, **options) -> Optional[str]:
         # Also on week
         on_week = get_product_list_on_week_filtered(week)
         if on_week:
-            text += "\nТакже на неделе:\n"
+            text += "\n\n<b>Также на неделе:</b>\n"
 
             for item in on_week:
                 text += render_product_item(item)
@@ -295,9 +303,10 @@ def send_notification(name: str, force: bool = False):
     log.info(f"Sending notification: {name}")
 
     for profile in UserProfile.objects.all():
-        log.debug(f"Checking profile: {profile}")
+        notif_enabled = name in profile.telegram_notifications
+        log.debug(f"Checking profile: {profile} ({notif_enabled} - {','.join(profile.telegram_notifications)})")
 
-        if name in profile.telegram_notifications or force:
+        if notif_enabled or force:
             send_notification_profile(name, profile)
 
 

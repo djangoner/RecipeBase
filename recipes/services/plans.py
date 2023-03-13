@@ -35,6 +35,15 @@ def is_convertible(measuring: str, advanced: bool = True) -> bool:
     return measuring in MEASURING_CONVERT or (advanced and measuring in CONVERT_ADVANCED)
 
 
+def get_ingredient_packs(ing: RecipeIngredient | ProductListItem) -> float | int:
+    if not (ing.amount and ing.ingredient and ing.ingredient.min_pack_size):
+        return 0
+
+    # if obj.amount_type == "items":
+    #     return obj.amount
+    return round(ing.amount / ing.ingredient.min_pack_size, 3)
+
+
 def convert_all_to_grams(measurings: IngredientAmounts) -> Tuple[str, int | float]:
     res: float = 0
     all_meas = "g"

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from recipes.services.telegram import send_notification, send_notification_profile
+from recipes.services.telegram import get_notifications_dict, send_notification, send_notification_profile
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
@@ -11,7 +11,7 @@ class Command(BaseCommand):
     help = "Send telegram notification"
 
     def add_arguments(self, parser):
-        parser.add_argument("name")
+        parser.add_argument("name", choices=get_notifications_dict().keys())
         parser.add_argument("--force", "-F", action="store_true", help="Force send notification to all profiles")
         parser.add_argument("--user", "-U", help="Send notification to one user")
 

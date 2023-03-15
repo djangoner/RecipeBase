@@ -22,6 +22,7 @@ django-q = "*"
 django-simple-history = "*"
 drf-flex-fields = "*"
 pytest-mock = "*"
+django-cachalot = "*"
 
 [dev-packages]
 pytest = "*"

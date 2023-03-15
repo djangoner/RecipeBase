@@ -9,7 +9,5 @@ class ThumbnailDBBackend(DatabaseBackend):
 
     def add_thumbnail(self, source_name, size, name):
         source = self.get_or_create_source(source_name)
-        meta, _ = ThumbnailMeta.objects.get_or_create(
-            source=source, size=size, name=name
-        )
+        meta, _ = ThumbnailMeta.objects.get_or_create(source=source, size=size, name=name)
         return ImageMeta(source_name, meta.name, meta.size)

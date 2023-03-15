@@ -50,6 +50,7 @@ from recipes.serializers import (
     RecipeRatingSerializer,
     RecipeReadSerializer,
     RecipeSerializer,
+    RecipeShortSerializer,
     RecipeTagSerializer,
     IngredientCategorySerializer,
     RegularIngredientSerializer,
@@ -65,6 +66,11 @@ from recipes.services.plans import update_plan_week
 from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import fields
+
+
+class SerializerKeyedMixin(viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        self.request.GET.get("fields")
 
 
 class RecipeFilterSet(filters.FilterSet):
@@ -183,7 +189,7 @@ class RecipeFilterSet(filters.FilterSet):
     create=extend_schema(responses=RecipeReadSerializer),
     list=extend_schema(responses=RecipeReadSerializer),
     update=extend_schema(responses=RecipeReadSerializer),
-    patch=extend_schema(responses=RecipeReadSerializer),
+    partial_update=extend_schema(responses=RecipeReadSerializer),
 )
 class RecipeViewset(viewsets.ModelViewSet):
     queryset = (
@@ -218,6 +224,14 @@ class RecipeViewset(viewsets.ModelViewSet):
         "last_cooked",
     ]
 
+    def get_serializer_class(self):
+        short = self.request.GET.get("short")
+
+        if short:
+            return RecipeShortSerializer
+
+        return self.serializer_class
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
@@ -247,7 +261,7 @@ class IngredientFilterSet(filters.FilterSet):
     create=extend_schema(responses=IngredientReadSerializer),
     list=extend_schema(responses=IngredientReadSerializer),
     update=extend_schema(responses=IngredientReadSerializer),
-    patch=extend_schema(responses=IngredientReadSerializer),
+    partial_update=extend_schema(responses=IngredientReadSerializer),
 )
 class IngredientViewset(viewsets.ModelViewSet):
     queryset = (
@@ -318,7 +332,7 @@ class MealTimeViewset(viewsets.ModelViewSet):
         responses=RecipePlanWeekReadSerializer,
     ),
     destroy=extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)]),
-    patch=extend_schema(responses=RecipePlanWeekReadSerializer),
+    partial_update=extend_schema(responses=RecipePlanWeekReadSerializer),
     list=extend_schema(responses=RecipePlanWeekReadSerializer),
 )
 class RecipePlanWeekViewset(viewsets.ModelViewSet):
@@ -405,7 +419,7 @@ class RecipeRatingViewset(viewsets.ModelViewSet):
         responses=ProductListWeekReadSerializer,
     ),
     destroy=extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)]),
-    patch=extend_schema(responses=ProductListWeekReadSerializer),
+    partial_update=extend_schema(responses=ProductListWeekReadSerializer),
     list=extend_schema(responses=ProductListWeekReadSerializer),
 )
 class ProductListWeekViewset(viewsets.ModelViewSet):

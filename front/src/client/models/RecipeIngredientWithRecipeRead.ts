@@ -7,7 +7,10 @@ import type { IngredientRead } from './IngredientRead';
 import type { RecipeShort } from './RecipeShort';
 
 /**
- * Adds nested create feature
+ * A ModelSerializer that takes additional arguments for
+ * "fields", "omit" and "expand" in order to
+ * control which fields are displayed, and whether to replace simple
+ * values with complex, nested serializations
  */
 export type RecipeIngredientWithRecipeRead = {
     readonly id: number;

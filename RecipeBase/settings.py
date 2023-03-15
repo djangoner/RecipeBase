@@ -314,6 +314,7 @@ Q_CLUSTER = {
     # 'cpu_affinity': 1,
 }
 
+CACHALOT_ENABLED = not bool(os.getenv("CACHALOT_DISABLE"))
 # CACHALOT_TIMEOUT = 60 * 60
 
 DEBUG_TOOLBAR_PANELS = [

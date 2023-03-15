@@ -40,7 +40,9 @@ services:
             retries: 3
 
     qcluster:
-        build: .
+        build:
+            context: .
+            dockerfile: Dockerfile.django
         restart: unless-stopped
         volumes:
             - ./:/app

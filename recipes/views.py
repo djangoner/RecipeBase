@@ -189,7 +189,7 @@ class RecipeFilterSet(filters.FilterSet):
     create=extend_schema(responses=RecipeReadSerializer),
     list=extend_schema(responses=RecipeReadSerializer),
     update=extend_schema(responses=RecipeReadSerializer),
-    patch=extend_schema(responses=RecipeReadSerializer),
+    partial_update=extend_schema(responses=RecipeReadSerializer),
 )
 class RecipeViewset(viewsets.ModelViewSet):
     queryset = (
@@ -261,7 +261,7 @@ class IngredientFilterSet(filters.FilterSet):
     create=extend_schema(responses=IngredientReadSerializer),
     list=extend_schema(responses=IngredientReadSerializer),
     update=extend_schema(responses=IngredientReadSerializer),
-    patch=extend_schema(responses=IngredientReadSerializer),
+    partial_update=extend_schema(responses=IngredientReadSerializer),
 )
 class IngredientViewset(viewsets.ModelViewSet):
     queryset = (
@@ -332,7 +332,7 @@ class MealTimeViewset(viewsets.ModelViewSet):
         responses=RecipePlanWeekReadSerializer,
     ),
     destroy=extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)]),
-    patch=extend_schema(responses=RecipePlanWeekReadSerializer),
+    partial_update=extend_schema(responses=RecipePlanWeekReadSerializer),
     list=extend_schema(responses=RecipePlanWeekReadSerializer),
 )
 class RecipePlanWeekViewset(viewsets.ModelViewSet):
@@ -419,7 +419,7 @@ class RecipeRatingViewset(viewsets.ModelViewSet):
         responses=ProductListWeekReadSerializer,
     ),
     destroy=extend_schema(parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)]),
-    patch=extend_schema(responses=ProductListWeekReadSerializer),
+    partial_update=extend_schema(responses=ProductListWeekReadSerializer),
     list=extend_schema(responses=ProductListWeekReadSerializer),
 )
 class ProductListWeekViewset(viewsets.ModelViewSet):

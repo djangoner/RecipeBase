@@ -47,4 +47,4 @@ services:
         entrypoint: ["python3", "manage.py", "qcluster"]
 
 volumes:
-    - redis_data:/data
+    redis_data:

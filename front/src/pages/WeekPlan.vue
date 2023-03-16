@@ -108,7 +108,7 @@
                           @update:modelValue="
                             setRecipe(idx, mtime, $event, rec_idx)
                           "
-                          :input-debounce="300"
+                          :input-debounce="100"
                           :options="recipesList || []"
                           :readonly="saving || !editMode || !canEdit"
                           option-label="title"

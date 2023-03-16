@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
     "tasks.apps.TasksConfig",
+    "telegram_bot.apps.TelegramBotConfig",
 ]
 
 MIDDLEWARE = [
@@ -153,9 +154,7 @@ else:
 
 CACHES = {
     "default": {
-        "BACKEND": os.getenv(
-            "CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"
-        ),
+        "BACKEND": os.getenv("CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"),
         "LOCATION": os.getenv("CACHE_LOCATION", None),
         "KEY_PREFIX": os.getenv("CACHE_PREFIX", "recipebase"),
     }

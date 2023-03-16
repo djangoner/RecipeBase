@@ -29,7 +29,7 @@ from recipes.models import (
     RegularIngredient,
     Shop,
 )
-from recipes.services.telegram import send_product_list
+from telegram_bot.services.notifications import send_product_list
 from tasks.models import Task
 from recipes.serializers import (
     IngredientReadSerializer,

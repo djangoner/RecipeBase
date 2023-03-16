@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from recipes.services.telegram import get_notifications_dict, send_notification, send_notification_profile
+from telegram_bot.services.notifications import get_notifications_dict, send_notification, send_notification_profile
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 

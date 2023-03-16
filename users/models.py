@@ -17,6 +17,7 @@ TELEGRAM_NOTIFICATIONS = [
 
 TELEGRAM_NOTIFICATIONS_MANUAL = [
     ("product_list", "Список продуктов"),
+    ("week_plan", "План на неделю"),
 ]
 
 

@@ -42,6 +42,7 @@ urlpatterns = [
     path("api/schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     path("api/v1/auth/", include("rest_framework.urls")),
     path("api/v1/auth/token/", CustomObtainAuthToken.as_view()),
+    path("", include("telegram_bot.urls")),
     # url('', include('rest_framework.urls'), name="recipes"),
 ]
 

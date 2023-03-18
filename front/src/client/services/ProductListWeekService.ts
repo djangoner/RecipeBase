@@ -110,7 +110,7 @@ requestBody: ProductListWeek,
     }
 
     /**
-     * @returns ProductListWeek 
+     * @returns ProductListWeekRead 
      * @throws ApiError
      */
     public static productListWeekPartialUpdate({
@@ -122,7 +122,7 @@ requestBody,
  */
 id: number,
 requestBody?: PatchedProductListWeek,
-}): CancelablePromise<ProductListWeek> {
+}): CancelablePromise<ProductListWeekRead> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/v1/product_list_week/{id}/',

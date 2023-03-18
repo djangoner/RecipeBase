@@ -17,17 +17,32 @@ export class ProductListItemService {
      * @throws ApiError
      */
     public static productListItemList({
+expand,
+fields,
 isAuto,
 isCompleted,
 isDeleted,
+omit,
 ordering,
 page,
 pageSize,
 search,
 }: {
+/**
+ * Which field should be expanded, comma separated
+ */
+expand?: string,
+/**
+ * Which fields should be returned
+ */
+fields?: string,
 isAuto?: boolean,
 isCompleted?: boolean,
 isDeleted?: boolean,
+/**
+ * Which fields should be excluded from results
+ */
+omit?: string,
 /**
  * Which field to use when ordering the results.
  */
@@ -49,9 +64,12 @@ search?: string,
             method: 'GET',
             url: '/api/v1/product_list_item/',
             query: {
+                'expand': expand,
+                'fields': fields,
                 'is_auto': isAuto,
                 'is_completed': isCompleted,
                 'is_deleted': isDeleted,
+                'omit': omit,
                 'ordering': ordering,
                 'page': page,
                 'page_size': pageSize,

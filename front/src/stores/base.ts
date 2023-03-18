@@ -191,8 +191,8 @@ export const useBaseStore = defineStore("base", {
           requestBody: payload,
         })
           .then((resp) => {
-            this.recipe = resp as RecipeRead;
-            resolve(resp as RecipeRead);
+            this.recipe = resp;
+            resolve(resp);
           })
           .catch((err) => {
             reject(err);
@@ -206,8 +206,8 @@ export const useBaseStore = defineStore("base", {
           requestBody: payload,
         })
           .then((resp) => {
-            this.recipe = resp as RecipeRead;
-            resolve(resp as RecipeRead);
+            this.recipe = resp;
+            resolve(resp);
           })
           .catch((err) => {
             reject(err);

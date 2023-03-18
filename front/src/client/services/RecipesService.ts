@@ -13,7 +13,7 @@ import { request as __request } from '../core/request';
 export class RecipesService {
 
     /**
-     * @returns PaginatedRecipeReadList
+     * @returns PaginatedRecipeReadList 
      * @throws ApiError
      */
     public static recipesList({
@@ -27,9 +27,12 @@ cookingTimeGt,
 cookingTimeLt,
 created,
 edited,
+expand,
+fields,
 ingredientsExclude,
 ingredientsInclude,
 isArchived,
+omit,
 ordering,
 page,
 pageSize,
@@ -57,6 +60,14 @@ cookingTimeLt?: number,
 created?: string,
 edited?: string,
 /**
+ * Which field should be expanded, comma separated
+ */
+expand?: string,
+/**
+ * Which fields should be returned
+ */
+fields?: string,
+/**
  * Ingredients exclude
  */
 ingredientsExclude?: string,
@@ -65,6 +76,10 @@ ingredientsExclude?: string,
  */
 ingredientsInclude?: string,
 isArchived?: boolean,
+/**
+ * Which fields should be excluded from results
+ */
+omit?: string,
 /**
  * Which field to use when ordering the results.
  */
@@ -113,9 +128,12 @@ title?: string,
                 'cooking_time_lt': cookingTimeLt,
                 'created': created,
                 'edited': edited,
+                'expand': expand,
+                'fields': fields,
                 'ingredients_exclude': ingredientsExclude,
                 'ingredients_include': ingredientsInclude,
                 'is_archived': isArchived,
+                'omit': omit,
                 'ordering': ordering,
                 'page': page,
                 'page_size': pageSize,
@@ -133,7 +151,7 @@ title?: string,
     }
 
     /**
-     * @returns RecipeRead
+     * @returns RecipeRead 
      * @throws ApiError
      */
     public static recipesCreate({
@@ -150,7 +168,7 @@ requestBody: Recipe,
     }
 
     /**
-     * @returns RecipeRead
+     * @returns RecipeRead 
      * @throws ApiError
      */
     public static recipesRetrieve({
@@ -171,7 +189,7 @@ id: number,
     }
 
     /**
-     * @returns RecipeRead
+     * @returns RecipeRead 
      * @throws ApiError
      */
     public static recipesUpdate({
@@ -196,7 +214,7 @@ requestBody: Recipe,
     }
 
     /**
-     * @returns Recipe
+     * @returns RecipeRead 
      * @throws ApiError
      */
     public static recipesPartialUpdate({
@@ -208,7 +226,7 @@ requestBody,
  */
 id: number,
 requestBody?: PatchedRecipe,
-}): CancelablePromise<Recipe> {
+}): CancelablePromise<RecipeRead> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/v1/recipes/{id}/',
@@ -221,7 +239,7 @@ requestBody?: PatchedRecipe,
     }
 
     /**
-     * @returns void
+     * @returns void 
      * @throws ApiError
      */
     public static recipesDestroy({

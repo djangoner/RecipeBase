@@ -7,4 +7,4 @@ class UsersConfig(AppConfig):
     verbose_name = _("Авторизация")
 
     def ready(self):
-        from . import signals  # NOQA
+        from . import signals, schema  # NOQA

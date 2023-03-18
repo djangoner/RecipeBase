@@ -109,7 +109,7 @@ requestBody: RecipePlanWeek,
     }
 
     /**
-     * @returns RecipePlanWeek 
+     * @returns RecipePlanWeekRead 
      * @throws ApiError
      */
     public static recipePlanWeekPartialUpdate({
@@ -121,7 +121,7 @@ requestBody,
  */
 id: number,
 requestBody?: PatchedRecipePlanWeek,
-}): CancelablePromise<RecipePlanWeek> {
+}): CancelablePromise<RecipePlanWeekRead> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/v1/recipe_plan_week/{id}/',

@@ -21,7 +21,10 @@ export class IngredientsService {
 category,
 categoryIsnull,
 edible,
+expand,
+fields,
 needBuy,
+omit,
 ordering,
 page,
 pageSize,
@@ -32,7 +35,19 @@ search,
 category?: number,
 categoryIsnull?: boolean,
 edible?: boolean,
+/**
+ * Which field should be expanded, comma separated
+ */
+expand?: string,
+/**
+ * Which fields should be returned
+ */
+fields?: string,
 needBuy?: boolean,
+/**
+ * Which fields should be excluded from results
+ */
+omit?: string,
 /**
  * Which field to use when ordering the results.
  */
@@ -59,7 +74,10 @@ search?: string,
                 'category': category,
                 'category__isnull': categoryIsnull,
                 'edible': edible,
+                'expand': expand,
+                'fields': fields,
                 'need_buy': needBuy,
+                'omit': omit,
                 'ordering': ordering,
                 'page': page,
                 'page_size': pageSize,
@@ -134,7 +152,7 @@ requestBody: Ingredient,
     }
 
     /**
-     * @returns Ingredient 
+     * @returns IngredientRead 
      * @throws ApiError
      */
     public static ingredientsPartialUpdate({
@@ -146,7 +164,7 @@ requestBody,
  */
 id: number,
 requestBody?: PatchedIngredient,
-}): CancelablePromise<Ingredient> {
+}): CancelablePromise<IngredientRead> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/v1/ingredients/{id}/',

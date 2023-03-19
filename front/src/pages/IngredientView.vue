@@ -66,6 +66,7 @@
             label="Категория"
             option-label="title"
             option-value="id"
+            emit-value
             use-input
             map-options
             options-dense

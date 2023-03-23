@@ -344,16 +344,14 @@ export default defineComponent({
       debounceLoadIngredients: emptyFunc,
     };
   },
-  mounted() {
+  created() {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    this.debounceLoadIngredients = debounce(this.loadIngredients, 1000);
     this.handleQueryChange(this.$query as QueryInterface);
     this.loadIngredients();
     if (!this.ingredientCategories) {
       this.loadIngredientCategories();
     }
-  },
-  created() {
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    this.debounceLoadIngredients = debounce(this.loadIngredients, 1000);
   },
   methods: {
     loadIngredients(props?: TablePropsOnRequest) {

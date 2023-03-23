@@ -806,7 +806,7 @@ export default defineComponent({
       ],
     };
   },
-  mounted() {
+  created() {
     this.loadRecipe();
     if (!this.tags) {
       this.loadTags();

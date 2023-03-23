@@ -63,7 +63,9 @@
       ></q-btn-toggle>
     </div>
 
-    <span v-if="recipes"> Найдено результатов: {{ tablePagination?.rowsNumber }} </span>
+    <span v-if="recipes">
+      Найдено результатов: {{ tablePagination?.rowsNumber }}
+    </span>
 
     <!-- Recipe cards -->
     <div
@@ -92,7 +94,10 @@
               :key="recipe.id"
             >
               <!-- Recipe card -->
-              <recipe-card :recipe="recipe" @updateItem="loadRecipes()"></recipe-card>
+              <recipe-card
+                :recipe="recipe"
+                @updateItem="loadRecipes()"
+              ></recipe-card>
             </div>
           </div>
 
@@ -103,7 +108,11 @@
             class="flex justify-center q-mt-md"
             v-if="recipes.length > 0 && totalPages"
           >
-            <q-pagination v-model="page" :max="totalPages" direction-links></q-pagination>
+            <q-pagination
+              v-model="page"
+              :max="totalPages"
+              direction-links
+            ></q-pagination>
           </div>
           <!-- /Pagination -->
           <div class="flex justify-center items-center full-height" v-else>
@@ -144,7 +153,9 @@
 
               <q-form @submit="loadRecipes()" @reset="resetFilters()">
                 <div class="q-my-sm">
-                  <h6 class="q-my-sm text-subtitle2 text-bold">Время готовки</h6>
+                  <h6 class="q-my-sm text-subtitle2 text-bold">
+                    Время готовки
+                  </h6>
                   <q-range
                     v-model="filters.cooking_time"
                     class="q-px-md"
@@ -298,42 +309,47 @@
         </div>
       </transition>
 
-      <q-inner-loading v-if="displayMode == 'cards'" :showing="loading"></q-inner-loading>
+      <q-inner-loading
+        v-if="displayMode == 'cards'"
+        :showing="loading"
+      ></q-inner-loading>
     </div>
   </q-page>
 </template>
 
 <script lang="ts">
-import { useQuery } from '@oarepo/vue-query-synchronizer';
-import recipeCard from 'components/RecipeCard.vue';
-import { date, debounce, QTableProps } from 'quasar';
+import { useQuery } from "@oarepo/vue-query-synchronizer";
+import recipeCard from "components/RecipeCard.vue";
+import { date, debounce, QTableProps } from "quasar";
 import {
   Ingredient,
   PaginatedRecipeReadList,
   RecipeRead,
   RecipeTag,
   User,
-} from 'src/client';
-import { TablePagination, TablePropsOnRequest } from 'src/modules/Globals';
-import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
-import { clearPayload } from 'src/modules/Utils';
-import { useAuthStore } from 'src/stores/auth';
-import { useBaseStore } from 'src/stores/base.js';
-import { defineComponent } from 'vue';
+} from "src/client";
+import { TablePagination, TablePropsOnRequest } from "src/modules/Globals";
+import HandleErrorsMixin, {
+  CustomAxiosError,
+} from "src/modules/HandleErrorsMixin";
+import { clearPayload } from "src/modules/Utils";
+import { useAuthStore } from "src/stores/auth";
+import { useBaseStore } from "src/stores/base.js";
+import { defineComponent } from "vue";
 
 const orderingOptions = [
-  { label: 'Создан - по возрастанию', value: 'created' },
-  { label: 'Создан - по убыванию', value: '-created' },
-  { label: 'Последнее приготовление - по возрастанию', value: 'last_cooked' },
-  { label: 'Последнее приготовление - по убыванию', value: '-last_cooked' },
+  { label: "Создан - по возрастанию", value: "created" },
+  { label: "Создан - по убыванию", value: "-created" },
+  { label: "Последнее приготовление - по возрастанию", value: "last_cooked" },
+  { label: "Последнее приготовление - по убыванию", value: "-last_cooked" },
 ];
 
 let tableColumns = [
   {
-    name: 'title',
-    label: 'Название',
-    align: 'left',
-    field: 'title',
+    name: "title",
+    label: "Название",
+    align: "left",
+    field: "title",
     required: true,
     sortable: true,
   },
@@ -345,31 +361,31 @@ let tableColumns = [
   //   sortable: true,
   // },
   {
-    name: 'cooking_time',
-    label: 'Время',
-    field: 'cooking_time',
+    name: "cooking_time",
+    label: "Время",
+    field: "cooking_time",
     required: true,
     sortable: true,
-    style: 'width: 40px',
+    style: "width: 40px",
   },
   {
-    name: 'last_cooked',
-    label: 'Приготовили',
-    field: (r: RecipeRead) => date.formatDate(r.last_cooked, 'YYYY.MM.DD'),
+    name: "last_cooked",
+    label: "Приготовили",
+    field: (r: RecipeRead) => date.formatDate(r.last_cooked, "YYYY.MM.DD"),
     required: true,
     sortable: true,
-    style: 'width: 40px',
+    style: "width: 40px",
   },
   {
-    name: 'created',
-    label: 'Создан',
+    name: "created",
+    label: "Создан",
     field: (r: RecipeRead) =>
-      r.created ? date.formatDate(r.created, 'YYYY.MM.DD hh:mm') : '',
+      r.created ? date.formatDate(r.created, "YYYY.MM.DD hh:mm") : "",
     required: true,
     sortable: true,
-    style: 'width: 50px',
+    style: "width: 50px",
   },
-] as QTableProps['columns'];
+] as QTableProps["columns"];
 
 interface RangeValue {
   min: number;
@@ -418,21 +434,21 @@ export default defineComponent({
       store,
       $query: useQuery(),
       storeAuth,
-      search: '',
+      search: "",
       page: 1,
       page_size: 20,
       loading: false,
       tagList: null as RecipeTag[] | null,
       ingredientList: null as Ingredient[] | null,
-      ordering: '-created',
+      ordering: "-created",
       tablePagination: {
         rowsPerPage: 20,
         page: 1,
-        sortBy: 'created',
+        sortBy: "created",
         descending: true,
       } as TablePagination,
       // compilation: this.$query.compilation,
-      showFilters: this.$q.localStorage.getItem('recipesShowFilters'),
+      showFilters: this.$q.localStorage.getItem("recipesShowFilters"),
       filters: Object.assign({}, filters) as RecipesFilters,
       filtersDefault: JSON.parse(JSON.stringify(filters)) as RecipesFilters,
       orderingOptions,
@@ -442,9 +458,6 @@ export default defineComponent({
   created() {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     this.debounceLoadRecipes = debounce(this.loadRecipes, 1000);
-  },
-
-  mounted() {
     void this.$nextTick(() => {
       void this.loadRecipes();
       if (!this.tags) {
@@ -471,10 +484,10 @@ export default defineComponent({
         payload.page = String(this.page);
         payload.page_size = String(this.page_size);
 
-        if (this.compilation == 'top10') {
-          payload.ordering = '';
-          if (this.tablePagination.sortBy !== 'cooked_times') {
-            this.tablePagination.sortBy = 'cooked_times';
+        if (this.compilation == "top10") {
+          payload.ordering = "";
+          if (this.tablePagination.sortBy !== "cooked_times") {
+            this.tablePagination.sortBy = "cooked_times";
             this.tablePagination.descending = true;
           }
         } else {
@@ -487,17 +500,19 @@ export default defineComponent({
         }
         // Tags
         if (this.filters.tags_include) {
-          payload.tagsInclude = this.filters.tags_include.join(',');
+          payload.tagsInclude = this.filters.tags_include.join(",");
         }
         if (this.filters.tags_exclude) {
-          payload.tagsExclude = this.filters.tags_exclude.join(',');
+          payload.tagsExclude = this.filters.tags_exclude.join(",");
         }
         // Tags
         if (this.filters.ingredients_include) {
-          payload.ingredientsInclude = this.filters.ingredients_include.join(',');
+          payload.ingredientsInclude =
+            this.filters.ingredients_include.join(",");
         }
         if (this.filters.ingredients_exclude) {
-          payload.ingredientsExclude = this.filters.ingredients_exclude.join(',');
+          payload.ingredientsExclude =
+            this.filters.ingredients_exclude.join(",");
         }
 
         // Cooking time
@@ -513,7 +528,9 @@ export default defineComponent({
         // Ratings
         if (this.filters.ratings) {
           let r = [];
-          for (const [user_id, values] of Object.entries(this.filters.ratings)) {
+          for (const [user_id, values] of Object.entries(
+            this.filters.ratings
+          )) {
             if (values.min == values.max) {
               r.push(`${user_id}_${values.min}`);
               // payload.rating = `${user_id}_${values.min}`;
@@ -529,7 +546,7 @@ export default defineComponent({
               }
             }
           }
-          payload.rating = r.join(',');
+          payload.rating = r.join(",");
         }
 
         // Send request
@@ -547,17 +564,18 @@ export default defineComponent({
             console.warn(err);
             reject(err);
             this.loading = false;
-            this.handleErrors(err, 'Ошибка загрузки рецептов');
+            this.handleErrors(err, "Ошибка загрузки рецептов");
           });
       });
     },
 
     loadRecipesTable(props: TablePropsOnRequest) {
-      console.debug('tableProps: ', props.pagination);
+      console.debug("tableProps: ", props.pagination);
       this.ordering =
-        props?.pagination?.descending && !props?.pagination?.sortBy?.startsWith('-')
-          ? '-'
-          : '';
+        props?.pagination?.descending &&
+        !props?.pagination?.sortBy?.startsWith("-")
+          ? "-"
+          : "";
       this.ordering += props?.pagination?.sortBy;
       this.page = props?.pagination?.page || 1;
       this.page_size = props?.pagination?.rowsPerPage || 20;
@@ -580,7 +598,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           // this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки меток');
+          this.handleErrors(err, "Ошибка загрузки меток");
         });
     },
     loadIngredients() {
@@ -595,7 +613,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           // this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки ингредиентов');
+          this.handleErrors(err, "Ошибка загрузки ингредиентов");
         });
     },
     loadMealTime() {
@@ -611,7 +629,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           // this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки времени приема пищи');
+          this.handleErrors(err, "Ошибка загрузки времени приема пищи");
         });
     },
     loadAmountTypes() {
@@ -623,7 +641,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           // this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки типов измерений');
+          this.handleErrors(err, "Ошибка загрузки типов измерений");
         });
     },
     loadUsers() {
@@ -638,7 +656,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки пользователей');
+          this.handleErrors(err, "Ошибка загрузки пользователей");
         });
     },
 
@@ -652,8 +670,9 @@ export default defineComponent({
         let tags = this.tags;
 
         this.tagList =
-          tags?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)) ||
-          [];
+          tags?.filter(
+            (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
+          ) || [];
         // console.debug(needle, this.tagList, tags);
       });
     },
@@ -667,8 +686,9 @@ export default defineComponent({
         let tags = this.tags;
 
         this.tagList =
-          tags?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)) ||
-          [];
+          tags?.filter(
+            (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
+          ) || [];
         // console.debug(needle, this.tagList, tags);
       });
     },
@@ -725,15 +745,15 @@ export default defineComponent({
     resetFilters() {
       this.filters = Object.assign({}, this.filtersDefault);
       this.filters.ratings = [];
-      console.debug('Reset: ', this.filters);
+      console.debug("Reset: ", this.filters);
     },
 
-    openRecipe(id: number | 'new') {
-      void this.$router.push({ name: 'recipe', params: { id: id } });
+    openRecipe(id: number | "new") {
+      void this.$router.push({ name: "recipe", params: { id: id } });
     },
     userReadable(user: User): string {
       if (user.first_name) {
-        return user.first_name + ' ' + String(user.last_name);
+        return user.first_name + " " + String(user.last_name);
       }
       return user.username;
     },
@@ -741,7 +761,7 @@ export default defineComponent({
       if (tx.length < length) {
         return tx;
       } else {
-        return tx.slice(0, length) + '...';
+        return tx.slice(0, length) + "...";
       }
     },
   },
@@ -791,38 +811,44 @@ export default defineComponent({
       },
     },
     totalPages(): number | null {
-      if (!this.tablePagination.rowsNumber || !this.tablePagination.rowsPerPage) {
+      if (
+        !this.tablePagination.rowsNumber ||
+        !this.tablePagination.rowsPerPage
+      ) {
         return null;
       }
       return (
-        Math.ceil(this.tablePagination?.rowsNumber / this.tablePagination?.rowsPerPage) ||
-        1
+        Math.ceil(
+          this.tablePagination?.rowsNumber / this.tablePagination?.rowsPerPage
+        ) || 1
       );
     },
     tableColumns() {
       let r = tableColumns?.slice() || [];
-      if (this.compilation == 'top10') {
+      if (this.compilation == "top10") {
         r.unshift({
-          name: 'pos',
-          label: '#',
+          name: "pos",
+          label: "#",
           field: (r: RecipeRead) =>
             this.recipes
-              ? String(this.recipes.indexOf(r) + 1 + (this.page - 1) * this.page_size)
-              : '-',
-          style: 'width: 20px',
+              ? String(
+                  this.recipes.indexOf(r) + 1 + (this.page - 1) * this.page_size
+                )
+              : "-",
+          style: "width: 20px",
           sortable: false,
           required: false,
         });
         r.splice(2, 0, {
-          name: 'cooked_times',
-          label: 'Кол-во',
-          field: 'cooked_times',
-          style: 'width: 20px',
+          name: "cooked_times",
+          label: "Кол-во",
+          field: "cooked_times",
+          style: "width: 20px",
           sortable: true,
           required: false,
         });
-      } else if (this.compilation == 'new') {
-        r = r.filter((c) => c.name !== 'last_cooked');
+      } else if (this.compilation == "new") {
+        r = r.filter((c) => c.name !== "last_cooked");
       }
       return r;
     },
@@ -851,7 +877,7 @@ export default defineComponent({
       },
     },
     showFilters(val) {
-      this.$q.localStorage.set('recipesShowFilters', val);
+      this.$q.localStorage.set("recipesShowFilters", val);
     },
   },
 });

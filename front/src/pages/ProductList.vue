@@ -267,7 +267,7 @@ export default defineComponent({
       WeekDays,
     };
   },
-  mounted() {
+  created() {
     void this.$nextTick(() => {
       this.onLoad();
     });

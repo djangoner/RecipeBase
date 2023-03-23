@@ -4,10 +4,10 @@
       <div class="row justify-center items-center q-col-gutter-x-md">
         <q-btn icon="chevron_left" flat @click="changeWeek(-1)"></q-btn>
         <span class="cursor-pointer q-px-md"
-          >{{ week_pick.year }}.{{ String(week_pick.week).padStart(2, '0') }} ({{
-            getDay(0)
+          >{{ week_pick.year }}.{{
+            String(week_pick.week).padStart(2, "0")
           }}
-          - {{ getDay(6) }})
+          ({{ getDay(0) }} - {{ getDay(6) }})
           <q-menu>
             <q-date v-model="date_picker" first-day-of-week="1"></q-date>
           </q-menu>
@@ -19,9 +19,9 @@
 </template>
 
 <script lang="ts">
-import { useBaseStore } from 'src/stores/base';
-import { date } from 'quasar';
-import { defineComponent, PropType } from 'vue';
+import { useBaseStore } from "src/stores/base";
+import { date } from "quasar";
+import { defineComponent, PropType } from "vue";
 import {
   DatePicker,
   YearWeek,
@@ -31,7 +31,7 @@ import {
   getFirstDayOfWeek,
   getWeekNumber,
   getYearWeek,
-} from 'src/modules/WeekUtils';
+} from "src/modules/WeekUtils";
 
 export default defineComponent({
   props: {
@@ -47,7 +47,7 @@ export default defineComponent({
       WeekDays,
     };
   },
-  mounted() {
+  created() {
     if (!this.modelValue.year || !this.modelValue.week) {
       this.selectToday();
     } else {
@@ -92,20 +92,20 @@ export default defineComponent({
       // console.debug(first, last);
       let firstday = date.formatDate(
         new Date(d.setDate(first)).toDateString(),
-        'YYYY/MM/DD'
+        "YYYY/MM/DD"
       );
       let lastday = date.formatDate(
         new Date(d.setDate(last)).toDateString(),
-        'YYYY/MM/DD'
+        "YYYY/MM/DD"
       );
       this.date_picker = { from: firstday, to: lastday };
-      console.debug('Datepicker upd: ', this.date_picker, this.week_pick.year);
+      console.debug("Datepicker upd: ", this.date_picker, this.week_pick.year);
     },
     parseDatePicker(): void {
-      if (typeof this.date_picker != 'string') {
+      if (typeof this.date_picker != "string") {
         return;
       }
-      console.debug('Parsing date: ', this.date_picker);
+      console.debug("Parsing date: ", this.date_picker);
       let d = new Date(this.date_picker);
       console.debug(d, getWeekNumber(d));
       [this.week_pick.year, this.week_pick.week] = getWeekNumber(d);
@@ -122,7 +122,7 @@ export default defineComponent({
       // let fday = getDateOfISOWeek(this.week_pick.year, this.week_pick.week);
       let day = fday.getDay();
       fday.setDate(fday.getDate() + day + idx - 1);
-      return date.formatDate(fday, 'DD.MM');
+      return date.formatDate(fday, "DD.MM");
     },
   },
   watch: {
@@ -132,7 +132,7 @@ export default defineComponent({
       }
     },
     modelValue(val: YearWeek, oldVal: YearWeek) {
-      console.debug('modelValue: ', val, oldVal);
+      console.debug("modelValue: ", val, oldVal);
       if (val !== oldVal) {
         this.week_pick = val;
       }
@@ -140,14 +140,15 @@ export default defineComponent({
     week_pick: {
       deep: true,
       handler: function (val: YearWeek) {
-        let notChanged = JSON.stringify(val) === JSON.stringify(this.week_pick_old);
+        let notChanged =
+          JSON.stringify(val) === JSON.stringify(this.week_pick_old);
         if (notChanged) {
           this.week_pick_old = Object.assign({}, val);
           return;
         }
-        console.debug('week_pick: ', notChanged, val, this.week_pick_old);
+        console.debug("week_pick: ", notChanged, val, this.week_pick_old);
         this.week_pick_old = Object.assign({}, val);
-        this.$emit('update:modelValue', val);
+        this.$emit("update:modelValue", val);
       },
     },
   },

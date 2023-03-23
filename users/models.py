@@ -27,6 +27,8 @@ class UserProfile(models.Model):
     show_rate = models.BooleanField(_("Показывать в рейтинге"), default=True)
     num = models.PositiveSmallIntegerField(_("Сортировка"), null=True, blank=True)
 
+    conditions_include = models.BooleanField(_("Включить в условия недели"), default=False)
+
     telegram_id = models.CharField(_("ID аккаунта телеграмм"), max_length=20, null=True, blank=True)
     telegram_notifications = MultiSelectField(
         _("Telegram уведомления"), max_length=255, choices=TELEGRAM_NOTIFICATIONS, null=True, blank=True

@@ -247,7 +247,7 @@ export default defineComponent({
         !!val || "Обязательное поле",
     };
   },
-  mounted() {
+  created() {
     this.loadIngredient();
     if (!this.ingredientCategories) {
       this.loadIngredientCategories();

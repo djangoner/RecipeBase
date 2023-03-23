@@ -22,6 +22,7 @@ from recipes.models import (
     RegularIngredient,
     Shop,
     ShopIngredientCategory,
+    WeekPlanCondition,
 )
 from recipes.services.measurings import MEASURING_SHORT, MEASURING_TYPES
 from users.models import User
@@ -37,6 +38,10 @@ def amount_str(meas: str | None):
         return str(meas_types[meas])
 
     return meas
+
+
+class StatusOkSerializer(serializers.Serializer):
+    ok = serializers.BooleanField(default=True)
 
 
 class RecipeImageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -450,5 +455,7 @@ class ProductListWeekShortSerializer(ProductListWeekSerializer):
     items = None  # type: ignore
 
 
-class StatusOkSerializer(serializers.Serializer):
-    ok = serializers.BooleanField(default=True)
+class WeekPlanConditionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WeekPlanCondition
+        exclude = ()

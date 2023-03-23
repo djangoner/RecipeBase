@@ -44,7 +44,7 @@ export default defineComponent({
       loading: false,
     };
   },
-  mounted() {
+  created() {
     if (!this.amount_types) {
       this.loadAmountTypes();
     }

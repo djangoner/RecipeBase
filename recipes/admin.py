@@ -17,6 +17,7 @@ from recipes.models import (
     RegularIngredient,
     Shop,
     ShopIngredientCategory,
+    WeekPlanCondition,
 )
 from adminsortable.admin import NonSortableParentAdmin, SortableTabularInline
 from simple_history.admin import SimpleHistoryAdmin
@@ -50,6 +51,11 @@ class ShopIngredientCategoryInline(SortableTabularInline):
     model = ShopIngredientCategory
     readonly_fields = ["num"]
     # autocomplete_fields = ["shop", "category"]
+
+
+class WeekPlanConditionInline(admin.TabularInline):
+    extra = 0
+    model = WeekPlanCondition
 
 
 @admin.register(Recipe)
@@ -169,3 +175,21 @@ class ShopAdmin(NonSortableParentAdmin, admin.ModelAdmin):
 class IngredientCategoryAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "icon")
     search_fields = ["title"]
+
+
+@admin.register(WeekPlanCondition)
+class WeekPlanConditionAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "title",
+        "parent",
+        "plan_field",
+        "condition",
+        "comparison_mode",
+        "selector_type",
+        "selector_value",
+        "active",
+    ]
+    list_filter = ("condition", "comparison_mode", "plan_field")
+    search_fields = ["title", "selector_type", "selector_value", "comparison_mode"]
+    inlines = [WeekPlanConditionInline]

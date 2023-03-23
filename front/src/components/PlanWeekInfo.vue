@@ -36,7 +36,7 @@
               :class="rating ? weekDayColor(rating) : 'bg-cyan'"
             >
               <div>
-                {{ rating && rating > 0 ? rating : '-' }}
+                {{ rating && rating > 0 ? rating : "-" }}
               </div>
             </td>
           </tr>
@@ -47,18 +47,20 @@
 </template>
 
 <script lang="ts">
-import { RecipePlanWeekRead, User } from 'src/client';
-import { WeekDaysShort } from 'src/modules/WeekUtils';
-import { useAuthStore } from 'src/stores/auth';
-import { defineComponent, PropType } from 'vue';
-import HandleErrorsMixin, { CustomAxiosError } from '../modules/HandleErrorsMixin';
+import { RecipePlanWeekRead, User } from "src/client";
+import { WeekDaysShort } from "src/modules/WeekUtils";
+import { useAuthStore } from "src/stores/auth";
+import { defineComponent, PropType } from "vue";
+import HandleErrorsMixin, {
+  CustomAxiosError,
+} from "../modules/HandleErrorsMixin";
 
 let ratingColors: { [key: number]: string } = {
-  5: 'bg-positive',
-  4: 'bg-green-4',
-  3: 'bg-amber',
-  2: 'bg-orange',
-  1: 'bg-deep-orange-4',
+  5: "bg-positive",
+  4: "bg-green-4",
+  3: "bg-amber",
+  2: "bg-orange",
+  1: "bg-deep-orange-4",
 };
 
 interface TagsStats {
@@ -72,7 +74,7 @@ export default defineComponent({
   mixins: [HandleErrorsMixin],
   data() {
     const storeAuth = useAuthStore();
-    const defaultTab = this.$q.localStorage.getItem('week_tab') || 'stats';
+    const defaultTab = this.$q.localStorage.getItem("week_tab") || "stats";
     return {
       storeAuth,
       tab: defaultTab as string,
@@ -80,7 +82,7 @@ export default defineComponent({
       loading: false,
     };
   },
-  mounted() {
+  created() {
     if (!this.users) {
       this.loadUsers();
     }
@@ -98,7 +100,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки пользователей');
+          this.handleErrors(err, "Ошибка загрузки пользователей");
         });
     },
     getRating(day_idx: number, user: User): number | null {
@@ -114,7 +116,9 @@ export default defineComponent({
         if (r?.recipe?.ratings) {
           items = r?.recipe?.ratings.map((r) => {
             let rate =
-              typeof r.user == 'number' ? r.user == user.id : r.user.id == user.id;
+              typeof r.user == "number"
+                ? r.user == user.id
+                : r.user.id == user.id;
             return rate ? r.rating : -1;
           });
         }
@@ -138,7 +142,7 @@ export default defineComponent({
       });
     },
     weekDayColor(rating: number): string {
-      return ratingColors[rating] || 'bg-cyan';
+      return ratingColors[rating] || "bg-cyan";
     },
   },
   computed: {
@@ -173,7 +177,7 @@ export default defineComponent({
   },
   watch: {
     tab(val: string) {
-      this.$q.localStorage.set('week_tab', val);
+      this.$q.localStorage.set("week_tab", val);
     },
   },
 });

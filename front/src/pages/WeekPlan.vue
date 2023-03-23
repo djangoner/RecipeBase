@@ -271,7 +271,7 @@ export default defineComponent({
       WeekDaysColors,
     };
   },
-  mounted() {
+  created() {
     void this.$nextTick(() => {
       this.loadMealTime();
     });

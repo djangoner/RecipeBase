@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from functools import lru_cache
 import itertools
 import logging
 from typing import Optional, TypeAlias
@@ -17,21 +16,37 @@ CACHE_TTL = 5
 
 
 @dataclass
-class ConditionError:
+class ConditionWarning:
     condition: WeekPlanCondition
     value_current: ConditionValue
     value_expected: ConditionValue
     plan: Optional[RecipePlan] = None
-    childrens: list["ConditionError"] = field(default_factory=list)
+    childrens: list["ConditionWarning"] = field(default_factory=list)
 
 
 @dataclass
 class ConditionsResult:
-    errors: list[ConditionError]
+    warnings: list[ConditionWarning]
 
 
 # def build_condition_text(cond: WeekPlanCondition):
 #     pass
+
+
+def warnings_json(warnings: list[ConditionWarning]):
+    res: list[dict] = []
+    for w in warnings:
+        assert w.plan is not None
+        res.append(
+            {
+                "value_current": w.value_current,
+                "value_expected": w.value_expected,
+                "condition": w.condition.pk,
+                "plan": w.plan.pk,
+                "childrens": warnings_json(w.childrens),
+            }
+        )
+    return res
 
 
 def get_selector_value(cond: WeekPlanCondition) -> ConditionType | None:
@@ -255,7 +270,7 @@ def compare_condition_values(cond: WeekPlanCondition, value_current, value_expec
     return False
 
 
-def process_children_values(cond: WeekPlanCondition, values: list[list[ConditionError]]) -> bool:
+def process_children_values(cond: WeekPlanCondition, values: list[list[ConditionWarning]]) -> bool:
     condition = cond.condition
     childrens_values = [len(c) > 0 for c in values]
 
@@ -272,28 +287,28 @@ def process_children_values(cond: WeekPlanCondition, values: list[list[Condition
 def process_condition(cond: WeekPlanCondition, plan: RecipePlan):
     """Process condition, also process childrens tree if required."""
 
-    errors: list[ConditionError] = []
+    warnings: list[ConditionWarning] = []
     # log.info(f"Processing condition {cond} with ({plan})")
 
     ## -- Nested
     childrens = get_condition_childrens(cond)
     if childrens:
         # log.debug("Processing nested conditions...")
-        children_values: list[list[ConditionError]] = []
+        children_values: list[list[ConditionWarning]] = []
         for c in childrens:
             children_values.append(process_condition(c, plan))
 
         res = process_children_values(cond, children_values)
         if res:
-            errors.append(
-                ConditionError(
+            warnings.append(
+                ConditionWarning(
                     cond, "1", "1", plan=plan, childrens=list(itertools.chain.from_iterable(children_values))
                 )
             )
 
         # log.debug(f"Children res: {res}")
         # log.debug(f"Children values (condition: {cond.condition}): '{[len(c) for c in children_values]}'")
-        return errors
+        return warnings
     ##
 
     value_current = try_int(get_plan_value(cond, plan))
@@ -309,14 +324,11 @@ def process_condition(cond: WeekPlanCondition, plan: RecipePlan):
         value_expected = manual_value
 
     is_matching = compare_condition_values(cond, value_current, value_expected)
-    # log.debug(
-    #     f"Condition {cond} matching ({cond.comparison_mode}): {is_matching}. Values: '{value_current}' - '{value_expected}'"
-    # )
 
     if is_matching:
-        errors.append(ConditionError(cond, value_current, value_expected, plan=plan))
+        warnings.append(ConditionWarning(cond, value_current, value_expected, plan=plan))
 
-    return errors
+    return warnings
 
 
 def process_conditions_tree(week: RecipePlanWeek):
@@ -324,13 +336,13 @@ def process_conditions_tree(week: RecipePlanWeek):
 
     # Process only root active conditions
     root_conditions = WeekPlanCondition.objects.filter(parent__isnull=True, active=True)
-    errors: list[ConditionError] = []
+    warnings: list[ConditionWarning] = []
     # log.info(f"Checking conditions {root_conditions}...")
 
     for plan in week.plans.all():
         for cond in root_conditions:
-            errs = process_condition(cond, plan)
-            if errs:
-                errors.extend(errs)
+            cond_warnings = process_condition(cond, plan)
+            if cond_warnings:
+                warnings.extend(cond_warnings)
 
-    return ConditionsResult(errors=errors)
+    return ConditionsResult(warnings=warnings)

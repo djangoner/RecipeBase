@@ -513,7 +513,7 @@ class WeekPlanCondition(models.Model):
     class Condition(models.TextChoices):
         AND = "and", _("И")
         OR = "or", _("Или")
-        NOT = "не", _("Не")
+        NOT = "not", _("Не")
 
     class Field(models.TextChoices):
         WEEKDAY = "weekday", _("[N] День недели (Число 1-7)")

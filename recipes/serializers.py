@@ -24,6 +24,7 @@ from recipes.models import (
     ShopIngredientCategory,
     WeekPlanCondition,
 )
+from recipes.services.conditions import process_conditions_tree, warnings_json
 from recipes.services.measurings import MEASURING_SHORT, MEASURING_TYPES
 from users.models import User
 from users.serializers import ShortUserSerializer
@@ -348,13 +349,32 @@ class RecipePlanReadSerializer(RecipePlanSerializer):
     meal_time = MealTimeSerializer()
 
 
+class ConditionWarningSerializer(serializers.Serializer):
+    condition = serializers.IntegerField()
+    value_current = serializers.CharField()
+    value_expected = serializers.CharField()
+    plan = serializers.IntegerField()
+
+    def get_fields(self):
+        fields = super().get_fields()
+        fields["childrens"] = ConditionWarningSerializer(many=True)
+        return fields
+
+
 class RecipePlanWeekSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     plans = RecipePlanShortSerializer(many=True)
+    warnings = serializers.SerializerMethodField()
 
     class Meta:
         model = RecipePlanWeek
         fields = "__all__"
         depth = 1
+
+    @extend_schema_field(ConditionWarningSerializer(many=True))
+    def get_warnings(self, instance: RecipePlanWeek):
+        res = process_conditions_tree(instance)
+        warnings = warnings_json(res.warnings)
+        return warnings
 
 
 class RecipePlanWeekShortSerializer(RecipePlanWeekSerializer, serializers.ModelSerializer):

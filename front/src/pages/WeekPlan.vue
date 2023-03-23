@@ -202,7 +202,7 @@
         >
           <q-card class="q-pt-none q-px-none">
             <q-card-section class="q-px-xs">
-              <plan-week-info :plan="plan" />
+              <plan-week-info :plan="plan" :week="week" />
             </q-card-section>
           </q-card>
         </q-expansion-item>

@@ -1,21 +1,19 @@
 <template>
   <q-tabs v-model="tab" dense>
-    <q-tab name="stats" icon="info" />
+    <q-tab name="warnings" icon="warning" class="text-orange">
+      <q-badge color="red" floating>{{ warningsCount }}</q-badge>
+    </q-tab>
     <q-tab name="eats" icon="people" />
   </q-tabs>
 
-  <q-tab-panels v-model="tab" animated>
-    <q-tab-panel name="stats">
-      <div class="text-center text-subtitle1 q-mb-sm">Метки</div>
-      <q-markup-table flat dense>
-        <tbody>
-          <tr v-for="(stat, tag) in getTagsStats" :key="tag">
-            <td class="text-left">{{ tag }}</td>
-            <td class="text-center">{{ stat }}</td>
-            <td class="text-center">-</td>
-          </tr>
-        </tbody>
-      </q-markup-table>
+  <q-tab-panels v-model="tab" style="height: 200px" animated>
+    <q-tab-panel name="warnings">
+      <condition-warnings
+        :warnings="plan.warnings"
+        :week="week"
+        v-if="conditions"
+      />
+      <q-inner-loading :showing="!conditions" />
     </q-tab-panel>
     <q-tab-panel name="eats" class="q-px-sm">
       <q-markup-table flat dense>
@@ -48,12 +46,14 @@
 
 <script lang="ts">
 import { RecipePlanWeekRead, User } from "src/client";
-import { WeekDaysShort } from "src/modules/WeekUtils";
+import { WeekDaysShort, YearWeek } from "src/modules/WeekUtils";
 import { useAuthStore } from "src/stores/auth";
+import { useBaseStore } from "src/stores/base";
 import { defineComponent, PropType } from "vue";
 import HandleErrorsMixin, {
   CustomAxiosError,
 } from "../modules/HandleErrorsMixin";
+import ConditionWarnings from "./ConditionWarnings.vue";
 
 let ratingColors: { [key: number]: string } = {
   5: "bg-positive",
@@ -70,12 +70,17 @@ interface TagsStats {
 export default defineComponent({
   props: {
     plan: { required: true, type: Object as PropType<RecipePlanWeekRead> },
+    week: { required: true, type: Object as PropType<YearWeek> },
   },
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  components: { ConditionWarnings },
   mixins: [HandleErrorsMixin],
   data() {
+    const store = useBaseStore();
     const storeAuth = useAuthStore();
-    const defaultTab = this.$q.localStorage.getItem("week_tab") || "stats";
+    const defaultTab = this.$q.localStorage.getItem("week_tab") || "warnings";
     return {
+      store,
       storeAuth,
       tab: defaultTab as string,
       WeekDaysShort: WeekDaysShort as { [key: number]: string },
@@ -86,6 +91,7 @@ export default defineComponent({
     if (!this.users) {
       this.loadUsers();
     }
+    this.loadConditions();
   },
   methods: {
     loadUsers() {
@@ -135,6 +141,12 @@ export default defineComponent({
       // }
       return rate;
     },
+    loadConditions() {
+      let payload = { pageSize: 1000 };
+      void this.store.loadConditions(payload).catch((err: CustomAxiosError) => {
+        this.handleErrors(err);
+      });
+    },
     weekDaysRatings(user: User) {
       // :set="(rating = getRating(day, user))"
       return Object.entries(WeekDaysShort).map(([k]) => {
@@ -173,6 +185,15 @@ export default defineComponent({
         });
       });
       return stats;
+    },
+    conditions() {
+      return this.store.conditions;
+    },
+    warningsCount(): number {
+      if (!this.plan || !this.plan.warnings) {
+        return 0;
+      }
+      return this.plan.warnings.length;
     },
   },
   watch: {

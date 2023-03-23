@@ -44,6 +44,8 @@ import {
   TaskCategory,
   TaskCategoryService,
   TaskService,
+  WeekPlanCondition,
+  ConditionsService,
 } from "src/client";
 import { request } from "src/client/core/request";
 
@@ -71,6 +73,7 @@ export const useBaseStore = defineStore("base", {
     tasks_categories: null as TaskCategory[] | null,
     ingredient_categories: null as IngredientCategory[] | null,
     shops: null as Shop[] | null,
+    conditions: null as WeekPlanCondition[] | null,
   }),
 
   getters: {},
@@ -649,6 +652,19 @@ export const useBaseStore = defineStore("base", {
         TaskService.taskDestroy({ id })
           .then(() => {
             resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+
+    async loadConditions(payload: object): Promise<WeekPlanCondition[]> {
+      return new Promise((resolve, reject) => {
+        ConditionsService.conditionsList(payload)
+          .then((resp) => {
+            this.conditions = resp.results as WeekPlanCondition[];
+            resolve(resp.results as WeekPlanCondition[]);
           })
           .catch((err) => {
             reject(err);

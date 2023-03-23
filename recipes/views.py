@@ -589,6 +589,6 @@ class StatsViewset(viewsets.ViewSet):
         return response.Response(data)
 
 
-class WeekPlanConditionViewset(viewsets.ViewSet):
+class WeekPlanConditionViewset(viewsets.ModelViewSet):
     queryset = WeekPlanCondition.objects.all()
     serializer_class = WeekPlanConditionSerializer

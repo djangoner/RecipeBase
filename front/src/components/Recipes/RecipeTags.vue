@@ -120,8 +120,11 @@ export default defineComponent({
         return
       }
 
-      this.updateRootTags([].concat(this.recipeTags, this.tagAddSelect))
-      this.tagAddSelect = null
+      if (this.recipeTags){
+        // @ts-expect-error custom v-model updating
+        this.updateRootTags([].concat(this.recipeTags, this.tagAddSelect))
+        this.tagAddSelect = null
+      }
     },
     addNewTag(new_tag: string) {
       // , done: CallableFunction

@@ -482,7 +482,7 @@ export default defineComponent({
 
         payload.search = this.search;
         payload.page = String(this.page);
-        payload.page_size = String(this.page_size);
+        payload.pageSize = String(this.page_size);
 
         if (this.compilation == "top10") {
           payload.ordering = "";

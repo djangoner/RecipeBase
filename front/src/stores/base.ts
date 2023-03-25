@@ -147,33 +147,33 @@ export const useBaseStore = defineStore("base", {
 
     // -- Recipes
     async loadRecipes(payload: object): Promise<PaginatedRecipeReadList> {
-      return new CancelablePromise<PaginatedRecipeReadList>(
-        (resolve, reject) => {
-          request(OpenAPI, {
-            method: "GET",
-            url: "/api/v1/recipes/",
-            query: payload,
-          })
-            .then((resp) => {
-              this.recipes = (resp as PaginatedRecipeReadList)
-                .results as RecipeRead[];
-              resolve(resp as PaginatedRecipeReadList);
-            })
-            .catch((err) => {
-              reject(err);
-            });
-        }
-      );
-      // return new Promise((resolve, reject) => {
-      //   RecipesService.recipesList(payload)
-      //     .then((resp) => {
-      //       this.recipes = resp.results as RecipeRead[];
-      //       resolve(resp);
+      // return new CancelablePromise<PaginatedRecipeReadList>(
+      //   (resolve, reject) => {
+      //     request(OpenAPI, {
+      //       method: "GET",
+      //       url: "/api/v1/recipes/",
+      //       query: payload,
       //     })
-      //     .catch((err) => {
-      //       reject(err);
-      //     });
-      // });
+      //       .then((resp) => {
+      //         this.recipes = (resp as PaginatedRecipeReadList)
+      //           .results as RecipeRead[];
+      //         resolve(resp as PaginatedRecipeReadList);
+      //       })
+      //       .catch((err) => {
+      //         reject(err);
+      //       });
+      //   }
+      // );
+      return new Promise((resolve, reject) => {
+        RecipesService.recipesList(payload)
+          .then((resp) => {
+            this.recipes = resp.results as RecipeRead[];
+            resolve(resp);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
     },
     async loadRecipe(id: number): Promise<RecipeRead> {
       return new Promise((resolve, reject) => {

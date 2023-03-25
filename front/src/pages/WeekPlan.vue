@@ -58,7 +58,11 @@
                 :disable="saving"
                 flat
                 round
-              ></q-btn>
+              >
+                <q-tooltip v-if="plan.comments[idx]">
+                  {{ plan.comments[idx] }}
+                </q-tooltip>
+              </q-btn>
             </q-card-section>
 
             <q-card-section>

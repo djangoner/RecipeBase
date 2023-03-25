@@ -44,10 +44,6 @@
         </template>
       </draggable>
     </div>
-    <!-- <div class="row no-wrap items-center" v-for="img of modelValue" :key="img.id">
-      <q-icon name="drag_indicator" size="md"></q-icon>
-      <q-img :src="img.image" height="100px" fit="contain"></q-img>
-    </div> -->
 
     <div class="q-mt-md">
       <q-file

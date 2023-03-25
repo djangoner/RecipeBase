@@ -303,41 +303,6 @@
                         <span>
                           {{ userReadable(user) }}
                         </span>
-                        <!-- <div class="row col-grow justify-between q-col-gutter-x-sm">
-                          <div class="row items-center no-wrap">
-                            <q-icon
-                              v-if="rating.min === 0"
-                              size="xs"
-                              name="thumb_down"
-                              color="grey"
-                            >
-                            </q-icon>
-                            <template v-else>
-                              <q-icon
-                                v-for="i in Math.floor(rating.min)"
-                                :key="i"
-                                size="xs"
-                                name="star_rate"
-                                color="teal"
-                              >
-                              </q-icon>
-                            </template>
-                          </div>
-                          <q-space />
-                          <div
-                            class="row items-center no-wrap"
-                            :set="(rating = userRating(user))"
-                          >
-                            <q-icon
-                              v-for="i in Math.floor(rating.max)"
-                              :key="i"
-                              size="xs"
-                              name="star_rate"
-                              color="teal"
-                            >
-                            </q-icon>
-                          </div>
-                        </div> -->
                       </div>
                     </div>
 

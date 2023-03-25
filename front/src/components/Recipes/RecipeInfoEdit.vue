@@ -161,16 +161,6 @@
       label="Рецепт архивирован"
       dense
     />
-    <!-- <q-select
-      v-model="recipe.is_archived"
-      :options="archivedOptions"
-      label="Статус"
-      options-dense
-      map-options
-      emit-value
-      filled
-      :dense="dense"
-    /> -->
   </div>
 
   <!-- Images carousel -->

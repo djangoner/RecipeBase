@@ -145,11 +145,13 @@ def get_notification_text(name: str, **options) -> Optional[str]:
         product_items: list[ProductListItem] = list(week_plan.items.all())  # type: ignore
         product_items.sort(key=lambda x: x.day if x.day is not None else 99)
         for item in product_items:
-            state_str = "+" if item.is_completed else "-"
+            if item.is_completed:
+                continue
+            # state_str = "+" if item.is_completed else "-"
             amounts_str = product_item_amount_str(item)
             day_str = WEEKDAYS_STR[item.day] if item.day is not None else "-"
 
-            text += f"<pre>[{state_str}] [{day_str:<2}] {item.title} {amounts_str}</pre>\n"
+            text += f"<pre>[{day_str:<2}] {item.title} {amounts_str}</pre>\n"
 
         return text
 

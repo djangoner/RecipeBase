@@ -1,6 +1,6 @@
 import { date } from "quasar";
 import { Task, TaskCategory } from "src/client";
-import { TaskOrCategory } from "./Globals";
+import { TaskOrCategory, WarnedPlan } from "./Globals";
 
 export function isTaskCategory(
   item: Task | TaskCategory
@@ -24,4 +24,15 @@ export function clearPayload(payload: object): object {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(payload).filter(([_, v]) => v != null && v != "")
   );
+}
+
+export function getWarningPriorityColor(priority: string | null): string {
+  switch (priority) {
+    case "high":
+      return "red";
+    case "low":
+      return "green";
+    default:
+      return "orange";
+  }
 }

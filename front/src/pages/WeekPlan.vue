@@ -85,8 +85,8 @@
                         >
                           {{ mtime.title }}
                           <q-badge
-                            v-if="plan && warnedPlans.indexOf(plan.id) !== -1"
-                            color="orange"
+                            v-if="plan && getWarning(plan)"
+                            :color="getWarningColor(plan)"
                             rounded
                             floating
                           />
@@ -241,11 +241,13 @@ import HandleErrorsMixin, {
   CustomAxiosError,
 } from "src/modules/HandleErrorsMixin";
 import { WeekDays } from "src/modules/WeekUtils";
-import { MealTime, RecipeRead } from "src/client";
+import { MealTime, RecipeRead, RecipePlanRead } from "src/client";
 import { RecipePlanWeekFromRead } from "src/Convert";
 import { useAuthStore } from "src/stores/auth";
 // import VueHtmlToPaper from 'vue-html-to-paper';
 import { Directive } from "vue";
+import { WarningPriorities } from "src/modules/Globals";
+import { getWarningPriorityColor } from "src/modules/Utils";
 
 const WeekDaysColors: { [key: number]: string } = {
   1: "bg-amber-2",
@@ -259,6 +261,15 @@ type QueryInterface = YearWeek;
 
 interface PlanComments {
   [id: number]: string;
+}
+
+interface WarnedPlan {
+  priority: string | null;
+  icon: string | null;
+}
+
+interface WarnedPlans {
+  [id: number]: WarnedPlan;
 }
 
 export default defineComponent({
@@ -520,7 +531,7 @@ export default defineComponent({
             type: "textarea",
             autogrow: true,
             inputStyle: { minHeight: "3rem", maxHeight: "10rem" },
-            readOnly: !this.editMode,
+            readonly: !this.editMode,
           },
           cancel: true,
           persistent: true,
@@ -557,6 +568,16 @@ export default defineComponent({
         (d.getMonth() + 1).toString().padStart(2, "0");
       return day == d_str;
       // return day.getUTCDate() == new Date().getUTCDate();
+    },
+    getWarning(plan: RecipePlanRead) {
+      return this.warnedPlans[plan.id] || null;
+    },
+    getWarningColor(plan: RecipePlanRead) {
+      let warn = this.getWarning(plan);
+      return getWarningPriorityColor(warn.priority);
+    },
+    getCondition(id: number) {
+      return this.conditions?.find((c) => c.id == id) || null;
     },
   },
   computed: {
@@ -601,9 +622,35 @@ export default defineComponent({
     canEdit() {
       return this.storeAuth.hasPerm("recipes.change_recipeplanweek");
     },
-    warnedPlans(): number[] {
-      let plans = this.plan?.warnings?.map((w) => w.plan) || [];
-      return [...new Set(plans)];
+    conditions() {
+      return this.store.conditions;
+    },
+    warnedPlans(): WarnedPlans {
+      let warnings = this.plan?.warnings || [];
+      let res: WarnedPlans = {};
+
+      for (const warning of warnings) {
+        let cond = this.getCondition(warning.condition);
+        let plan = warning.plan;
+        if (!Object.hasOwn(res, plan)) {
+          cond = this.getCondition(warning.condition);
+          res[plan] = {
+            icon: String(cond?.icon) || null,
+            priority: String(cond?.priority) || null,
+          };
+        }
+
+        let prioritySaved = WarningPriorities.indexOf(res[plan].priority || "");
+        let priorityCurr = WarningPriorities.indexOf(
+          String(cond?.priority) || ""
+        );
+
+        if (priorityCurr > prioritySaved) {
+          res[plan].priority = WarningPriorities[priorityCurr];
+        }
+      }
+      return res;
+      // return [...new Set(plans)];
     },
   },
 });

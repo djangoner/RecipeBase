@@ -19,6 +19,7 @@
 <script lang="ts">
 import { date, QTreeNode } from "quasar";
 import { ConditionWarning, WeekPlanCondition } from "src/client";
+import { getWarningPriorityColor } from "src/modules/Utils";
 import { getDateOfISOWeek, YearWeek } from "src/modules/WeekUtils";
 import { useBaseStore } from "src/stores/base";
 import { defineComponent, PropType } from "vue";
@@ -128,8 +129,13 @@ export default defineComponent({
       let r: QTreeNode = {
         label: label,
         id: String(cond.id) + "_" + label,
+        icon: "warning",
+        iconColor: getWarningPriorityColor(String(cond.priority)),
         children: [] as QTreeNode[],
       };
+      if (cond.icon) {
+        r.icon = String(cond.icon);
+      }
       warnings.forEach((w) => {
         // console.debug("Children: ", w);
 

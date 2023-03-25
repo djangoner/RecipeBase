@@ -538,6 +538,11 @@ class WeekPlanCondition(models.Model):
     class SelectorType(models.TextChoices):
         WEEKDAY = "weekday", _("Текущий день недели")
 
+    class PriorityType(models.TextChoices):
+        HIGH = "high", _("Высокий")
+        MEDIUM = "medium", _("Средний")
+        LOW = "low", _("Низкий")
+
     parent = models.ForeignKey("self", models.CASCADE, blank=True, null=True, related_name="childrens")
     active = models.BooleanField(_("Активен"), default=True)
     title = models.CharField(_("Название условия"), null=True, blank=True, max_length=100)
@@ -556,6 +561,11 @@ class WeekPlanCondition(models.Model):
     selector_value = models.CharField(_("ID объекта сравнения"), blank=True, null=True, max_length=100)
 
     manual_value = models.CharField(_("Статическое значение"), blank=True, null=True, max_length=100)
+
+    icon = models.CharField(_("Иконка"), max_length=100, blank=True, null=True)
+    priority = models.CharField(
+        _("Приоритет"), choices=PriorityType.choices, default=PriorityType.MEDIUM, max_length=10
+    )
 
     class Meta:
         pass

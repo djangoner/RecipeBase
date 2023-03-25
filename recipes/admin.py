@@ -53,7 +53,7 @@ class ShopIngredientCategoryInline(SortableTabularInline):
     # autocomplete_fields = ["shop", "category"]
 
 
-class WeekPlanConditionInline(admin.TabularInline):
+class WeekPlanConditionInline(admin.StackedInline):
     extra = 0
     model = WeekPlanCondition
 
@@ -188,6 +188,8 @@ class WeekPlanConditionAdmin(admin.ModelAdmin):
         "comparison_mode",
         "selector_type",
         "selector_value",
+        "icon",
+        "priority",
         "active",
     ]
     list_filter = ("condition", "comparison_mode", "plan_field")

@@ -179,7 +179,8 @@ def get_week_duplicates(plan: RecipePlan) -> int:
 
         if p.recipe.pk == plan.recipe.pk:
             r += 1
-    return 0
+
+    return r
 
 
 @ttl_cache(32, ttl=CACHE_TTL)

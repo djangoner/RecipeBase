@@ -8,7 +8,7 @@
     <q-tab name="eats" icon="people" />
   </q-tabs>
 
-  <q-tab-panels v-model="tab" style="height: 200px" animated>
+  <q-tab-panels v-model="tab" style="height: 230px" animated>
     <q-tab-panel name="warnings">
       <template v-if="plan.warnings.length === 0">
         <div class="text-subtitle1 flex flex-center full-height">

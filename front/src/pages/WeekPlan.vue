@@ -38,7 +38,7 @@
             :class="[
               idx >= 6 ? 'bg-grey-3 print-hide print-week-hide' : '',
               WeekDaysColors[idx],
-              isToday(getDay(idx - 1)) ? 'shadow-5' : '',
+              // isToday(getDay(idx - 1)) ? 'shadow-5' : '',
               `weekday-${idx}`,
             ]"
             style="min-height: 300px"

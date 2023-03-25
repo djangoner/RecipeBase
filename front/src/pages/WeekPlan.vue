@@ -1,24 +1,36 @@
 <template>
-  <week-select v-model="week" @update:modelValue="loadWeekPlan()" />
+  <week-select
+    v-model="week"
+    @update:model-value="loadWeekPlan()"
+  />
   <q-linear-progress
     :value="fillingPrc || undefined"
     :indeterminate="saving"
     :instant-feedback="saving"
     :animation-speed="500"
   />
-  <q-page id="week_plan_print" padding>
+  <q-page
+    id="week_plan_print"
+    padding
+  >
     <div class="row items-center q-col-gutter-x-md print-hide">
       <div>
         <q-toggle
           v-model="editMode"
           label="Режим редактирования"
           :readonly="!canEdit"
-        ></q-toggle>
+        />
       </div>
       <div>
-        <q-btn @click="onPrint()" icon="print" color="primary" size="sm" no-caps
-          >Распечатать план</q-btn
+        <q-btn
+          icon="print"
+          color="primary"
+          size="sm"
+          no-caps
+          @click="onPrint()"
         >
+          Распечатать план
+        </q-btn>
       </div>
     </div>
 
@@ -29,9 +41,9 @@
       <template v-for="(day, idx) of WeekDays">
         <div
           v-if="idx > 0"
+          :key="idx"
           class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3"
           :class="`weekday-col-${idx}`"
-          :key="idx"
         >
           <q-card
             class="row column justify-around q-px-xs q-py-sm full-height"
@@ -52,12 +64,12 @@
               </span>
               <q-btn
                 v-if="plan?.comments"
-                @click="openComment(idx)"
                 icon="announcement"
                 :color="plan.comments[idx] ? 'red' : 'grey'"
                 :disable="saving"
                 flat
                 round
+                @click="openComment(idx)"
               >
                 <q-tooltip v-if="plan.comments[idx]">
                   {{ plan.comments[idx] }}
@@ -66,11 +78,17 @@
             </q-card-section>
 
             <q-card-section>
-              <div class="q-gutter-y-md" v-if="loading">
+              <div
+                v-if="loading"
+                class="q-gutter-y-md"
+              >
                 <q-skeleton type="QInput" />
                 <q-skeleton type="QInput" />
               </div>
-              <div class="flex column" v-else>
+              <div
+                v-else
+                class="flex column"
+              >
                 <template v-for="mtime of meal_time">
                   <div
                     v-if="
@@ -79,9 +97,9 @@
                     :key="mtime.id"
                   >
                     <div
-                      class="row q-col-gutter-x-sm wrap"
-                      v-for="(plan, rec_idx) of getDayPlans(idx, mtime)"
+                      v-for="(dayPlan, rec_idx) of getDayPlans(idx, mtime)"
                       :key="rec_idx"
+                      class="row q-col-gutter-x-sm wrap"
                     >
                       <div class="col-auto">
                         <div>
@@ -90,14 +108,14 @@
                           >
                             {{ mtime.title }}
                             <q-badge
-                              v-if="plan && getWarning(plan)"
-                              :color="getWarningColor(plan)"
+                              v-if="dayPlan && getWarning(dayPlan)"
+                              :color="getWarningColor(dayPlan)"
                               rounded
                               floating
                             />
                           </span>
                           <q-icon
-                            v-if="plan?.recipe?.comment"
+                            v-if="dayPlan?.recipe?.comment"
                             name="notes"
                             size="xs"
                             color="primary"
@@ -108,7 +126,7 @@
                               :offset="[10, 10]"
                             >
                               Комментарий:
-                              {{ plan?.recipe?.comment }}
+                              {{ dayPlan?.recipe?.comment }}
                             </q-tooltip>
                           </q-icon>
                           <q-tooltip>
@@ -120,21 +138,21 @@
 
                       <div class="col">
                         <q-select
-                          :model-value="plan?.recipe"
-                          @update:modelValue="
-                            setRecipe(idx, mtime, $event, rec_idx)
-                          "
+                          :model-value="dayPlan?.recipe"
                           :input-debounce="100"
                           :options="recipesList || []"
                           :readonly="saving || !editMode || !canEdit"
                           option-label="title"
-                          @filter="filterRecipes"
                           use-input
                           clearable
                           options-dense
                           dense
+                          @update:model-value="
+                            setRecipe(idx, mtime, $event, rec_idx)
+                          "
+                          @filter="filterRecipes"
                         >
-                          <template v-slot:no-option>
+                          <template #no-option>
                             <q-item>
                               <q-item-section class="text-grey">
                                 Нет результатов
@@ -146,14 +164,14 @@
                       </div>
 
                       <div
+                        v-if="dayPlan?.recipe"
                         class="flex flex-center col-auto"
-                        v-if="plan?.recipe"
                       >
                         <q-btn
                           v-if="storeAuth.hasPerm('recipes.view_recipe')"
                           :to="{
                             name: 'recipe',
-                            params: { id: plan.recipe.id },
+                            params: { id: dayPlan.recipe.id },
                           }"
                           icon="open_in_new"
                           size="sm"
@@ -165,25 +183,25 @@
                         </q-btn>
                       </div>
                       <div
-                        class="flex flex-center col-auto"
                         v-else-if="!mtime.is_primary"
+                        class="flex flex-center col-auto"
                       >
                         <q-btn
-                          @click="delPlan(idx, mtime)"
                           icon="close"
                           size="sm"
                           flat
                           dense
                           round
+                          @click="delPlan(idx, mtime)"
                         >
                           <q-tooltip>Убрать</q-tooltip>
                         </q-btn>
                       </div>
 
                       <recipe-card-tooltip
-                        v-if="plan?.recipe && $q.screen.gt.xs"
-                        :recipe="plan.recipe"
-                      ></recipe-card-tooltip>
+                        v-if="dayPlan?.recipe && $q.screen.gt.xs"
+                        :recipe="dayPlan.recipe"
+                      />
                     </div>
                   </div>
                 </template>
@@ -195,10 +213,8 @@
               <div class="row q-mt-sm">
                 <q-select
                   class="col"
-                  :modelValue="null"
+                  :model-value="null"
                   :options="meal_time_options || []"
-                  @update:modelValue="addMtime(idx, $event)"
-                  @filter="filterMealTime"
                   :input-debounce="0"
                   :readonly="saving || !editMode || !canEdit"
                   option-value="id"
@@ -208,14 +224,19 @@
                   use-input
                   options-dense
                   dense
-                ></q-select>
+                  @update:model-value="addMtime(idx, $event)"
+                  @filter="filterMealTime"
+                />
               </div>
             </q-card-section>
           </q-card>
         </div>
       </template>
 
-      <div class="col weekplan_info" v-if="plan">
+      <div
+        v-if="plan"
+        class="col weekplan_info"
+      >
         <q-expansion-item
           label="Доп информация"
           dense
@@ -224,14 +245,17 @@
         >
           <q-card class="q-pt-none q-px-none">
             <q-card-section class="q-px-xs q-pt-none">
-              <plan-week-info :plan="plan" :week="week" />
+              <plan-week-info
+                :plan="plan"
+                :week="week"
+              />
             </q-card-section>
           </q-card>
         </q-expansion-item>
       </div>
     </div>
   </q-page>
-  <q-inner-loading :showing="loading"></q-inner-loading>
+  <q-inner-loading :showing="loading" />
 </template>
 
 <script lang="ts">
@@ -280,10 +304,10 @@ interface WarnedPlans {
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   components: { weekSelect, recipeCardTooltip, PlanWeekInfo },
-  mixins: [HandleErrorsMixin],
   directives: {
     print: print as Directive,
   },
+  mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
@@ -304,6 +328,79 @@ export default defineComponent({
       WeekDaysColors,
     };
   },
+  computed: {
+    week: {
+      get() {
+        return {
+          year: (this.$query as QueryInterface)?.year as string | number | null,
+          week: (this.$query as QueryInterface)?.week as string | number | null,
+        } as YearWeek;
+      },
+      set(val: YearWeek) {
+        (this.$query as QueryInterface).year = val?.year;
+        (this.$query as QueryInterface).week = val?.week;
+      },
+    },
+    plan() {
+      return this.store.week_plan;
+    },
+    meal_time() {
+      return this.store.meal_time;
+    },
+    recipesList() {
+      return this.store.recipes;
+    },
+    fillingPrc(): number | null {
+      if (!this.meal_time) {
+        return null;
+      }
+      const plans = this.store.week_plan?.plans;
+      let plansFilled;
+      if (plans) {
+        plansFilled = plans.filter((p) => p.meal_time.is_primary).length;
+      }
+      const plansTotal = this.meal_time.filter((m) => m.is_primary).length * 5;
+
+      if (!plansFilled || !plansTotal) {
+        return 0;
+      }
+
+      return plansFilled / plansTotal;
+    },
+    canEdit() {
+      return this.storeAuth.hasPerm("recipes.change_recipeplanweek");
+    },
+    conditions() {
+      return this.store.conditions;
+    },
+    warnedPlans(): WarnedPlans {
+      const warnings = this.plan?.warnings || [];
+      const res: WarnedPlans = {};
+
+      for (const warning of warnings) {
+        let cond = this.getCondition(warning.condition);
+        const plan = warning.plan;
+        if (!Object.hasOwn(res, plan)) {
+          cond = this.getCondition(warning.condition);
+          res[plan] = {
+            icon: String(cond?.icon) || null,
+            priority: String(cond?.priority) || null,
+          };
+        }
+
+        const prioritySaved = WarningPriorities.indexOf(res[plan].priority || "");
+        const priorityCurr = WarningPriorities.indexOf(
+          String(cond?.priority) || ""
+        );
+
+        if (priorityCurr > prioritySaved) {
+          res[plan].priority = WarningPriorities[priorityCurr];
+        }
+      }
+      return res;
+      // return [...new Set(plans)];
+    },
+  },
   created() {
     void this.$nextTick(() => {
       this.loadMealTime();
@@ -323,7 +420,7 @@ export default defineComponent({
       if (!this.week?.year || !this.week?.week) {
         return;
       }
-      let payload = {
+      const payload = {
         year: this.week.year,
         week: this.week.week,
       };
@@ -344,7 +441,7 @@ export default defineComponent({
     },
     saveWeekPlan() {
       // let payload = Object.assign({}, this.plan);
-      let payload = RecipePlanWeekFromRead(Object.assign({}, this.plan));
+      const payload = RecipePlanWeekFromRead(Object.assign({}, this.plan));
       this.saving = true;
       console.debug("Save: ", payload);
 
@@ -359,7 +456,7 @@ export default defineComponent({
         });
     },
     loadMealTime() {
-      let payload = {
+      const payload = {
         pageSize: 1000,
       };
       // this.loading = true;
@@ -376,7 +473,7 @@ export default defineComponent({
     },
     loadRecipes() {
       return new Promise((resolve, reject) => {
-        let payload = {
+        const payload = {
           search: this.search,
           fields: "id,title",
           // page_size: 1,
@@ -433,7 +530,7 @@ export default defineComponent({
       if (!this.plan) {
         return;
       }
-      let recipes = this.plan?.plans.filter((plan) => {
+      const recipes = this.plan?.plans.filter((plan) => {
         return plan.day == day && plan.meal_time.id == mtime.id;
       });
       return recipes[0]?.recipe;
@@ -442,7 +539,7 @@ export default defineComponent({
       if (!this.plan) {
         return [];
       }
-      let plans = this.plan?.plans.filter((plan) => {
+      const plans = this.plan?.plans.filter((plan) => {
         return plan.day == day && plan.meal_time.id == mtime.id;
       });
 
@@ -460,12 +557,12 @@ export default defineComponent({
       rec_idx?: number
     ) {
       console.debug("setRecipe: ", day, mtime, value);
-      let plans =
+      const plans =
         this.plan?.plans?.filter((plan) => {
           return plan.day == day && plan.meal_time.id == mtime.id;
         }) || [];
 
-      let plan = plans[rec_idx || 0];
+      const plan = plans[rec_idx || 0];
       if (plan) {
         console.debug("Updating recipe...");
         plan.recipe = value;
@@ -508,7 +605,7 @@ export default defineComponent({
       let delOne = false;
       this.plan.plans =
         this.plan?.plans?.filter((p) => {
-          let r = p.day != idx || p.meal_time != mtime || p.recipe != null;
+          const r = p.day != idx || p.meal_time != mtime || p.recipe != null;
           if (!r && !delOne) {
             delOne = true;
             return false;
@@ -525,7 +622,7 @@ export default defineComponent({
       if (!this.plan?.comments) {
         this.plan.comments = {};
       }
-      let comments = this.plan?.comments as PlanComments;
+      const comments = this.plan?.comments as PlanComments;
       const startPlanID = this.plan.id;
 
       this.$q
@@ -561,13 +658,13 @@ export default defineComponent({
       return raw.slice(0, raw.length - 3);
     },
     getDay(idx: number): string {
-      let fday = getDateOfISOWeek(this.week.year, this.week.week);
+      const fday = getDateOfISOWeek(this.week.year, this.week.week);
       fday.setDate(fday.getDate() + idx);
       return date.formatDate(fday, "DD.MM");
     },
     isToday(day: string) {
-      let d = new Date();
-      let d_str =
+      const d = new Date();
+      const d_str =
         String(d.getDate()) +
         "." +
         (d.getMonth() + 1).toString().padStart(2, "0");
@@ -578,84 +675,11 @@ export default defineComponent({
       return this.warnedPlans[plan.id] || null;
     },
     getWarningColor(plan: RecipePlanRead) {
-      let warn = this.getWarning(plan);
+      const warn = this.getWarning(plan);
       return getWarningPriorityColor(warn.priority);
     },
     getCondition(id: number) {
       return this.conditions?.find((c) => c.id == id) || null;
-    },
-  },
-  computed: {
-    week: {
-      get() {
-        return {
-          year: (this.$query as QueryInterface)?.year as string | number | null,
-          week: (this.$query as QueryInterface)?.week as string | number | null,
-        } as YearWeek;
-      },
-      set(val: YearWeek) {
-        (this.$query as QueryInterface).year = val?.year;
-        (this.$query as QueryInterface).week = val?.week;
-      },
-    },
-    plan() {
-      return this.store.week_plan;
-    },
-    meal_time() {
-      return this.store.meal_time;
-    },
-    recipesList() {
-      return this.store.recipes;
-    },
-    fillingPrc(): number | null {
-      if (!this.meal_time) {
-        return null;
-      }
-      let plans = this.store.week_plan?.plans;
-      let plansFilled;
-      if (plans) {
-        plansFilled = plans.filter((p) => p.meal_time.is_primary).length;
-      }
-      let plansTotal = this.meal_time.filter((m) => m.is_primary).length * 5;
-
-      if (!plansFilled || !plansTotal) {
-        return 0;
-      }
-
-      return plansFilled / plansTotal;
-    },
-    canEdit() {
-      return this.storeAuth.hasPerm("recipes.change_recipeplanweek");
-    },
-    conditions() {
-      return this.store.conditions;
-    },
-    warnedPlans(): WarnedPlans {
-      let warnings = this.plan?.warnings || [];
-      let res: WarnedPlans = {};
-
-      for (const warning of warnings) {
-        let cond = this.getCondition(warning.condition);
-        let plan = warning.plan;
-        if (!Object.hasOwn(res, plan)) {
-          cond = this.getCondition(warning.condition);
-          res[plan] = {
-            icon: String(cond?.icon) || null,
-            priority: String(cond?.priority) || null,
-          };
-        }
-
-        let prioritySaved = WarningPriorities.indexOf(res[plan].priority || "");
-        let priorityCurr = WarningPriorities.indexOf(
-          String(cond?.priority) || ""
-        );
-
-        if (priorityCurr > prioritySaved) {
-          res[plan].priority = WarningPriorities[priorityCurr];
-        }
-      }
-      return res;
-      // return [...new Set(plans)];
     },
   },
 });

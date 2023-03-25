@@ -1,8 +1,7 @@
 <template>
   <q-select
-    :modelValue="modelValue"
-    @update:modelValue="$emit('update:modelValue', $event)"
-    label="Единица измерения"
+    :model-value="modelValue"
+    :label="label || undefined"
     :options="amountTypeList || []"
     :readonly="readonly"
     option-label="title"
@@ -12,8 +11,8 @@
     dense
     options-dense
     clearable
-  >
-  </q-select>
+    @update:model-value="$emit('update:model-value', $event)"
+  />
 </template>
 
 <script lang="ts">
@@ -26,23 +25,39 @@ import { AmountTypesConvert, AmountTypesTypes } from "src/modules/Globals";
 import { AmountTypeEnum } from "src/client";
 
 export default defineComponent({
+  mixins: [HandleErrorsMixin],
   props: {
     modelValue: {
       type: String as PropType<string | null | AmountTypeEnum>,
-      required: false,
+      required: true,
     },
     readonly: {
       type: Boolean,
       default: false,
     },
+    label: {
+      type: String as PropType<string | null>,
+      default: "Единица измерения",
+    }
   },
-  mixins: [HandleErrorsMixin],
+  emits: ['update:model-value'],
   data() {
     const store = useBaseStore();
     return {
       store,
       loading: false,
     };
+  },
+  computed: {
+    amount_types() {
+      return this.store.amount_types;
+    },
+    amountTypeList() {
+      return this.amount_types?.types as AmountTypesTypes;
+    },
+    amountTypeConvert() {
+      return this.amount_types?.convert as AmountTypesConvert;
+    },
   },
   created() {
     if (!this.amount_types) {
@@ -61,17 +76,6 @@ export default defineComponent({
           this.loading = false;
           this.handleErrors(err, "Ошибка загрузки типов измерений");
         });
-    },
-  },
-  computed: {
-    amount_types() {
-      return this.store.amount_types;
-    },
-    amountTypeList() {
-      return this.amount_types?.types as AmountTypesTypes;
-    },
-    amountTypeConvert() {
-      return this.amount_types?.convert as AmountTypesConvert;
     },
   },
 });

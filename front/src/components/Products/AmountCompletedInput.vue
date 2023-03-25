@@ -2,24 +2,24 @@
   <div class="row justify-between items-center">
     <q-input
       :model-value="modelValue"
-      @update:modelValue="$emit('update:modelValue', $event)"
       :debounce="2000"
       :readonly="readonly"
       class="col-3"
       type="number"
       label="Куплено"
       dense
+      @update:model-value="$emit('update:model-value', $event)"
     />
     <q-slider
       :model-value="modelValue"
-      @update:modelValue="debouncedUpdate"
       class="col-grow q-px-md"
       marker-labels
       :readonly="readonly"
       :min="0"
       :max="max"
       :step="sliderStep"
-    ></q-slider>
+      @update:model-value="debouncedUpdate"
+    />
   </div>
 </template>
 
@@ -31,6 +31,7 @@ export default defineComponent({
   props: {
     modelValue: {
       type: Number as PropType<number | null>,
+        required: true,
     },
     readonly: {
       type: Boolean,
@@ -40,25 +41,21 @@ export default defineComponent({
       type: Number,
       default: 1,
     },
-    amount_type: {
+    amountType: {
       type: String,
+      default: undefined,
       required: false,
     },
   },
+  emits:['update:model-value'],
   data() {
     // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
     const emptyFn = ($ev: number | null) => {};
     return { debouncedUpdate: emptyFn as (value: number | null) => void };
   },
-  created() {
-    this.debouncedUpdate = debounce(
-      ($ev) => this.$emit("update:modelValue", $ev),
-      1000
-    );
-  },
   computed: {
     sliderStep(): number {
-      if (this.amount_type == "g") {
+      if (this.amountType == "g") {
         return 50;
       }
 
@@ -71,6 +68,12 @@ export default defineComponent({
         return Math.max(Math.floor(this.max / 5), 1);
       }
     },
+  },
+  created() {
+    this.debouncedUpdate = debounce(
+      ($ev) => this.$emit("update:model-value", $ev),
+      1000
+    );
   },
 });
 </script>

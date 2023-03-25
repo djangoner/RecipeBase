@@ -4,9 +4,10 @@
       <task-item-list
         v-model="taskCategories"
         :flat="true"
-        :canEdit="canEdit"
+        :can-edit="canEdit"
+        is-category
         @reload="loadTaskCategories()"
-      ></task-item-list>
+      />
 
       <q-form
         v-if="storeAuth.hasPerm('tasks.add_taskcategory')"
@@ -22,7 +23,7 @@
               round
               dense
               no-caps
-            ></q-btn>
+            />
           </q-item-section>
           <q-item-section>
             <q-input
@@ -31,8 +32,7 @@
               required
               outlined
               dense
-            >
-            </q-input>
+            />
           </q-item-section>
         </q-item>
       </q-form>
@@ -70,13 +70,22 @@ export default defineComponent({
     };
   },
 
+  computed: {
+    taskCategories() {
+      return this.store.tasks_categories;
+    },
+    canEdit() {
+      return this.storeAuth.hasPerm("tasks.change_task");
+    },
+  },
+
   created() {
     this.loadTaskCategories();
   },
 
   methods: {
     loadTaskCategories() {
-      let payload = {
+      const payload = {
         pageSize: 1000,
       };
       this.loading = true;
@@ -96,7 +105,7 @@ export default defineComponent({
         return;
       }
       this.loading = true;
-      let payload = {
+      const payload = {
         title: this.addCategory,
       };
       this.store
@@ -114,15 +123,6 @@ export default defineComponent({
     },
     openCategory(category: TaskOrCategory) {
       this.category = category;
-    },
-  },
-
-  computed: {
-    taskCategories() {
-      return this.store.tasks_categories;
-    },
-    canEdit() {
-      return this.storeAuth.hasPerm("tasks.change_task");
     },
   },
 });

@@ -2,17 +2,29 @@
   <q-menu context-menu>
     <q-list dense>
       <!-- Add to plan -->
-      <q-item clickable @click="addToPlanPreload()">
-        <q-item-section side><q-icon name="calendar_month" /></q-item-section>
+      <q-item
+        clickable
+        @click="addToPlanPreload()"
+      >
+        <q-item-section side>
+          <q-icon name="calendar_month" />
+        </q-item-section>
         <q-item-section>Добавить в план</q-item-section>
         <q-item-section side>
           <q-icon name="keyboard_arrow_right" />
         </q-item-section>
 
-        <q-menu anchor="top end" self="top start">
+        <q-menu
+          anchor="top end"
+          self="top start"
+        >
           <q-list dense>
             <template v-for="(day, idx) of WeekDays">
-              <q-item v-if="idx > 0" clickable :key="idx">
+              <q-item
+                v-if="idx > 0"
+                :key="idx"
+                clickable
+              >
                 <q-item-section
                   :class="isDayFilled(Number(idx)) ? 'text-underline text-bold' : ''"
                 >
@@ -22,14 +34,18 @@
                   <q-icon name="keyboard_arrow_right" />
                 </q-item-section>
 
-                <q-menu auto-close anchor="top end" self="top start">
+                <q-menu
+                  auto-close
+                  anchor="top end"
+                  self="top start"
+                >
                   <q-list dense>
                     <q-item
-                      @click="addToPlan(idx, mtime, recipe)"
                       v-for="mtime of meal_time"
                       :key="mtime.id"
-                      clickable
                       v-close-popup
+                      clickable
+                      @click="addToPlan(idx, mtime, recipe)"
                     >
                       <q-item-section
                         :class="
@@ -48,12 +64,20 @@
       </q-item>
 
       <!-- Archive management -->
-      <q-item clickable @click="actionArchive()">
-        <q-item-section side><q-icon name="archive" /></q-item-section>
-        <q-item-section
-          ><template v-if="recipe.is_archived">Убрать из архива</template
-          ><template v-else>В архив</template></q-item-section
-        >
+      <q-item
+        clickable
+        @click="actionArchive()"
+      >
+        <q-item-section side>
+          <q-icon name="archive" />
+        </q-item-section>
+        <q-item-section>
+          <template v-if="recipe.is_archived">
+            Убрать из архива
+          </template><template v-else>
+            В архив
+          </template>
+        </q-item-section>
       </q-item>
     </q-list>
   </q-menu>
@@ -68,26 +92,35 @@ import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMix
 import { RecipePlanWeekFromRead } from 'src/Convert';
 
 export default defineComponent({
-  emits: ['updateItem'],
+  mixins: [HandleErrorsMixin],
   props: {
     recipe: { required: true, type: Object as PropType<RecipeRead> },
   },
-  mixins: [HandleErrorsMixin],
+  emits: ['updateItem'],
   setup() {
     const store = useBaseStore();
-    let [year, week] = getYearWeek();
-    let week_p: YearWeek = {
+    const [year, week] = getYearWeek();
+    const week_p: YearWeek = {
       year: year,
       week: week,
     };
     return { store, WeekDays, week: week_p };
+  },
+
+  computed: {
+    plan() {
+      return this.store.week_plan;
+    },
+    meal_time() {
+      return this.store.meal_time;
+    },
   },
   methods: {
     emitUpdated() {
       this.$emit('updateItem');
     },
     actionArchive() {
-      let recipe_title: string = this.recipe?.title || '';
+      const recipe_title: string = this.recipe?.title || '';
       this.$q
         .dialog({
           title: 'Подтверждение',
@@ -124,11 +157,11 @@ export default defineComponent({
           // Load current plan
           await this.loadWeekPlan();
           // Update plan
-          let plans =
+          const plans =
             this.plan?.plans.filter((plan) => {
               return plan.day == day && plan.meal_time.id == mtime.id;
             }) || [];
-          let plan = plans[0];
+          const plan = plans[0];
           if (plan) {
             plan.recipe = recipe;
           } else {
@@ -163,16 +196,16 @@ export default defineComponent({
     },
 
     isDayFilled(day: number): boolean {
-      let plans = this.plan?.plans;
-      let plansFilled =
+      const plans = this.plan?.plans;
+      const plansFilled =
         plans?.filter((p) => p.meal_time.is_primary && p.day === day).length || 0;
-      let plansTotal = plans?.filter((p) => p.day == day).length || 0;
+      const plansTotal = plans?.filter((p) => p.day == day).length || 0;
 
       return plansFilled >= plansTotal && plansTotal > 0;
     },
     isMtimeFilled(day: number, mtime: MealTime): boolean {
-      let plans = this.plan?.plans;
-      let plansFilled =
+      const plans = this.plan?.plans;
+      const plansFilled =
         plans?.filter((p) => p.meal_time.id == mtime.id && p.day == day).length || 0;
       return plansFilled > 0;
     },
@@ -184,7 +217,7 @@ export default defineComponent({
           reject();
           return;
         }
-        let payload = {
+        const payload = {
           year: this.week.year,
           week: this.week.week,
         };
@@ -200,7 +233,7 @@ export default defineComponent({
       });
     },
     loadMealTime() {
-      let payload = {
+      const payload = {
         pageSize: 1000,
       };
       // this.loading = true;
@@ -230,15 +263,6 @@ export default defineComponent({
             this.handleErrors(err, 'Ошибка загрузки плана');
           });
       });
-    },
-  },
-
-  computed: {
-    plan() {
-      return this.store.week_plan;
-    },
-    meal_time() {
-      return this.store.meal_time;
     },
   },
 });

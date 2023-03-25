@@ -1,8 +1,18 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="print-hide" elevated>
+    <q-header
+      class="print-hide"
+      elevated
+    >
       <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
+        <q-btn
+          flat
+          dense
+          round
+          icon="menu"
+          aria-label="Menu"
+          @click="toggleLeftDrawer"
+        />
 
         <q-toolbar-title> База рецептов </q-toolbar-title>
 
@@ -23,15 +33,26 @@
 
         <q-item class="cursor-pointer">
           <q-item-section avatar>
-            <q-icon name="account_circle" size="lg"></q-icon>
+            <q-icon
+              name="account_circle"
+              size="lg"
+            />
           </q-item-section>
           <q-item-section>
             {{ userReadable }}
           </q-item-section>
 
-          <q-menu anchor="bottom middle" self="top middle" auto-close>
+          <q-menu
+            anchor="bottom middle"
+            self="top middle"
+            auto-close
+          >
             <q-list dense>
-              <q-item class="justify-center text-negative" clickable @click="askLogout">
+              <q-item
+                class="justify-center text-negative"
+                clickable
+                @click="askLogout"
+              >
                 Выйти
               </q-item>
             </q-list>
@@ -40,55 +61,90 @@
 
         <q-separator class="q-mb-md" />
 
-        <q-item v-if="!isOnLine" class="bg-orange text-white">
-          <q-item-section avatar><q-icon name="wifi_off"></q-icon></q-item-section>
+        <q-item
+          v-if="!isOnLine"
+          class="bg-orange text-white"
+        >
+          <q-item-section avatar>
+            <q-icon name="wifi_off" />
+          </q-item-section>
           <q-item-section>Нет подключения к интернету</q-item-section>
         </q-item>
 
-        <q-item :to="{ name: 'index' }" exact
-          ><q-item-section avatar><q-icon name="home"></q-icon></q-item-section>
+        <q-item
+          :to="{ name: 'index' }"
+          exact
+        >
+          <q-item-section avatar>
+            <q-icon name="home" />
+          </q-item-section>
           <q-item-section>Главная</q-item-section>
         </q-item>
-        <q-item :to="{ name: 'recipes' }" v-if="storeAuth.hasPerm('recipes.view_recipe')"
-          ><q-item-section avatar><q-icon name="article"></q-icon></q-item-section>
+        <q-item
+          v-if="storeAuth.hasPerm('recipes.view_recipe')"
+          :to="{ name: 'recipes' }"
+        >
+          <q-item-section avatar>
+            <q-icon name="article" />
+          </q-item-section>
           <q-item-section>Рецепты</q-item-section>
         </q-item>
         <q-item
-          :to="{ name: 'week_plan' }"
           v-if="storeAuth.hasPerm('recipes.view_recipeplanweek')"
-          ><q-item-section avatar><q-icon name="calendar_month"></q-icon></q-item-section>
+          :to="{ name: 'week_plan' }"
+        >
+          <q-item-section avatar>
+            <q-icon name="calendar_month" />
+          </q-item-section>
           <q-item-section>План</q-item-section>
         </q-item>
         <q-item
-          :to="{ name: 'product_list' }"
           v-if="storeAuth.hasPerm('recipes.view_productlistweek')"
-          ><q-item-section avatar><q-icon name="shopping_cart"></q-icon></q-item-section>
+          :to="{ name: 'product_list' }"
+        >
+          <q-item-section avatar>
+            <q-icon name="shopping_cart" />
+          </q-item-section>
           <q-item-section>Список продуктов</q-item-section>
         </q-item>
         <q-item
-          :to="{ name: 'ingredients' }"
           v-if="storeAuth.hasPerm('recipes.view_ingredient')"
-          ><q-item-section avatar
-            ><q-icon name="shopping_basket"></q-icon
-          ></q-item-section>
+          :to="{ name: 'ingredients' }"
+        >
+          <q-item-section avatar>
+            <q-icon name="shopping_basket" />
+          </q-item-section>
           <q-item-section>Ингредиенты</q-item-section>
         </q-item>
-        <q-item :to="{ name: 'tasks' }" v-if="storeAuth.hasPerm('tasks.view_task')"
-          ><q-item-section avatar><q-icon name="list"></q-icon></q-item-section>
+        <q-item
+          v-if="storeAuth.hasPerm('tasks.view_task')"
+          :to="{ name: 'tasks' }"
+        >
+          <q-item-section avatar>
+            <q-icon name="list" />
+          </q-item-section>
           <q-item-section>Задачи</q-item-section>
         </q-item>
 
         <q-separator />
 
-        <q-item clickable @click="toggleDark">
+        <q-item
+          clickable
+          @click="toggleDark"
+        >
           <q-item-section avatar>
-            <q-icon :name="darkIcon()"></q-icon>
+            <q-icon :name="darkIcon()" />
           </q-item-section>
           <q-item-section> Тёмная тема </q-item-section>
         </q-item>
-        <q-item clickable dense href="/admin" v-if="user?.is_staff">
+        <q-item
+          v-if="user?.is_staff"
+          clickable
+          dense
+          href="/admin"
+        >
           <q-item-section avatar>
-            <q-icon name="settings"></q-icon>
+            <q-icon name="settings" />
           </q-item-section>
           <q-item-section> Администрирование </q-item-section>
         </q-item>
@@ -96,8 +152,13 @@
     </q-drawer>
 
     <q-page-container>
-      <q-item v-if="!isOnLine" class="bg-orange text-white">
-        <q-item-section avatar><q-icon name="wifi_off"></q-icon></q-item-section>
+      <q-item
+        v-if="!isOnLine"
+        class="bg-orange text-white"
+      >
+        <q-item-section avatar>
+          <q-icon name="wifi_off" />
+        </q-item-section>
         <q-item-section>Нет подключения к интернету</q-item-section>
       </q-item>
       <router-view />
@@ -143,19 +204,19 @@ export default defineComponent({
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
       toggleDark() {
-        let mode = $q.dark.mode;
-        let idxCurr = darkModes.indexOf(mode);
+        const mode = $q.dark.mode;
+        const idxCurr = darkModes.indexOf(mode);
         let idxNew = idxCurr + 1;
         if (idxNew >= darkModes.length) {
           idxNew = 0;
         }
-        let newMode: DarkMode = darkModes[idxNew];
+        const newMode: DarkMode = darkModes[idxNew];
         // set
         $q.dark.set(newMode);
         $q.localStorage.set('preferredMode', newMode);
       },
       darkIcon() {
-        let mode = $q.dark.mode;
+        const mode = $q.dark.mode;
         switch (mode) {
           case false:
             return 'light_mode';
@@ -168,25 +229,6 @@ export default defineComponent({
         }
       },
     };
-  },
-
-  methods: {
-    askLogout() {
-      this.$q
-        .dialog({
-          title: 'Подтверждение',
-          message: 'Вы уверены что хотите выйти из аккаунта?',
-          cancel: true,
-          persistent: true,
-        })
-        .onOk(() => {
-          this.logout();
-        });
-    },
-    logout() {
-      void this.storeAuth.logout();
-      void this.$router.push({ name: 'login' });
-    },
   },
 
   computed: {
@@ -212,6 +254,25 @@ export default defineComponent({
           this.leftDrawerOpen = sessionStorage.getItem('leftDrawerOpen') !== '0';
         }
       },
+    },
+  },
+
+  methods: {
+    askLogout() {
+      this.$q
+        .dialog({
+          title: 'Подтверждение',
+          message: 'Вы уверены что хотите выйти из аккаунта?',
+          cancel: true,
+          persistent: true,
+        })
+        .onOk(() => {
+          this.logout();
+        });
+    },
+    logout() {
+      void this.storeAuth.logout();
+      void this.$router.push({ name: 'login' });
     },
   },
 });

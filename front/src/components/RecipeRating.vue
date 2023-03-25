@@ -1,9 +1,15 @@
 <template>
   <q-markup-table flat>
     <tbody class="table-rating">
-      <tr v-for="user of usersRate" :key="user.id">
+      <tr
+        v-for="user of usersRate"
+        :key="user.id"
+      >
         <td class="cell-icon">
-          <q-icon :name="user.profile.icon || 'person'" size="md"></q-icon>
+          <q-icon
+            :name="user.profile.icon || 'person'"
+            size="md"
+          />
         </td>
 
         <td class="cell-name">
@@ -16,14 +22,14 @@
 
         <td class="cell-rating">
           <q-rating
-            :modelValue="userRating(user) + 1"
+            :model-value="userRating(user) + 1"
             :readonly="!edit"
-            @update:modelValue="userSetRating(user, $event - 1)"
             :icon="['thumb_down', 'star']"
             :color-selected="['grey', 'green-5']"
             :max="6"
             size="2em"
             :color="$q.dark.isActive ? 'grey-4' : 'primary'"
+            @update:model-value="userSetRating(user, $event - 1)"
           />
         </td>
       </tr>
@@ -40,14 +46,15 @@ import HandleErrorsMixin, {
   CustomAxiosError,
 } from "src/modules/HandleErrorsMixin";
 
-let defaultRating = {};
+const defaultRating = {};
 
 export default defineComponent({
+  mixins: [HandleErrorsMixin],
   props: {
     modelValue: { required: true, type: Object as PropType<RecipeRead> },
     edit: { required: true, type: Boolean },
   },
-  mixins: [HandleErrorsMixin],
+  emits: ['update:model-value'],
   data() {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
@@ -57,6 +64,20 @@ export default defineComponent({
       loading: false,
     };
   },
+  computed: {
+    users() {
+      return this.storeAuth?.users;
+    },
+    usersRate() {
+      const users = this.users;
+      if (!users) {
+        return users;
+      }
+      return users.filter((u) => {
+        return u?.profile?.show_rate;
+      });
+    },
+  },
   created() {
     if (!this.users) {
       this.loadUsers();
@@ -64,7 +85,7 @@ export default defineComponent({
   },
   methods: {
     loadUsers() {
-      let payload = {
+      const payload = {
         page_size: 1000,
         can_rate: true,
       };
@@ -79,7 +100,7 @@ export default defineComponent({
         });
     },
     userRating(user: User) {
-      let exists = this.modelValue?.ratings?.filter((r) => {
+      const exists = this.modelValue?.ratings?.filter((r) => {
         return typeof r.user == "number"
           ? r.user == user.id
           : r.user.id == user.id;
@@ -96,23 +117,23 @@ export default defineComponent({
       if (!this.modelValue || !this.modelValue?.ratings) {
         return;
       }
-      let exists =
+      const exists =
         this.modelValue?.ratings.filter((r) => {
           return r.user.id == user.id;
         }) || false;
       // console.debug('setUserRating: ', user, rating, exists);
 
       if (exists && exists.length > 0 && this.modelValue.ratings) {
-        let mvalue = Object.assign({}, this.modelValue);
+        const mvalue = Object.assign({}, this.modelValue);
         mvalue.ratings = this.modelValue.ratings.map((r) => {
           if (r.user.id == user.id) {
             r.rating = rating;
           }
           return r;
         });
-        this.$emit("update:modelValue", mvalue);
+        this.$emit("update:model-value", mvalue);
       } else {
-        let mvalue = Object.assign({}, this.modelValue);
+        const mvalue = Object.assign({}, this.modelValue);
         // @ts-expect-error: Rating will be created
         mvalue.ratings.push(
           // @ts-expect-error: Rating will be created
@@ -122,22 +143,8 @@ export default defineComponent({
             rating: rating,
           })
         );
-        this.$emit("update:modelValue", mvalue);
+        this.$emit("update:model-value", mvalue);
       }
-    },
-  },
-  computed: {
-    users() {
-      return this.storeAuth?.users;
-    },
-    usersRate() {
-      let users = this.users;
-      if (!users) {
-        return users;
-      }
-      return users.filter((u) => {
-        return u?.profile?.show_rate;
-      });
     },
   },
 });

@@ -1,10 +1,13 @@
 <template>
   <q-dialog
-    :modelValue="!!modelValue"
-    @update:modelValue="$emit('update:modelValue', null)"
+    :model-value="!!modelValue"
     no-route-dismiss
+    @update:model-value="$emit('update:model-value', null)"
   >
-    <q-card style="width: 700px; max-width: 90vw" v-if="item">
+    <q-card
+      v-if="item"
+      style="width: 700px; max-width: 90vw"
+    >
       <!-- Top row -->
       <q-card-section class="row items-center no-wrap q-pb-none">
         <div class="col row">
@@ -15,7 +18,7 @@
             indeterminate-icon="help"
             size="lg"
             :disable="!canEdit"
-            @update:modelValue="$emit('updateItem', item)"
+            @update:model-value="$emit('updateItem', item)"
           />
           <div class="row column col">
             <!-- <span class="text-h6 full-width" v-if="item.is_auto">
@@ -23,15 +26,18 @@
             </span> -->
             <q-input
               v-model="item.title"
-              @update:modelValue="$emit('updateItem', item)"
               class="col"
               :debounce="500"
               :readonly="item.is_auto || !canEdit"
               dense
+              @update:model-value="$emit('updateItem', item)"
             />
 
             <span class="text-body2 text-primary">
-              <q-icon v-if="item.is_auto" name="settings">
+              <q-icon
+                v-if="item.is_auto"
+                name="settings"
+              >
                 <q-tooltip>
                   Этот рецепт был создан автоматически на основе плана на неделю
                 </q-tooltip>
@@ -42,13 +48,13 @@
           </div>
         </div>
         <q-btn
+          v-close-popup
           class="col-auto"
           icon="close"
           flat
           round
           dense
-          v-close-popup
-        ></q-btn>
+        />
       </q-card-section>
 
       <!-- Content -->
@@ -56,7 +62,6 @@
         <q-select
           v-if="!item.is_auto"
           v-model.number="item.day"
-          @update:modelValue="$emit('updateItem', item)"
           :options="weekDaysOptions"
           :readonly="item.is_auto || !canEdit"
           label="День недели"
@@ -68,13 +73,11 @@
           options-dense
           use-input
           clearable
-        >
-        </q-select>
+          @update:model-value="$emit('updateItem', item)"
+        />
         <q-select
           v-model="item.ingredient"
-          @update:modelValue="$emit('updateItem', item)"
           label="Ингредиент"
-          @filter="filterIngredients"
           :debounce="100"
           :options="ingredients || []"
           :readonly="item.is_auto || !canEdit"
@@ -85,23 +88,26 @@
           options-dense
           use-input
           clearable
-        >
-        </q-select>
+          @update:model-value="$emit('updateItem', item)"
+          @filter="filterIngredients"
+        />
 
-        <q-expansion-item label="Дополнительно" dense>
+        <q-expansion-item
+          label="Дополнительно"
+          dense
+        >
           <q-toggle
             v-model="item.already_completed"
             label="Уже есть"
-            @update:modelValue="$emit('updateItem', item)"
+            @update:model-value="$emit('updateItem', item)"
           >
-            <q-tooltip
-              >Продукт уже есть на начало недели и его не требуется
-              покупать</q-tooltip
-            >
+            <q-tooltip>
+              Продукт уже есть на начало недели и его не требуется
+              покупать
+            </q-tooltip>
           </q-toggle>
           <q-select
             v-model.number="item.priority"
-            @update:modelValue="$emit('updateItem', item)"
             :options="priorityOptions"
             :readonly="item.is_auto || !canEdit"
             label="Приоритет"
@@ -112,8 +118,9 @@
             dense
             options-dense
             use-input
+            @update:model-value="$emit('updateItem', item)"
           >
-            <template v-slot:no-option>
+            <template #no-option>
               <q-item>
                 <q-item-section class="text-grey">
                   Нет результатов
@@ -123,21 +130,24 @@
           </q-select>
 
           <!-- Manual amount -->
-          <div class="row justify-between items-center" v-if="!item.is_auto">
+          <div
+            v-if="!item.is_auto"
+            class="row justify-between items-center"
+          >
             <q-input
               v-model.number="item.amount"
-              @update:modelValue="$emit('updateItem', item)"
               :debounce="2000"
               class="col-3"
               type="number"
               label="Количество"
               dense
+              @update:model-value="$emit('updateItem', item)"
             />
             <amount-type-select
               v-model="item.amount_type"
-              @update:modelValue="$emit('updateItem', item)"
               :readonly="!canEdit"
               class="col-grow"
+              @update:model-value="$emit('updateItem', item)"
             />
           </div>
 
@@ -146,27 +156,31 @@
           <amount-completed-input
             v-if="item?.amount"
             v-model.number="item.amount_completed"
-            @update:modelValue="$emit('updateItem', item)"
             :max="Math.ceil(item.packs) || item.amount || 1"
             :readonly="!canEdit"
-            :amount_type="item.amount_type || ''"
+            :amount-type="item.amount_type || ''"
+            @update:model-value="$emit('updateItem', item)"
           />
         </q-expansion-item>
 
         <!-- Used in recipes -->
-        <div class="q-my-md" v-if="item.is_auto && item.ingredients">
+        <div
+          v-if="item.is_auto && item.ingredients"
+          class="q-my-md"
+        >
           <span class="text-subtitle-1">Используется в рецептах:</span>
-          <q-list class="q-my-sm" dense>
+          <q-list
+            class="q-my-sm"
+            dense
+          >
             <q-item
-              class="items-center"
               v-for="ing of item.ingredients"
               :key="ing.id"
+              class="items-center"
               clickable
               :to="{ name: 'recipe', params: { id: ing.recipe.id } }"
             >
-              <small class="ing-day"
-                >{{ getRecipeDays(ing.recipe)?.join(",") }}.&nbsp;</small
-              >
+              <small class="ing-day">{{ getRecipeDays(ing.recipe)?.join(",") }}.&nbsp;</small>
               {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
             </q-item>
 
@@ -197,10 +211,6 @@
         <div class="q-my-md q-col-gutter-x-md row">
           <div>
             <q-btn
-              @click="
-                showMoveWeek = true;
-                filterWeeks('', () => {});
-              "
               v-if="isOnLine && canEdit"
               label="Перенести на неделю..."
               icon="swap_horiz"
@@ -208,7 +218,11 @@
               color="primary"
               no-caps
               dense
-            ></q-btn>
+              @click="
+                showMoveWeek = true;
+                filterWeeks('', () => {});
+              "
+            />
           </div>
           <div>
             <q-btn
@@ -220,26 +234,26 @@
               color="primary"
               no-caps
               dense
-            ></q-btn>
+            />
           </div>
         </div>
 
         <!-- Product list ingredient description -->
         <q-input
           v-model="item.description"
-          @update:modelValue="$emit('updateItem', item)"
           :debounce="1000"
           :readonly="!canEdit"
           type="textarea"
           label="Описание"
           autogrow
           input-style="max-height: 5rem;"
+          @update:model-value="$emit('updateItem', item)"
         />
 
         <!-- Ingredient description -->
         <q-input
           v-if="item?.ingredient"
-          :modelValue="item?.ingredient?.description"
+          :model-value="item?.ingredient?.description"
           :debounce="1000"
           type="textarea"
           label="Описание ингредиента"
@@ -247,11 +261,17 @@
           readonly
         />
 
-        <div v-if="item?.ingredient?.image" class="q-mt-md">
+        <div
+          v-if="item?.ingredient?.image"
+          class="q-mt-md"
+        >
           <div class="text-subtitle1 text-grey q-mb-sm">
             Изображение рецепта
           </div>
-          <q-img :src="item.ingredient.image" fit="contain"></q-img>
+          <q-img
+            :src="item.ingredient.image"
+            fit="contain"
+          />
         </div>
       </q-card-section>
 
@@ -264,48 +284,64 @@
 
   <!-- Move to another week dialog -->
 
-  <q-dialog v-model="showMoveWeek" persistent>
+  <q-dialog
+    v-model="showMoveWeek"
+    persistent
+  >
     <q-card style="min-width: 350px">
       <q-card-section>
-        <div class="text-h6">Перенести задачу на другую неделю</div>
+        <div class="text-h6">
+          Перенести задачу на другую неделю
+        </div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
         <q-select
-          label="Неделя для переноса"
           v-model="moveWeek"
+          label="Неделя для переноса"
           :input-debounce="100"
           :options="weeksList || []"
           :option-label="(w) => w.year + '.' + w.week"
-          @filter="filterWeeks"
           use-input
           clearable
           options-dense
           dense
           autofocus
+          @filter="filterWeeks"
         />
 
         <div class="q-mt-md row justify-around">
           <q-btn
-            @click="moveWeekDelta(-1)"
             label="Прошлая"
             icon="navigate_before"
             color="primary"
             size="sm"
+            @click="moveWeekDelta(-1)"
           />
           <q-btn
-            @click="moveWeekDelta(1)"
             label="Следующая"
             icon="navigate_next"
             color="primary"
             size="sm"
+            @click="moveWeekDelta(1)"
           />
         </div>
       </q-card-section>
 
-      <q-card-actions align="right" class="text-primary">
-        <q-btn flat label="Отменить" v-close-popup />
-        <q-btn @click="itemMoveWeek()" flat label="Перенести" />
+      <q-card-actions
+        align="right"
+        class="text-primary"
+      >
+        <q-btn
+          v-close-popup
+          flat
+          label="Отменить"
+        />
+        <q-btn
+          flat
+          label="Перенести"
+          @click="itemMoveWeek()"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -349,6 +385,9 @@ interface ProductListItemAmounts {
 }
 
 export default defineComponent({
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  components: { AmountTypeSelect, AmountCompletedInput },
+  mixins: [HandleErrorsMixin, IsOnlineMixin],
   props: {
     modelValue: {
       required: false,
@@ -357,10 +396,7 @@ export default defineComponent({
     week: { required: true, type: Object as PropType<YearWeek> },
     canEdit: { default: true, type: Boolean },
   },
-  emits: ["openItem", "updateItem", "update:modelValue"],
-  mixins: [HandleErrorsMixin, IsOnlineMixin],
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { AmountTypeSelect, AmountCompletedInput },
+  emits: ["openItem", "updateItem", "update:model-value"],
   data() {
     const store = useBaseStore();
     return {
@@ -371,117 +407,6 @@ export default defineComponent({
       moveWeek: null as null | ProductListWeekRead,
       priorityOptions,
     };
-  },
-  methods: {
-    getDay(idx: number): string {
-      let fday = getDateOfISOWeek(this.week.year, this.week.week);
-      fday.setDate(fday.getDate() + idx - 1);
-      return date.formatDate(fday, "DD.MM");
-    },
-    ingUsingStr(ing: RecipeIngredientWithRecipeRead): string {
-      let recipe = ing.recipe;
-      if (!recipe) {
-        return "";
-      }
-
-      const amounts = this.item?.amounts as ProductListItemAmounts;
-      const ings = amounts[recipe.id] || [];
-
-      const texts = ings.map((i) => {
-        let r = String(i.amount) + " " + i.amount_type_str;
-        if (i.is_main) {
-          r += ", основной";
-        }
-        return r;
-      });
-      return texts.join(", ");
-    },
-
-    filterWeeks(val: string, update: CallableFunction) {
-      // if (this.searchWeek == val) {
-      //   update(() => {});
-      //   return;
-      // }
-      this.searchWeek = val || "";
-      let payload = {
-        short: "1",
-        search: this.searchWeek.replaceAll(".", ""),
-      };
-
-      this.store
-        .loadProductListWeeks(payload)
-        .then(() => {
-          update();
-        })
-        .catch(() => {
-          update();
-        });
-    },
-    loadIngredients(search: string): Promise<void> {
-      return new Promise((resolve, reject) => {
-        let payload = {
-          pageSize: 20,
-          search: search,
-          fields: "id,title",
-        };
-        this.store
-          .loadIngredients(payload)
-          .then(() => {
-            resolve();
-            // this.loading = false;
-          })
-          .catch((err: CustomAxiosError) => {
-            reject(err);
-            // this.loading = false;
-            this.handleErrors(err, "Ошибка загрузки ингредиентов");
-          });
-      });
-    },
-    filterIngredients(val: string, update: CallableFunction) {
-      void this.loadIngredients(val).then(() => {
-        void update();
-      });
-    },
-    moveWeekDelta(delta: number) {
-      let year = this.week.year.valueOf();
-      let week = this.week.week.valueOf();
-
-      week = week + delta;
-
-      if (week < 0) {
-        week = 54;
-      } else if (week > 54) {
-        week = 1;
-      }
-
-      let payload = {
-        year: year,
-        week: week,
-      };
-      void this.store.loadProductListWeek(payload, true).then((resp) => {
-        this.moveWeek = resp;
-        // delete this.moveWeek['items'];
-      });
-    },
-    itemMoveWeek() {
-      if (!this.moveWeek) {
-        return;
-      }
-
-      let item = Object.assign({}, this.item);
-
-      item.week = this.moveWeek.id;
-      this.$emit("updateItem", item, true);
-      this.showMoveWeek = false;
-      this.$emit("update:modelValue", false);
-    },
-    getRecipeDays(recipe: RecipeRead | RecipeShort): null | string[] {
-      if (!this.plan) {
-        return null;
-      }
-      let plans = this.plan.plans.filter((p) => p.recipe.id == recipe?.id);
-      return plans.map((p) => (p.day ? WeekDaysShort[p.day] : ("" as string)));
-    },
   },
   computed: {
     item() {
@@ -507,6 +432,117 @@ export default defineComponent({
       if (val !== oldVal) {
         this.showMoveWeek = false;
       }
+    },
+  },
+  methods: {
+    getDay(idx: number): string {
+      const fday = getDateOfISOWeek(this.week.year, this.week.week);
+      fday.setDate(fday.getDate() + idx - 1);
+      return date.formatDate(fday, "DD.MM");
+    },
+    ingUsingStr(ing: RecipeIngredientWithRecipeRead): string {
+      const recipe = ing.recipe;
+      if (!recipe) {
+        return "";
+      }
+
+      const amounts = this.item?.amounts as ProductListItemAmounts;
+      const ings = amounts[recipe.id] || [];
+
+      const texts = ings.map((i) => {
+        let r = String(i.amount) + " " + i.amount_type_str;
+        if (i.is_main) {
+          r += ", основной";
+        }
+        return r;
+      });
+      return texts.join(", ");
+    },
+
+    filterWeeks(val: string, update: CallableFunction) {
+      // if (this.searchWeek == val) {
+      //   update(() => {});
+      //   return;
+      // }
+      this.searchWeek = val || "";
+      const payload = {
+        short: "1",
+        search: this.searchWeek.replaceAll(".", ""),
+      };
+
+      this.store
+        .loadProductListWeeks(payload)
+        .then(() => {
+          update();
+        })
+        .catch(() => {
+          update();
+        });
+    },
+    loadIngredients(search: string): Promise<void> {
+      return new Promise((resolve, reject) => {
+        const payload = {
+          pageSize: 20,
+          search: search,
+          fields: "id,title",
+        };
+        this.store
+          .loadIngredients(payload)
+          .then(() => {
+            resolve();
+            // this.loading = false;
+          })
+          .catch((err: CustomAxiosError) => {
+            reject(err);
+            // this.loading = false;
+            this.handleErrors(err, "Ошибка загрузки ингредиентов");
+          });
+      });
+    },
+    filterIngredients(val: string, update: CallableFunction) {
+      void this.loadIngredients(val).then(() => {
+        void update();
+      });
+    },
+    moveWeekDelta(delta: number) {
+      const year = this.week.year.valueOf();
+      let week = this.week.week.valueOf();
+
+      week = week + delta;
+
+      if (week < 0) {
+        week = 54;
+      } else if (week > 54) {
+        week = 1;
+      }
+
+      const payload = {
+        year: year,
+        week: week,
+      };
+      void this.store.loadProductListWeek(payload, true).then((resp) => {
+        this.moveWeek = resp;
+        // delete this.moveWeek['items'];
+      });
+    },
+    itemMoveWeek() {
+      if (!this.moveWeek) {
+        return;
+      }
+
+      const item = Object.assign({}, this.item);
+
+      item.week = this.moveWeek.id;
+      this.$emit("updateItem", item, true);
+      this.showMoveWeek = false;
+      this.$emit("update:model-value", false);
+    },
+    getRecipeDays(recipe: RecipeRead | RecipeShort): null | string[] {
+      if (!this.plan) {
+        return null;
+      }
+      const plans = this.plan.plans.filter((p) => p.recipe.id == recipe?.id);
+      return plans.map((p) => (p.day ? WeekDaysShort[p.day] : ("" as string)));
     },
   },
 });

@@ -1,10 +1,19 @@
 <template>
-  <q-dialog :model-value="!!modelValue" @update:modelValue="setOpened">
+  <q-dialog
+    :model-value="!!modelValue"
+    @update:model-value="setOpened"
+  >
     <q-card style="width: 700px; max-width: 95vw; height: 80vh">
-      <q-linear-progress :indeterminate="saving" :instant-feedback="true" />
+      <q-linear-progress
+        :indeterminate="saving"
+        :instant-feedback="true"
+      />
 
       <!-- Top row -->
-      <q-card-section class="row items-center no-wrap q-pb-none" v-if="category">
+      <q-card-section
+        v-if="category"
+        class="row items-center no-wrap q-pb-none"
+      >
         <q-checkbox
           v-if="category?.is_completed !== undefined"
           v-model="category.is_completed"
@@ -13,59 +22,83 @@
           unchecked-icon="radio_button_unchecked"
           indeterminate-icon="help"
           size="lg"
-          @update:modelValue="updateItem()"
+          @update:model-value="updateItem()"
         />
         <q-input
           v-model="category.title"
           :readonly="!canEdit"
-          @update:modelValue="updateItem()"
           class="col"
           :debounce="500"
           dense
+          @update:model-value="updateItem()"
         />
         <q-space />
         <!-- Actions menu -->
-        <q-btn class="q-ml-sm q-mr-md" icon="menu" size="sm" round flat>
-          <q-menu anchor="bottom right" self="top right">
+        <q-btn
+          class="q-ml-sm q-mr-md"
+          icon="menu"
+          size="sm"
+          round
+          flat
+        >
+          <q-menu
+            anchor="bottom right"
+            self="top right"
+          >
             <q-list dense>
               <q-item>
                 <q-item-section>
-                  <q-item-label caption
-                    >Добавлено {{ dateFormat(category.created) }}
+                  <q-item-label caption>
+                    Добавлено {{ dateFormat(category.created) }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
               <q-separator />
               <q-item
                 v-if="canEdit"
-                @click="askDeleteTask()"
+                v-close-popup
                 class="text-negative"
                 clickable
-                v-close-popup
+                @click="askDeleteTask()"
               >
-                <q-item-section avatar><q-icon name="delete" size="xs" /></q-item-section>
+                <q-item-section avatar>
+                  <q-icon
+                    name="delete"
+                    size="xs"
+                  />
+                </q-item-section>
                 <q-item-section>Удалить</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
         </q-btn>
-        <q-btn icon="close" flat round dense v-close-popup></q-btn>
+        <q-btn
+          v-close-popup
+          icon="close"
+          flat
+          round
+          dense
+        />
       </q-card-section>
 
       <!-- Breadcrumbs -->
       <q-card-section v-if="tree.length > 1">
         <q-separator />
         <q-breadcrumbs class="q-my-sm cursor-pointer">
-          <template v-slot:separator>
-            <q-icon size="1.5em" name="chevron_right" color="primary" />
+          <template #separator>
+            <q-icon
+              size="1.5em"
+              name="chevron_right"
+              color="primary"
+            />
           </template>
 
           <q-breadcrumbs-el
-            @click="openParent(task)"
             v-for="task in tree"
             :key="task.id"
             :label="task.title"
-          ></q-breadcrumbs-el>
+            @click="openParent(task)"
+          />
         </q-breadcrumbs>
         <q-separator />
       </q-card-section>
@@ -74,16 +107,19 @@
       <q-card-section class="q-pt-none">
         <q-input
           v-model="category.description"
-          @update:modelValue="updateItem()"
           :debounce="2000"
           :readonly="!canEdit"
           type="textarea"
           label="Описание задачи"
           autogrow
           input-style="max-height: 5rem;"
+          @update:model-value="updateItem()"
         >
           <template #prepend>
-            <q-icon name="notes" size="sm" />
+            <q-icon
+              name="notes"
+              size="sm"
+            />
           </template>
         </q-input>
 
@@ -112,14 +148,13 @@
           <q-list>
             <task-item-list
               v-model="category.childrens"
-              @updateItem="updateItem"
-              @reload="$emit('reload')"
-              @openParent="openParent"
-              :canEdit="canEdit"
+              :can-edit="canEdit"
               :root="root"
               :tree="tree"
-            >
-            </task-item-list>
+              @update-item="updateItem"
+              @reload="$emit('reload')"
+              @open-parent="openParent"
+            />
           </q-list>
         </q-expansion-item>
       </q-card-section>
@@ -128,10 +163,10 @@
 </template>
 
 <script lang="ts">
-import taskItemList from 'src/components/TaskItemList.vue';
+// import taskItemList from 'src/components/TaskItemList.vue';
 import { useBaseStore } from 'src/stores/base';
 import { date } from 'quasar';
-import { defineComponent } from 'vue';
+import { defineAsyncComponent, defineComponent, PropType } from 'vue';
 import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
 import {
   isTaskCategory,
@@ -139,18 +174,22 @@ import {
   TaskCategoryCountCompleted,
 } from 'src/modules/Utils';
 import { TaskOrCategory } from 'src/modules/Globals';
+import { Task, TaskCategory } from 'src/client';
+
+type TaskList = TaskOrCategory[];
 
 export default defineComponent({
+  name: 'TaskItemView',
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { taskItemList },
+  components: { taskItemList:defineAsyncComponent(() => import('./TaskItemList.vue')) },
+  mixins: [HandleErrorsMixin],
   props: {
-    modelValue: { required: true },
-    root: { required: false },
-    tree: { required: false },
+    modelValue: { required: true, type: Object as PropType<Task> },
+    root: { required: false, default: null, type: Object as PropType<TaskCategory> },
+    tree: { required: false, default: null, type: Array as PropType<TaskList>},
     canEdit: { required: true, type: Boolean },
   },
-  emits: ['reload', 'openParent', 'update:modelValue'],
-  mixins: [HandleErrorsMixin],
+  emits: ['reload', 'openParent', 'update:model-value'],
   data() {
     const store = useBaseStore();
     return {
@@ -160,13 +199,19 @@ export default defineComponent({
       expanded: true,
     };
   },
+  computed: {
+    isTaskCategory,
+    category(): Task | TaskCategory {
+      return this.modelValue;
+    },
+  },
   methods: {
     getCategoryCompleted: TaskCategoryCountCompleted,
     getCategoryAll: TaskCategoryCountAll,
-    setOpened(val) {
-      this.$emit('update:modelValue', val || null);
+    setOpened(val?: boolean | null) {
+      this.$emit('update:model-value', val || null);
     },
-    updateItem(item: TaskOrCategory) {
+    updateItem(item?: TaskOrCategory) {
       let useThis = false;
       if (!item) {
         item = this.category;
@@ -175,15 +220,17 @@ export default defineComponent({
       console.debug('Update item', item);
       this.saving = true;
 
-      let method = isTaskCategory(item)
+      const method = isTaskCategory(item)
         ? this.store.updateTaskCategory
         : this.store.updateTask;
 
-      let updateData = Object.assign({}, item);
+      const updateData = Object.assign({}, item);
       if (updateData?.childrens) {
+        // @ts-expect-error don't update childrens
         delete updateData['childrens'];
       }
 
+      // @ts-expect-error Custom update
       method(updateData)
         .then((resp) => {
           this.saving = false;
@@ -209,11 +256,11 @@ export default defineComponent({
       this.$emit('openParent', target);
     },
 
-    deleteTask(item: TaskOrCategory | undefined) {
+    deleteTask(item?: TaskOrCategory | undefined) {
       if (!item) {
         item = this.category;
       }
-      let method = isTaskCategory(item)
+      const method = isTaskCategory(item)
         ? this.store.deleteTaskCategory
         : this.store.deleteTask;
 
@@ -243,11 +290,6 @@ export default defineComponent({
     },
     dateFormat(raw: Date): string {
       return date.formatDate(raw, 'YYYY.MM.DD hh:mm');
-    },
-  },
-  computed: {
-    category(): TaskOrCategory {
-      return this.modelValue;
     },
   },
 });

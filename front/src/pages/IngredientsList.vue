@@ -6,47 +6,49 @@
     >
       <div class="col">
         <q-table
+          v-model:pagination="tablePagination"
           title="Ингредиенты"
           :rows="ingredients || []"
           :columns="tableColumns"
           :loading="loading"
           :filter="tableFilter"
           :rows-per-page-options="[1, 5, 10, 15, 20, 50, 100]"
-          @row-click="onRowClick"
-          v-model:pagination="tablePagination"
-          @request="loadIngredients"
           binary-state-sort
           :dense="$q.screen.lt.md"
+          @row-click="onRowClick"
+          @request="loadIngredients"
         >
           <!-- Search & create new -->
-          <template v-slot:top-right>
+          <template #top-right>
             <q-btn
               v-if="storeAuth.hasPerm('recipes.add_ingredient')"
               class="q-mx-md"
-              @click="
-                $router.push({ name: 'ingredient', params: { id: 'new' } })
-              "
               icon="add"
               size="sm"
               color="positive"
-              >Новый ингредиент</q-btn
+              @click="
+                $router.push({ name: 'ingredient', params: { id: 'new' } })
+              "
             >
+              Новый ингредиент
+            </q-btn>
             <q-btn
               icon="tune"
               color="primary"
               size="sm"
               @click="showFilters = !showFilters"
-              >Фильтры</q-btn
             >
+              Фильтры
+            </q-btn>
             <q-input
+              v-model="tableFilter"
               class="q-ml-md"
               borderless
               dense
               debounce="300"
-              v-model="tableFilter"
               placeholder="Поиск"
             >
-              <template v-slot:append>
+              <template #append>
                 <q-icon name="search" />
               </template>
             </q-input>
@@ -54,17 +56,43 @@
 
           <!-- Need buy -->
           <template #body-cell-need_buy="props">
-            <q-td class="text-center" :props="props">
-              <q-badge v-if="props.row.need_buy" color="green">Да</q-badge>
-              <q-badge v-else color="orange">Нет</q-badge>
+            <q-td
+              class="text-center"
+              :props="props"
+            >
+              <q-badge
+                v-if="props.row.need_buy"
+                color="green"
+              >
+                Да
+              </q-badge>
+              <q-badge
+                v-else
+                color="orange"
+              >
+                Нет
+              </q-badge>
             </q-td>
           </template>
 
           <!-- Edible -->
           <template #body-cell-edible="props">
-            <q-td class="text-center" :props="props">
-              <q-badge v-if="props.row.edible" color="green">Да</q-badge>
-              <q-badge v-else color="orange">Нет</q-badge>
+            <q-td
+              class="text-center"
+              :props="props"
+            >
+              <q-badge
+                v-if="props.row.edible"
+                color="green"
+              >
+                Да
+              </q-badge>
+              <q-badge
+                v-else
+                color="orange"
+              >
+                Нет
+              </q-badge>
             </q-td>
           </template>
         </q-table>
@@ -76,13 +104,15 @@
         leave-active-class="animated slideOutRight"
       >
         <div
+          v-if="showFilters"
           class="col-12 col-md-3 col-lg-2 col-shrink"
           :class="$q.screen.gt.sm ? '' : 'order-first'"
-          v-if="showFilters"
         >
           <q-card class="position-sticky">
             <q-card-section>
-              <h6 class="q-my-sm text-center text-bold">Фильтры</h6>
+              <h6 class="q-my-sm text-center text-bold">
+                Фильтры
+              </h6>
 
               <q-form
                 class="q-col-gutter-y-md"
@@ -90,10 +120,8 @@
                 @reset="resetFilters()"
               >
                 <div>
-                  <span class="text-subtitle2"
-                    >Найдено результатов:
-                    {{ tablePagination.rowsNumber || "-" }}</span
-                  >
+                  <span class="text-subtitle2">Найдено результатов:
+                    {{ tablePagination.rowsNumber || "-" }}</span>
                 </div>
                 <div>
                   <h6 class="q-my-sm text-subtitle2 text-bold">
@@ -110,7 +138,9 @@
                   />
                 </div>
                 <div>
-                  <h6 class="q-my-sm text-subtitle2 text-bold">Категория</h6>
+                  <h6 class="q-my-sm text-subtitle2 text-bold">
+                    Категория
+                  </h6>
                   <q-select
                     v-model="filters.category"
                     :disable="filters.hasCategory !== null"
@@ -125,7 +155,9 @@
                   />
                 </div>
                 <div>
-                  <h6 class="q-my-sm text-subtitle2 text-bold">Цена</h6>
+                  <h6 class="q-my-sm text-subtitle2 text-bold">
+                    Цена
+                  </h6>
                   <q-select
                     v-model="filters.hasPrice"
                     :options="optionsIsFilled"
@@ -165,7 +197,9 @@
                   />
                 </div>
                 <div>
-                  <h6 class="q-my-sm text-subtitle2 text-bold">Съедобен</h6>
+                  <h6 class="q-my-sm text-subtitle2 text-bold">
+                    Съедобен
+                  </h6>
                   <q-select
                     v-model="filters.edible"
                     :options="optionsIsTrue"
@@ -178,12 +212,22 @@
                 </div>
 
                 <div class="row justify-around">
-                  <q-btn type="reset" color="negative" size="sm" icon="close"
-                    >Сбросить</q-btn
+                  <q-btn
+                    type="reset"
+                    color="negative"
+                    size="sm"
+                    icon="close"
                   >
-                  <q-btn type="submit" color="primary" size="sm" icon="search"
-                    >Поиск</q-btn
+                    Сбросить
+                  </q-btn>
+                  <q-btn
+                    type="submit"
+                    color="primary"
+                    size="sm"
+                    icon="search"
                   >
+                    Поиск
+                  </q-btn>
                 </div>
               </q-form>
             </q-card-section>
@@ -204,7 +248,7 @@ import HandleErrorsMixin, {
 import { TablePagination, TablePropsOnRequest } from "src/modules/Globals";
 import { debounce, QTableProps } from "quasar";
 import { useAuthStore } from "src/stores/auth";
-let tableColumns = [
+const tableColumns = [
   {
     name: "title",
     label: "Название",
@@ -344,6 +388,40 @@ export default defineComponent({
       debounceLoadIngredients: emptyFunc,
     };
   },
+  computed: {
+    ingredients() {
+      return this.store.ingredients;
+    },
+    ingredientCategories() {
+      return this.store.ingredient_categories;
+    },
+    tableFilter: {
+      get() {
+        return (this.$query as QueryInterface).q || null;
+      },
+      set(val: string | null) {
+        (this.$query as QueryInterface).q = val || "";
+      },
+    },
+  },
+  watch: {
+    filters: {
+      deep: true,
+      handler() {
+        this.tablePagination.page = 1;
+        this.debounceLoadIngredients();
+      },
+    },
+    showFilters(val) {
+      this.$q.localStorage.set("ingredientsShowFilters", val);
+    },
+    $query: {
+      deep: true,
+      handler(val: QueryInterface) {
+        this.handleQueryChange(val);
+      },
+    },
+  },
   created() {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     this.debounceLoadIngredients = debounce(this.loadIngredients, 1000);
@@ -355,7 +433,7 @@ export default defineComponent({
   },
   methods: {
     loadIngredients(props?: TablePropsOnRequest) {
-      let payload = {};
+      const payload = {};
       this.loading = true;
 
       let pagination: TablePagination = Object.assign({}, this.tablePagination);
@@ -373,7 +451,7 @@ export default defineComponent({
 
       for (const [filterName, fieldName] of Object.entries(filtersRemap)) {
         // @ts-expect-error Custom filters
-        let val = this.filters[filterName] as boolean | null;
+        const val = this.filters[filterName] as boolean | null;
         if (val !== null) {
           // @ts-expect-error Custom filters
           payload[fieldName] = val;
@@ -394,7 +472,7 @@ export default defineComponent({
         });
     },
     loadIngredientCategories() {
-      let payload = {
+      const payload = {
         page_size: 1000,
       };
       // this.loading = true;
@@ -443,40 +521,6 @@ export default defineComponent({
     resetFilters() {
       this.filters = Object.assign({}, this.filtersDefault);
       console.debug("Reset: ", this.filters);
-    },
-  },
-  computed: {
-    ingredients() {
-      return this.store.ingredients;
-    },
-    ingredientCategories() {
-      return this.store.ingredient_categories;
-    },
-    tableFilter: {
-      get() {
-        return (this.$query as QueryInterface).q || null;
-      },
-      set(val: string | null) {
-        (this.$query as QueryInterface).q = val || "";
-      },
-    },
-  },
-  watch: {
-    filters: {
-      deep: true,
-      handler() {
-        this.tablePagination.page = 1;
-        this.debounceLoadIngredients();
-      },
-    },
-    showFilters(val) {
-      this.$q.localStorage.set("ingredientsShowFilters", val);
-    },
-    $query: {
-      deep: true,
-      handler(val: QueryInterface) {
-        this.handleQueryChange(val);
-      },
     },
   },
 });

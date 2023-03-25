@@ -1,15 +1,18 @@
 <template>
   <q-card
+    v-ripple
     class="recipe-card cursor-pointer q-hoverable relative-position"
     :class="[recipe.is_planned ? 'recipe-used' : '']"
-    v-ripple
     @click="openRecipe(recipe.id)"
   >
-    <span class="q-focus-helper"></span>
+    <span class="q-focus-helper" />
 
     <!-- Main card content -->
     <q-card-section>
-      <div class="flex justify-center items-center" style="min-height: 100px">
+      <div
+        class="flex justify-center items-center"
+        style="min-height: 100px"
+      >
         <!-- <q-icon name="restaurant_menu" size="50px" color="grey"></q-icon> -->
         <q-img
           :src="previewImage"
@@ -19,7 +22,7 @@
           fit="cover"
           style="max-height: 200px"
         >
-          <template v-slot:error>
+          <template #error>
             <div class="absolute-full flex flex-center bg-negative text-white">
               Ошибка загрузки
             </div>
@@ -46,8 +49,11 @@
 
     <!-- Aside info tooltip -->
 
-    <recipe-card-tooltip :recipe="recipe"></recipe-card-tooltip>
-    <recipe-menu :recipe="recipe" @updateItem="$emit('updateItem')"></recipe-menu>
+    <recipe-card-tooltip :recipe="recipe" />
+    <recipe-menu
+      :recipe="recipe"
+      @update-item="$emit('updateItem')"
+    />
   </q-card>
 </template>
 
@@ -59,14 +65,23 @@ import { defineComponent, PropType } from 'vue';
 import RecipeMenu from './RecipeMenu.vue';
 
 export default defineComponent({
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  components: { recipeCardTooltip, RecipeMenu },
   props: {
     recipe: { required: true, type: Object as PropType<RecipeRead> },
   },
   emits: ['updateItem'],
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { recipeCardTooltip, RecipeMenu },
   data() {
     return {};
+  },
+  computed: {
+    previewImage(): string {
+      if (this.recipe?.images && this.recipe?.images?.length > 0) {
+        const img = this.recipe.images[0];
+        return (img.thumbnails['small'] as string) || img.image;
+      }
+      return '/favicon.png';
+    },
   },
   methods: {
     dateFormat(dt: Date | string): string {
@@ -74,15 +89,6 @@ export default defineComponent({
     },
     openRecipe(id: number) {
       void this.$router.push({ name: 'recipe', params: { id: id } });
-    },
-  },
-  computed: {
-    previewImage(): string {
-      if (this.recipe?.images && this.recipe?.images?.length > 0) {
-        let img = this.recipe.images[0];
-        return (img.thumbnails['small'] as string) || img.image;
-      }
-      return '/favicon.png';
     },
   },
 });

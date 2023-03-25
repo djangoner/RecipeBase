@@ -10,6 +10,10 @@ export const IsOnlineMixin = defineComponent({
     window.addEventListener("online", this._handleNowOnline);
     window.addEventListener("offline", this._handleNowOffline);
   },
+  beforeUnmount() {
+    window.removeEventListener("online", this._handleNowOnline);
+    window.removeEventListener("offline", this._handleNowOffline);
+  },
   methods: {
     _handleNowOnline() {
       this.isOnLine = true;
@@ -17,10 +21,6 @@ export const IsOnlineMixin = defineComponent({
     _handleNowOffline() {
       this.isOnLine = false;
     },
-  },
-  beforeUnmount() {
-    window.removeEventListener("online", this._handleNowOnline);
-    window.removeEventListener("offline", this._handleNowOffline);
   },
 });
 

@@ -1,7 +1,7 @@
 <template>
   <q-tree
-    :nodes="warningsNodes"
     v-model:selected="selected"
+    :nodes="warningsNodes"
     selected-color="primary"
     node-key="id"
     dense
@@ -58,6 +58,50 @@ export default defineComponent({
       groupByField: "condition" as "condition" | "plan",
     };
   },
+  computed: {
+    conditions() {
+      return this.store.conditions;
+    },
+    plans() {
+      return this.store.week_plan?.plans || [];
+    },
+    warningsGrouped(): warningsGrouped {
+      const res: warningsGrouped = {};
+      for (const cond of this.warnings) {
+        const idVal = cond[this.groupByField];
+        if (!Object.hasOwn(res, idVal)) {
+          res[idVal] = [];
+        }
+        res[idVal].push(cond);
+      }
+      return res;
+    },
+    warningsNodes() {
+      const res: QTreeNode[] = [];
+      for (const [condID, warnings] of Object.entries(this.warningsGrouped)) {
+        const r = this.warningNodeRender(
+          {
+            condition: Number(condID),
+            value_current: "",
+            value_expected: "",
+            plan: 0,
+            childrens: [],
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          warnings
+        );
+        if (!r) {
+          continue;
+        }
+        res.push(r);
+      }
+      return res;
+    },
+    warnedPlans(): number[] {
+      const plans = this.warnings.map((w) => w.plan);
+      return [...new Set(plans)];
+    },
+  },
   methods: {
     conditionName(cond: WeekPlanCondition | null): string {
       if (!cond) {
@@ -81,19 +125,19 @@ export default defineComponent({
       return this.plans?.find((c) => c.id == id) || null;
     },
     getDay(idx: number): string {
-      let fday = getDateOfISOWeek(this.week.year, this.week.week);
+      const fday = getDateOfISOWeek(this.week.year, this.week.week);
       fday.setDate(fday.getDate() + idx);
       return date.formatDate(fday, "DD.MM");
     },
     conditionAsString(warn: ConditionWarning) {
-      let cond = this.getCondition(warn.condition);
+      const cond = this.getCondition(warn.condition);
       let sign = String(cond?.comparison_mode) || "";
 
       if (sign) {
         sign = ComparisonModes[sign] || sign;
       }
-      let val1 = warn.value_current;
-      let val2 = warn.value_expected;
+      const val1 = warn.value_current;
+      const val2 = warn.value_expected;
 
       return `${val1} ${sign} ${val2}`;
     },
@@ -101,19 +145,19 @@ export default defineComponent({
       rootCond: ConditionWarning,
       warnings: ConditionWarning[]
     ): QTreeNode | null {
-      let cond = this.getCondition(Number(rootCond.condition));
+      const cond = this.getCondition(Number(rootCond.condition));
       if (!cond) {
         return null;
       }
 
       let label = this.conditionName(cond);
       if (rootCond.plan) {
-        let plan = this.getPlan(rootCond.plan);
+        const plan = this.getPlan(rootCond.plan);
         if (plan && plan.day) {
-          let dayStr = this.getDay(plan.day - 1);
-          let failTx = this.conditionAsString(rootCond);
+          const dayStr = this.getDay(plan.day - 1);
+          const failTx = this.conditionAsString(rootCond);
           if (cond.condition) {
-            let condStr =
+            const condStr =
               StrConditions[cond.condition].toUpperCase() || cond.condition;
 
             label = `${dayStr || ""} ${
@@ -126,7 +170,7 @@ export default defineComponent({
           }
         }
       }
-      let r: QTreeNode = {
+      const r: QTreeNode = {
         label: label,
         id: String(cond.id) + "_" + label,
         icon: "warning",
@@ -139,57 +183,13 @@ export default defineComponent({
       warnings.forEach((w) => {
         // console.debug("Children: ", w);
 
-        let subNode = this.warningNodeRender(w, w.childrens);
+        const subNode = this.warningNodeRender(w, w.childrens);
         if (subNode && r.children) {
           r.children.push(subNode);
         }
       });
       // console.debug("Res:", r);
       return r;
-    },
-  },
-  computed: {
-    conditions() {
-      return this.store.conditions;
-    },
-    plans() {
-      return this.store.week_plan?.plans || [];
-    },
-    warningsGrouped(): warningsGrouped {
-      let res: warningsGrouped = {};
-      for (const cond of this.warnings) {
-        let idVal = cond[this.groupByField];
-        if (!Object.hasOwn(res, idVal)) {
-          res[idVal] = [];
-        }
-        res[idVal].push(cond);
-      }
-      return res;
-    },
-    warningsNodes() {
-      let res: QTreeNode[] = [];
-      for (const [condID, warnings] of Object.entries(this.warningsGrouped)) {
-        let r = this.warningNodeRender(
-          {
-            condition: Number(condID),
-            value_current: "",
-            value_expected: "",
-            plan: 0,
-            childrens: [],
-          },
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          warnings
-        );
-        if (!r) {
-          continue;
-        }
-        res.push(r);
-      }
-      return res;
-    },
-    warnedPlans(): number[] {
-      let plans = this.warnings.map((w) => w.plan);
-      return [...new Set(plans)];
     },
   },
 });

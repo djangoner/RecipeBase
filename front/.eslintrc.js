@@ -18,7 +18,7 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     project: resolve(__dirname, './tsconfig.json'),
     tsconfigRootDir: __dirname,
-    ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
+    ecmaVersion: 'latest', // Allows for the parsing of modern ECMAScript features
     sourceType: 'module', // Allows for the use of imports
   },
 
@@ -37,11 +37,13 @@ module.exports = {
     // https://eslint.vuejs.org/rules/#priority-a-essential-error-prevention
     // consider switching to `plugin:vue/strongly-recommended` or `plugin:vue/recommended` for stricter rules
     'plugin:vue/essential',
+    '@vue/eslint-config-typescript/recommended',
 
     // --- ONLY WHEN USING PRETTIER ---
     // https://github.com/prettier/eslint-config-prettier#installation
     // usage with Prettier, provided by 'eslint-config-prettier'.
     'prettier',
+    "plugin:vue/vue3-recommended",
     // 'prettier/@typescript-eslint',
     // 'prettier/vue',
   ],
@@ -69,6 +71,7 @@ module.exports = {
         "checksVoidReturn": false
       }
     ],
-    "vue/no-v-model-argument": 'off'
+    "vue/no-v-model-argument": 'off',
+    "vue/no-v-html": 'off'
   }
 }

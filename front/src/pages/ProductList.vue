@@ -1,7 +1,10 @@
 <template>
   <q-page>
     <!-- Top bar -->
-    <week-select v-model="week" @update:modelValue="onWeekUpd()" />
+    <week-select
+      v-model="week"
+      @update:model-value="onWeekUpd()"
+    />
     <q-linear-progress
       :value="completedPrc"
       :indeterminate="saving"
@@ -9,16 +12,21 @@
       :animation-speed="500"
     />
     <!-- Top warnings -->
-    <q-item v-if="markAlreadyCompleted" class="bg-info text-white">
-      <q-item-section avatar><q-icon name="info"></q-icon></q-item-section>
+    <q-item
+      v-if="markAlreadyCompleted"
+      class="bg-info text-white"
+    >
+      <q-item-section avatar>
+        <q-icon name="info" />
+      </q-item-section>
       <q-item-section>Режим "отметить что уже есть"</q-item-section>
     </q-item>
     <!-- Modals -->
     <product-list-item-view
       v-model="viewItem"
       :week="week"
-      :canEdit="canEdit"
-      @updateItem="updateItem"
+      :can-edit="canEdit"
+      @update-item="updateItem"
     />
     <!-- Contents -->
 
@@ -39,20 +47,36 @@
           options-dense
           clearable
           dense
-        ></q-select>
+        />
       </div>
       <div>
-        <q-toggle v-model="showCompleted" label="Показать завершенные" dense />
+        <q-toggle
+          v-model="showCompleted"
+          label="Показать завершенные"
+          dense
+        />
       </div>
 
       <q-space />
       <div>
-        <q-btn icon="menu" size="md" flat round dense>
+        <q-btn
+          icon="menu"
+          size="md"
+          flat
+          round
+          dense
+        >
           <q-menu>
             <q-list dense>
-              <q-item tag="label" v-ripple>
+              <q-item
+                v-ripple
+                tag="label"
+              >
                 <q-item-section side>
-                  <q-toggle v-model="markAlreadyCompleted" dense />
+                  <q-toggle
+                    v-model="markAlreadyCompleted"
+                    dense
+                  />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>Отметить что уже есть</q-item-label>
@@ -61,12 +85,15 @@
 
               <q-item
                 v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
-                @click="regenerateList()"
                 :disable="!isOnLine"
                 clickable
+                @click="regenerateList()"
               >
                 <q-item-section avatar>
-                  <q-icon name="refresh" color="primary" />
+                  <q-icon
+                    name="refresh"
+                    color="primary"
+                  />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label> Обновить автоматический список </q-item-label>
@@ -74,12 +101,15 @@
               </q-item>
               <q-item
                 v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
-                @click="askSyncLocal()"
                 :disable="!canSync"
                 clickable
+                @click="askSyncLocal()"
               >
                 <q-item-section avatar>
-                  <q-icon name="sync" color="primary" />
+                  <q-icon
+                    name="sync"
+                    color="primary"
+                  />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label> Синхронизация </q-item-label>
@@ -87,20 +117,29 @@
               </q-item>
               <q-item
                 v-if="canSync"
-                @click="askDiscardSync()"
                 :disable="!canSync"
                 clickable
+                @click="askDiscardSync()"
               >
                 <q-item-section avatar>
-                  <q-icon name="delete" color="negative" />
+                  <q-icon
+                    name="delete"
+                    color="negative"
+                  />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label> Очистка синхронизации </q-item-label>
                 </q-item-section>
               </q-item>
 
-              <q-item clickable v-close-popup @click="sendList()">
-                <q-item-section avatar><q-icon name="send" /> </q-item-section>
+              <q-item
+                v-close-popup
+                clickable
+                @click="sendList()"
+              >
+                <q-item-section avatar>
+                  <q-icon name="send" />
+                </q-item-section>
                 <q-item-section>
                   <q-item-label> Отправить в телеграмм </q-item-label>
                 </q-item-section>
@@ -121,7 +160,7 @@
             v-model="createItem"
             label="Добавить задачу"
             @keypress.enter="createNewItem()"
-          ></q-input>
+          />
         </div>
         <q-btn
           class="col-auto q-ml-md"
@@ -130,8 +169,7 @@
           color="green"
           dense
           @click="createNewItem()"
-        >
-        </q-btn>
+        />
       </div>
       <!-- Prices total -->
       <span class="q-px-md q-pt-xs">
@@ -147,7 +185,10 @@
       <!-- Product list item -->
       <template v-if="sortShop">
         <template v-for="cat of listItemsCategories">
-          <div v-if="cat.items && cat.items.length > 0" :key="cat.id">
+          <div
+            v-if="cat.items && cat.items.length > 0"
+            :key="cat.id"
+          >
             <div class="row q-mx-md">
               <h5
                 class="q-my-sm"
@@ -156,38 +197,43 @@
                 {{ cat.title }}
                 <q-tooltip v-if="cat.sorting">
                   <b>Магазины:</b>
-                  <div v-for="sort of cat.sorting" :key="sort.id">
+                  <div
+                    v-for="sort of cat.sorting"
+                    :key="sort.id"
+                  >
                     - {{ sort.shop.title }}
                   </div>
-                  <div v-if="cat.sorting.length < 1">Нет магазинов</div>
+                  <div v-if="cat.sorting.length < 1">
+                    Нет магазинов
+                  </div>
                 </q-tooltip>
               </h5>
             </div>
 
             <product-list-items
               :key="cat.id"
-              :listItems="cat.items"
+              :list-items="cat.items"
               :week="week"
-              :canEdit="canEdit"
-              @openItem="openItem"
-              @updateItem="updateItem"
-            ></product-list-items>
+              :can-edit="canEdit"
+              @open-item="openItem"
+              @update-item="updateItem"
+            />
           </div>
         </template>
       </template>
       <template v-else>
         <product-list-items
           :key="0"
-          :listItems="listItems"
+          :list-items="listItems"
           :week="week"
-          :canEdit="canEdit"
-          @openItem="openItem"
-          @updateItem="updateItem"
-        ></product-list-items>
+          :can-edit="canEdit"
+          @open-item="openItem"
+          @update-item="updateItem"
+        />
       </template>
     </q-list>
 
-    <q-inner-loading :showing="loading"></q-inner-loading>
+    <q-inner-loading :showing="loading" />
   </q-page>
 </template>
 
@@ -267,6 +313,196 @@ export default defineComponent({
       WeekDays,
     };
   },
+  computed: {
+    week: {
+      get(): YearWeek {
+        const [year, week] = getYearWeek();
+        return {
+          year: (this.$query as QueryInterface).year || year,
+          week: (this.$query as QueryInterface).week || week,
+        };
+      },
+      set(val: YearWeek) {
+        (this.$query as QueryInterface).year = val.year || undefined;
+        (this.$query as QueryInterface).week = val.week || undefined;
+      },
+    },
+    sortShop: {
+      get() {
+        return (this.$query as QueryInterface).shop || null;
+      },
+      set(val: number | null) {
+        (this.$query as QueryInterface).shop = val || undefined;
+      },
+    },
+    listItemsRaw() {
+      return this.store.product_list?.items || [];
+    },
+    listItems: {
+      get() {
+        let res = this.store.product_list?.items || [];
+        res = res.slice();
+
+        if (res) {
+          if (!this.showCompleted) {
+            res = res.filter((i) => !i.is_completed);
+          }
+          res.sort((a, b) => {
+            if (a.is_completed) {
+              return 1;
+            } else if (b.is_completed) {
+              return -1;
+            }
+            if (!a.day || !b.day) {
+              return 0;
+            }
+            return a.day - b.day;
+          });
+        }
+        return res;
+      },
+      set(newValue: ProductListItemRead[]) {
+        // console.debug('set: ', newValue, this.store.product_list.items);
+        if (this.store.product_list?.items == newValue) {
+          return;
+        }
+        // this.store.product_list.items = newValue;
+      },
+    },
+    listItemsCategories: {
+      get() {
+        if (!this.ingredientCategories) {
+          return [];
+        }
+        const categoriesArr: CustomIngredientCategory[] =
+          this.ingredientCategories.slice();
+
+        categoriesArr.forEach((item, idx) => (categoriesArr[idx].items = [])); // Add items array
+
+        const categories: CategoriesMapping = categoriesArr.reduce(
+          (obj: CategoriesMapping, cur: CustomIngredientCategory) =>
+            ({
+              ...obj,
+              [cur.id]: cur,
+            } as CategoriesMapping),
+          {} as CategoriesMapping
+        ); // Convert to object
+        let items = this.listItems.slice();
+        const itemsCompleted = items.filter((i) => i?.is_completed);
+        items = items.filter((i) => itemsCompleted.indexOf(i) === -1);
+
+        for (const [idx, item] of items.entries()) {
+          const catItem = item?.ingredient?.category;
+          if (!catItem) continue;
+          const cat = categories[catItem];
+          if (!cat || !cat.items) continue;
+          cat.items.push(Object.assign({}, item));
+          delete items[idx];
+        }
+
+        // @ts-expect-error Custom category
+        categories[-1] = {
+          id: -1,
+          title: "Остальные",
+          items: items.filter((i) => i).slice(),
+          custom: true,
+        };
+        // @ts-expect-error Custom category
+        categories[-2] = {
+          id: -1,
+          title: "Завершенные",
+          items: itemsCompleted,
+          custom: true,
+        };
+        const categoriesList: CustomIngredientCategory[] = [
+          ...(Object.values(categories) as CustomIngredientCategory[]),
+        ];
+
+        categoriesList.sort((a, b) => {
+          if (a.custom) {
+            return 1;
+          } else if (b.custom) {
+            return -1;
+          }
+
+          const aSort = a.sorting.find((s) => s?.shop?.id == this.sortShop);
+          const bSort = b.sorting.find((s) => s?.shop?.id == this.sortShop);
+          if (!aSort?.num || !bSort?.num) {
+            return 0;
+          }
+
+          return aSort?.num - bSort?.num;
+        });
+
+        return categoriesList;
+      },
+      set(newValue: ProductListItemRead[]) {
+        if (
+          !this.store.product_list ||
+          this.store.product_list.items == newValue
+        ) {
+          return;
+        }
+        this.store.product_list.items = newValue;
+      },
+    },
+    shops() {
+      return this.store.shops;
+    },
+    ingredientCategories() {
+      return this.store.ingredient_categories;
+    },
+    completedPrc() {
+      const itemsCompleted = this.store.product_list?.items.filter(
+        (i) => i.is_completed
+      )?.length;
+      const itemsTotal = this.store.product_list?.items?.length;
+
+      if (!itemsCompleted || !itemsTotal) {
+        return 0;
+      }
+      return itemsCompleted / itemsTotal;
+    },
+    canSync: {
+      get() {
+        return this.isOnLine && this.canSyncFlag;
+      },
+      set(val: boolean) {
+        this.canSyncFlag = val;
+      },
+    },
+    pricesCompleted() {
+      return this.listItemsRaw
+        .filter((i) => i.is_completed && !i.already_completed)
+        .map((i) => i.price_full)
+        .reduce((a, b) => a + b, 0);
+    },
+    pricesTotal() {
+      return this.listItemsRaw
+        .filter((i) => !i.already_completed)
+        .map((i) => i.price_full)
+        .reduce((a, b) => a + b, 0);
+    },
+    productsWithoutPrice() {
+      return this.listItemsRaw.filter((i) => !i.price_full).length;
+    },
+    canEdit() {
+      return this.storeAuth.hasPerm("recipes.change_productlistitem");
+    },
+    // viewItem: {
+    //   get() {
+    //     return (this.$query as QueryInterface).task;
+    //   },
+    //   set(val: string | null) {
+    //     (this.$query as QueryInterface).task = val;
+    //   },
+    // },
+  },
+  watch: {
+    showCompleted(val) {
+      this.$q.localStorage.set("productsShowCompleted", val);
+    },
+  },
   created() {
     void this.$nextTick(() => {
       this.onLoad();
@@ -293,21 +529,21 @@ export default defineComponent({
 
         // this.loadList();
       } else {
-        let local_cache = this.$q.localStorage.getItem("local_productlist") as
+        const local_cache = this.$q.localStorage.getItem("local_productlist") as
           | ProductListWeekRead
           | undefined;
         if (local_cache) {
           this.store.product_list = local_cache;
         }
 
-        let shopsCache = this.$q.localStorage.getItem("shops") as
+        const shopsCache = this.$q.localStorage.getItem("shops") as
           | Shop[]
           | undefined;
         if (shopsCache) {
           this.store.shops = shopsCache;
         }
 
-        let ingCategoryCache = this.$q.localStorage.getItem(
+        const ingCategoryCache = this.$q.localStorage.getItem(
           "ing_categories"
         ) as IngredientCategory[];
         if (ingCategoryCache) {
@@ -323,7 +559,7 @@ export default defineComponent({
       if (!this.week?.year || !this.week?.week) {
         return;
       }
-      let payload = {
+      const payload = {
         year: this.week?.year,
         week: this.week?.week,
       };
@@ -333,12 +569,12 @@ export default defineComponent({
         .loadProductListWeek(payload)
         .then(() => {
           this.loading = false;
-          let argTask = (this.$query as QueryInterface).task;
+          const argTask = (this.$query as QueryInterface).task;
           if (!this.viewItem && argTask) {
             this.selectItemByID(argTask);
           }
 
-          let rewriteLocal = !this.$q.localStorage.has(
+          const rewriteLocal = !this.$q.localStorage.has(
             "local_productlist_updated"
           );
           if (rewriteLocal) {
@@ -427,7 +663,7 @@ export default defineComponent({
 
       this.loading = true;
 
-      let payload = productListWeekFromRead(
+      const payload = productListWeekFromRead(
         this.$q.localStorage.getItem("local_productlist")
       );
       console.debug("SyncLocal: ", payload);
@@ -477,7 +713,7 @@ export default defineComponent({
         this.syncServer();
         return;
       }
-      let payload = productListItemFromRead(Object.assign({}, item));
+      const payload = productListItemFromRead(Object.assign({}, item));
       this.saving = true;
 
       this.store
@@ -508,7 +744,7 @@ export default defineComponent({
       if (!this.week.year || !this.week.week) {
         return;
       }
-      let payload = {
+      const payload = {
         year: this.week.year,
         week: this.week.week,
       };
@@ -530,7 +766,7 @@ export default defineComponent({
       // this.$query.task = item.id;
     },
     createNewItem() {
-      let payload = {
+      const payload = {
         title: this.createItem,
         week: this.store.product_list?.id,
         amount: 1,
@@ -555,7 +791,7 @@ export default defineComponent({
         });
     },
     selectItemByID(val: number) {
-      let res = this.store.product_list?.items.filter((i) => i.id == val);
+      const res = this.store.product_list?.items.filter((i) => i.id == val);
       if (res && res.length > 0) {
         this.viewItem = res[0];
       }
@@ -564,7 +800,7 @@ export default defineComponent({
       if (!this.week?.year || !this.week?.week) {
         return;
       }
-      let payload = {
+      const payload = {
         year: this.week.year,
         week: this.week.week,
       };
@@ -590,7 +826,7 @@ export default defineComponent({
       return cat.sorting.find((s) => s.shop.id == this.sortShop);
     },
     sendList() {
-      let payload = {
+      const payload = {
         year: this.week?.year,
         week: this.week?.week,
       };
@@ -613,196 +849,6 @@ export default defineComponent({
           this.$q.loading.hide("sending");
           this.handleErrors(err, "Ошибка отправки списка");
         });
-    },
-  },
-  computed: {
-    week: {
-      get(): YearWeek {
-        let [year, week] = getYearWeek();
-        return {
-          year: (this.$query as QueryInterface).year || year,
-          week: (this.$query as QueryInterface).week || week,
-        };
-      },
-      set(val: YearWeek) {
-        (this.$query as QueryInterface).year = val.year || undefined;
-        (this.$query as QueryInterface).week = val.week || undefined;
-      },
-    },
-    sortShop: {
-      get() {
-        return (this.$query as QueryInterface).shop || null;
-      },
-      set(val: number | null) {
-        (this.$query as QueryInterface).shop = val || undefined;
-      },
-    },
-    listItemsRaw() {
-      return this.store.product_list?.items || [];
-    },
-    listItems: {
-      get() {
-        let res = this.store.product_list?.items || [];
-        res = res.slice();
-
-        if (res) {
-          if (!this.showCompleted) {
-            res = res.filter((i) => !i.is_completed);
-          }
-          res.sort((a, b) => {
-            if (a.is_completed) {
-              return 1;
-            } else if (b.is_completed) {
-              return -1;
-            }
-            if (!a.day || !b.day) {
-              return 0;
-            }
-            return a.day - b.day;
-          });
-        }
-        return res;
-      },
-      set(newValue: ProductListItemRead[]) {
-        // console.debug('set: ', newValue, this.store.product_list.items);
-        if (this.store.product_list?.items == newValue) {
-          return;
-        }
-        // this.store.product_list.items = newValue;
-      },
-    },
-    listItemsCategories: {
-      get() {
-        if (!this.ingredientCategories) {
-          return [];
-        }
-        let categoriesArr: CustomIngredientCategory[] =
-          this.ingredientCategories.slice();
-
-        categoriesArr.forEach((item, idx) => (categoriesArr[idx].items = [])); // Add items array
-
-        let categories: CategoriesMapping = categoriesArr.reduce(
-          (obj: CategoriesMapping, cur: CustomIngredientCategory) =>
-            ({
-              ...obj,
-              [cur.id]: cur,
-            } as CategoriesMapping),
-          {} as CategoriesMapping
-        ); // Convert to object
-        let items = this.listItems.slice();
-        let itemsCompleted = items.filter((i) => i?.is_completed);
-        items = items.filter((i) => itemsCompleted.indexOf(i) === -1);
-
-        for (let [idx, item] of items.entries()) {
-          let catItem = item?.ingredient?.category;
-          if (!catItem) continue;
-          let cat = categories[catItem];
-          if (!cat || !cat.items) continue;
-          cat.items.push(Object.assign({}, item));
-          delete items[idx];
-        }
-
-        // @ts-expect-error Custom category
-        categories[-1] = {
-          id: -1,
-          title: "Остальные",
-          items: items.filter((i) => i).slice(),
-          custom: true,
-        };
-        // @ts-expect-error Custom category
-        categories[-2] = {
-          id: -1,
-          title: "Завершенные",
-          items: itemsCompleted,
-          custom: true,
-        };
-        let categoriesList: CustomIngredientCategory[] = [
-          ...(Object.values(categories) as CustomIngredientCategory[]),
-        ];
-
-        categoriesList.sort((a, b) => {
-          if (a.custom) {
-            return 1;
-          } else if (b.custom) {
-            return -1;
-          }
-
-          let aSort = a.sorting.find((s) => s?.shop?.id == this.sortShop);
-          let bSort = b.sorting.find((s) => s?.shop?.id == this.sortShop);
-          if (!aSort?.num || !bSort?.num) {
-            return 0;
-          }
-
-          return aSort?.num - bSort?.num;
-        });
-
-        return categoriesList;
-      },
-      set(newValue: ProductListItemRead[]) {
-        if (
-          !this.store.product_list ||
-          this.store.product_list.items == newValue
-        ) {
-          return;
-        }
-        this.store.product_list.items = newValue;
-      },
-    },
-    shops() {
-      return this.store.shops;
-    },
-    ingredientCategories() {
-      return this.store.ingredient_categories;
-    },
-    completedPrc() {
-      let itemsCompleted = this.store.product_list?.items.filter(
-        (i) => i.is_completed
-      )?.length;
-      let itemsTotal = this.store.product_list?.items?.length;
-
-      if (!itemsCompleted || !itemsTotal) {
-        return 0;
-      }
-      return itemsCompleted / itemsTotal;
-    },
-    canSync: {
-      get() {
-        return this.isOnLine && this.canSyncFlag;
-      },
-      set(val: boolean) {
-        this.canSyncFlag = val;
-      },
-    },
-    pricesCompleted() {
-      return this.listItemsRaw
-        .filter((i) => i.is_completed && !i.already_completed)
-        .map((i) => i.price_full)
-        .reduce((a, b) => a + b, 0);
-    },
-    pricesTotal() {
-      return this.listItemsRaw
-        .filter((i) => !i.already_completed)
-        .map((i) => i.price_full)
-        .reduce((a, b) => a + b, 0);
-    },
-    productsWithoutPrice() {
-      return this.listItemsRaw.filter((i) => !i.price_full).length;
-    },
-    canEdit() {
-      return this.storeAuth.hasPerm("recipes.change_productlistitem");
-    },
-    // viewItem: {
-    //   get() {
-    //     return (this.$query as QueryInterface).task;
-    //   },
-    //   set(val: string | null) {
-    //     (this.$query as QueryInterface).task = val;
-    //   },
-    // },
-  },
-  watch: {
-    showCompleted(val) {
-      this.$q.localStorage.set("productsShowCompleted", val);
     },
   },
 });

@@ -1,9 +1,9 @@
 <template>
   <q-dialog
+    v-if="previewImage"
     v-model="imageFullscreen"
     full-height
     full-width
-    v-if="previewImage"
   >
     <q-card
       class="column full-height q-pa-none"
@@ -12,23 +12,33 @@
     >
       <div class="absolute-top-right">
         <q-btn
+          v-close-popup
           class="bg-white"
           icon="close"
           round
           dense
           style="z-index: 99"
-          v-close-popup
         />
       </div>
       <q-card-section class="full-height q-pa-none">
-        <q-img :src="previewImage" fit="contain" height="100%"></q-img
-      ></q-card-section>
+        <q-img
+          :src="previewImage"
+          fit="contain"
+          height="100%"
+        />
+      </q-card-section>
     </q-card>
   </q-dialog>
   <q-page padding>
     <div class="row q-col-gutter-x-md q-pb-md">
       <div>
-        <q-btn icon="arrow_back" size="sm" @click="$router.go(-1)">Назад</q-btn>
+        <q-btn
+          icon="arrow_back"
+          size="sm"
+          @click="$router.go(-1)"
+        >
+          Назад
+        </q-btn>
       </div>
       <div>
         <q-btn
@@ -37,14 +47,15 @@
           size="sm"
           color="positive"
           @click="$router.push({ name: 'ingredient', params: { id: 'new' } })"
-          >Новый ингредиент</q-btn
         >
+          Новый ингредиент
+        </q-btn>
       </div>
     </div>
     <q-form
+      v-if="ingredient"
       class="q-my-md"
       @submit.prevent="saveIngredient()"
-      v-if="ingredient"
     >
       <q-card padding>
         <q-card-section class="q-col-gutter-y-md">
@@ -56,10 +67,9 @@
             :readonly="!canEdit"
             hide-bottom-space
             filled
-          ></q-input>
+          />
           <q-select
             v-model.number="ingredient.category"
-            @filter="filterCategories"
             :options="ingredientCategories || []"
             :input-debounce="0"
             :readonly="!canEdit"
@@ -72,8 +82,8 @@
             options-dense
             clearable
             filled
-          >
-          </q-select>
+            @filter="filterCategories"
+          />
           <q-select
             v-model="ingredient.type"
             :options="ingredientTypes"
@@ -87,22 +97,21 @@
             options-dense
             clearable
             filled
-          >
-          </q-select>
+          />
           <q-input
             v-model.number="ingredient.min_pack_size"
             :readonly="!canEdit"
             label="Размер упаковки"
             type="number"
             filled
-          ></q-input>
+          />
           <q-input
             v-model.number="ingredient.item_weight"
             :readonly="!canEdit"
             label="Вес одной штуки"
             type="number"
             filled
-          ></q-input>
+          />
 
           <q-input
             v-model.number="ingredient.price"
@@ -110,7 +119,7 @@
             type="number"
             label="Цена (₺)"
             filled
-          ></q-input>
+          />
 
           <q-input
             v-model="ingredient.description"
@@ -119,22 +128,24 @@
             label="Описание"
             filled
             autogrow
-          >
-          </q-input>
+          />
 
           <!-- Image -->
           <div v-if="exists">
             <q-separator />
           </div>
 
-          <div class="row q-col-gutter-y-md" v-if="exists">
+          <div
+            v-if="exists"
+            class="row q-col-gutter-y-md"
+          >
             <div class="col-12 col-md-5 row">
               <div :class="$q.screen.gt.md ? 'col-6' : 'col-grow'">
                 <q-file
+                  ref="upload_field"
                   v-model="uploadFile"
                   :readonly="!canEdit"
                   class="full-width"
-                  ref="upload_field"
                   label="Загрузка изображения"
                   accept=".jpg, image/*"
                   dense
@@ -143,20 +154,24 @@
               </div>
               <div>
                 <q-btn
-                  @click="confirmClearImage()"
                   v-if="ingredient.image && canEdit"
                   align="left"
                   label="Очистить"
                   color="primary"
                   flat
                   no-caps
-                ></q-btn>
+                  @click="confirmClearImage()"
+                />
               </div>
             </div>
 
             <div class="col-12 col-md-7 col-grow">
               <div v-if="previewImage">
-                <q-img :src="previewImage" height="200px" fit="contain">
+                <q-img
+                  :src="previewImage"
+                  height="200px"
+                  fit="contain"
+                >
                   <div class="absolute-bottom-right bg-none">
                     <q-btn
                       push
@@ -183,14 +198,12 @@
               v-model="ingredient.need_buy"
               :readonly="!canEdit"
               label="Требует покупки"
-            >
-            </q-toggle>
+            />
             <q-toggle
               v-model="ingredient.edible"
               :readonly="!canEdit"
               label="Съедобный"
-            >
-            </q-toggle>
+            />
           </div>
         </q-card-section>
 
@@ -204,19 +217,21 @@
               color="positive"
               :loading="saving"
               :disable="deleting"
-              >Сохранить</q-btn
             >
+              Сохранить
+            </q-btn>
           </div>
           <div>
             <q-btn
               v-if="exists && storeAuth.hasPerm('recipes.delete_ingredient')"
-              @click="askDelete()"
               icon="delete"
               color="negative"
               :loading="deleting"
               :disable="saving"
-              >Удалить</q-btn
+              @click="askDelete()"
             >
+              Удалить
+            </q-btn>
           </div>
         </q-card-actions>
       </q-card>
@@ -245,6 +260,9 @@ const defaultIngredient = {
 
 export default defineComponent({
   mixins: [HandleErrorsMixin],
+  beforeRouteUpdate(to) {
+    this.loadIngredient(parseInt(to.params.id as string));
+  },
   data() {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
@@ -263,14 +281,52 @@ export default defineComponent({
         !!val || "Обязательное поле",
     };
   },
+  computed: {
+    ingredientTypes() {
+      const opts = Object.entries(IngredientTypes).map((i) => {
+        return { label: i[1], value: i[0] };
+      });
+      return opts;
+    },
+    ingredient() {
+      return this.store.ingredient;
+    },
+    ingredientCategories() {
+      if (this.searchCategory) {
+        return (
+          this.store.ingredient_categories?.filter(
+            (c) => c.title.toLowerCase().indexOf(this.searchCategory) > -1
+          ) || []
+        );
+      } else {
+        return this.store.ingredient_categories;
+      }
+    },
+    exists() {
+      return Boolean(this.ingredient?.id);
+    },
+    previewImage() {
+      return this.uploadPreview || this.ingredient?.image;
+    },
+    canEdit() {
+      return this.storeAuth.hasPerm("recipes.change_ingredient");
+    },
+  },
+  watch: {
+    uploadFile(val: File | null) {
+      if (!val) {
+        return;
+      }
+      // @ts-expect-error: file will be converted on sending
+      this.ingredient.image = val;
+      this.uploadPreview = URL.createObjectURL(val);
+    },
+  },
   created() {
     this.loadIngredient();
     if (!this.ingredientCategories) {
       this.loadIngredientCategories();
     }
-  },
-  beforeRouteUpdate(to) {
-    this.loadIngredient(parseInt(to.params.id as string));
   },
   methods: {
     loadIngredient(load_id?: string | number | undefined) {
@@ -297,7 +353,7 @@ export default defineComponent({
         });
     },
     loadIngredientCategories() {
-      let payload = {
+      const payload = {
         page_size: 1000,
       };
       // this.loading = true;
@@ -321,11 +377,11 @@ export default defineComponent({
       update();
     },
     saveIngredient() {
-      let payload = ingredientFromRead(this.ingredient);
+      const payload = ingredientFromRead(this.ingredient);
       this.saving = true;
 
-      let isCreating = !this.exists;
-      let method = isCreating
+      const isCreating = !this.exists;
+      const method = isCreating
         ? this.store.createIngredient
         : this.store.saveIngredient;
 
@@ -353,7 +409,7 @@ export default defineComponent({
             });
           }
 
-          let created_tx = isCreating ? "создан" : "сохранен";
+          const created_tx = isCreating ? "создан" : "сохранен";
           this.$q.notify({
             type: "positive",
             message: `Ингредиент успешно ${created_tx}`,
@@ -418,47 +474,6 @@ export default defineComponent({
             this.handleErrors(err, "Ошибка удаления ингредиента");
           });
       });
-    },
-  },
-  computed: {
-    ingredientTypes() {
-      let opts = Object.entries(IngredientTypes).map((i) => {
-        return { label: i[1], value: i[0] };
-      });
-      return opts;
-    },
-    ingredient() {
-      return this.store.ingredient;
-    },
-    ingredientCategories() {
-      if (this.searchCategory) {
-        return (
-          this.store.ingredient_categories?.filter(
-            (c) => c.title.toLowerCase().indexOf(this.searchCategory) > -1
-          ) || []
-        );
-      } else {
-        return this.store.ingredient_categories;
-      }
-    },
-    exists() {
-      return Boolean(this.ingredient?.id);
-    },
-    previewImage() {
-      return this.uploadPreview || this.ingredient?.image;
-    },
-    canEdit() {
-      return this.storeAuth.hasPerm("recipes.change_ingredient");
-    },
-  },
-  watch: {
-    uploadFile(val: File | null) {
-      if (!val) {
-        return;
-      }
-      // @ts-expect-error: file will be converted on sending
-      this.ingredient.image = val;
-      this.uploadPreview = URL.createObjectURL(val);
     },
   },
 });

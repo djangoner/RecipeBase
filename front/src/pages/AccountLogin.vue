@@ -2,24 +2,30 @@
   <div class="window-width window-height row justify-center items-center">
     <q-card class="login-card col-xs-12 col-sm-6 col-md-4 q-pa-md">
       <q-card-section>
-        <h4 class="text-center no-margin">Авторизация</h4>
+        <h4 class="text-center no-margin">
+          Авторизация
+        </h4>
       </q-card-section>
       <q-card-section>
-        <q-form id="loginForm" class="q-gutter-md" @submit="onSubmit">
+        <q-form
+          id="loginForm"
+          class="q-gutter-md"
+          @submit="onSubmit"
+        >
           <q-input
-            outlined
             v-model="login.username"
+            outlined
             label="Имя пользователя"
             :rules="[(val) => (val !== null && val !== '') || 'Введите имя пользователя']"
-          ></q-input>
+          />
           <q-input
+            v-model="login.password"
             :type="login.passwordShow ? 'text' : 'password'"
             outlined
-            v-model="login.password"
             label="Пароль"
             lazy-rules
             :rules="[(val) => (val !== null && val !== '') || 'Введите пароль']"
-          ></q-input>
+          />
         </q-form>
       </q-card-section>
 
@@ -56,9 +62,14 @@ export default defineComponent({
       },
     };
   },
+  computed: {
+    loginStatus(): boolean {
+      return this.store.isAuthenticated;
+    },
+  },
   methods: {
     onSubmit() {
-      let payload = {
+      const payload = {
         username: this.login.username,
         password: this.login.password,
       } as AuthToken;
@@ -82,11 +93,6 @@ export default defineComponent({
             progress: true,
           });
         });
-    },
-  },
-  computed: {
-    loginStatus(): boolean {
-      return this.store.isAuthenticated;
     },
   },
 });

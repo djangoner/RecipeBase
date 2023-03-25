@@ -1,11 +1,11 @@
 <template>
   <q-item
-    class="cursor-pointer non-selectable column"
-    :class="itemCls(item)"
     v-for="item of listItems"
     :key="item.id"
-    @click="$emit('openItem', item)"
+    class="cursor-pointer non-selectable column"
+    :class="itemCls(item)"
     clickable
+    @click="$emit('openItem', item)"
   >
     <div class="row">
       <!-- Checkbox -->
@@ -15,7 +15,7 @@
         unchecked-icon="radio_button_unchecked"
         size="lg"
         :disable="!canEdit"
-        @update:modelValue="$emit('updateItem', item)"
+        @update:model-value="$emit('updateItem', item)"
       />
 
       <!-- First column -->
@@ -28,8 +28,8 @@
           <template
             v-if="
               !item.is_auto &&
-              item.ingredient &&
-              item.title.toLowerCase() !== item.ingredient.title.toLowerCase()
+                item.ingredient &&
+                item.title.toLowerCase() !== item.ingredient.title.toLowerCase()
             "
           >
             ({{ item.ingredient.title }})
@@ -52,8 +52,7 @@
               :key="sub_ing.id"
             >
               {{ sub_ing.amount }} {{ sub_ing.amount_type_str
-              }}<template v-if="index != item.ingredients.length - 1"
-                >,
+              }}<template v-if="index != item.ingredients.length - 1">,
               </template>
             </span>
             )
@@ -65,16 +64,22 @@
           class="text-body2"
           :class="item.day || item.day === 0 ? WeekDaysColors[item.day] : ''"
         >
-          <q-icon v-if="item.is_auto" name="settings">
+          <q-icon
+            v-if="item.is_auto"
+            name="settings"
+          >
             <q-tooltip>
               Этот рецепт был создан автоматически на основе плана на неделю
             </q-tooltip>
           </q-icon>
-          <q-icon v-else name="edit"></q-icon>
+          <q-icon
+            v-else
+            name="edit"
+          />
           <q-icon
             v-if="!item.is_auto && item.ingredient"
             name="restaurant"
-          ></q-icon>
+          />
 
           <q-icon
             v-if="item?.ingredient?.description"
@@ -82,28 +87,34 @@
             color="primary"
             size="xs"
             name="notes"
-          ></q-icon>
+          />
 
           <q-badge
             class="q-mx-sm q-py-xs"
             :color="item.priority ? priorityColors[item.priority] : ''"
           >
-            <q-icon name="flag" size="10px" />
+            <q-icon
+              name="flag"
+              size="10px"
+            />
             <span class="q-ml-xs">
               {{ item.priority }}
             </span>
           </q-badge>
           <q-icon
+            v-if="item.description"
             name="notes"
             size="17px"
             color="blue-grey"
-            v-if="item.description"
           />
 
           {{ item.day || item.day === 0 ? getDay(item.day) : "" }}
           {{ item.day || item.day === 0 ? WeekDays[item.day] : "" }}
 
-          <span class="text-teal" v-if="isEdited(item)">
+          <span
+            v-if="isEdited(item)"
+            class="text-teal"
+          >
             [Изменено локально]
           </span>
         </span>
@@ -111,11 +122,10 @@
     </div>
 
     <div
-      class="item__count row items-center no-wrap q-mx-md"
       v-if="item.amount_completed && item.amount"
+      class="item__count row items-center no-wrap q-mx-md"
     >
-      <span class="item__count-text"
-        >{{ item.amount_completed }} /
+      <span class="item__count-text">{{ item.amount_completed }} /
         {{ Math.ceil(item.packs || item.amount) }}
       </span>
       <q-linear-progress
@@ -148,7 +158,7 @@ export default defineComponent({
     week: { required: true, type: Object as PropType<YearWeek> },
     canEdit: { default: true, type: Boolean },
   },
-  emits: ["openItem", "updateItem", "update:modelValue"],
+  emits: ["openItem", "updateItem", "update:model-value"],
 
   data() {
     return {
@@ -158,6 +168,26 @@ export default defineComponent({
       priorityColors,
     };
   },
+  computed: {
+    local_cache(): ProductListWeek | null {
+      const val = this.$q.localStorage.getItem("local_productlist");
+      return val ? (val as ProductListWeek) : null;
+    },
+  },
+  watch: {
+    // listItems(val, oldVal) {
+    //   if (val == oldVal) {
+    //     return;
+    //   }
+    //   this.$emit('update:model-value', val);
+    // },
+    // modelValue(val, oldVal) {
+    //   if (val == oldVal) {
+    //     return;
+    //   }
+    //   this.listItems = val;
+    // },
+  },
   methods: {
     getPackSuffix,
     getDay(idx: number): string | null {
@@ -166,7 +196,7 @@ export default defineComponent({
       }
       // console.debug(this.week, this.week.year, this.week.week);
       // let fday: Date = getDateOfISOWeek(this.week.year, this.week.week);
-      let fday = getDateOfISOWeek(1, 2);
+      const fday = getDateOfISOWeek(1, 2);
       fday.setDate(fday.getDate() + idx - 1);
       return date.formatDate(fday, "DD.MM");
     },
@@ -176,7 +206,7 @@ export default defineComponent({
       val2: string,
       val3: string
     ): string {
-      let n = number.toString();
+      const n = number.toString();
       if (number > 10 && number < 20) {
         return val3;
       } else if (n.endsWith("1")) {
@@ -193,11 +223,11 @@ export default defineComponent({
       if (!this.local_cache) {
         return;
       }
-      let cached_item = this.local_cache.items.filter((i) => {
+      const cached_item = this.local_cache.items.filter((i) => {
         return i.id == item.id;
       })[0];
 
-      let isChanged =
+      const isChanged =
         cached_item && JSON.stringify(cached_item) !== JSON.stringify(item);
 
       return isChanged;
@@ -207,26 +237,6 @@ export default defineComponent({
         return this.$q.dark.isActive ? "bg-grey-9" : "bg-grey-4";
       }
     },
-  },
-  computed: {
-    local_cache(): ProductListWeek | null {
-      let val = this.$q.localStorage.getItem("local_productlist");
-      return val ? (val as ProductListWeek) : null;
-    },
-  },
-  watch: {
-    // listItems(val, oldVal) {
-    //   if (val == oldVal) {
-    //     return;
-    //   }
-    //   this.$emit('update:modelValue', val);
-    // },
-    // modelValue(val, oldVal) {
-    //   if (val == oldVal) {
-    //     return;
-    //   }
-    //   this.listItems = val;
-    // },
   },
 });
 </script>

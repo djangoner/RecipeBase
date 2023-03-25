@@ -1,7 +1,7 @@
 <template>
   <div class="col col-xs-6 col-sm-6 col-md-3">
     <q-card
-      @click="$emit('cardClick')"
+      v-ripple
       class="row cursor-pointer q-hoverable no-wrap"
       :class="[
         mobile ? 'q-px-xs' : 'q-px-md',
@@ -9,18 +9,22 @@
       ]"
       flat
       bordered
-      v-ripple
+      @click="$emit('cardClick')"
     >
-      <span class="q-focus-helper"></span>
+      <span class="q-focus-helper" />
       <q-card-section :class="[mobile && 'q-px-sm']">
-        <q-icon :name="icon" :size="mobile ? 'sm' : 'lg'" :color="iconColor"></q-icon>
+        <q-icon
+          :name="icon"
+          :size="mobile ? 'sm' : 'lg'"
+          :color="iconColor"
+        />
       </q-card-section>
 
       <q-space v-if="mobile" />
 
       <q-card-section class="text-right">
         <b class="text-h6">{{ value }}</b>
-        <br />
+        <br>
         <span>{{ title }}</span>
       </q-card-section>
     </q-card>
@@ -41,12 +45,12 @@ const component = defineComponent({
   data() {
     return {};
   },
-  methods: {},
   computed: {
     mobile(): boolean {
       return this.$q.screen.lt.md;
     },
   },
+  methods: {},
 });
 
 export default component;

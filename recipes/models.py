@@ -575,3 +575,7 @@ class WeekPlanCondition(models.Model):
         if self.title:
             return self.title
         return f"Condition #{self.pk}"
+
+    @property
+    def full_day(self):
+        return self.plan_field in [self.Field.MIN_RATING, self.Field.MAX_RATING]

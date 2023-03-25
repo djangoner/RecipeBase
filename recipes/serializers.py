@@ -476,6 +476,12 @@ class ProductListWeekShortSerializer(ProductListWeekSerializer):
 
 
 class WeekPlanConditionSerializer(serializers.ModelSerializer):
+    full_day = serializers.SerializerMethodField()
+
     class Meta:
         model = WeekPlanCondition
         exclude = ()
+
+    @extend_schema_field(OpenApiTypes.BOOL)
+    def get_full_day(self, instance: WeekPlanCondition):
+        return instance.full_day

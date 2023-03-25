@@ -10,6 +10,7 @@ import type { SelectorTypeEnum } from './SelectorTypeEnum';
 
 export type WeekPlanCondition = {
     readonly id: number;
+    readonly full_day: boolean;
     active?: boolean;
     title?: string | null;
     condition?: ConditionEnum | null;

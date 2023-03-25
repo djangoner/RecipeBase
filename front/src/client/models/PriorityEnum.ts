@@ -3,9 +3,9 @@
 /* eslint-disable */
 
 /**
- * * `high` - Высокий приоритет
- * * `medium` - Средний приоритет
- * * `low` - Низкий приоритет
+ * * `high` - Высокий
+ * * `medium` - Средний
+ * * `low` - Низкий
  */
 export enum PriorityEnum {
     HIGH = 'high',

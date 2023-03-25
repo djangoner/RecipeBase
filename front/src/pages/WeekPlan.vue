@@ -80,17 +80,18 @@
                       :key="rec_idx"
                     >
                       <div class="col-auto">
-                        <span
-                          class="text-subtitle1 q-my-none relative-position q-py-xs"
-                        >
-                          {{ mtime.title }}
-                          <q-badge
-                            v-if="plan && getWarning(plan)"
-                            :color="getWarningColor(plan)"
-                            rounded
-                            floating
-                          />
-
+                        <div>
+                          <span
+                            class="text-subtitle1 q-my-none relative-position q-py-xs"
+                          >
+                            {{ mtime.title }}
+                            <q-badge
+                              v-if="plan && getWarning(plan)"
+                              :color="getWarningColor(plan)"
+                              rounded
+                              floating
+                            />
+                          </span>
                           <q-icon
                             v-if="plan?.recipe?.comment"
                             name="notes"
@@ -110,7 +111,7 @@
                             {{ mtime.title }} -
                             {{ timeFormat(mtime.time || null) }}
                           </q-tooltip>
-                        </span>
+                        </div>
                       </div>
 
                       <div class="col">

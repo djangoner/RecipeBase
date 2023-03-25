@@ -85,6 +85,7 @@ export default defineComponent({
   props: {
     modelValue: { required: true, type: Array as PropType<RecipeImage[]> },
   },
+  emits: ['update:model-value'],
   data() {
     return {
       upload_file: null as File | null,

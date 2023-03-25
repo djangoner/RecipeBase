@@ -130,7 +130,6 @@ import AmountTypeSelect from '../Products/AmountTypeSelect.vue'
 import IngredientSelect from "./IngredientSelect.vue"
 import { IngredientRead, RecipeIngredientRead, RecipeRead } from "src/client"
 import { AmountTypesConvert, AmountTypesTypes } from "src/modules/Globals"
-import HandleErrorsMixin, { CustomAxiosError } from "src/modules/HandleErrorsMixin"
 import { useBaseStore } from "src/stores/base"
 import { defineComponent, PropType } from "vue"
 
@@ -187,7 +186,6 @@ const ingAddDefault = {
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   components: { IngredientSelect, AmountTypeSelect },
-  mixins: [HandleErrorsMixin],
   props: {
     recipe: {
       type: Object as PropType<RecipeRead>,

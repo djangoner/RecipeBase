@@ -42,7 +42,7 @@
                   Этот рецепт был создан автоматически на основе плана на неделю
                 </q-tooltip>
               </q-icon>
-              {{ item || item.day === 0 ? getDay(item.day) : "" }}
+              <!-- <template v-if="item && item.day">{{ item || item.day === 0 ? getDay(item.day) : "" }}</template> -->
               {{ item.day || item.day === 0 ? WeekDays[item.day] : "" }}
             </span>
           </div>
@@ -391,6 +391,7 @@ export default defineComponent({
   props: {
     modelValue: {
       required: false,
+      default: undefined,
       type: Object as PropType<ProductListItemRead>,
     },
     week: { required: true, type: Object as PropType<YearWeek> },

@@ -120,47 +120,12 @@
               <!-- Recipe tags -->
               <div class="row recipe-tags items-center q-gutter-x-md">
                 <span class="text-subtitle2">Метки: </span>
-                <q-chip
-                  v-for="tag of recipe.tags"
-                  :key="tag.id"
-                  class="cursor-pointer"
-                  :removable="edit"
-                  @remove="removeTag(tag)"
-                >
-                  {{ tag.title }}
-                </q-chip>
 
-                <q-select
-                  v-if="edit && tags"
-                  v-model="tagAddSelect"
-                  label="Добавить метку"
-                  keydown.enter.prevent="addTag()"
-                  :input-debounce="0"
-                  :options="tagList || []"
-                  :options-dense="dense"
-                  :dense="dense"
-                  option-label="title"
-                  use-input
-                  new-value-mode="add-unique"
-                  @filter="filterTags"
-                  @new-value="addNewTag"
-                >
-                  <template #no-option>
-                    <q-item>
-                      <q-item-section class="text-grey">
-                        Нет результатов
-                      </q-item-section>
-                    </q-item>
-                  </template>
-                  <template #after>
-                    <q-btn
-                      icon="add"
-                      size="sm"
-                      color="positive"
-                      @click="addTag()"
-                    />
-                  </template>
-                </q-select>
+
+                <recipe-tags
+                  v-model:recipeTags="recipe.tags"
+                  :edit="edit"
+                />
               </div>
 
               <!-- Info -->
@@ -300,21 +265,11 @@
                 <h6 class="q-my-sm">
                   Содержание (изначальное, источник)
                 </h6>
-                <q-editor
-                  v-model="recipe.content_source"
-                  :dense="$q.screen.lt.md"
-                  :toolbar="editorToolbar"
-                  :fonts="editorFonts"
-                />
+                <content-editor v-model="recipe.content_source" />
                 <h6 class="q-my-sm">
                   Содержание (редактированное)
                 </h6>
-                <q-editor
-                  v-model="recipe.content"
-                  :dense="$q.screen.lt.md"
-                  :toolbar="editorToolbar"
-                  :fonts="editorFonts"
-                />
+                <content-editor v-model="recipe.content" />
 
                 <h6 class="q-my-sm">
                   Комментарий
@@ -428,20 +383,22 @@
 </template>
 
 <script lang="ts">
+import RecipeTags from '../components/Recipes/RecipeTags.vue'
+import ContentEditor from "../components/Recipes/ContentEditor.vue"
 import RecipeIngredients from "../components/Recipes/RecipeIngredients.vue"
 import RecipePrices from "../components/Recipes/RecipePrices.vue"
 import RecipeInfo from "../components/Recipes/RecipeInfo.vue"
 import { useBaseStore } from "src/stores/base"
-import { date } from "quasar"
 import RecipeImagesUpload from "src/components/RecipeImagesUpload.vue"
 import RecipeRating from "src/components/RecipeRating.vue"
 import RecipeMenu from "src/components/RecipeMenu.vue"
 import { defineComponent } from "vue"
-import { IngredientRead, RecipeImage, RecipeIngredientRead, RecipeRead, RecipeTag } from "src/client"
+import { RecipeImage, RecipeIngredientRead, RecipeRead, RecipeTag } from "src/client"
 import HandleErrorsMixin, { CustomAxiosError } from "src/modules/HandleErrorsMixin"
 import { AmountTypesConvert, AmountTypesTypes } from "src/modules/Globals"
 import { RecipeFromRead } from "src/Convert"
 import { useAuthStore } from "src/stores/auth"
+import {dateFormat, dateTimeFormat } from "src/modules/Utils"
 
 const defaultRecipe = {
   content_source: "",
@@ -474,6 +431,10 @@ export default defineComponent({
     RecipePrices,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     RecipeIngredients,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    ContentEditor,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    RecipeTags
   },
   mixins: [HandleErrorsMixin],
   beforeRouteUpdate(to) {
@@ -487,116 +448,6 @@ export default defineComponent({
     const store = useBaseStore()
     const storeAuth = useAuthStore()
 
-    const ingredientsColumns = [
-      {
-        name: "title",
-        label: "Название",
-        field: (row: RecipeIngredientRead) => row.ingredient?.title,
-        required: true,
-        sortable: true,
-        style: "width: 50px",
-      },
-      // {
-      //   name: 'amount_type',
-      //   label: 'Ед. изм.',
-      //   field: (row) => row.amount_type,
-      //   required: true,
-      //   sortable: true,
-      //   style: 'width: 20px',
-      // },
-      {
-        name: "amount_rec",
-        label: "Вес (рецепт)",
-        field: (row: RecipeIngredientRead) => String(row.amount) + "  (" + row.amount_type_str + ")",
-        required: true,
-        sortable: true,
-        style: "width: 20px",
-      },
-      {
-        name: "amount_g",
-        label: "Вес (гр.)",
-        field: (row: RecipeIngredientRead) => (row.amount_grams ? String(row.amount_grams) + " гр." : "-"),
-        required: true,
-        sortable: true,
-        style: "width: 30px",
-      },
-      {
-        name: "is_main",
-        label: "Основной",
-        field: "is_main",
-        required: true,
-        sortable: true,
-        style: "width: 30px",
-      },
-    ]
-
-    const ingAddDefault = {
-      select: null as { id: number | null; title: string } | null,
-      amount: null,
-      amount_type: "g",
-      is_main: false,
-    }
-
-    const editorToolbar = [
-      [
-        {
-          label: this.$q.lang.editor.align,
-          icon: this.$q.iconSet.editor.align,
-          fixedLabel: true,
-          list: "only-icons",
-          options: ["left", "center", "right", "justify"],
-        },
-        {
-          label: this.$q.lang.editor.align,
-          icon: this.$q.iconSet.editor.align,
-          fixedLabel: true,
-          options: ["left", "center", "right", "justify"],
-        },
-      ],
-      ["bold", "italic", "strike", "underline", "subscript", "superscript"],
-      ["token", "hr", "link", "custom_btn"],
-      ["print", "fullscreen"],
-      [
-        {
-          label: this.$q.lang.editor.formatting,
-          icon: this.$q.iconSet.editor.formatting,
-          list: "no-icons",
-          options: ["p", "h1", "h2", "h3", "h4", "h5", "h6", "code"],
-        },
-        {
-          label: this.$q.lang.editor.fontSize,
-          icon: this.$q.iconSet.editor.fontSize,
-          fixedLabel: true,
-          fixedIcon: true,
-          list: "no-icons",
-          options: ["size-1", "size-2", "size-3", "size-4", "size-5", "size-6", "size-7"],
-        },
-        {
-          label: this.$q.lang.editor.defaultFont,
-          icon: this.$q.iconSet.editor.font,
-          fixedIcon: true,
-          list: "no-icons",
-          options: ["default_font", "arial", "arial_black", "comic_sans", "courier_new", "impact", "lucida_grande", "times_new_roman", "verdana"],
-        },
-        "removeFormat",
-      ],
-      ["quote", "unordered", "ordered", "outdent", "indent"],
-
-      ["undo", "redo"],
-      ["viewsource"],
-    ]
-
-    const editorFonts = {
-      arial: "Arial",
-      arial_black: "Arial Black",
-      comic_sans: "Comic Sans MS",
-      courier_new: "Courier New",
-      impact: "Impact",
-      lucida_grande: "Lucida Grande",
-      times_new_roman: "Times New Roman",
-      verdana: "Verdana",
-    }
-
     const requiredRule = (val: string | number) => !!val || "Обязательное поле"
 
     return {
@@ -608,16 +459,8 @@ export default defineComponent({
       autoplay: true,
       fullscreen: false,
       edit: false,
-      tagAddSelect: null as RecipeTag | null,
-      tagList: null as RecipeTag[] | null,
       saveAndContinue: false,
-      ingAddDefault,
-      addIngredientSelect: null as IngredientRead | null,
-      ingList: null as IngredientRead[] | null,
       requiredRule,
-      ingredientsColumns,
-      editorToolbar,
-      editorFonts,
       archivedOptions: [
         { label: "Не архивирован", value: false },
         { label: "Архивирован", value: true },
@@ -634,9 +477,6 @@ export default defineComponent({
         this.store.recipe = val
       },
     },
-    tags() {
-      return this.store.tags
-    },
     ingredients() {
       return this.store.ingredients
     },
@@ -648,42 +488,17 @@ export default defineComponent({
       return true
     },
     amount_types() {
-      return this.store.amount_types;
+      return this.store.amount_types
     },
     amountTypeList() {
-      return this.amount_types?.types as AmountTypesTypes;
+      return this.amount_types?.types as AmountTypesTypes
     },
     amountTypeConvert() {
-      return this.amount_types?.convert as AmountTypesConvert;
+      return this.amount_types?.convert as AmountTypesConvert
     },
   },
 
   watch: {
-    edit(val) {
-      const column_actions = {
-        name: "actions",
-        label: "Действия",
-        field: () => "",
-        required: true,
-        sortable: false,
-        style: "width: 75px",
-      }
-      const column_amount_type = {
-        name: "amount_type",
-        label: "Единица измерения",
-        field: () => "",
-        required: true,
-        sortable: false,
-        style: "width: 120px",
-      }
-
-      if (val) {
-        this.ingredientsColumns.push(column_actions)
-        this.ingredientsColumns.splice(1, 0, column_amount_type)
-      } else {
-        this.ingredientsColumns = this.ingredientsColumns?.filter((i) => i.name !== column_actions.name && i.name !== column_amount_type.name)
-      }
-    },
     "recipe.ingredients": {
       deep: true,
       handler(val: RecipeIngredientRead[]) {
@@ -691,17 +506,13 @@ export default defineComponent({
         this.calculateIngredientsGrams()
       },
     },
-    tagAddSelect() {
-      this.addTag()
-    },
   },
   created() {
     this.loadRecipe()
-    if (!this.tags) {
-      this.loadTags()
-    }
   },
   methods: {
+    dateFormat,
+    dateTimeFormat,
     loadRecipe(load_id?: number | "new" | undefined) {
       let id: string | number | "new" = load_id || (this.$route.params.id as string)
 
@@ -835,83 +646,8 @@ export default defineComponent({
           this.handleErrors(err, "Ошибка сохранения рецепта")
         })
     },
-    loadTags() {
-      const payload = {
-        pageSize: 1000,
-      }
-      this.store
-        .loadTags(payload)
-        .then(() => {
-          // this.loading = false;
-        })
-        .catch((err: CustomAxiosError) => {
-          // this.loading = false;
-          this.handleErrors(err, "Ошибка загрузки меток")
-        })
-    },
     toggleEdit() {
       this.edit = !this.edit
-    },
-    removeTag(tag: RecipeTag) {
-      if (!this.recipe) {
-        return
-        }
-      console.debug("Remove tag: ", tag)
-      this.recipe.tags =
-        this.recipe?.tags?.filter((t) => {
-          return t.title !== tag.title
-        }) || []
-    },
-    addTag() {
-      console.debug("Add tag: ", this.tagAddSelect)
-      if (!this.tagAddSelect) {
-        return
-      }
-      this.recipe?.tags?.push(this.tagAddSelect)
-      this.tagAddSelect = null
-    },
-    addNewTag(new_tag: string) {
-      // , done: CallableFunction
-      console.debug("Add new tag: ", new_tag)
-      if (!new_tag) {
-        return
-      }
-      const exists = this.recipe?.tags?.find((t) => t.title.toLowerCase() === new_tag.toLowerCase())
-      if (exists) {
-        // If tag with this name already added to recipe
-        console.debug("Tag already exists!")
-        return
-      }
-
-      const existsNotUsed = this.tags?.find((t) => t.title.toLowerCase() === new_tag.toLowerCase())
-      if (existsNotUsed) {
-        // If tag with this name exists in DB
-        console.debug("Using existing tag in DB")
-        this.tagAddSelect = existsNotUsed
-        this.addTag()
-        return
-      }
-
-      this.tagAddSelect = {
-        // @ts-expect-error: Tag will be created
-        id: null,
-        title: new_tag,
-      }
-      // done(new_tag, 'add-unique');
-      this.addTag()
-    },
-    filterTags(val: string, update: CallableFunction) {
-      update(() => {
-        const isUsed = (tag: RecipeTag) => {
-          return this.recipe?.tags?.some((t) => t.id == tag.id)
-        }
-
-        const needle = val.toLowerCase()
-        const tags = this.tags
-
-        this.tagList = tags?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)) || []
-        // console.debug(needle, this.tagList, tags);
-      })
     },
     calculateIngredientsGrams() {
       if (!this.edit || !this.amountTypeConvert) return
@@ -930,15 +666,6 @@ export default defineComponent({
         return i
       })
       // console.debug("Calculating grams...");
-    },
-    dateTimeFormat(raw: Date | string | null): string {
-      if (!raw) {
-        return "-"
-      }
-      return date.formatDate(raw, "YYYY.MM.DD hh:mm")
-    },
-    dateFormat(raw: Date | string): string {
-      return date.formatDate(raw, "YYYY.MM.DD")
     },
   },
 })

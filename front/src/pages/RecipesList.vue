@@ -553,18 +553,18 @@ export default defineComponent({
     },
     compilation: {
       get() {
-        return (this.$query as QueryInterface).compilation;
+        return (this.$query as unknown as QueryInterface).compilation;
       },
       set(val: string) {
-        (this.$query as QueryInterface).compilation = val;
+        (this.$query as unknown as QueryInterface).compilation = val;
       },
     },
     displayMode: {
       get() {
-        return (this.$query as QueryInterface).display;
+        return (this.$query as unknown as QueryInterface).display;
       },
       set(val: string) {
-        (this.$query as QueryInterface).display = val;
+        (this.$query as unknown as QueryInterface).display = val;
       },
     },
     totalPages(): number | null {

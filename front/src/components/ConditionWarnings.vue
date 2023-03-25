@@ -110,7 +110,7 @@ export default defineComponent({
       if (rootCond.plan) {
         let plan = this.getPlan(rootCond.plan);
         if (plan && plan.day) {
-          let dayStr = this.getDay(plan.day);
+          let dayStr = this.getDay(plan.day - 1);
           let failTx = this.conditionAsString(rootCond);
           if (cond.condition) {
             let condStr =

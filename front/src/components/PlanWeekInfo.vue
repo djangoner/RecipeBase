@@ -1,17 +1,24 @@
 <template>
   <q-tabs v-model="tab" dense>
     <q-tab name="warnings" icon="warning" class="text-orange">
-      <q-badge color="red" floating>{{ warningsCount }}</q-badge>
+      <q-badge v-if="warningsCount" color="red" floating>{{
+        warningsCount
+      }}</q-badge>
     </q-tab>
     <q-tab name="eats" icon="people" />
   </q-tabs>
 
   <q-tab-panels v-model="tab" style="height: 200px" animated>
     <q-tab-panel name="warnings">
+      <template v-if="plan.warnings.length === 0">
+        <div class="text-subtitle1 flex flex-center full-height">
+          Нет предупреждений
+        </div>
+      </template>
       <condition-warnings
         :warnings="plan.warnings"
         :week="week"
-        v-if="conditions"
+        v-else-if="conditions"
       />
       <q-inner-loading :showing="!conditions" />
     </q-tab-panel>

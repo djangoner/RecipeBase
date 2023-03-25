@@ -3,7 +3,7 @@
     :nodes="warningsNodes"
     v-model:selected="selected"
     selected-color="primary"
-    node-key="label"
+    node-key="id"
     dense
     default-expand-all
   />
@@ -54,6 +54,7 @@ export default defineComponent({
       store,
       loading: false,
       selected: null as ConditionWarning | null,
+      groupByField: "condition" as "condition" | "plan",
     };
   },
   methods: {
@@ -119,13 +120,14 @@ export default defineComponent({
             } (условие ${condStr})`;
           } else {
             label = `${dayStr || ""} ${plan.meal_time.title} ${failTx} (${
-              cond.plan_field || ''
+              cond.plan_field || ""
             })`;
           }
         }
       }
       let r: QTreeNode = {
         label: label,
+        id: String(cond.id) + "_" + label,
         children: [] as QTreeNode[],
       };
       warnings.forEach((w) => {
@@ -150,10 +152,11 @@ export default defineComponent({
     warningsGrouped(): warningsGrouped {
       let res: warningsGrouped = {};
       for (const cond of this.warnings) {
-        if (!Object.hasOwn(res, cond.condition)) {
-          res[cond.condition] = [];
+        let idVal = cond[this.groupByField];
+        if (!Object.hasOwn(res, idVal)) {
+          res[idVal] = [];
         }
-        res[cond.condition].push(cond);
+        res[idVal].push(cond);
       }
       return res;
     },
@@ -177,6 +180,10 @@ export default defineComponent({
         res.push(r);
       }
       return res;
+    },
+    warnedPlans(): number[] {
+      let plans = this.warnings.map((w) => w.plan);
+      return [...new Set(plans)];
     },
   },
 });

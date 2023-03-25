@@ -69,19 +69,30 @@
               <div class="flex column" v-else>
                 <template v-for="mtime of meal_time">
                   <div
-                    v-if="getRecipes(idx, mtime).length > 0 || mtime.is_primary"
+                    v-if="
+                      getDayPlans(idx, mtime).length > 0 || mtime.is_primary
+                    "
                     :key="mtime.id"
                   >
                     <div
                       class="row q-col-gutter-x-sm wrap"
-                      v-for="(recipe, rec_idx) of getRecipes(idx, mtime)"
+                      v-for="(plan, rec_idx) of getDayPlans(idx, mtime)"
                       :key="rec_idx"
                     >
                       <div class="col-auto">
-                        <span class="text-subtitle1 q-my-none">
+                        <span
+                          class="text-subtitle1 q-my-none relative-position q-py-xs"
+                        >
                           {{ mtime.title }}
+                          <q-badge
+                            v-if="plan && warnedPlans.indexOf(plan.id) !== -1"
+                            color="orange"
+                            rounded
+                            floating
+                          />
+
                           <q-icon
-                            v-if="recipe?.comment"
+                            v-if="plan?.recipe?.comment"
                             name="notes"
                             size="xs"
                             color="primary"
@@ -92,7 +103,7 @@
                               :offset="[10, 10]"
                             >
                               Комментарий:
-                              {{ recipe?.comment }}
+                              {{ plan?.recipe?.comment }}
                             </q-tooltip>
                           </q-icon>
                           <q-tooltip>
@@ -104,7 +115,7 @@
 
                       <div class="col">
                         <q-select
-                          :model-value="recipe"
+                          :model-value="plan?.recipe"
                           @update:modelValue="
                             setRecipe(idx, mtime, $event, rec_idx)
                           "
@@ -126,13 +137,19 @@
                             </q-item>
                           </template>
                         </q-select>
-                        <!-- <span>{{ getRecipe(idx, mtime)?.title }}</span> -->
+                        <!-- <span>{{ getplan(idx, mtime)?.title }}</span> -->
                       </div>
 
-                      <div class="flex flex-center col-auto" v-if="recipe">
+                      <div
+                        class="flex flex-center col-auto"
+                        v-if="plan?.recipe"
+                      >
                         <q-btn
                           v-if="storeAuth.hasPerm('recipes.view_recipe')"
-                          :to="{ name: 'recipe', params: { id: recipe.id } }"
+                          :to="{
+                            name: 'recipe',
+                            params: { id: plan.recipe.id },
+                          }"
                           icon="open_in_new"
                           size="sm"
                           flat
@@ -159,8 +176,8 @@
                       </div>
 
                       <recipe-card-tooltip
-                        v-if="recipe && $q.screen.gt.xs"
-                        :recipe="recipe"
+                        v-if="plan?.recipe && $q.screen.gt.xs"
+                        :recipe="plan.recipe"
                       ></recipe-card-tooltip>
                     </div>
                   </div>
@@ -405,20 +422,20 @@ export default defineComponent({
       });
       return recipes[0]?.recipe;
     },
-    getRecipes(day: number, mtime: MealTime) {
+    getDayPlans(day: number, mtime: MealTime) {
       if (!this.plan) {
         return [];
       }
-      let recipes = this.plan?.plans.filter((plan) => {
+      let plans = this.plan?.plans.filter((plan) => {
         return plan.day == day && plan.meal_time.id == mtime.id;
       });
 
       if (mtime.is_primary) {
-        if (recipes.length < 1) {
+        if (plans.length < 1) {
           return [null];
         }
       }
-      return recipes.map((r) => r.recipe);
+      return plans; //.map((r) => r.recipe);
     },
     setRecipe(
       day: number,
@@ -583,6 +600,10 @@ export default defineComponent({
     },
     canEdit() {
       return this.storeAuth.hasPerm("recipes.change_recipeplanweek");
+    },
+    warnedPlans(): number[] {
+      let plans = this.plan?.warnings?.map((w) => w.plan) || [];
+      return [...new Set(plans)];
     },
   },
 });

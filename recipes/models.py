@@ -116,6 +116,11 @@ class RecipeImage(models.Model):
 
 
 class Ingredient(models.Model):
+    class IngredientType(models.TextChoices):
+        GROCERY = "grocery", _("Зелень/фрукты/овощи")
+        LIQUID = "liq", _("Жидкость (в литрах)")
+        kilo = "kilo", _("Измеряется в КГ")
+
     title = models.CharField(_("Название"), unique=True, max_length=100)
     description = models.TextField(_("Описание"), null=True, blank=True)
     category = models.ForeignKey(
@@ -137,6 +142,7 @@ class Ingredient(models.Model):
         null=True,
         blank=True,
     )
+    type = models.CharField(_("Тип ингредиента"), choices=IngredientType.choices, max_length=10, null=True, blank=True)
     price = models.PositiveSmallIntegerField(_("Цена"), null=True, blank=True)
     need_buy = models.BooleanField(_("Требует покупки"), default=True)
     edible = models.BooleanField(_("Съедобный"), default=True)

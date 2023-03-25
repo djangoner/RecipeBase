@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { RegularIngredient } from './RegularIngredient';
+import type { TypeEnum } from './TypeEnum';
 
 /**
  * A ModelSerializer that takes additional arguments for
@@ -23,6 +24,7 @@ export type IngredientRead = {
      */
     min_pack_size?: number | null;
     item_weight?: number | null;
+    type?: TypeEnum | null;
     price?: number | null;
     need_buy?: boolean;
     edible?: boolean;

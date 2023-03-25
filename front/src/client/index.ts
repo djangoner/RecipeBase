@@ -84,6 +84,7 @@ export type { Task } from './models/Task';
 export type { TaskCategory } from './models/TaskCategory';
 export type { TaskNested } from './models/TaskNested';
 export { TelegramNotificationsEnum } from './models/TelegramNotificationsEnum';
+export { TypeEnum } from './models/TypeEnum';
 export type { User } from './models/User';
 export type { UserProfile } from './models/UserProfile';
 export type { WeekPlanCondition } from './models/WeekPlanCondition';

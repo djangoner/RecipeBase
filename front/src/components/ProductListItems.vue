@@ -115,10 +115,11 @@
       v-if="item.amount_completed && item.amount"
     >
       <span class="item__count-text"
-        >{{ item.amount_completed }} / {{ item.amount }}
+        >{{ item.amount_completed }} /
+        {{ Math.ceil(item.packs || item.amount) }}
       </span>
       <q-linear-progress
-        :value="item.amount_completed / item.amount"
+        :value="item.amount_completed / Math.ceil(item.packs || item.amount)"
         class="col-grow"
       />
     </div>
@@ -136,6 +137,7 @@ import {
   WeekDaysColors,
   priorityColors,
 } from "src/modules/WeekUtils";
+import { getPackSuffix } from "src/modules/Utils";
 
 export default defineComponent({
   props: {
@@ -157,6 +159,7 @@ export default defineComponent({
     };
   },
   methods: {
+    getPackSuffix,
     getDay(idx: number): string | null {
       if (!this.week) {
         return null;

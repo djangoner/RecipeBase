@@ -123,3 +123,9 @@ export interface WarnedPlans {
 }
 
 export const WarningPriorities = ["low", "medium", "high"];
+
+export const IngredientTypes = {
+  grocery: "Зелень/фрукты/овощи",
+  liq: "Жидкость (в литрах)",
+  kilo: "Измеряется в КГ",
+};

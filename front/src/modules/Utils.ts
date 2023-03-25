@@ -1,5 +1,5 @@
 import { date } from "quasar";
-import { Task, TaskCategory } from "src/client";
+import { IngredientRead, Task, TaskCategory } from "src/client";
 import { TaskOrCategory, WarnedPlan } from "./Globals";
 
 export function isTaskCategory(
@@ -34,5 +34,19 @@ export function getWarningPriorityColor(priority: string | null): string {
       return "green";
     default:
       return "orange";
+  }
+}
+
+export function getPackSuffix(ingredient: IngredientRead): string {
+  switch (ingredient.type) {
+    case "liq":
+      return "л";
+    case "kilo":
+      return "кг";
+    case "grocery":
+      return "кг";
+
+    default:
+      return "шт";
   }
 }

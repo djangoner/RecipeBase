@@ -75,6 +75,7 @@
           @update:modelValue="$emit('updateItem', item)"
           label="Ингредиент"
           @filter="filterIngredients"
+          :debounce="100"
           :options="ingredients || []"
           :readonly="item.is_auto || !canEdit"
           option-label="title"
@@ -146,7 +147,7 @@
             v-if="item?.amount"
             v-model.number="item.amount_completed"
             @update:modelValue="$emit('updateItem', item)"
-            :max="item.amount || 1"
+            :max="Math.ceil(item.packs) || item.amount || 1"
             :readonly="!canEdit"
             :amount_type="item.amount_type || ''"
           />
@@ -421,6 +422,7 @@ export default defineComponent({
         let payload = {
           pageSize: 20,
           search: search,
+          fields: "id,title",
         };
         this.store
           .loadIngredients(payload)

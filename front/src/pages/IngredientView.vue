@@ -74,6 +74,21 @@
             filled
           >
           </q-select>
+          <q-select
+            v-model="ingredient.type"
+            :options="ingredientTypes"
+            :input-debounce="0"
+            :readonly="!canEdit"
+            label="Тип продукта"
+            option-label="label"
+            option-value="value"
+            emit-value
+            map-options
+            options-dense
+            clearable
+            filled
+          >
+          </q-select>
           <q-input
             v-model.number="ingredient.min_pack_size"
             :readonly="!canEdit"
@@ -213,6 +228,7 @@
 
 <script lang="ts">
 import { ingredientFromRead } from "src/Convert";
+import { IngredientTypes } from "src/modules/Globals";
 import HandleErrorsMixin, {
   CustomAxiosError,
 } from "src/modules/HandleErrorsMixin";
@@ -405,6 +421,12 @@ export default defineComponent({
     },
   },
   computed: {
+    ingredientTypes() {
+      let opts = Object.entries(IngredientTypes).map((i) => {
+        return { label: i[1], value: i[0] };
+      });
+      return opts;
+    },
     ingredient() {
       return this.store.ingredient;
     },

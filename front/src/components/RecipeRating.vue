@@ -7,7 +7,11 @@
         </td>
 
         <td class="cell-name">
-          {{ user?.first_name ? user.first_name + ' ' + user?.last_name : user.username }}
+          {{
+            user?.first_name
+              ? user.first_name + " " + user?.last_name
+              : user.username
+          }}
         </td>
 
         <td class="cell-rating">
@@ -28,11 +32,13 @@
 </template>
 
 <script lang="ts">
-import { useBaseStore } from 'src/stores/base';
-import { useAuthStore } from 'src/stores/auth';
-import { defineComponent, PropType } from 'vue';
-import { RecipeRead, User } from 'src/client';
-import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
+import { useBaseStore } from "src/stores/base";
+import { useAuthStore } from "src/stores/auth";
+import { defineComponent, PropType } from "vue";
+import { RecipeRead, User } from "src/client";
+import HandleErrorsMixin, {
+  CustomAxiosError,
+} from "src/modules/HandleErrorsMixin";
 
 let defaultRating = {};
 
@@ -51,7 +57,7 @@ export default defineComponent({
       loading: false,
     };
   },
-  mounted() {
+  created() {
     if (!this.users) {
       this.loadUsers();
     }
@@ -69,12 +75,14 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузки пользователей');
+          this.handleErrors(err, "Ошибка загрузки пользователей");
         });
     },
     userRating(user: User) {
       let exists = this.modelValue?.ratings?.filter((r) => {
-        return typeof r.user == 'number' ? r.user == user.id : r.user.id == user.id;
+        return typeof r.user == "number"
+          ? r.user == user.id
+          : r.user.id == user.id;
       });
       // console.debug('userRating: ', user, exists);
 
@@ -102,7 +110,7 @@ export default defineComponent({
           }
           return r;
         });
-        this.$emit('update:modelValue', mvalue);
+        this.$emit("update:modelValue", mvalue);
       } else {
         let mvalue = Object.assign({}, this.modelValue);
         // @ts-expect-error: Rating will be created
@@ -114,7 +122,7 @@ export default defineComponent({
             rating: rating,
           })
         );
-        this.$emit('update:modelValue', mvalue);
+        this.$emit("update:modelValue", mvalue);
       }
     },
   },

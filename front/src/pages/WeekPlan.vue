@@ -38,7 +38,7 @@
             :class="[
               idx >= 6 ? 'bg-grey-3 print-hide print-week-hide' : '',
               WeekDaysColors[idx],
-              isToday(getDay(idx - 1)) ? 'shadow-5' : '',
+              // isToday(getDay(idx - 1)) ? 'shadow-5' : '',
               `weekday-${idx}`,
             ]"
             style="min-height: 300px"
@@ -69,19 +69,31 @@
               <div class="flex column" v-else>
                 <template v-for="mtime of meal_time">
                   <div
-                    v-if="getRecipes(idx, mtime).length > 0 || mtime.is_primary"
+                    v-if="
+                      getDayPlans(idx, mtime).length > 0 || mtime.is_primary
+                    "
                     :key="mtime.id"
                   >
                     <div
                       class="row q-col-gutter-x-sm wrap"
-                      v-for="(recipe, rec_idx) of getRecipes(idx, mtime)"
+                      v-for="(plan, rec_idx) of getDayPlans(idx, mtime)"
                       :key="rec_idx"
                     >
                       <div class="col-auto">
-                        <span class="text-subtitle1 q-my-none">
-                          {{ mtime.title }}
+                        <div>
+                          <span
+                            class="text-subtitle1 q-my-none relative-position q-py-xs"
+                          >
+                            {{ mtime.title }}
+                            <q-badge
+                              v-if="plan && getWarning(plan)"
+                              :color="getWarningColor(plan)"
+                              rounded
+                              floating
+                            />
+                          </span>
                           <q-icon
-                            v-if="recipe?.comment"
+                            v-if="plan?.recipe?.comment"
                             name="notes"
                             size="xs"
                             color="primary"
@@ -92,19 +104,19 @@
                               :offset="[10, 10]"
                             >
                               Комментарий:
-                              {{ recipe?.comment }}
+                              {{ plan?.recipe?.comment }}
                             </q-tooltip>
                           </q-icon>
                           <q-tooltip>
                             {{ mtime.title }} -
                             {{ timeFormat(mtime.time || null) }}
                           </q-tooltip>
-                        </span>
+                        </div>
                       </div>
 
                       <div class="col">
                         <q-select
-                          :model-value="recipe"
+                          :model-value="plan?.recipe"
                           @update:modelValue="
                             setRecipe(idx, mtime, $event, rec_idx)
                           "
@@ -126,13 +138,19 @@
                             </q-item>
                           </template>
                         </q-select>
-                        <!-- <span>{{ getRecipe(idx, mtime)?.title }}</span> -->
+                        <!-- <span>{{ getplan(idx, mtime)?.title }}</span> -->
                       </div>
 
-                      <div class="flex flex-center col-auto" v-if="recipe">
+                      <div
+                        class="flex flex-center col-auto"
+                        v-if="plan?.recipe"
+                      >
                         <q-btn
                           v-if="storeAuth.hasPerm('recipes.view_recipe')"
-                          :to="{ name: 'recipe', params: { id: recipe.id } }"
+                          :to="{
+                            name: 'recipe',
+                            params: { id: plan.recipe.id },
+                          }"
                           icon="open_in_new"
                           size="sm"
                           flat
@@ -159,8 +177,8 @@
                       </div>
 
                       <recipe-card-tooltip
-                        v-if="recipe && $q.screen.gt.xs"
-                        :recipe="recipe"
+                        v-if="plan?.recipe && $q.screen.gt.xs"
+                        :recipe="plan.recipe"
                       ></recipe-card-tooltip>
                     </div>
                   </div>
@@ -202,7 +220,7 @@
         >
           <q-card class="q-pt-none q-px-none">
             <q-card-section class="q-px-xs">
-              <plan-week-info :plan="plan" />
+              <plan-week-info :plan="plan" :week="week" />
             </q-card-section>
           </q-card>
         </q-expansion-item>
@@ -224,11 +242,13 @@ import HandleErrorsMixin, {
   CustomAxiosError,
 } from "src/modules/HandleErrorsMixin";
 import { WeekDays } from "src/modules/WeekUtils";
-import { MealTime, RecipeRead } from "src/client";
+import { MealTime, RecipeRead, RecipePlanRead } from "src/client";
 import { RecipePlanWeekFromRead } from "src/Convert";
 import { useAuthStore } from "src/stores/auth";
 // import VueHtmlToPaper from 'vue-html-to-paper';
 import { Directive } from "vue";
+import { WarningPriorities } from "src/modules/Globals";
+import { getWarningPriorityColor } from "src/modules/Utils";
 
 const WeekDaysColors: { [key: number]: string } = {
   1: "bg-amber-2",
@@ -242,6 +262,15 @@ type QueryInterface = YearWeek;
 
 interface PlanComments {
   [id: number]: string;
+}
+
+interface WarnedPlan {
+  priority: string | null;
+  icon: string | null;
+}
+
+interface WarnedPlans {
+  [id: number]: WarnedPlan;
 }
 
 export default defineComponent({
@@ -271,7 +300,7 @@ export default defineComponent({
       WeekDaysColors,
     };
   },
-  mounted() {
+  created() {
     void this.$nextTick(() => {
       this.loadMealTime();
     });
@@ -405,20 +434,20 @@ export default defineComponent({
       });
       return recipes[0]?.recipe;
     },
-    getRecipes(day: number, mtime: MealTime) {
+    getDayPlans(day: number, mtime: MealTime) {
       if (!this.plan) {
         return [];
       }
-      let recipes = this.plan?.plans.filter((plan) => {
+      let plans = this.plan?.plans.filter((plan) => {
         return plan.day == day && plan.meal_time.id == mtime.id;
       });
 
       if (mtime.is_primary) {
-        if (recipes.length < 1) {
+        if (plans.length < 1) {
           return [null];
         }
       }
-      return recipes.map((r) => r.recipe);
+      return plans; //.map((r) => r.recipe);
     },
     setRecipe(
       day: number,
@@ -503,7 +532,7 @@ export default defineComponent({
             type: "textarea",
             autogrow: true,
             inputStyle: { minHeight: "3rem", maxHeight: "10rem" },
-            readOnly: !this.editMode,
+            readonly: !this.editMode,
           },
           cancel: true,
           persistent: true,
@@ -540,6 +569,16 @@ export default defineComponent({
         (d.getMonth() + 1).toString().padStart(2, "0");
       return day == d_str;
       // return day.getUTCDate() == new Date().getUTCDate();
+    },
+    getWarning(plan: RecipePlanRead) {
+      return this.warnedPlans[plan.id] || null;
+    },
+    getWarningColor(plan: RecipePlanRead) {
+      let warn = this.getWarning(plan);
+      return getWarningPriorityColor(warn.priority);
+    },
+    getCondition(id: number) {
+      return this.conditions?.find((c) => c.id == id) || null;
     },
   },
   computed: {
@@ -583,6 +622,36 @@ export default defineComponent({
     },
     canEdit() {
       return this.storeAuth.hasPerm("recipes.change_recipeplanweek");
+    },
+    conditions() {
+      return this.store.conditions;
+    },
+    warnedPlans(): WarnedPlans {
+      let warnings = this.plan?.warnings || [];
+      let res: WarnedPlans = {};
+
+      for (const warning of warnings) {
+        let cond = this.getCondition(warning.condition);
+        let plan = warning.plan;
+        if (!Object.hasOwn(res, plan)) {
+          cond = this.getCondition(warning.condition);
+          res[plan] = {
+            icon: String(cond?.icon) || null,
+            priority: String(cond?.priority) || null,
+          };
+        }
+
+        let prioritySaved = WarningPriorities.indexOf(res[plan].priority || "");
+        let priorityCurr = WarningPriorities.indexOf(
+          String(cond?.priority) || ""
+        );
+
+        if (priorityCurr > prioritySaved) {
+          res[plan].priority = WarningPriorities[priorityCurr];
+        }
+      }
+      return res;
+      // return [...new Set(plans)];
     },
   },
 });

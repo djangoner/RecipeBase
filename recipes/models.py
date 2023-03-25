@@ -507,3 +507,71 @@ class ShopIngredientCategory(SortableMixin, models.Model):
     def __str__(self) -> str:
         # return self.shop.title + " - " + self.category.title'
         return f"#{self.num}"
+
+
+class WeekPlanCondition(models.Model):
+    class Condition(models.TextChoices):
+        AND = "and", _("И")
+        OR = "or", _("Или")
+        NOT = "not", _("Не")
+
+    class Field(models.TextChoices):
+        WEEKDAY = "weekday", _("[N] День недели (Число 1-7)")
+        MEAL_TIME = "mtime", _("[N] Время приема пищи (ID)")
+        TAG = "tag", _("[B] Метка рецепта (0/1)")
+        TAG_WEEK = "tag_week", _("[N] Кол-во меток на неделе")
+        INGREDIENT = "ing", _("[N] Ингредиент рецепта (кол-во недели)")
+        INGREDIENT_MAIN = "ing_main", _("[N] Основной ингредиент рецепта (кол-во недели)")
+        COOKING_TIME = "cooking_time", _("[N] Время приготовления (кол-во недели)")
+        MIN_RATING = "minrating", _("[N] Мин рейтинг выбранных пользователей (кол-во дня)")
+        MAX_RATING = "maxrating", _("[N] Макс рейтинг выбранных пользователей (кол-во дня)")
+        DUPLICATES = "duplicates", _("[N] дубликатов рецепта (кол-во недели)")
+
+    class ComparisonMode(models.TextChoices):
+        EQUAL = "eq", _("Равно")
+        NOT_EQUAL = "neq", _("Не Равно")
+        GT = "gt", _("Больше")
+        GE = "ge", _("Больше или равно")
+        LT = "lt", _("Меньше")
+        LE = "le", _("Меньше или равно")
+
+    class SelectorType(models.TextChoices):
+        WEEKDAY = "weekday", _("Текущий день недели")
+
+    class PriorityType(models.TextChoices):
+        HIGH = "high", _("Высокий")
+        MEDIUM = "medium", _("Средний")
+        LOW = "low", _("Низкий")
+
+    parent = models.ForeignKey("self", models.CASCADE, blank=True, null=True, related_name="childrens")
+    active = models.BooleanField(_("Активен"), default=True)
+    title = models.CharField(_("Название условия"), null=True, blank=True, max_length=100)
+    childrens: models.QuerySet["WeekPlanCondition"]
+
+    condition = models.CharField(_("Условие"), choices=Condition.choices, blank=True, null=True, max_length=10)
+    plan_field = models.CharField(_("Поле плана"), choices=Field.choices, blank=True, null=True, max_length=12)
+    comparison_mode = models.CharField(
+        _("Режим сравнения"), choices=ComparisonMode.choices, blank=True, null=True, max_length=10
+    )
+
+    selector_type = models.CharField(
+        _("Тип объекта сравнения"), choices=SelectorType.choices, blank=True, null=True, max_length=10
+    )
+
+    selector_value = models.CharField(_("ID объекта сравнения"), blank=True, null=True, max_length=100)
+
+    manual_value = models.CharField(_("Статическое значение"), blank=True, null=True, max_length=100)
+
+    icon = models.CharField(_("Иконка"), max_length=100, blank=True, null=True)
+    priority = models.CharField(
+        _("Приоритет"), choices=PriorityType.choices, default=PriorityType.MEDIUM, max_length=10
+    )
+
+    class Meta:
+        pass
+        # ordering = ["-parent__isnull"]
+
+    def __str__(self) -> str:
+        if self.title:
+            return self.title
+        return f"Condition #{self.pk}"

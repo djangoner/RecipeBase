@@ -5,7 +5,7 @@ export const IsOnlineMixin = defineComponent({
   data() {
     return { isOnLine: navigator.onLine, httpErrors: {} };
   },
-  mounted() {
+  created() {
     this.httpErrors = {};
     window.addEventListener("online", this._handleNowOnline);
     window.addEventListener("offline", this._handleNowOffline);

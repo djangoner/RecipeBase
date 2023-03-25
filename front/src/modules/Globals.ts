@@ -112,3 +112,14 @@ export const priorityOptions = [
     name: "Низший",
   },
 ];
+
+export interface WarnedPlan {
+  priority: string | null;
+  icon: string | null;
+}
+
+export interface WarnedPlans {
+  [id: number]: WarnedPlan;
+}
+
+export const WarningPriorities = ["low", "medium", "high"];

@@ -30,6 +30,7 @@ from recipes.views import (
     ShopViewset,
     IngredientCategoryViewset,
     StatsViewset,
+    WeekPlanConditionViewset,
 )
 
 router = routers.DefaultRouter()
@@ -48,5 +49,6 @@ router.register("recipe_plan_week", RecipePlanWeekViewset)
 router.register("recipe_rating", RecipeRatingViewset)
 router.register("product_list_week", ProductListWeekViewset)
 router.register("product_list_item", ProductListItemViewset)
+router.register("conditions", WeekPlanConditionViewset)
 
 urlpatterns: list = []

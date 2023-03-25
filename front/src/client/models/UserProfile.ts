@@ -9,6 +9,7 @@ export type UserProfile = {
     icon?: string | null;
     show_rate?: boolean;
     num?: number | null;
+    conditions_include?: boolean;
     telegram_id?: string | null;
     telegram_notifications?: TelegramNotificationsEnum | null;
     user: number;

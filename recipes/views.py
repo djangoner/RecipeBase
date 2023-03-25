@@ -28,6 +28,7 @@ from recipes.models import (
     IngredientCategory,
     RegularIngredient,
     Shop,
+    WeekPlanCondition,
 )
 from telegram_bot.services.notifications import send_product_list
 from tasks.models import Task
@@ -56,6 +57,7 @@ from recipes.serializers import (
     RegularIngredientSerializer,
     ShopSerializer,
     StatusOkSerializer,
+    WeekPlanConditionSerializer,
 )
 from recipes.services.measurings import (
     MEASURING_CONVERT,
@@ -585,3 +587,8 @@ class StatsViewset(viewsets.ViewSet):
             "tasks": Task.objects.count(),
         }
         return response.Response(data)
+
+
+class WeekPlanConditionViewset(viewsets.ModelViewSet):
+    queryset = WeekPlanCondition.objects.all()
+    serializer_class = WeekPlanConditionSerializer

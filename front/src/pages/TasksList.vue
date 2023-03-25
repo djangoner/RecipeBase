@@ -43,13 +43,15 @@
 </template>
 
 <script lang="ts">
-import { useBaseStore } from 'src/stores/base';
+import { useBaseStore } from "src/stores/base";
 // import taskCategoryView from 'src/components/TaskItemView.vue';
-import taskItemList from 'components/TaskItemList.vue';
-import { defineComponent } from 'vue';
-import HandleErrorsMixin, { CustomAxiosError } from 'src/modules/HandleErrorsMixin';
-import { TaskOrCategory } from 'src/modules/Globals';
-import { useAuthStore } from 'src/stores/auth';
+import taskItemList from "components/TaskItemList.vue";
+import { defineComponent } from "vue";
+import HandleErrorsMixin, {
+  CustomAxiosError,
+} from "src/modules/HandleErrorsMixin";
+import { TaskOrCategory } from "src/modules/Globals";
+import { useAuthStore } from "src/stores/auth";
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -64,11 +66,11 @@ export default defineComponent({
       storeAuth,
       loading: false,
       category: null as TaskOrCategory | null,
-      addCategory: '',
+      addCategory: "",
     };
   },
 
-  mounted() {
+  created() {
     this.loadTaskCategories();
   },
 
@@ -85,7 +87,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузка списка категорий задач');
+          this.handleErrors(err, "Ошибка загрузка списка категорий задач");
         });
     },
 
@@ -102,12 +104,12 @@ export default defineComponent({
         .createTaskCategory(payload)
         .then(() => {
           this.loading = false;
-          this.addCategory = '';
+          this.addCategory = "";
           this.loadTaskCategories();
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;
-          this.handleErrors(err, 'Ошибка загрузка создания категории');
+          this.handleErrors(err, "Ошибка загрузка создания категории");
         });
     },
     openCategory(category: TaskOrCategory) {
@@ -120,7 +122,7 @@ export default defineComponent({
       return this.store.tasks_categories;
     },
     canEdit() {
-      return this.storeAuth.hasPerm('tasks.change_task');
+      return this.storeAuth.hasPerm("tasks.change_task");
     },
   },
 });

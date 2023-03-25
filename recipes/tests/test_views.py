@@ -31,7 +31,7 @@ from recipes.tests.factories import (
 )
 from tasks.models import Task, TaskCategory
 from django.utils.http import urlencode
-from recipes.services import MEASURING_CONVERT, MEASURING_TYPES
+from recipes.services.measurings import MEASURING_CONVERT, MEASURING_TYPES
 
 logging.disable(logging.CRITICAL)
 

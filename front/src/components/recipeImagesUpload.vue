@@ -23,7 +23,7 @@
               @click="askDelete(element)"
             ></q-icon>
 
-            <span> {{ String(element.num || '0').padStart(2, '0') }} : </span>
+            <span> {{ String(element.num || "0").padStart(2, "0") }} : </span>
             <q-input v-model="element.title" label="Название файла"> </q-input>
             <!-- Image content -->
             <div style="flex: 1 1 50px">
@@ -63,9 +63,9 @@
 </template>
 
 <script lang="ts">
-import { RecipeImage } from 'src/client';
-import { defineComponent, PropType } from 'vue';
-import draggable from 'vuedraggable';
+import { RecipeImage } from "src/client";
+import { defineComponent, PropType } from "vue";
+import draggable from "vuedraggable";
 
 interface FileInput extends HTMLInputElement {
   pickFiles: CallableFunction;
@@ -85,7 +85,7 @@ export default defineComponent({
       images: [] as RecipeImage[],
     };
   },
-  mounted() {
+  created() {
     this.images = this.modelValue;
   },
   methods: {
@@ -105,12 +105,12 @@ export default defineComponent({
       });
     },
     askDelete(elem: RecipeImage) {
-      console.debug('askDelete: ', elem);
+      console.debug("askDelete: ", elem);
       this.$q
         .dialog({
-          title: 'Подтверждение',
+          title: "Подтверждение",
           message: `Вы уверены что хотите удалить изображение '${
-            elem.title || 'Новое изображение'
+            elem.title || "Новое изображение"
           }' ?`,
           cancel: true,
           persistent: true,
@@ -124,14 +124,14 @@ export default defineComponent({
 
   watch: {
     images(newVal, oldVal) {
-      console.debug('Updated recipe from imagesUpload!', newVal, oldVal);
+      console.debug("Updated recipe from imagesUpload!", newVal, oldVal);
       // if (newVal != oldVal) {
       //   return;
       // }
-      this.$emit('update:modelValue', newVal);
+      this.$emit("update:modelValue", newVal);
     },
     modelValue(newVal: RecipeImage[], oldVal) {
-      console.debug('Updated imagesUpload from recipe!', newVal, oldVal);
+      console.debug("Updated imagesUpload from recipe!", newVal, oldVal);
       if (newVal != oldVal) {
         return;
       }

@@ -24,6 +24,7 @@ drf-flex-fields = "*"
 pytest-mock = "*"
 django-cachalot = "*"
 gunicorn = "*"
+cachetools = "*"
 
 [dev-packages]
 pytest = "*"
@@ -36,6 +37,7 @@ black = "*"
 mypy = "*"
 pylint = "*"
 django-debug-toolbar = "*"
+ipykernel = "*"
 
 [requires]
 python_version = "3.11"

@@ -1,3 +1,5 @@
+// API Errors handler v0.2
+
 import { ApiError } from "src/client"
 import { defineComponent } from "vue"
 import { Notify } from "quasar"

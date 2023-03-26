@@ -23,46 +23,49 @@ export interface ProductListItemSyncable extends ProductListItemRead {
 export async function getDB() {
   const db = await openDB("recipebase", DBVersion, {
     upgrade(db, oldVersion, newVersion, transaction) {
+      console.debug("[IDB] Upgrading DB" + `${oldVersion} -> ${newVersion}`)
       // switch (oldVersion) {
       //   case 0:
       //   case 1:
-      const recipe_plan_week = db.createObjectStore("recipe_plan_week", {
-        autoIncrement: true,
-        keyPath: "id",
-      })
-      recipe_plan_week.createIndex("year_week", ["year", "week"], { unique: true })
-      const recipe_plan_items = db.createObjectStore("recipe_plan_items", {
-        autoIncrement: true,
-        keyPath: "id",
-      })
-      recipe_plan_items.createIndex("week", ["week"], { unique: false })
+      if (oldVersion <= 1) {
+        const recipe_plan_week = db.createObjectStore("recipe_plan_week", {
+          autoIncrement: true,
+          keyPath: "id",
+        })
+        recipe_plan_week.createIndex("year_week", ["year", "week"], { unique: true })
+        const recipe_plan_items = db.createObjectStore("recipe_plan_items", {
+          autoIncrement: true,
+          keyPath: "id",
+        })
+        recipe_plan_items.createIndex("week", ["week"], { unique: false })
 
-      const product_list_week = db.createObjectStore("product_list_week", {
-        autoIncrement: true,
-        keyPath: "id",
-      })
-      product_list_week.createIndex("year_week", ["year", "week"], { unique: true })
-      const product_list_items = db.createObjectStore("product_list_items", {
-        autoIncrement: true,
-        keyPath: "idLocal",
-      })
-      product_list_items.createIndex("week", ["week"], { unique: false })
-      const meal_time = db.createObjectStore("meal_time", {
-        autoIncrement: true,
-        keyPath: "id",
-      })
-      const shops = db.createObjectStore("shops", {
-        autoIncrement: true,
-        keyPath: "id",
-      })
-      const ing_categories = db.createObjectStore("ing_categories", {
-        autoIncrement: true,
-        keyPath: "id",
-      })
-      const ingredients = db.createObjectStore("ingredients", {
-        autoIncrement: true,
-        keyPath: "id",
-      })
+        const product_list_week = db.createObjectStore("product_list_week", {
+          autoIncrement: true,
+          keyPath: "id",
+        })
+        product_list_week.createIndex("year_week", ["year", "week"], { unique: true })
+        const product_list_items = db.createObjectStore("product_list_items", {
+          autoIncrement: true,
+          keyPath: "idLocal",
+        })
+        product_list_items.createIndex("week", ["week"], { unique: false })
+        const meal_time = db.createObjectStore("meal_time", {
+          autoIncrement: true,
+          keyPath: "id",
+        })
+        const shops = db.createObjectStore("shops", {
+          autoIncrement: true,
+          keyPath: "id",
+        })
+        const ing_categories = db.createObjectStore("ing_categories", {
+          autoIncrement: true,
+          keyPath: "id",
+        })
+        const ingredients = db.createObjectStore("ingredients", {
+          autoIncrement: true,
+          keyPath: "id",
+        })
+      }
       // }
     },
   })

@@ -1,4 +1,5 @@
 import { defineStore } from "pinia"
+import { LocalStorage, Notify } from "quasar"
 import {
   AmountTypes,
   Ingredient,
@@ -124,7 +125,6 @@ export const useBaseStore = defineStore("base", {
                 resolve(this.amount_types as AmountTypes)
               })
             }
-            LocalStorage.set("cached:meal_times", objectUnproxy(resp))
             reject(err)
           })
       })
@@ -304,6 +304,12 @@ export const useBaseStore = defineStore("base", {
           return new Promise((resolve) => {
             resolve(resObj)
           })
+        } else {
+          Notify.create({
+            type: "negative",
+            caption: `Не найден сохраненный план для ${payload.year}.${payload.week}`,
+          })
+          return
         }
       }
       return new Promise((resolve, reject) => {

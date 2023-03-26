@@ -55,9 +55,9 @@ export default defineComponent({
   },
   computed: {
     sliderStep(): number {
-      if (this.amountType == "g") {
-        return 50;
-      }
+      // if (this.amountType == "g") {
+      //   return 50;
+      // }
 
       return 1;
     },

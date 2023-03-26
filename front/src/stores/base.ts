@@ -102,7 +102,7 @@ export const useBaseStore = defineStore("base", {
     },
     async loadAmountTypes(): Promise<AmountTypes> {
       if (!isOnline()) {
-        const res: AmountTypes | null = LocalStorage.getItem("cached:meal_times")
+        const res: AmountTypes | null = LocalStorage.getItem("cached:amount_types")
         if (res) {
           this.amount_types = res
           return new Promise((resolve) => {
@@ -115,17 +115,17 @@ export const useBaseStore = defineStore("base", {
           .then((resp) => {
             this.amount_types = resp
             resolve(resp)
-            LocalStorage.set("cached:meal_times", objectUnproxy(resp))
+            LocalStorage.set("cached:amount_types", resp)
           })
           .catch((err) => {
-            const res: AmountTypes | null = LocalStorage.getItem("cached:meal_times")
+            reject(err)
+            const res: AmountTypes | null = LocalStorage.getItem("cached:amount_types")
             if (res) {
               this.amount_types = res
               return new Promise((resolve) => {
                 resolve(this.amount_types as AmountTypes)
               })
             }
-            reject(err)
           })
       })
     },
@@ -309,7 +309,6 @@ export const useBaseStore = defineStore("base", {
             type: "negative",
             caption: `Не найден сохраненный план для ${payload.year}.${payload.week}`,
           })
-          return
         }
       }
       return new Promise((resolve, reject) => {
@@ -740,14 +739,31 @@ export const useBaseStore = defineStore("base", {
     },
 
     async loadConditions(payload: object): Promise<WeekPlanCondition[]> {
+      if (!isOnline()) {
+        const res: WeekPlanCondition[] | null = LocalStorage.getItem("cached:conditions")
+        if (res) {
+          this.conditions = res
+          return new Promise((resolve) => {
+            resolve(this.conditions as WeekPlanCondition[])
+          })
+        }
+      }
       return new Promise((resolve, reject) => {
         ConditionsService.conditionsList(payload)
           .then((resp) => {
             this.conditions = resp.results as WeekPlanCondition[]
             resolve(resp.results as WeekPlanCondition[])
+            LocalStorage.set("cached:conditions", resp.results)
           })
           .catch((err) => {
             reject(err)
+            const res: WeekPlanCondition[] | null = LocalStorage.getItem("cached:conditions")
+            if (res) {
+              this.conditions = res
+              return new Promise((resolve) => {
+                resolve(this.conditions as WeekPlanCondition[])
+              })
+            }
           })
       })
     },

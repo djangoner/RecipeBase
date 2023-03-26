@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { AuthService, AuthToken, PaginatedUserList, User, UsersService } from "src/client"
+import { AuthService, AuthToken, User, UsersService } from "src/client"
 import { LocalStorage } from "quasar"
 import { OpenAPI } from "src/client"
 import { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
@@ -12,6 +12,7 @@ const getToken = async () => {
 OpenAPI.TOKEN = getToken
 
 const cachedPermissions: string[] = LocalStorage.getItem("cachedPermissions") || []
+const isOnline = () => navigator?.onLine
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -77,16 +78,33 @@ export const useAuthStore = defineStore("auth", {
       })
     },
 
-    async loadUsers(payload: object): Promise<PaginatedUserList> {
+    async loadUsers(payload: object): Promise<User[]> {
+      if (!isOnline()) {
+        const res: User[] | null = LocalStorage.getItem("cached:users")
+        if (res) {
+          this.users = res
+          return new Promise((resolve) => {
+            resolve(this.users as User[])
+          })
+        }
+      }
       return new Promise((resolve, reject) => {
         UsersService.usersList(payload)
           .then((resp) => {
             this.users = resp.results as Array<User>
-            resolve(resp)
+            resolve(resp.results as User[])
+            LocalStorage.set("cached:users", resp.results)
           })
           .catch((err: CustomAxiosError) => {
             handleErrors(err, "Ошибка загрузки пользователей")
             reject(err)
+            const res: User[] | null = LocalStorage.getItem("cached:users")
+            if (res) {
+              this.users = res
+              return new Promise((resolve) => {
+                resolve(this.users as User[])
+              })
+            }
           })
       })
     },

@@ -17,7 +17,6 @@ import {
   PaginatedRecipePlanWeekReadList,
   PaginatedRecipeReadList,
   PaginatedRecipeTagList,
-  PaginatedShopList,
   PaginatedTaskCategoryList,
   PaginatedTaskNestedList,
   PatchedRecipe,
@@ -167,15 +166,29 @@ export const useBaseStore = defineStore("base", {
           })
       })
     },
-    async loadShops(payload: object): Promise<PaginatedShopList> {
+    async loadShops(payload: object): Promise<Shop[]> {
+      const db = await getDB()
+      if (!isOnline()) {
+        this.shops = (await db.getAll("shops")) as Shop[]
+        return new Promise((resolve) => {
+          resolve(this.shops as Shop[])
+        })
+      }
       return new Promise((resolve, reject) => {
         ShopService.shopList(payload)
-          .then((resp) => {
+          .then(async (resp) => {
             this.shops = resp.results as Shop[]
-            resolve(resp)
+            resolve(resp.results as Shop[])
+            for (const item of resp.results || []) {
+              await db.put("shops", objectUnproxy(item))
+            }
           })
-          .catch((err) => {
+          .catch(async (err) => {
             reject(err)
+            this.shops = (await db.getAll("shops")) as Shop[]
+            return new Promise((resolve) => {
+              resolve(this.shops as Shop[])
+            })
           })
       })
     },

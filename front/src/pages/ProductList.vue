@@ -525,50 +525,12 @@ export default defineComponent({
       if (changedItems){
         this.changedCount = changedItems.length;
       }
+      void this.loadShops();
+      void this.loadIngredientCategories();
       if (this.isOnLine) {
-        // if (this.canSync) {
-        //   this.$q.notify({
-        //     type: "info",
-        //     caption:
-        //       "Рекомендуется выполнить синхронизацию изменений с сервером",
-        //   });
-        // }
-        void this.loadShops();
-        void this.loadIngredientCategories();
         if (this.canSync){
           void this.askSyncLocal()
         }
-        // if (this.$q.localStorage.has('local_productlist_updated')) {
-        //   this.syncLocal();
-        // }
-
-        // this.loadList();
-      } else {
-        // if (this.week){
-        //   void productListGetOffline(this.week.year, this.week.week).then((info) => {
-        //     this.store.product_list = Object.assign({}, info.week, {items: info.items})
-        //   })
-        // }
-        // const local_cache = this.$q.localStorage.getItem("local_productlist") as
-        //   | ProductListWeekRead
-        //   | undefined;
-        // if (local_cache) {
-        //   this.store.product_list = local_cache;
-        // }
-
-        // const shopsCache = this.$q.localStorage.getItem("shops") as
-        //   | Shop[]
-        //   | undefined;
-        // if (shopsCache) {
-        //   this.store.shops = shopsCache;
-        // }
-
-        // const ingCategoryCache = this.$q.localStorage.getItem(
-        //   "ing_categories"
-        // ) as IngredientCategory[];
-        // if (ingCategoryCache) {
-        //   this.store.ingredient_categories = ingCategoryCache;
-        // }
       }
     },
     onWeekUpd() {
@@ -629,21 +591,11 @@ export default defineComponent({
           this.handleErrors(err, "Ошибка загрузки списка продуктов");
         });
     },
-    async loadShops() {
-      const db = (await getDB())
-      if (!this.isOnLine){
-        this.store.shops = await db.getAll("shops") as Shop[]
-      }
+    loadShops() {
       this.store
         .loadShops({ pageSize: 1000 })
-        .then(async (resp) => {
-          for (const item of resp.results || []) {
-            await db.put("shops", objectUnproxy(item))
-          }
-        })
-        .catch(async (err: CustomAxiosError) => {
+        .catch((err: CustomAxiosError) => {
           this.handleErrors(err, "Ошибка загрузки списка магазинов");
-        this.store.shops = await db.getAll("shops") as Shop[]
         });
     },
     async loadIngredientCategories() {

@@ -752,7 +752,9 @@ export default defineComponent({
         type: "positive",
         caption: "Список продуктов успешно синхронизирован",
       });
-      this.loadList()
+      void this.$nextTick(() => {
+        this.loadList()
+      })
       // this.store
       //   .saveProductListWeek(payload)
       //   .then(() => {

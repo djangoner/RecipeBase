@@ -575,13 +575,21 @@ export default defineComponent({
       this.loadList();
       this.loadWeekPlan();
     },
-    loadListOffline(){
+    async loadListOffline(){
       console.debug("Trying to load cached product list", this.week)
         if (this.week){
+          const changedItems = await productListGetChanged(this.week.year, this.week.week);
+      this.canSyncFlag = Boolean(
+        changedItems && changedItems.length > 0
+      );
+      if (changedItems){
+        this.changedCount = changedItems.length;
+      }
+      //
+          // this.changedCount = info.items.length
           void productListGetOffline(this.week.year, this.week.week).then((info) => {
             if (info){
               this.store.product_list = Object.assign({}, info.week, {items: info.items})
-              this.changedCount = info.items.length
             } else {
               this.$q.notify({
                 type: 'negative',
@@ -596,7 +604,7 @@ export default defineComponent({
         return;
       }
       if (!this.isOnLine){
-        this.loadListOffline()
+        void this.loadListOffline()
         return;
       }
       console.debug("Loading online list")
@@ -849,7 +857,7 @@ export default defineComponent({
       if (!this.isOnLine){
         this.updateOfflineItem(payload)
         this.viewItem = payload;
-        this.loadListOffline()
+        void this.loadListOffline()
         return;
       }
 

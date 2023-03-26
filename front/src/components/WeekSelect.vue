@@ -52,7 +52,7 @@ export default defineComponent({
     const store = useBaseStore();
     return {
       store,
-      date_picker: null as DatePicker | null,
+      date_picker: null as DatePicker | string | null,
       week_pick: {} as YearWeekNullable,
       week_pick_old: {},
       WeekDays,
@@ -153,7 +153,7 @@ export default defineComponent({
     //   return raw.slice(0, raw.length - 3);
     // },
     getDay(idx: number): string | undefined {
-      if (!this.date_picker) {
+      if (!this.date_picker || typeof this.date_picker == "string") {
         return;
       }
       const fday = new Date(this.date_picker.from);

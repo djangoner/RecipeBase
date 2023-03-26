@@ -100,7 +100,7 @@ class MealTimeFactory(DjangoModelFactory):
         model = MealTime
         django_get_or_create = ("title",)
 
-    title = "Test meal"
+    title = factory.Faker("name")
     is_primary = True
 
 

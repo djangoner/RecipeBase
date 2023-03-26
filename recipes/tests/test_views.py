@@ -2,7 +2,9 @@ import logging
 from datetime import datetime
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
+from django.test.client import AsyncClient
+import pytest
 
 from recipes.models import (
     Ingredient,
@@ -40,10 +42,11 @@ class RecipesTestCase(TestCase):
     user: User
 
     @classmethod
-    def setUpTestData(self) -> None:
-        self.user = User.objects.create(username="testuser", is_superuser=True)
+    def setUpTestData(cls) -> None:
+        cls.user = User.objects.create(username="testuser", is_superuser=True)
 
     def setUp(self) -> None:
+        self.factory = RequestFactory()
         self.client.force_login(self.user)
 
     def test_stats_empty(self):
@@ -193,66 +196,6 @@ class RecipesTestCase(TestCase):
 
         self.assertEqual(resp_json["count"], 2)
 
-    def create_test_ratings(self):
-        r1 = Recipe.objects.create()
-        r2 = Recipe.objects.create()
-        r3 = Recipe.objects.create()
-        r4 = Recipe.objects.create()
-        r5 = Recipe.objects.create()
-
-        RecipeRating.objects.create(recipe=r1, user=self.user, rating=1)
-        RecipeRating.objects.create(recipe=r2, user=self.user, rating=2)
-        RecipeRating.objects.create(recipe=r3, user=self.user, rating=3)
-        RecipeRating.objects.create(recipe=r4, user=self.user, rating=4)
-        RecipeRating.objects.create(recipe=r5, user=self.user, rating=5)
-
-    def test_recipes_search_rating_gt(self):
-        self.create_test_ratings()
-
-        resp = self.client.get("/api/v1/recipes/", {"rating": f"{self.user.id}_+5"})
-        self.assertEqual(resp.status_code, 200)
-        resp_json = resp.json()
-        self.assertEqual(resp_json["count"], 1)
-
-        resp = self.client.get("/api/v1/recipes/", {"rating": f"{self.user.id}_+1"})
-        self.assertEqual(resp.status_code, 200)
-        resp_json = resp.json()
-        self.assertEqual(resp_json["count"], 5)
-
-    def test_recipes_search_rating_lt(self):
-        self.create_test_ratings()
-
-        resp = self.client.get("/api/v1/recipes/", {"rating": f"{self.user.id}_-5"})
-        self.assertEqual(resp.status_code, 200)
-        resp_json = resp.json()
-        self.assertEqual(resp_json["count"], 5)
-
-        resp = self.client.get("/api/v1/recipes/", {"rating": f"{self.user.id}_-1"})
-        self.assertEqual(resp.status_code, 200)
-        resp_json = resp.json()
-        self.assertEqual(resp_json["count"], 1)
-
-    def test_recipes_search_rating_eq(self):
-        self.create_test_ratings()
-
-        resp = self.client.get("/api/v1/recipes/", {"rating": f"{self.user.id}_3"})
-        self.assertEqual(resp.status_code, 200)
-        resp_json = resp.json()
-        self.assertEqual(resp_json["count"], 1)
-
-        resp = self.client.get("/api/v1/recipes/", {"rating": f"{self.user.id}_1"})
-        self.assertEqual(resp.status_code, 200)
-        resp_json = resp.json()
-        self.assertEqual(resp_json["count"], 1)
-
-    def test_recipes_search_rating_invalid(self):
-        self.create_test_ratings()
-
-        resp = self.client.get("/api/v1/recipes/", {"rating": "1"})
-        self.assertEqual(resp.status_code, 200)
-        resp_json = resp.json()
-        self.assertEqual(resp_json["count"], 5)
-
     def test_recipes_search_tags_include(self):
         tag = RecipeTag.objects.create(title="Test")
         r1 = Recipe.objects.create()
@@ -313,7 +256,7 @@ class RecipesTestCase(TestCase):
         resp_json = resp.json()
 
         self.assertEqual(resp_json["title"], "test recipe creation")
-        self.assertEqual(resp_json["author"]["id"], self.user.id)
+        self.assertEqual(resp_json["author"]["id"], self.user.pk)
 
     def test_recipe_ratings_list(self):
         RecipeRatingFactory(user=self.user)
@@ -574,7 +517,7 @@ class RecipesTestCase(TestCase):
         resp_json = resp.json()
 
         assert resp_json["title"] == "test"
-        assert resp_json["author"] == self.user.id
+        assert resp_json["author"] == self.user.pk
 
     def test_product_list_item(self):
         week = ProductListWeekFactory()
@@ -624,3 +567,76 @@ class RecipesTestCase(TestCase):
             f"/api/v1/recipes/{recipe.id}/",
         )
         assert resp.status_code == 200
+
+
+def get_test_ratings(user):
+
+    r1 = Recipe.objects.create()
+    r2 = Recipe.objects.create()
+    r3 = Recipe.objects.create()
+    r4 = Recipe.objects.create()
+    r5 = Recipe.objects.create()
+
+    ratings: list[RecipeRating] = []
+
+    ratings.append(RecipeRating.objects.create(recipe=r1, user=user, rating=1))
+    ratings.append(RecipeRating.objects.create(recipe=r2, user=user, rating=2))
+    ratings.append(RecipeRating.objects.create(recipe=r3, user=user, rating=3))
+    ratings.append(RecipeRating.objects.create(recipe=r4, user=user, rating=4))
+    ratings.append(RecipeRating.objects.create(recipe=r5, user=user, rating=5))
+    return ratings
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db(transaction=True)
+class RecipesRatingsTestCase(TestCase):
+    user: User
+    async_client: AsyncClient
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.user = User.objects.create(username="testuser", is_superuser=True)
+        cls.ratings = get_test_ratings(cls.user)
+        print("Ratings: ", cls.ratings)
+
+    def setUp(self) -> None:
+        self.async_client.force_login(self.user)
+
+    async def test_recipes_search_rating_gt(self):
+        resp = await self.async_client.get("/api/v1/recipes/", {"rating": f"{self.user.pk}_+5"})
+        self.assertEqual(resp.status_code, 200)
+        resp_json = resp.json()
+        self.assertEqual(resp_json["count"], 1)
+
+        resp = await self.async_client.get("/api/v1/recipes/", {"rating": f"{self.user.pk}_+1"})
+        self.assertEqual(resp.status_code, 200)
+        resp_json = resp.json()
+        self.assertEqual(resp_json["count"], 5)
+
+    async def test_recipes_search_rating_lt(self):
+        resp = await self.async_client.get("/api/v1/recipes/", {"rating": f"{self.user.pk}_-5"})
+        self.assertEqual(resp.status_code, 200)
+        resp_json = resp.json()
+        self.assertEqual(resp_json["count"], 5)
+
+        resp = await self.async_client.get("/api/v1/recipes/", {"rating": f"{self.user.pk}_-1"})
+        self.assertEqual(resp.status_code, 200)
+        resp_json = resp.json()
+        self.assertEqual(resp_json["count"], 1)
+
+    async def test_recipes_search_rating_eq(self):
+        resp = await self.async_client.get("/api/v1/recipes/", {"rating": f"{self.user.pk}_3"})
+        self.assertEqual(resp.status_code, 200)
+        resp_json = resp.json()
+        self.assertEqual(resp_json["count"], 1)
+
+        resp = await self.async_client.get("/api/v1/recipes/", {"rating": f"{self.user.pk}_1"})
+        self.assertEqual(resp.status_code, 200)
+        resp_json = resp.json()
+        self.assertEqual(resp_json["count"], 1)
+
+    async def test_recipes_search_rating_invalid(self):
+        resp = await self.async_client.get("/api/v1/recipes/", {"rating": "1"})
+        self.assertEqual(resp.status_code, 200)
+        resp_json = resp.json()
+        self.assertEqual(resp_json["count"], 5)

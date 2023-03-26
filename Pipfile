@@ -38,6 +38,7 @@ mypy = "*"
 pylint = "*"
 django-debug-toolbar = "*"
 ipykernel = "*"
+pytest-asyncio = "*"
 
 [requires]
 python_version = "3.11"

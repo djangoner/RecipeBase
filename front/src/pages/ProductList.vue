@@ -258,6 +258,7 @@ import { defineComponent } from "vue";
 import { getYearWeek } from "src/modules/WeekUtils";
 import { productListItemFromRead, productListWeekFromRead } from "src/Convert";
 import { useAuthStore } from "src/stores/auth";
+import { useQuery } from "@oarepo/vue-query-synchronizer";
 
 type CustomIngredientCategory = IngredientCategory & {
   items?: ProductListItemRead[];
@@ -297,7 +298,7 @@ export default defineComponent({
     return {
       store,
       storeAuth,
-      // $query: useQuery(),
+      $query: useQuery(),
       loading: false,
       updating: false,
       saving: false,

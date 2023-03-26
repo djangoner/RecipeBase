@@ -180,6 +180,8 @@
         </template>
       </div>
 
+
+      <!-- Aside filters -->
       <transition
         appear
         enter-active-class="animated slideInRight"
@@ -196,146 +198,11 @@
                 Фильтры
               </h6>
 
-              <q-form
+              <recipes-list-filters
+                v-model="filters"
                 @submit="loadRecipes()"
                 @reset="resetFilters()"
-              >
-                <div class="q-my-sm">
-                  <h6 class="q-my-sm text-subtitle2 text-bold">
-                    Время готовки
-                  </h6>
-                  <q-range
-                    v-model="filters.cooking_time"
-                    class="q-px-md"
-                    :min="5"
-                    :max="120"
-                    :step="5"
-                    label
-                  />
-                </div>
-
-                <div class="q-my-sm">
-                  <h6 class="q-my-sm text-subtitle2 text-bold">
-                    Метки
-                  </h6>
-                  <q-select
-                    v-model="filters.tags_include"
-                    label="Включить"
-                    :options="tagList || []"
-                    option-label="title"
-                    option-value="id"
-                    use-input
-                    multiple
-                    use-chips
-                    map-options
-                    emit-value
-                    options-dense
-                    dense
-                    @filter="filterTagsInclude"
-                  />
-                  <q-select
-                    v-model="filters.tags_exclude"
-                    label="Исключить"
-                    :options="tagList || []"
-                    option-label="title"
-                    option-value="id"
-                    use-input
-                    multiple
-                    use-chips
-                    map-options
-                    emit-value
-                    options-dense
-                    dense
-                    @filter="filterTagsExclude"
-                  />
-                </div>
-                <div class="q-my-sm">
-                  <h6 class="q-my-sm text-subtitle2 text-bold">
-                    Ингредиенты
-                  </h6>
-                  <q-select
-                    v-model="filters.ingredients_include"
-                    label="Включить"
-                    :options="ingredientList || []"
-                    option-label="title"
-                    option-value="id"
-                    use-input
-                    multiple
-                    use-chips
-                    map-options
-                    emit-value
-                    options-dense
-                    dense
-                    @filter="filterIngredientsInclude"
-                  />
-                  <q-select
-                    v-model="filters.ingredients_exclude"
-                    label="Исключить"
-                    :options="ingredientList || []"
-                    option-label="title"
-                    option-value="id"
-                    use-input
-                    multiple
-                    use-chips
-                    map-options
-                    emit-value
-                    options-dense
-                    dense
-                    @filter="filterIngredientsExclude"
-                  />
-                </div>
-                <div class="q-my-sm">
-                  <h6 class="q-my-sm text-subtitle2 text-bold">
-                    Рейтинг
-                  </h6>
-                </div>
-
-                <div class="q-my-sm">
-                  <div
-                    v-for="user of usersRate"
-                    :key="user.id"
-                    class="q-my-sm"
-                  >
-                    <div>
-                      <div
-                        class="row justify-between q-col-gutter-x-sm q-col-gutter-y-sm"
-                      >
-                        <span>
-                          {{ userReadable(user) }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <q-range
-                      :model-value="userRating(user)"
-                      class="q-px-md"
-                      :min="0"
-                      :max="5"
-                      label
-                      @update:model-value="userSetRating(user, $event)"
-                    />
-                  </div>
-                </div>
-
-                <div class="row justify-around">
-                  <q-btn
-                    type="reset"
-                    color="negative"
-                    size="sm"
-                    icon="close"
-                  >
-                    Сбросить
-                  </q-btn>
-                  <q-btn
-                    type="submit"
-                    color="primary"
-                    size="sm"
-                    icon="search"
-                  >
-                    Поиск
-                  </q-btn>
-                </div>
-              </q-form>
+              />
             </q-card-section>
           </q-card>
         </div>
@@ -350,17 +217,15 @@
 </template>
 
 <script lang="ts">
+import RecipesListFilters from '../components/Recipes/RecipesListFilters.vue'
 import { useQuery } from "@oarepo/vue-query-synchronizer";
 import recipeCard from "components/RecipeCard.vue";
 import { date, debounce, QTableProps } from "quasar";
 import {
-  Ingredient,
   PaginatedRecipeReadList,
   RecipeRead,
-  RecipeTag,
-  User,
 } from "src/client";
-import { TablePagination, TablePropsOnRequest } from "src/modules/Globals";
+import { RecipesFilters, TablePagination, TablePropsOnRequest } from "src/modules/Globals";
 import HandleErrorsMixin, {
   CustomAxiosError,
 } from "src/modules/HandleErrorsMixin";
@@ -374,6 +239,8 @@ const orderingOptions = [
   { label: "Создан - по убыванию", value: "-created" },
   { label: "Последнее приготовление - по возрастанию", value: "last_cooked" },
   { label: "Последнее приготовление - по убыванию", value: "-last_cooked" },
+  { label: "Название - по возрастанию", value: "title" },
+  { label: "Название - по убыванию", value: "-title" },
 ];
 
 const tableColumns = [
@@ -419,24 +286,7 @@ const tableColumns = [
   },
 ] as QTableProps["columns"];
 
-interface RangeValue {
-  min: number;
-  max: number;
-}
 
-interface RecipesFilters {
-  cooking_time: {
-    min: number;
-    max: number;
-  };
-  tags_include: number[];
-  tags_exclude: number[];
-  ingredients_include: number[];
-  ingredients_exclude: number[];
-  ratings: {
-    [key: number]: RangeValue;
-  };
-}
 
 interface QueryInterface {
   compilation?: string;
@@ -445,7 +295,7 @@ interface QueryInterface {
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { recipeCard },
+  components: { recipeCard, RecipesListFilters },
   mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore();
@@ -470,8 +320,6 @@ export default defineComponent({
       page: 1,
       page_size: 20,
       loading: false,
-      tagList: null as RecipeTag[] | null,
-      ingredientList: null as Ingredient[] | null,
       ordering: "-created",
       tablePagination: {
         rowsPerPage: 20,
@@ -491,30 +339,6 @@ export default defineComponent({
   computed: {
     recipes() {
       return this.store.recipes;
-    },
-    users() {
-      return this.storeAuth?.users;
-    },
-    usersRate() {
-      const users = this.users;
-      if (!users) {
-        return users;
-      }
-      return users.filter((u) => {
-        return u?.profile?.show_rate;
-      });
-    },
-    tags() {
-      return this.store.tags;
-    },
-    ingredients() {
-      return this.store.ingredients;
-    },
-    amount_types() {
-      return this.store.amount_types;
-    },
-    meal_time() {
-      return this.store.meal_time;
     },
     compilation: {
       get() {
@@ -607,18 +431,6 @@ export default defineComponent({
     this.debounceLoadRecipes = debounce(this.loadRecipes, 1000);
     void this.$nextTick(() => {
       void this.loadRecipes();
-      if (!this.tags) {
-        this.loadTags();
-      }
-      if (!this.users) {
-        this.loadUsers();
-      }
-      if (!this.meal_time) {
-        this.loadMealTime();
-      }
-      if (!this.ingredients) {
-        this.loadIngredients();
-      }
     });
   },
 
@@ -715,7 +527,6 @@ export default defineComponent({
           });
       });
     },
-
     loadRecipesTable(props: TablePropsOnRequest) {
       console.debug("tableProps: ", props.pagination);
       this.ordering =
@@ -733,183 +544,13 @@ export default defineComponent({
     onRowClick(e: Event, row: RecipeRead) {
       this.openRecipe(row.id);
     },
-
-    loadTags() {
-      const payload = {
-        page_size: 1000,
-      };
-      this.store
-        .loadTags(payload)
-        .then(() => {
-          // this.loading = false;
-        })
-        .catch((err: CustomAxiosError) => {
-          // this.loading = false;
-          this.handleErrors(err, "Ошибка загрузки меток");
-        });
-    },
-    loadIngredients() {
-      const payload = {
-        page_size: 1000,
-      };
-      this.store
-        .loadIngredients(payload)
-        .then(() => {
-          // this.ingredientList = resp.results;
-          // this.loading = false;
-        })
-        .catch((err: CustomAxiosError) => {
-          // this.loading = false;
-          this.handleErrors(err, "Ошибка загрузки ингредиентов");
-        });
-    },
-    loadMealTime() {
-      const payload = {
-        page_size: 1000,
-      };
-      // this.loading = true;
-
-      this.store
-        .loadMealTime(payload)
-        .then(() => {
-          // this.loading = false;
-        })
-        .catch((err: CustomAxiosError) => {
-          // this.loading = false;
-          this.handleErrors(err, "Ошибка загрузки времени приема пищи");
-        });
-    },
-    loadAmountTypes() {
-      this.store
-        .loadAmountTypes()
-        .then(() => {
-          // this.loading = false;
-          // this.amountTypeList = this.amount_types?.types;
-        })
-        .catch((err: CustomAxiosError) => {
-          // this.loading = false;
-          this.handleErrors(err, "Ошибка загрузки типов измерений");
-        });
-    },
-    loadUsers() {
-      const payload = {
-        page_size: 1000,
-        can_rate: true,
-      };
-      this.storeAuth
-        .loadUsers(payload)
-        .then(() => {
-          this.loading = false;
-        })
-        .catch((err: CustomAxiosError) => {
-          this.loading = false;
-          this.handleErrors(err, "Ошибка загрузки пользователей");
-        });
-    },
-
-    filterTagsInclude(val: string, update: CallableFunction) {
-      update(() => {
-        const isUsed = (tag: RecipeTag) => {
-          return this.filters.tags_exclude.some((t) => t == tag.id);
-        };
-
-        const needle = val.toLowerCase();
-        const tags = this.tags;
-
-        this.tagList =
-          tags?.filter(
-            (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
-          ) || [];
-        // console.debug(needle, this.tagList, tags);
-      });
-    },
-    filterTagsExclude(val: string, update: CallableFunction) {
-      update(() => {
-        const isUsed = (tag: RecipeTag) => {
-          return this.filters.tags_include.some((t) => t == tag.id);
-        };
-
-        const needle = val.toLowerCase();
-        const tags = this.tags;
-
-        this.tagList =
-          tags?.filter(
-            (v) => v.title.toLowerCase().indexOf(needle) > -1 && !isUsed(v)
-          ) || [];
-        // console.debug(needle, this.tagList, tags);
-      });
-    },
-
-    filterIngredientsInclude(val: string, update: CallableFunction) {
-      update(() => {
-        // let isUsed = (ingredient: Ingredient) => {
-        //   return this.filters.ingredients_exclude.some((t) => t == ingredient.id);
-        // };
-
-        const needle = val.toLowerCase();
-        const ingredients = this.ingredients;
-
-        this.ingredientList = (
-          ingredients?.filter(
-            (v) => v.title.toLowerCase().indexOf(needle) > -1 // && !isUsed(v)
-          ) || []
-        ).slice(0, 20);
-        // console.debug(needle, this.ingredientList, ingredients);
-      });
-    },
-    filterIngredientsExclude(val: string, update: CallableFunction) {
-      update(() => {
-        // let isUsed = (ingredient: Ingredient) => {
-        //   return this.filters.ingredients_include.some((t) => t == ingredient.id);
-        // };
-
-        const needle = val.toLowerCase();
-        const ingredients = this.ingredients;
-
-        this.ingredientList = (
-          ingredients?.filter(
-            (v) => v.title.toLowerCase().indexOf(needle) > -1 //  && !isUsed(v)
-          ) || []
-        ).slice(0, 20);
-        // console.debug(needle, this.ingredientList, ingredients);
-      });
-    },
-    userRating(user: User) {
-      const exists = this.filters?.ratings[user.id];
-      // console.debug('userRating: ', user, exists);
-
-      if (exists) {
-        return exists;
-      } else {
-        return { min: 0, max: 5 };
-      }
-    },
-    userSetRating(user: User, rating: RangeValue) {
-      // console.debug('setUserRating: ', user, rating);
-
-      this.filters.ratings[user.id] = rating;
-    },
     resetFilters() {
       this.filters = Object.assign({}, this.filtersDefault);
       this.filters.ratings = [];
       console.debug("Reset: ", this.filters);
     },
-
     openRecipe(id: number | "new") {
       void this.$router.push({ name: "recipe", params: { id: id } });
-    },
-    userReadable(user: User): string {
-      if (user.first_name) {
-        return user.first_name + " " + String(user.last_name);
-      }
-      return user.username;
-    },
-    shortText(tx: string, length = 100): string {
-      if (tx.length < length) {
-        return tx;
-      } else {
-        return tx.slice(0, length) + "...";
-      }
     },
   },
 });

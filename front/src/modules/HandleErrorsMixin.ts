@@ -1,46 +1,41 @@
-import { ApiError } from "src/client";
-import { defineComponent } from "vue";
+import { ApiError } from "src/client"
+import { defineComponent } from "vue"
 
 interface RestError {
-  code?: string;
-  detail?: string;
-  [key: string]: unknown;
+  code?: string
+  detail?: string
+  [key: string]: unknown
 }
 
-export type CustomAxiosError = ApiError;
+export type CustomAxiosError = ApiError
 
 export const HandleErrorsMixin = defineComponent({
   methods: {
     handleErrors(err: CustomAxiosError, title?: string) {
-      console.warn({ err, title });
+      console.warn({ err, title })
 
       if (!title) {
-        title = "Ошибка загрузки данных";
+        title = "Ошибка загрузки данных"
       }
 
-      const data: RestError = (err?.body as unknown as RestError) || {};
-      let respText;
+      const data: RestError = (err?.body as unknown as RestError) || {}
+      let respText
 
-      if (
-        !err.body &&
-        (!err.statusText ||
-          err.statusText === "ERR_NETWORK" ||
-          err.statusText == "ERR_INTERNET_DISCONNECTED")
-      ) {
-        respText = "Ошибка подключения к серверу";
+      if (!err.body && (!err.statusText || err.statusText === "ERR_NETWORK" || err.statusText == "ERR_INTERNET_DISCONNECTED")) {
+        respText = "Ошибка подключения к серверу"
       } else {
-        respText = [err.status, err.statusText].join(" ");
+        respText = [err.status, err.statusText].join(" ")
       }
 
-      let errValidation = "";
+      let errValidation = ""
 
       if (typeof data === "object") {
-        console.debug("Err data: ", data);
+        console.debug("Err data: ", data)
         for (const [key, val] of Object.entries(data)) {
           // console.debug(key, val);
           if (Array.isArray(val)) {
-            const errJoin = val.join(", ");
-            errValidation += `${key}: ${errJoin}<br/>`;
+            const errJoin = val.join(", ")
+            errValidation += `${key}: ${errJoin}<br/>`
           }
         }
       }
@@ -51,7 +46,7 @@ export const HandleErrorsMixin = defineComponent({
         errValidation ||
         respText ||
         // data ||
-        "Неизвестная ошибка";
+        `Неизвестная ошибка (${err.url})`
 
       this.$q.notify({
         type: "negative",
@@ -59,9 +54,9 @@ export const HandleErrorsMixin = defineComponent({
         caption: caption,
         progress: true,
         html: true,
-      });
+      })
     },
   },
-});
+})
 
-export default HandleErrorsMixin;
+export default HandleErrorsMixin

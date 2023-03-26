@@ -1,27 +1,27 @@
-import { Task, TaskCategory } from "src/client";
+import { Task, TaskCategory } from "src/client"
 
 export interface TablePaginationOnRequest {
-  rowsPerPage: number;
-  page: number;
-  sortBy: string;
-  descending: boolean;
+  rowsPerPage: number
+  page: number
+  sortBy: string
+  descending: boolean
 }
 
 export interface TablePagination {
-  rowsPerPage?: number;
-  rowsNumber?: number;
-  page?: number;
-  sortBy?: string;
-  descending?: boolean;
+  rowsPerPage?: number
+  rowsNumber?: number
+  page?: number
+  sortBy?: string
+  descending?: boolean
 }
 
 export interface TableProps {
-  pagination?: TablePagination;
-  filter?: string;
+  pagination?: TablePagination
+  filter?: string
 }
 
 export interface TablePropsOnRequest {
-  pagination: TablePaginationOnRequest;
+  pagination: TablePaginationOnRequest
 }
 
 export const WeekDays: { [key: number]: string } = {
@@ -33,7 +33,7 @@ export const WeekDays: { [key: number]: string } = {
   5: "Пятница",
   6: "Суббота",
   7: "Восскресенье",
-};
+}
 export const WeekDaysShort: { [key: number]: string } = {
   1: "Пн",
   2: "Вт",
@@ -42,33 +42,33 @@ export const WeekDaysShort: { [key: number]: string } = {
   5: "Пт",
   6: "Сб",
   7: "Вс",
-};
+}
 
 export interface YearWeek {
-  year: number;
-  week: number;
+  year: number
+  week: number
 }
 
 export interface YearWeekNullable {
-  year: number | null;
-  week: number | null;
+  year: number | null
+  week: number | null
 }
 
 export interface DatePicker {
-  from: Date | string;
-  to: Date | string;
+  from: Date | string
+  to: Date | string
 }
 
-export type TaskOrCategory = Task | TaskCategory;
+export type TaskOrCategory = Task | TaskCategory
 
 export interface AmountType {
-  id: string;
-  title: string;
+  id: string
+  title: string
 }
 
-export type AmountTypesTypes = AmountType[];
+export type AmountTypesTypes = AmountType[]
 export interface AmountTypesConvert {
-  [id: string]: number;
+  [id: string]: number
 }
 
 export const WeekDaysColors: { [key: number]: string } = {
@@ -80,7 +80,7 @@ export const WeekDaysColors: { [key: number]: string } = {
   5: "text-indigo",
   6: "text-purple",
   7: "text-deep-purple",
-};
+}
 
 export const priorityColors: { [key: number]: string } = {
   1: "red",
@@ -88,7 +88,7 @@ export const priorityColors: { [key: number]: string } = {
   3: "yellpw",
   4: "green",
   5: "grey",
-};
+}
 
 export const priorityOptions = [
   {
@@ -111,21 +111,40 @@ export const priorityOptions = [
     id: 5,
     name: "Низший",
   },
-];
+]
 
 export interface WarnedPlan {
-  priority: string | null;
-  icon: string | null;
+  priority: string | null
+  icon: string | null
 }
 
 export interface WarnedPlans {
-  [id: number]: WarnedPlan;
+  [id: number]: WarnedPlan
 }
 
-export const WarningPriorities = ["low", "medium", "high"];
+export const WarningPriorities = ["low", "medium", "high"]
 
 export const IngredientTypes = {
   grocery: "Зелень/фрукты/овощи",
   liq: "Жидкость (в литрах)",
   kilo: "Измеряется в КГ",
-};
+}
+
+export interface RangeValue {
+  min: number
+  max: number
+}
+
+export interface RecipesFilters {
+  cooking_time: {
+    min: number
+    max: number
+  }
+  tags_include: number[]
+  tags_exclude: number[]
+  ingredients_include: number[]
+  ingredients_exclude: number[]
+  ratings: {
+    [key: number]: RangeValue
+  }
+}

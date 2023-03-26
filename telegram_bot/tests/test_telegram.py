@@ -44,7 +44,7 @@ def test_telegram_get_bot(mocker: MockerFixture):
 
 
 def test_get_today_day():
-    assert utils.get_today_day() in range(1, 7)
+    assert utils.get_today_day() in range(1, 7 + 1)
 
 
 @pytest.mark.django_db

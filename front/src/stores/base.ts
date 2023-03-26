@@ -100,13 +100,31 @@ export const useBaseStore = defineStore("base", {
       })
     },
     async loadAmountTypes(): Promise<AmountTypes> {
+      if (!isOnline()) {
+        const res: AmountTypes | null = LocalStorage.getItem("cached:meal_times")
+        if (res) {
+          this.amount_types = res
+          return new Promise((resolve) => {
+            resolve(this.amount_types as AmountTypes)
+          })
+        }
+      }
       return new Promise((resolve, reject) => {
         IngredientsService.ingredientsAmountTypesRetrieve()
           .then((resp) => {
             this.amount_types = resp
             resolve(resp)
+            LocalStorage.set("cached:meal_times", objectUnproxy(resp))
           })
           .catch((err) => {
+            const res: AmountTypes | null = LocalStorage.getItem("cached:meal_times")
+            if (res) {
+              this.amount_types = res
+              return new Promise((resolve) => {
+                resolve(this.amount_types as AmountTypes)
+              })
+            }
+            LocalStorage.set("cached:meal_times", objectUnproxy(resp))
             reject(err)
           })
       })

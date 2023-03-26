@@ -11,7 +11,7 @@
       @update:model-value="$emit('update:model-value', $event)"
     />
     <q-slider
-      :model-value="modelValue"
+      :model-value="modelValue || 0"
       class="col-grow q-px-md"
       marker-labels
       :readonly="readonly"

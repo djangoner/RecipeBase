@@ -20,6 +20,10 @@ clientsClaim();
 // Use with precache injection
 precacheAndRoute(self.__WB_MANIFEST);
 
+if (process.env.DEV) {
+  precacheAndRoute([{ url: "/" }]);
+}
+
 cleanupOutdatedCaches();
 
 // Non-SSR fallback to index.html
@@ -27,7 +31,7 @@ cleanupOutdatedCaches();
 if (process.env.MODE !== "ssr" || process.env.PROD) {
   registerRoute(
     new NavigationRoute(
-      createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
+      createHandlerBoundToURL(process.env.DEV?'/' :process.env.PWA_FALLBACK_HTML),
       {
         denylist: [/sw\.js$/, /workbox-(.)*\.js$/, /admin(.)*$/, /api(.)*$/],
       }

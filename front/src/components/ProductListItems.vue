@@ -7,7 +7,7 @@
     clickable
     @click="$emit('openItem', item)"
   >
-    <div class="row">
+    <div class="row no-wrap">
       <!-- Checkbox -->
       <q-checkbox
         v-model="item.is_completed"
@@ -138,7 +138,7 @@
 
 <script lang="ts">
 import { date } from "quasar";
-import { ProductListItemRead, ProductListWeek } from "src/client";
+import { ProductListItemRead } from "src/client";
 import { defineComponent, PropType } from "vue";
 import {
   getDateOfISOWeek,
@@ -148,6 +148,7 @@ import {
   priorityColors,
 } from "src/modules/WeekUtils";
 import { getPackSuffix } from "src/modules/Utils";
+import { productListGetChanged, ProductListItemSyncable } from "src/modules/ProductListSync";
 
 export default defineComponent({
   props: {
@@ -165,14 +166,9 @@ export default defineComponent({
       // listItems: null,
       WeekDays: WeekDays as { [key: number]: string },
       WeekDaysColors,
+      changedItems: null as number[] |null,
       priorityColors,
     };
-  },
-  computed: {
-    local_cache(): ProductListWeek | null {
-      const val = this.$q.localStorage.getItem("local_productlist");
-      return val ? (val as ProductListWeek) : null;
-    },
   },
   watch: {
     // listItems(val, oldVal) {
@@ -187,6 +183,10 @@ export default defineComponent({
     //   }
     //   this.listItems = val;
     // },
+  },
+  async created(){
+    const items = await productListGetChanged(this.week.year, this.week.week)
+    this.changedItems = items.map(i => i.idLocal || i.id)
   },
   methods: {
     getPackSuffix,
@@ -218,19 +218,11 @@ export default defineComponent({
       }
       // return number;
     },
-    isEdited(item: ProductListItemRead): boolean | undefined {
+    isEdited(item: ProductListItemSyncable): boolean | undefined {
       // let isNotSynced = !!this.$q.localStorage.getItem('local_productlist_updated');
-      if (!this.local_cache) {
-        return;
-      }
-      const cached_item = this.local_cache.items.filter((i) => {
-        return i.id == item.id;
-      })[0];
-
-      const isChanged =
-        cached_item && JSON.stringify(cached_item) !== JSON.stringify(item);
-
-      return isChanged;
+      const itemId = item.idLocal || item.id
+      // console.debug("isChanged: ", item.is_changed, itemId, item)
+      return item.is_changed || this.changedItems?.indexOf(itemId) !== -1
     },
     itemCls(item: ProductListItemRead): string | undefined {
       if (item?.is_completed && "dark" in this.$q) {

@@ -102,6 +102,7 @@
               <q-item
                 v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
                 :disable="!canSync"
+                :class="[canSync? 'bg-green text-white':'']"
                 clickable
                 @click="askSyncLocal()"
               >
@@ -116,8 +117,6 @@
                 </q-item-section>
               </q-item>
               <q-item
-                v-if="canSync"
-                :disable="!canSync"
                 clickable
                 @click="askDiscardSync()"
               >
@@ -128,7 +127,7 @@
                   />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label> Очистка синхронизации </q-item-label>
+                  <q-item-label> Очистить локальную БД </q-item-label>
                 </q-item-section>
               </q-item>
 
@@ -244,8 +243,8 @@ import weekSelect from "components/WeekSelect.vue";
 import {
   IngredientCategory,
   ProductListItemRead,
-  ProductListWeekRead,
-  Shop,
+Shop,
+
 } from "src/client";
 import { YearWeek } from "src/modules/Globals";
 import HandleErrorsMixin, {
@@ -256,9 +255,11 @@ import { WeekDays } from "src/modules/WeekUtils";
 import { useBaseStore } from "src/stores/base";
 import { defineComponent } from "vue";
 import { getYearWeek } from "src/modules/WeekUtils";
-import { productListItemFromRead, productListWeekFromRead } from "src/Convert";
+import { productListItemFromRead } from "src/Convert";
 import { useAuthStore } from "src/stores/auth";
 import { useQuery } from "@oarepo/vue-query-synchronizer";
+import { destroyDB, productListGetChanged, productListGetOffline, productListMarkUnchanged, ProductListItemSyncable, productListUpdateFromServer, productListUpdateItem, getDB } from "src/modules/ProductListSync";
+import { objectUnproxy } from "src/modules/SyncUtils";
 
 type CustomIngredientCategory = IngredientCategory & {
   items?: ProductListItemRead[];
@@ -311,6 +312,7 @@ export default defineComponent({
       // },
       viewItem: undefined as ProductListItemRead | undefined,
       canSyncFlag: false,
+      changedCount: null as number | null,
       WeekDays,
     };
   },
@@ -344,7 +346,7 @@ export default defineComponent({
         let res = this.store.product_list?.items || [];
         res = res.slice();
 
-        if (res) {
+        if (res) { // Sort by is_completed(false first), then day(lower first)
           if (!this.showCompleted) {
             res = res.filter((i) => !i.is_completed);
           }
@@ -503,63 +505,101 @@ export default defineComponent({
     showCompleted(val) {
       this.$q.localStorage.set("productsShowCompleted", val);
     },
+    isOnLine(val, oldVal){
+      if (val && !oldVal && this.canSync){
+        void this.askSyncLocal();
+      }
+    }
   },
   created() {
     void this.$nextTick(() => {
-      this.onLoad();
+      void this.onLoad();
     });
   },
   methods: {
-    onLoad() {
+    async onLoad() {
+      const changedItems = await productListGetChanged(this.week.year, this.week.week);
       this.canSyncFlag = Boolean(
-        this.$q.localStorage.has("local_productlist_updated")
+        changedItems && changedItems.length > 0
       );
+      if (changedItems){
+        this.changedCount = changedItems.length;
+      }
       if (this.isOnLine) {
-        if (this.canSync) {
-          this.$q.notify({
-            type: "info",
-            caption:
-              "Рекомендуется выполнить синхронизацию изменений с сервером",
-          });
+        // if (this.canSync) {
+        //   this.$q.notify({
+        //     type: "info",
+        //     caption:
+        //       "Рекомендуется выполнить синхронизацию изменений с сервером",
+        //   });
+        // }
+        void this.loadShops();
+        void this.loadIngredientCategories();
+        if (this.canSync){
+          void this.askSyncLocal()
         }
-        this.loadShops();
-        this.loadIngredientCategories();
         // if (this.$q.localStorage.has('local_productlist_updated')) {
         //   this.syncLocal();
         // }
 
         // this.loadList();
       } else {
-        const local_cache = this.$q.localStorage.getItem("local_productlist") as
-          | ProductListWeekRead
-          | undefined;
-        if (local_cache) {
-          this.store.product_list = local_cache;
-        }
+        // if (this.week){
+        //   void productListGetOffline(this.week.year, this.week.week).then((info) => {
+        //     this.store.product_list = Object.assign({}, info.week, {items: info.items})
+        //   })
+        // }
+        // const local_cache = this.$q.localStorage.getItem("local_productlist") as
+        //   | ProductListWeekRead
+        //   | undefined;
+        // if (local_cache) {
+        //   this.store.product_list = local_cache;
+        // }
 
-        const shopsCache = this.$q.localStorage.getItem("shops") as
-          | Shop[]
-          | undefined;
-        if (shopsCache) {
-          this.store.shops = shopsCache;
-        }
+        // const shopsCache = this.$q.localStorage.getItem("shops") as
+        //   | Shop[]
+        //   | undefined;
+        // if (shopsCache) {
+        //   this.store.shops = shopsCache;
+        // }
 
-        const ingCategoryCache = this.$q.localStorage.getItem(
-          "ing_categories"
-        ) as IngredientCategory[];
-        if (ingCategoryCache) {
-          this.store.ingredient_categories = ingCategoryCache;
-        }
+        // const ingCategoryCache = this.$q.localStorage.getItem(
+        //   "ing_categories"
+        // ) as IngredientCategory[];
+        // if (ingCategoryCache) {
+        //   this.store.ingredient_categories = ingCategoryCache;
+        // }
       }
     },
     onWeekUpd() {
       this.loadList();
       this.loadWeekPlan();
     },
+    loadListOffline(){
+      console.debug("Trying to load cached product list", this.week)
+        if (this.week){
+          void productListGetOffline(this.week.year, this.week.week).then((info) => {
+            if (info){
+              this.store.product_list = Object.assign({}, info.week, {items: info.items})
+              this.changedCount = info.items.length
+            } else {
+              this.$q.notify({
+                type: 'negative',
+                caption: `Не найден сохраненный список продуктов для ${this.week.year}.${this.week.week}`
+              })
+            }
+          })
+        }
+    },
     loadList() {
       if (!this.week?.year || !this.week?.week) {
         return;
       }
+      if (!this.isOnLine){
+        this.loadListOffline()
+        return;
+      }
+      console.debug("Loading online list")
       const payload = {
         year: this.week?.year,
         week: this.week?.week,
@@ -574,47 +614,58 @@ export default defineComponent({
           if (!this.viewItem && argTask) {
             this.selectItemByID(argTask);
           }
-
-          const rewriteLocal = !this.$q.localStorage.has(
-            "local_productlist_updated"
-          );
-          if (rewriteLocal) {
-            this.syncServer();
-          }
+          this.syncSaveToLocal();
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;
           this.handleErrors(err, "Ошибка загрузки списка продуктов");
         });
     },
-    loadShops() {
+    async loadShops() {
+      const db = (await getDB())
+      if (!this.isOnLine){
+        this.store.shops = await db.getAll("shops") as Shop[]
+      }
       this.store
         .loadShops({ pageSize: 1000 })
-        .then((resp) => {
-          this.$q.localStorage.set("shops", resp);
+        .then(async (resp) => {
+          for (const item of resp.results || []) {
+            await db.put("shops", objectUnproxy(item))
+          }
         })
-        .catch((err: CustomAxiosError) => {
+        .catch(async (err: CustomAxiosError) => {
           this.handleErrors(err, "Ошибка загрузки списка магазинов");
-          this.store.shops = this.$q.localStorage.getItem("shops");
+        this.store.shops = await db.getAll("shops") as Shop[]
         });
     },
-    loadIngredientCategories() {
+    async loadIngredientCategories() {
+      const db = (await getDB())
+      if (!this.isOnLine){
+        this.store.ingredient_categories = await db.getAll("ing_categories") as IngredientCategory[]
+      }
       this.store
         .loadIngredientCategories({ pageSize: 1000 })
-        .then((resp) => {
-          this.$q.localStorage.set("ing_categories", resp);
+        .then(async (resp) => {
+          for (const item of resp.results || []) {
+            await db.put("ing_categories", objectUnproxy(item))
+          }
+          // this.$q.localStorage.set("ing_categories", resp);
         })
-        .catch((err: CustomAxiosError) => {
+        .catch(async (err: CustomAxiosError) => {
           this.handleErrors(
             err,
             "Ошибка загрузки списка категорий ингредиентоа"
           );
-          this.store.shops = this.$q.localStorage.getItem("ing_categories");
+        this.store.ingredient_categories = await db.getAll("ing_categories") as IngredientCategory[]
         });
     },
-    syncServer() {
-      console.debug("SyncServer");
-      this.$q.localStorage.set("local_productlist", this.store?.product_list);
+    syncSaveToLocal() {
+      console.debug("syncSaveToLocal");
+
+      if (this.isOnLine && this.store.product_list){
+        void productListUpdateFromServer(this.store.product_list)
+        // this.$q.localStorage.set("local_productlist", this.store?.product_list);
+      }
 
       if (!this.isOnLine) {
         this.$q.localStorage.set("local_productlist_updated", true);
@@ -623,13 +674,13 @@ export default defineComponent({
     askSyncLocal() {
       this.$q
         .dialog({
-          title: "Подтверждение",
-          message: `Вы уверены что хотите выполнить синхронизацию? Данные на сервере будут заменены локальным списком продуктов`,
+          title: `Синхронизация (элементов: ${this.changedCount ||'-'})`,
+          message: `Вы уверены что хотите выполнить синхронизацию?`,
           cancel: true,
           persistent: true,
         })
         .onOk(() => {
-          this.syncLocal();
+          void this.syncLocal();
         });
     },
     askDiscardSync() {
@@ -641,21 +692,22 @@ export default defineComponent({
           persistent: true,
         })
         .onOk(() => {
-          this.discardSync();
+          void this.discardSync();
         });
     },
-    discardSync() {
-      this.$q.localStorage.remove("local_productlist_updated");
-      this.$q.localStorage.remove("local_productlist");
+    async discardSync() {
+      await destroyDB();
+      this.canSyncFlag = false;
       this.$q.notify({
-        type: "warning",
-        caption: "Данные синхронизации удалены",
-        icon: "delete",
-      });
-      this.canSync = false;
-      this.syncServer();
+        caption: "Локальная БД была очищена, рекомендуется обновить страницу.",
+        type: 'warning',
+      })
     },
-    syncLocal() {
+    async syncLocal() {
+      if (!this.week){
+        return
+      }
+      console.debug("Running sync with server...")
       this.$q.notify({
         type: "info",
         caption: "Синхронизация изменений с сервером...",
@@ -664,28 +716,56 @@ export default defineComponent({
 
       this.loading = true;
 
-      const payload = productListWeekFromRead(
-        this.$q.localStorage.getItem("local_productlist")
-      );
-      console.debug("SyncLocal: ", payload);
+      // const payload = productListWeekFromRead(
+      //   this.$q.localStorage.getItem("local_productlist")
+      // );
+      // console.debug("SyncLocal: ", payload);
+      const itemsChanged = await productListGetChanged(this.week.year, this.week.week)
+      console.debug("Local items changed: ", itemsChanged)
 
-      this.store
-        .saveProductListWeek(payload)
-        .then(() => {
-          this.loading = false;
-          this.$q.notify({
-            type: "positive",
-            caption: "Список продуктов успешно синхронизирован",
-          });
-          this.$q.localStorage.remove("local_productlist_updated");
-          this.canSync = false;
+      this.loading = false;
 
-          // this.loadList();
-        })
-        .catch((err: CustomAxiosError) => {
-          this.loading = false;
-          this.handleErrors(err, "Ошибка синхронизации списка продуктов");
-        });
+      const getMsg = (idx: number) => {
+        const prc = Math.round(idx/itemsChanged.length*100)
+        return `Синхронизация...  ${prc}%`
+      }
+      const loading = this.$q.loading.show({
+          group: "product-list-sync",
+
+      })
+
+      await this.store.syncProductListItems(itemsChanged, (idx: number) => {
+        loading({message: getMsg(idx)})
+      }, async (item: ProductListItemSyncable) => {
+        await productListMarkUnchanged(item)
+      })
+      this.$q.loading.hide("product-list-sync")
+      this.$q.notify({
+        type: "positive",
+        caption: "Список продуктов успешно синхронизирован",
+      });
+      this.loadList()
+      // this.store
+      //   .saveProductListWeek(payload)
+      //   .then(() => {
+      //     this.loading = false;
+      //     this.$q.localStorage.remove("local_productlist_updated");
+      //     this.canSync = false;
+
+      //     // this.loadList();
+      //   })
+      //   .catch((err: CustomAxiosError) => {
+      //     this.loading = false;
+      //     this.handleErrors(err, "Ошибка синхронизации списка продуктов");
+      //   });
+    },
+    updateOfflineItem(item: ProductListItemRead){
+      console.debug("Upd item: ", item);
+        // Update offline data
+        if (this.store.product_list) {
+          void productListUpdateItem(item) // Update in indexed DB
+          this.canSyncFlag = true;
+        }
     },
     updateItem(item: ProductListItemRead, reload: boolean) {
       if (!item) {
@@ -699,19 +779,7 @@ export default defineComponent({
         item.is_completed = true;
       }
       if (!this.isOnLine) {
-        console.debug("Upd item: ", item);
-        // Update offline data
-        if (this.store.product_list) {
-          this.store.product_list.items =
-            this.store.product_list?.items?.map((i) => {
-              if (i.id == item.id) {
-                // console.debug(resp);
-                return item;
-              }
-              return i;
-            }) || [];
-        }
-        this.syncServer();
+        this.updateOfflineItem(item)
         return;
       }
       const payload = productListItemFromRead(Object.assign({}, item));
@@ -753,8 +821,9 @@ export default defineComponent({
 
       this.store
         .generateProductListWeek(payload)
-        .then(() => {
+        .then((resp) => {
           this.loading = false;
+          void productListUpdateFromServer(resp)
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;
@@ -772,8 +841,17 @@ export default defineComponent({
         week: this.store.product_list?.id,
         amount: 1,
         amount_type: "items",
-      };
+        is_completed: false,
+        already_completed: false,
+      }  as ProductListItemRead;
       this.createItem = "";
+
+      if (!this.isOnLine){
+        this.updateOfflineItem(payload)
+        this.viewItem = payload;
+        this.loadListOffline()
+        return;
+      }
 
       this.saving = true;
       this.store
@@ -801,6 +879,9 @@ export default defineComponent({
       if (!this.week?.year || !this.week?.week) {
         return;
       }
+      // if (!this.isOnLine){
+      //   return
+      // }
       const payload = {
         year: this.week.year,
         week: this.week.week,
@@ -814,7 +895,7 @@ export default defineComponent({
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false;
-          this.handleErrors(err, "Ошибка загрузки плана");
+          this.handleErrors(err, "Ошибка загрузки плана на неделю");
         });
     },
     categoryHasShop(cat: IngredientCategory) {

@@ -141,7 +141,7 @@
                           :model-value="dayPlan?.recipe"
                           :input-debounce="100"
                           :options="recipesList || []"
-                          :readonly="saving || !editMode || !canEdit"
+                          :readonly="readonly"
                           option-label="title"
                           use-input
                           clearable
@@ -216,7 +216,7 @@
                   :model-value="null"
                   :options="meal_time_options || []"
                   :input-debounce="0"
-                  :readonly="saving || !editMode || !canEdit"
+                  :readonly="readonly"
                   option-value="id"
                   option-label="title"
                   label="Добавить"
@@ -277,6 +277,8 @@ import { useAuthStore } from "src/stores/auth";
 import { Directive } from "vue";
 import { WarningPriorities } from "src/modules/Globals";
 import { getWarningPriorityColor } from "src/modules/Utils";
+import { useQuery } from "@oarepo/vue-query-synchronizer";
+import IsOnlineMixin from "src/modules/IsOnlineMixin";
 
 const WeekDaysColors: { [key: number]: string } = {
   1: "bg-amber-2",
@@ -307,13 +309,14 @@ export default defineComponent({
   directives: {
     print: print as Directive,
   },
-  mixins: [HandleErrorsMixin],
+  mixins: [HandleErrorsMixin, IsOnlineMixin],
   data() {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
     return {
       store,
       storeAuth,
+      // $query: useQuery(),
       // week: {
       //   year: null,
       //   week: null,
@@ -340,6 +343,9 @@ export default defineComponent({
         (this.$query as QueryInterface).year = val?.year;
         (this.$query as QueryInterface).week = val?.week;
       },
+    },
+    readonly(){
+      return this.saving || !this.editMode || !this.canEdit || !this.isOnLine
     },
     plan() {
       return this.store.week_plan;

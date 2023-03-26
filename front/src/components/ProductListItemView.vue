@@ -184,7 +184,7 @@
               {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
             </q-item>
 
-            <template v-if="item.ingredient.regular_ingredients">
+            <template v-if="item.ingredient && item.ingredient.regular_ingredients">
               <q-separator />
               <q-item
                 class="items-center q-mt-xs"

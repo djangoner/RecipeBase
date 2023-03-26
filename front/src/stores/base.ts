@@ -1,3 +1,4 @@
+import { resolve } from "path"
 import { defineStore } from "pinia"
 import {
   AmountTypes,
@@ -47,6 +48,12 @@ import {
   ConditionsService,
 } from "src/client"
 import { request } from "src/client/core/request"
+import { productListItemFromRead } from "src/Convert"
+import { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
+import { getDB, ProductListItemSyncable, recipePlansGetOffline, recipePlansListUpdateFromServer } from "src/modules/ProductListSync"
+import { mockedPaginatedResponse, objectUnproxy, onlyChangedFields } from "src/modules/SyncUtils"
+
+const isOnline = () => navigator?.onLine
 
 export const useBaseStore = defineStore("base", {
   state: () => ({
@@ -106,13 +113,27 @@ export const useBaseStore = defineStore("base", {
       })
     },
     async loadMealTime(payload: object): Promise<MealTime[]> {
+      const db = await getDB()
+
+      if (!isOnline()) {
+        const res = (await db.getAll("meal_time")) as MealTime[]
+        this.meal_time = res
+        return new Promise((resolve) => {
+          resolve(this.meal_time as MealTime[])
+        })
+      }
       return new Promise((resolve, reject) => {
         MealTimeService.mealTimeList(payload)
-          .then((resp) => {
+          .then(async (resp) => {
             this.meal_time = resp.results as MealTime[]
             resolve(resp as MealTime[])
+            for (const item of resp.results || []) {
+              await db.put("meal_time", objectUnproxy(item))
+            }
           })
-          .catch((err) => {
+          .catch(async (err) => {
+            const res = (await db.getAll("meal_time")) as MealTime[]
+            this.meal_time = res
             reject(err)
           })
       })
@@ -259,15 +280,29 @@ export const useBaseStore = defineStore("base", {
     // Week plans
     async loadWeekPlan(payload: { year: number; week: number }): Promise<RecipePlanWeekRead> {
       const id = `${payload?.year}_${payload?.week}`
+      if (!isOnline()) {
+        const resObj = await recipePlansGetOffline(payload?.year, payload?.week)
+        if (resObj) {
+          this.week_plan = resObj
+          return new Promise((resolve) => {
+            resolve(resObj)
+          })
+        }
+      }
       return new Promise((resolve, reject) => {
         RecipePlanWeekService.recipePlanWeekRetrieve({
           id: id,
         })
           .then((resp) => {
             this.week_plan = resp
+            void recipePlansListUpdateFromServer(resp)
             resolve(resp)
           })
-          .catch((err) => {
+          .catch(async (err) => {
+            const resObj = await recipePlansGetOffline(payload.year, payload.week)
+            if (resObj) {
+              this.week_plan = resObj
+            }
             reject(err)
           })
       })
@@ -425,6 +460,46 @@ export const useBaseStore = defineStore("base", {
           })
       })
     },
+
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async syncProductListItems(items: ProductListItemSyncable[], callback?: CallableFunction, callbackRes?: CallableFunction): Promise<void> {
+      return new Promise((resolve, reject) => {
+        items.forEach((item, index) => {
+          if (!item.changed) {
+            return
+          }
+          const itemExists = item.id
+          const itemCleared = itemExists ? (onlyChangedFields(item, item.changed) as ProductListItemRead) : item
+          if (callback) {
+            callback(index)
+          }
+          let prom
+          console.debug("Performing sync for item: ", index, itemCleared, item)
+
+          if (itemExists) {
+            prom = ProductListItemService.productListItemPartialUpdate({
+              id: item.id,
+              requestBody: productListItemFromRead(itemCleared),
+            })
+          } else {
+            prom = ProductListItemService.productListItemCreate({ requestBody: productListItemFromRead(itemCleared) })
+          }
+
+          prom
+            .then((resp) => {
+              if (callbackRes) {
+                callbackRes(item, resp)
+              }
+              // this.product_list_item = resp
+            })
+            .catch((err: CustomAxiosError) => {
+              handleErrors(err)
+              reject(err)
+            })
+        })
+        resolve()
+      })
+    },
     async deleteProductListItem(id: number): Promise<void> {
       return new Promise((resolve, reject) => {
         ProductListItemService.productListItemDestroy({ id })
@@ -440,17 +515,33 @@ export const useBaseStore = defineStore("base", {
     // Ingredients
 
     async loadIngredients(payload: object, search = false): Promise<PaginatedIngredientReadList> {
+      const db = await getDB()
+
       this.ingredients_searched = search
+      if (!isOnline()) {
+        const res = (await db.getAll("ingredients")) as IngredientRead[]
+        this.ingredients = res
+        return new Promise((resolve) => {
+          resolve(mockedPaginatedResponse(res) as PaginatedIngredientReadList)
+        })
+      }
       return new Promise((resolve, reject) => {
         const defaultPayload = {
           pageSize: 1000,
         }
         IngredientsService.ingredientsList(Object.assign({}, defaultPayload, payload))
-          .then((resp) => {
+          .then(async (resp) => {
             this.ingredients = resp.results as IngredientRead[]
             resolve(resp)
+
+            if (!search) {
+              for (const item of resp.results || []) {
+                await db.put("ingredients", objectUnproxy(item))
+              }
+            }
           })
-          .catch((err) => {
+          .catch(async (err) => {
+            this.ingredients = (await db.getAll("ingredients")) as IngredientRead[]
             reject(err)
           })
       })

@@ -277,7 +277,7 @@ import { useAuthStore } from "src/stores/auth";
 import { Directive } from "vue";
 import { WarningPriorities } from "src/modules/Globals";
 import { getWarningPriorityColor } from "src/modules/Utils";
-import { useQuery } from "@oarepo/vue-query-synchronizer";
+// import { useQuery } from "@oarepo/vue-query-synchronizer";
 import IsOnlineMixin from "src/modules/IsOnlineMixin";
 
 const WeekDaysColors: { [key: number]: string } = {

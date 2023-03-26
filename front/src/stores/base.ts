@@ -1,4 +1,3 @@
-import { resolve } from "path"
 import { defineStore } from "pinia"
 import {
   AmountTypes,

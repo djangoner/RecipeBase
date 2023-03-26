@@ -188,13 +188,9 @@ export default defineComponent({
       };
       this.storeAuth
         .loadUsers(payload)
-        .then(() => {
+        .finally(() => {
           this.loading = false;
         })
-        .catch((err: CustomAxiosError) => {
-          this.loading = false;
-          this.handleErrors(err, "Ошибка загрузки пользователей");
-        });
     },
     getRating(day_idx: number, user: User): number | null {
       if (!this.plan) {

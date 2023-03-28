@@ -44,6 +44,8 @@ DEBUGBAR = getenv("DEBUGBAR", False)
 TESTING = "pytest" in sys.modules
 
 ALLOWED_HOSTS = getenv("ALLOWED_HOSTS", "*").split(" ")
+TELEGRAM_BOT_TOKEN = getenv("BOT_TOKEN")
+TELEGRAM_BOT_ENABLE = TELEGRAM_BOT_TOKEN and len(TELEGRAM_BOT_TOKEN) >= 40
 
 USE_X_FORWARDED_HOST = True
 HOSTNAME_OVERRIDE = getenv("HOSTNAME_OVERRIDE", None)
@@ -74,8 +76,10 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
     "tasks.apps.TasksConfig",
-    "telegram_bot.apps.TelegramBotConfig",
 ]
+
+if TELEGRAM_BOT_ENABLE:
+    INSTALLED_APPS.append("telegram_bot.apps.TelegramBotConfig")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -154,7 +158,9 @@ else:
 
 CACHES = {
     "default": {
-        "BACKEND": os.getenv("CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"),
+        "BACKEND": os.getenv(
+            "CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"
+        ),
         "LOCATION": os.getenv("CACHE_LOCATION", None),
         "KEY_PREFIX": os.getenv("CACHE_PREFIX", "recipebase"),
     }

@@ -14,17 +14,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import include
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from django.views.static import serve
 from recipes.urls import router as router_recipes
 from rest_framework import routers
 from users.urls import router as router_users
+from tasks.urls import router as router_tasks
 from users.views import CustomObtainAuthToken
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 router = routers.DefaultRouter()
-router_include = [router_recipes, router_users]
+router_include = [router_recipes, router_users, router_tasks]
 
 for sub_router in router_include:
     router.registry.extend(sub_router.registry)
@@ -35,14 +41,28 @@ urlpatterns = [
     #
     path("api/v1/", include(router.urls)),
     # Custom
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/schema/swagger/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path(
+        "api/schema/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
     path("api/v1/auth/", include("rest_framework.urls")),
     path("api/v1/auth/token/", CustomObtainAuthToken.as_view()),
     # url('', include('rest_framework.urls'), name="recipes"),
 ]
 
+if getattr(settings, "TELEGRAM_BOT_ENABLE"):
+    urlpatterns.append(path("", include("telegram_bot.urls")))
+
 if settings.DEBUG:
     urlpatterns += [
-        url(
+        re_path(
             r"^media/(?P<path>.*)$",
             serve,
             {
@@ -50,3 +70,5 @@ if settings.DEBUG:
             },
         ),
     ]
+if settings.DEBUGBAR:
+    urlpatterns += [path("__debug__/", include("debug_toolbar.urls"))]

@@ -2,24 +2,30 @@
   <div class="window-width window-height row justify-center items-center">
     <q-card class="login-card col-xs-12 col-sm-6 col-md-4 q-pa-md">
       <q-card-section>
-        <h4 class="text-center no-margin">Авторизация</h4>
+        <h4 class="text-center no-margin">
+          Авторизация
+        </h4>
       </q-card-section>
       <q-card-section>
-        <q-form id="loginForm" class="q-gutter-md" @submit="onSubmit">
+        <q-form
+          id="loginForm"
+          class="q-gutter-md"
+          @submit="onSubmit"
+        >
           <q-input
-            outlined
             v-model="login.username"
+            outlined
             label="Имя пользователя"
             :rules="[(val) => (val !== null && val !== '') || 'Введите имя пользователя']"
-          ></q-input>
+          />
           <q-input
+            v-model="login.password"
             :type="login.passwordShow ? 'text' : 'password'"
             outlined
-            v-model="login.password"
             label="Пароль"
             lazy-rules
             :rules="[(val) => (val !== null && val !== '') || 'Введите пароль']"
-          ></q-input>
+          />
         </q-form>
       </q-card-section>
 
@@ -27,7 +33,7 @@
         <q-btn
           type="submit"
           color="primary"
-          :loading="loginStatus == 'request'"
+          :loading="loading"
           label="Войти"
           size="md"
           form="loginForm"
@@ -38,15 +44,17 @@
   </div>
 </template>
 
-<script>
-import { defineComponent, ref } from 'vue';
-import { useAuthStore } from 'stores/auth.js';
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { useAuthStore } from 'src/stores/auth.js';
+import { AuthToken } from 'src/client';
 
 export default defineComponent({
   data() {
     const store = useAuthStore();
     return {
       store: store,
+      loading: false,
       login: {
         username: '',
         password: '',
@@ -54,19 +62,28 @@ export default defineComponent({
       },
     };
   },
+  computed: {
+    loginStatus(): boolean {
+      return this.store.isAuthenticated;
+    },
+  },
   methods: {
     onSubmit() {
-      let payload = {
+      const payload = {
         username: this.login.username,
         password: this.login.password,
-      };
+      } as AuthToken;
+
+      this.loading = true;
 
       this.store
         .login(payload)
         .then(() => {
-          this.$router.push({ name: 'index' });
+          this.loading = false;
+          void this.$router.push({ name: 'index' });
         })
         .catch((err) => {
+          this.loading = false;
           console.warn(err);
 
           this.$q.notify({
@@ -76,11 +93,6 @@ export default defineComponent({
             progress: true,
           });
         });
-    },
-  },
-  computed: {
-    loginStatus() {
-      return this.store.isAuthenticated;
     },
   },
 });

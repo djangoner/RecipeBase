@@ -1,0 +1,44 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+drf-spectacular = "*"
+django = "*"
+django-ckeditor = "*"
+djangorestframework = "*"
+django-filter = "*"
+django-cleanup = "*"
+drf-writable-nested = "*"
+python-dotenv = "*"
+pillow = "*"
+psycopg2-binary = "*"
+django-admin-sortable = "*"
+django-thumbnails = "*"
+pytelegrambotapi = "*"
+django-multiselectfield = "*"
+django-q = "*"
+django-simple-history = "*"
+drf-flex-fields = "*"
+pytest-mock = "*"
+django-cachalot = "*"
+gunicorn = "*"
+cachetools = "*"
+
+[dev-packages]
+pytest = "*"
+pytest-cov = "*"
+pytest-django = "*"
+pytest-xdist = "*"
+coverage = "*"
+factory_boy = "*"
+black = "*"
+mypy = "*"
+pylint = "*"
+django-debug-toolbar = "*"
+ipykernel = "*"
+pytest-asyncio = "*"
+
+[requires]
+python_version = "3.11"

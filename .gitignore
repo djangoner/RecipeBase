@@ -1,20 +1,24 @@
 # Django
 !package.json
+.env
 *.csv
 *.ini
 *.json*
+!front/*.json
+!manifest.json
 *.log*
 *.pyc
 *.sqlite*
 *tmp*
 *cache*
 *.local
-Pipfile
-Pipfile.lock
 __pycache__
 media
 migrations
 migrations/*
+.coverage
+coverage*
+!pytest.ini
 
 .DS_Store
 .thumbs.db

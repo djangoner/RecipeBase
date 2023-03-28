@@ -1,0 +1,9 @@
+[run]
+branch = true
+omit = */tests/*, */migrations/*, */urls.py, */settings/*, */wsgi.py, manage.py, fabfile.py, */asgi.py, */settings.py, */thumbnails_backend.py
+source = .
+
+[report]
+show_missing = true
+skip_empty = true
+skip_covered = true

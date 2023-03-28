@@ -3,9 +3,10 @@ from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from drf_spectacular.authentication import SessionScheme
 from rest_framework import pagination
-from rest_framework.authentication import (BasicAuthentication,
-                                           SessionAuthentication)
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.response import Response
+from rest_framework import permissions
+from django.http.request import HttpRequest
 
 UserModel = get_user_model()
 
@@ -34,18 +35,37 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
 
 
 class CsrfExemptSessionAuthenticationScheme(SessionScheme):
-    target_class = "supervisor.serializers.CsrfExemptSessionAuthentication"
+    target_class = "users.backends.CsrfExemptSessionAuthentication"
 
 
 class CustomAuthorizationBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
-
         try:
-            user = UserModel.objects.get(
-                Q(username=username) | Q(phone=username) | Q(email=username)
-            )
+            user = UserModel.objects.get(Q(username=username) | Q(email=username))
         except UserModel.DoesNotExist:
             pass
         else:
-            if user.check_password(password):
+            if password and user.check_password(password) and self.user_can_authenticate(user):
                 return user
+
+
+class CustomTokenAuthentication(TokenAuthentication):
+    keyword = "Bearer"
+
+
+class CustomModelPermissions(permissions.DjangoModelPermissions):
+    perms_map = {
+        "GET": ["%(app_label)s.view_%(model_name)s"],
+        "OPTIONS": ["%(app_label)s.view_%(model_name)s"],
+        "HEAD": ["%(app_label)s.view_%(model_name)s"],
+        "POST": ["%(app_label)s.add_%(model_name)s"],
+        "PUT": ["%(app_label)s.change_%(model_name)s"],
+        "PATCH": ["%(app_label)s.change_%(model_name)s"],
+        "DELETE": ["%(app_label)s.delete_%(model_name)s"],
+    }
+
+
+def toolbar_callback(request: HttpRequest) -> bool:
+    if not request.user:
+        return False
+    return request.user.is_superuser  # type: ignore

@@ -21,6 +21,7 @@ module.exports = configure(function (/* ctx */) {
       warnings: true,
       errors: true,
     },
+    supportTS: true,
 
     // https://v2.quasar.dev/quasar-cli/prefetch-feature
     // preFetch: true,
@@ -28,7 +29,7 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
-    boot: ["i18n", "axios", "mixinHandleErrors"],
+    boot: ["i18n", "querySync"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ["app.scss"],
@@ -54,7 +55,7 @@ module.exports = configure(function (/* ctx */) {
         node: "node16",
       },
 
-      vueRouterMode: "hash", // available values: 'hash', 'history'
+      vueRouterMode: "history", // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
       // vueOptionsAPI: false,
@@ -97,6 +98,10 @@ module.exports = configure(function (/* ctx */) {
           target: "http://127.0.0.1:8000",
           changeOrigin: true,
         },
+        "/admin": {
+          target: "http://127.0.0.1:8000",
+          changeOrigin: true,
+        },
         "/media": {
           target: "http://127.0.0.1:8000",
           changeOrigin: true,
@@ -125,7 +130,8 @@ module.exports = configure(function (/* ctx */) {
 
     // animations: 'all', // --- includes all animations
     // https://v2.quasar.dev/options/animations
-    animations: [],
+    // animations: [],
+    animations: ["fadeIn", "fadeOut", "slideInRight", "slideOutRight"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#property-sourcefiles
     // sourceFiles: {
@@ -162,7 +168,7 @@ module.exports = configure(function (/* ctx */) {
 
     // https://v2.quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxMode: "generateSW", // or 'injectManifest'
+      workboxMode: "injectManifest", // or 'injectManifest'
       injectPwaMetaTags: true,
       swFilename: "sw.js",
       manifestFilename: "manifest.json",

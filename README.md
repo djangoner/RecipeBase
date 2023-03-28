@@ -1,26 +1,37 @@
 # Recipe Base (recipe_base)
 
-A family recipes base
+A recipes base site
 
-## Install the dependencies
+## Running in docker-compose
 ```bash
-yarn
+docker-compose up -d
 ```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+
+# Development
+
+
+## Backend
+
+### Install backend dependencies
+```bash
+pip install pipenv
+pipenv install
+```
+
+### Run backend
+```bash
+pipenv run python3 manage.py runserver
+```
+
+## Frontend
+
+### Install frontend dependencies
+```bash
+pnpm install
+```
+
+### Start frontend in development mode (hot-code reloading, error reporting, etc.)
 ```bash
 quasar dev
 ```
-
-### Lint the files
-```bash
-yarn run lint
-```
-
-### Build the app for production
-```bash
-quasar build
-```
-
-### Customize the configuration
-See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).

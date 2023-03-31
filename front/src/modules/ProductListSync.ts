@@ -7,6 +7,7 @@ import { ProductListItemRead, ProductListWeekRead, RecipePlanWeekRead } from "sr
 import { IDBPDatabase, openDB, deleteDB } from "idb"
 import { objectUnproxy, shouldStore, simpleDiff } from "./SyncUtils"
 import { getYearWeek } from "./WeekUtils"
+import { useBaseStore } from "src/stores/base"
 
 const DBVersion = 1
 
@@ -198,8 +199,9 @@ export async function productListUpdateItem(updatedItem: ProductListItemSyncable
 
   const putItem = objectUnproxy(Object.assign({}, savedItem, updatedItem, { changed: changesList, is_changed: Boolean(diffList) }))
 
-  await store.put(putItem)
+  const newKey = await store.put(putItem)
   await tx.done
+  return newKey
 }
 
 export async function productListMarkUnchanged(updatedItem: ProductListItemSyncable) {
@@ -242,9 +244,9 @@ export async function productListGetOffline(year: number, week: number) {
   }
 }
 
-export async function productListGetChanged(year: number, week: number) {
+export async function productListGetChanged() {
   const db = await getDB()
-  const productWeek = await productListWeekResolve(year, week)
+  // const productWeek = await productListWeekResolve(year, week)
   //
   const tx = db.transaction("product_list_items", "readwrite")
   const store = tx.objectStore("product_list_items")

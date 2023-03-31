@@ -260,6 +260,8 @@ import { useAuthStore } from "src/stores/auth";
 import { useQuery } from "@oarepo/vue-query-synchronizer";
 import { destroyDB, productListGetChanged, productListGetOffline, productListMarkUnchanged, ProductListItemSyncable, productListUpdateFromServer, productListUpdateItem, getDB } from "src/modules/ProductListSync";
 import { objectUnproxy } from "src/modules/SyncUtils";
+import WorkerMessagesMixin, { WorkerMessage } from "src/modules/WorkerMessages";
+import {DialogChainObject} from 'quasar'
 
 type CustomIngredientCategory = IngredientCategory & {
   items?: ProductListItemRead[];
@@ -286,7 +288,7 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     ProductListItems,
   },
-  mixins: [HandleErrorsMixin, IsOnlineMixin],
+  mixins: [HandleErrorsMixin, IsOnlineMixin, WorkerMessagesMixin],
   data() {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
@@ -313,6 +315,7 @@ export default defineComponent({
       viewItem: undefined as ProductListItemRead | undefined,
       canSyncFlag: false,
       changedCount: null as number | null,
+      dialog_obj: null as DialogChainObject | null,
       WeekDays,
     };
   },
@@ -516,21 +519,68 @@ export default defineComponent({
       void this.onLoad();
     });
   },
-  methods: {
-    async onLoad() {
-      const changedItems = await productListGetChanged(this.week.year, this.week.week);
-      this.canSyncFlag = Boolean(
-        changedItems && changedItems.length > 0
-      );
-      if (changedItems){
-        this.changedCount = changedItems.length;
+  beforeUnmount(){
+    if (this.dialog_obj){
+      try {
+        this.dialog_obj.hide()
+      } catch (error) {
+        console.debug("Dialog hide error: ", error)
       }
+    }
+  },
+  methods: {
+    onWorkerMessage(msg: WorkerMessage){
+      const data = msg.data
+      if (data.type == "product-list-sync-start"){
+        this.$q.loading.show({
+        group: "autosync",
+        message: "Идет фоновая синхронизация...",
+        delay: 100, // ms
+      });
+      }
+      else if (data.type == "product-list-sync"){
+        console.debug("Product list received worker signal, reloading...")
+        if (this.dialog_obj){
+          this.dialog_obj.hide()
+        }
+        void this.$nextTick(() => {
+          this.$q.loading.hide("autosync");
+          this.canSyncFlag = false;
+          void this.onLoadCheckSync()
+          if (this.canSyncFlag){
+            this.$q.notify({
+              type: "warning",
+              caption: "Похоже что последняя фоновая синхронизация завершилась с ошибкой"
+            })
+            this.askSyncLocal()
+          } else {
+            this.$q.notify({
+              type: "success",
+              caption: "Фоновая синхронизация успешно завершена"
+            })
+          }
+          this.loadList()
+        })
+      }
+    },
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async onLoad() {
+      void this.onLoadCheckSync()
       void this.loadShops();
       void this.loadIngredientCategories();
       if (this.isOnLine) {
         if (this.canSync){
           void this.askSyncLocal()
         }
+      }
+    },
+    async onLoadCheckSync(){
+      const changedItems = await productListGetChanged();
+      this.canSyncFlag = Boolean(
+        changedItems && changedItems.length > 0
+      );
+      if (changedItems){
+        this.changedCount = changedItems.length;
       }
     },
     onWeekUpd() {
@@ -540,7 +590,7 @@ export default defineComponent({
     async loadListOffline(){
       console.debug("Trying to load cached product list", this.week)
         if (this.week){
-          const changedItems = await productListGetChanged(this.week.year, this.week.week);
+          const changedItems = await productListGetChanged();
       this.canSyncFlag = Boolean(
         changedItems && changedItems.length > 0
       );
@@ -549,7 +599,7 @@ export default defineComponent({
       }
       //
           // this.changedCount = info.items.length
-          void productListGetOffline(this.week.year, this.week.week).then((info) => {
+          await productListGetOffline(this.week.year, this.week.week).then((info) => {
             if (info){
               this.store.product_list = Object.assign({}, info.week, {items: info.items})
             } else {
@@ -632,7 +682,7 @@ export default defineComponent({
       }
     },
     askSyncLocal() {
-      this.$q
+      this.dialog_obj = this.$q
         .dialog({
           title: `Синхронизация (элементов: ${this.changedCount ||'-'})`,
           message: `Вы уверены что хотите выполнить синхронизацию?`,
@@ -644,7 +694,7 @@ export default defineComponent({
         });
     },
     askDiscardSync() {
-      this.$q
+      this.dialog_obj = this.$q
         .dialog({
           title: "Подтверждение",
           message: `Вы уверены что хотите удалить локальные данные синхронизации? Это действие необратимо, локальный список продуктов будет стерт.`,
@@ -680,7 +730,7 @@ export default defineComponent({
       //   this.$q.localStorage.getItem("local_productlist")
       // );
       // console.debug("SyncLocal: ", payload);
-      const itemsChanged = await productListGetChanged(this.week.year, this.week.week)
+      const itemsChanged = await productListGetChanged()
       console.debug("Local items changed: ", itemsChanged)
 
       this.loading = false;
@@ -705,6 +755,7 @@ export default defineComponent({
         caption: "Список продуктов успешно синхронизирован",
       });
       void this.$nextTick(() => {
+        this.canSyncFlag = false;
         this.loadList()
       })
       // this.store
@@ -721,13 +772,33 @@ export default defineComponent({
       //     this.handleErrors(err, "Ошибка синхронизации списка продуктов");
       //   });
     },
-    updateOfflineItem(item: ProductListItemRead){
+    async updateOfflineItem(item: ProductListItemRead){
       console.debug("Upd item: ", item);
         // Update offline data
+        let newKey = null;
         if (this.store.product_list) {
-          void productListUpdateItem(item) // Update in indexed DB
+          newKey = await productListUpdateItem(item) // Update in indexed DB
           this.canSyncFlag = true;
         }
+
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          const tags = await registration.sync.getTags()
+          const token = localStorage.getItem("authToken") || ""
+          const syncTag = 'product-list-sync:' + token
+
+          if (!tags.find(t => t.startsWith('product-list-sync'))){
+            await registration.sync.register(syncTag);
+            console.debug("Background sync task created")
+          } else {
+            console.debug("Background sync task already waiting", tags)
+          }
+
+        } catch (error) {
+          console.debug("Background sync request failed: ", error)
+        }
+        return newKey
+
     },
     updateItem(item: ProductListItemRead, reload: boolean) {
       if (!item) {
@@ -741,7 +812,7 @@ export default defineComponent({
         item.is_completed = true;
       }
       if (!this.isOnLine) {
-        this.updateOfflineItem(item)
+        void this.updateOfflineItem(item)
         return;
       }
       const payload = productListItemFromRead(Object.assign({}, item));
@@ -797,21 +868,30 @@ export default defineComponent({
       this.viewItem = item;
       // this.$query.task = item.id;
     },
-    createNewItem() {
+    async createNewItem() {
       const payload = {
         title: this.createItem,
         week: this.store.product_list?.id,
         amount: 1,
         amount_type: "items",
+        priority: 3,
         is_completed: false,
         already_completed: false,
       }  as ProductListItemRead;
       this.createItem = "";
 
       if (!this.isOnLine){
-        this.updateOfflineItem(payload)
-        this.viewItem = payload;
-        void this.loadListOffline()
+        const newKey = await this.updateOfflineItem(payload)
+        console.debug("Offline item new key: ", newKey)
+        await this.loadListOffline()
+        console.debug("Fixing offline item view: ", newKey)
+
+        // @ts-expect-error idLocal
+        const item = this.store.product_list.items.find(i => i.idLocal == newKey)
+        console.debug("Created item: ", item, this.store.product_list?.items)
+        if (item){
+          this.viewItem = item;
+        }
         return;
       }
 

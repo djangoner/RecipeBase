@@ -31,7 +31,8 @@ export default defineComponent({
   props: {
     modelValue: {
       type: Number as PropType<number | null>,
-        required: true,
+        default: null,
+        required: false,
     },
     readonly: {
       type: Boolean,

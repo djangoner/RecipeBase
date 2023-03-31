@@ -6,6 +6,7 @@
  * quasar.config.js > pwa > workboxMode is set to "injectManifest"
  */
 
+import { runBackgroundSyncProductList } from "src/modules/WorkerSync";
 import { clientsClaim } from "workbox-core";
 import {
   precacheAndRoute,
@@ -31,10 +32,44 @@ cleanupOutdatedCaches();
 if (process.env.MODE !== "ssr" || process.env.PROD) {
   registerRoute(
     new NavigationRoute(
-      createHandlerBoundToURL(process.env.DEV?'/' :process.env.PWA_FALLBACK_HTML),
+      createHandlerBoundToURL(process.env.DEV ? '/' : process.env.PWA_FALLBACK_HTML),
       {
         denylist: [/sw\.js$/, /workbox-(.)*\.js$/, /admin(.)*$/, /api(.)*$/],
       }
     )
   );
 }
+
+function postMessageAll(msg) {
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => client.postMessage(msg));
+  })
+}
+
+self.addEventListener('sync', event => {
+  console.debug("[Worker] Sync signal raw: ", event)
+  let option = event.tag.replace(/(.*?)\:.*?$/, "$1");
+  let token = event.tag.replace(/.*?\:(.*?)$/, "$1");
+  console.debug("[Worker] Sync signal: ", option, "| Token:", token)
+
+  if (option === 'product-list-sync') {
+    const productListSync = async () => {
+      postMessageAll({
+        type: "product-list-sync-start",
+        status: "success"
+      })
+
+      console.debug("[Worker] sync start")
+      let res = await runBackgroundSyncProductList(token)
+      console.debug("[Worker] sync finish")
+      if (res) {
+        postMessageAll({
+          type: "product-list-sync",
+          status: "success"
+        });
+        console.debug("[Worker] message sended")
+      }
+    }
+    event.waitUntil(productListSync());
+  }
+});

@@ -155,6 +155,9 @@ def get_notification_text(name: str, **options) -> Optional[str]:
 
         return text
 
+    elif name == "notif_synced":
+        return "Успешно выполнена фоновая синхронизация"
+
     return None
 
 
@@ -239,3 +242,10 @@ def send_product_list(week: ProductListWeek, user: AbstractBaseUser):
         return
 
     send_notification_profile("product_list", user.profile, week_plan=week)  # type: ignore
+
+
+def send_notif_synced(week: ProductListWeek, user: AbstractBaseUser):
+    if not user.profile:  # type: ignore
+        return
+
+    send_notification_profile("notif_synced", user.profile, week_plan=week)  # type: ignore

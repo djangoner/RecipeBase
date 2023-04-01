@@ -188,4 +188,22 @@ id: string,
         });
     }
 
+    /**
+     * @returns StatusOk 
+     * @throws ApiError
+     */
+    public static productListWeekSendSyncedRetrieve({
+id,
+}: {
+id: string,
+}): CancelablePromise<StatusOk> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/product_list_week/{id}/send_synced/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+
 }

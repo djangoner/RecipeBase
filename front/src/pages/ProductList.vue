@@ -555,7 +555,7 @@ export default defineComponent({
             this.askSyncLocal()
           } else {
             this.$q.notify({
-              type: "success",
+              type: "positive",
               caption: "Фоновая синхронизация успешно завершена"
             })
           }

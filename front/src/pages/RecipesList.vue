@@ -220,7 +220,7 @@
 import RecipesListFilters from '../components/Recipes/RecipesListFilters.vue'
 import { useQuery } from "@oarepo/vue-query-synchronizer";
 import recipeCard from "components/RecipeCard.vue";
-import { date, debounce, QTableProps } from "quasar";
+import { date, debounce, QTableProps, SessionStorage } from "quasar";
 import {
   PaginatedRecipeReadList,
   RecipeRead,
@@ -293,14 +293,7 @@ interface QueryInterface {
   display: string;
 }
 
-export default defineComponent({
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { recipeCard, RecipesListFilters },
-  mixins: [HandleErrorsMixin],
-  data() {
-    const store = useBaseStore();
-    const storeAuth = useAuthStore();
-    const filters = {
+const defaultFilters = {
       cooking_time: { min: 5, max: 120 },
       tags_include: [],
       tags_exclude: [],
@@ -309,8 +302,19 @@ export default defineComponent({
       ratings: {},
     };
 
+export default defineComponent({
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  components: { recipeCard, RecipesListFilters },
+  mixins: [HandleErrorsMixin],
+  data() {
+    const store = useBaseStore();
+    const storeAuth = useAuthStore();
+
+
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const emptyFunc = () => {};
+
+    const initialFilters = SessionStorage.getItem("recipesFilters") || defaultFilters
 
     return {
       store,
@@ -329,8 +333,8 @@ export default defineComponent({
       } as TablePagination,
       // compilation: this.$query.compilation,
       showFilters: this.$q.localStorage.getItem("recipesShowFilters"),
-      filters: Object.assign({}, filters) as RecipesFilters,
-      filtersDefault: JSON.parse(JSON.stringify(filters)) as RecipesFilters,
+      filters: Object.assign({}, initialFilters) as RecipesFilters,
+      filtersDefault: JSON.parse(JSON.stringify(defaultFilters)) as RecipesFilters,
       orderingOptions,
       debounceLoadRecipes: emptyFunc,
     };
@@ -417,7 +421,8 @@ export default defineComponent({
     },
     filters: {
       deep: true,
-      handler() {
+      handler(val) {
+        SessionStorage.set("recipesFilters", val)
         this.page = 1;
         this.debounceLoadRecipes();
       },

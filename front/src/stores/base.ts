@@ -155,14 +155,28 @@ export const useBaseStore = defineStore("base", {
       })
     },
     async loadIngredientCategories(payload: object): Promise<PaginatedIngredientCategoryList> {
+      const db = await getDB()
+      if (!isOnline()) {
+        const res = (await db.getAll("ing_categories")) as IngredientCategory[]
+        this.ingredient_categories = res
+        return new Promise((resolve) => {
+          resolve(mockedPaginatedResponse(res, payload) as PaginatedIngredientCategoryList)
+        })
+      }
       return new Promise((resolve, reject) => {
         IngredientCategoryService.ingredientCategoryList(payload)
-          .then((resp) => {
+          .then(async (resp) => {
             this.ingredient_categories = resp.results as IngredientCategory[]
             resolve(resp)
+
+            for (const item of resp.results || []) {
+              await db.put("ing_categories", objectUnproxy(item))
+            }
           })
-          .catch((err) => {
+          .catch(async (err: CustomAxiosError) => {
+            this.ingredient_categories = (await db.getAll("ing_categories")) as IngredientCategory[]
             reject(err)
+            handleErrors(err, "Ошибка загрузки списка категорий ингредиентоа")
           })
       })
     },

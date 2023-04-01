@@ -249,10 +249,8 @@ import {
   ProductListItemSyncable,
   productListUpdateFromServer,
   productListUpdateItem,
-  getDB,
 productListUpdateRawItem,
 } from "src/modules/ProductListSync"
-import { objectUnproxy } from "src/modules/SyncUtils"
 import WorkerMessagesMixin, { WorkerMessage } from "src/modules/WorkerMessages"
 import { DialogChainObject } from "quasar"
 
@@ -629,23 +627,9 @@ export default defineComponent({
         this.handleErrors(err, "Ошибка загрузки списка магазинов")
       })
     },
-    async loadIngredientCategories() {
-      const db = await getDB()
-      if (!this.isOnLine) {
-        this.store.ingredient_categories = (await db.getAll("ing_categories")) as IngredientCategory[]
-      }
-      this.store
+    loadIngredientCategories() {
+      void this.store
         .loadIngredientCategories({ pageSize: 1000 })
-        .then(async (resp) => {
-          for (const item of resp.results || []) {
-            await db.put("ing_categories", objectUnproxy(item))
-          }
-          // this.$q.localStorage.set("ing_categories", resp);
-        })
-        .catch(async (err: CustomAxiosError) => {
-          this.handleErrors(err, "Ошибка загрузки списка категорий ингредиентоа")
-          this.store.ingredient_categories = (await db.getAll("ing_categories")) as IngredientCategory[]
-        })
     },
     syncSaveToLocal() {
       console.debug("syncSaveToLocal")

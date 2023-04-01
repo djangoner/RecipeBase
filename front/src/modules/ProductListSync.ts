@@ -185,7 +185,6 @@ export async function productListUpdateItem(updatedItem: ProductListItemSyncable
   }
 
   const diffList = simpleDiff(savedItem, objectUnproxy(updatedItem))
-  console.debug("Updating item: ", diffList, savedItem)
 
   const changesList = {}
   for (const key of diffList) {
@@ -193,6 +192,7 @@ export async function productListUpdateItem(updatedItem: ProductListItemSyncable
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     changesList[key] = updatedItem[key] // || savedItem[key] // Don't use saved item keys, they can be false
   }
+  console.debug("Updating item: ", diffList, savedItem, changesList)
   // const changesList = diffList.map((key) => {
   //   return { key: updatedItem[key] || savedItem[key] }
   // })

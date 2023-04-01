@@ -13,9 +13,7 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-
         <q-toolbar-title> База рецептов </q-toolbar-title>
-
       </q-toolbar>
     </q-header>
 
@@ -166,31 +164,31 @@
 </template>
 
 <script lang="ts">
-import { useQuasar } from 'quasar';
-import { User } from 'src/client';
-import { useAuthStore } from 'src/stores/auth';
-import { defineComponent, ref } from 'vue';
-import IsOnlineMixin from 'src/modules/IsOnlineMixin';
-import { useBaseStore } from 'src/stores/base';
+import { useQuasar } from "quasar"
+import { User } from "src/client"
+import { useAuthStore } from "src/stores/auth"
+import { defineComponent, ref } from "vue"
+import IsOnlineMixin from "src/modules/IsOnlineMixin"
+import { useBaseStore } from "src/stores/base"
 
-type DarkMode = boolean | 'auto';
-const darkModes: Array<DarkMode> = ['auto', true, false];
+type DarkMode = boolean | "auto"
+const darkModes: Array<DarkMode> = ["auto", true, false]
 
 export default defineComponent({
-  name: 'MainLayout',
+  name: "MainLayout",
 
   components: {},
   mixins: [IsOnlineMixin],
   setup() {
-    const leftDrawerOpen = ref(false);
-    const store = useBaseStore();
-    const storeAuth = useAuthStore();
-    const $q = useQuasar();
+    const leftDrawerOpen = ref(false)
+    const store = useBaseStore()
+    const storeAuth = useAuthStore()
+    const $q = useQuasar()
 
-    const preferredMode: DarkMode | null = $q.localStorage.getItem('preferredMode');
+    const preferredMode: DarkMode | null = $q.localStorage.getItem("preferredMode")
 
     if (preferredMode !== null) {
-      $q.dark.set(preferredMode);
+      $q.dark.set(preferredMode)
     }
 
     return {
@@ -200,57 +198,55 @@ export default defineComponent({
       darkModes,
 
       toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value;
+        leftDrawerOpen.value = !leftDrawerOpen.value
       },
       toggleDark() {
-        const mode = $q.dark.mode;
-        const idxCurr = darkModes.indexOf(mode);
-        let idxNew = idxCurr + 1;
+        const mode = $q.dark.mode
+        const idxCurr = darkModes.indexOf(mode)
+        let idxNew = idxCurr + 1
         if (idxNew >= darkModes.length) {
-          idxNew = 0;
+          idxNew = 0
         }
-        const newMode: DarkMode = darkModes[idxNew];
+        const newMode: DarkMode = darkModes[idxNew]
         // set
-        $q.dark.set(newMode);
-        $q.localStorage.set('preferredMode', newMode);
+        $q.dark.set(newMode)
+        $q.localStorage.set("preferredMode", newMode)
       },
       darkIcon() {
-        const mode = $q.dark.mode;
+        const mode = $q.dark.mode
         switch (mode) {
           case false:
-            return 'light_mode';
+            return "light_mode"
           case true:
-            return 'dark_mode';
-          case 'auto':
-            return 'brightness_auto';
+            return "dark_mode"
+          case "auto":
+            return "brightness_auto"
           default:
-            return 'dark_mode';
+            return "dark_mode"
         }
       },
-    };
+    }
   },
 
   computed: {
     user(): User | null {
-      return this.storeAuth.account;
+      return this.storeAuth.account
     },
     userReadable(): string | undefined {
       if (!this.user) {
-        return;
+        return
       }
-      return this.user.first_name
-        ? [this.user.first_name, this.user.last_name].join(' ').trim()
-        : '@' + this.user.username;
+      return this.user.first_name ? [this.user.first_name, this.user.last_name].join(" ").trim() : "@" + this.user.username
     },
   },
   watch: {
-    'store.printMode': {
+    "store.printMode": {
       handler(val) {
         if (val) {
-          sessionStorage.setItem('leftDrawerOpen', this.leftDrawerOpen ? '1' : '0');
-          this.leftDrawerOpen = false;
+          sessionStorage.setItem("leftDrawerOpen", this.leftDrawerOpen ? "1" : "0")
+          this.leftDrawerOpen = false
         } else {
-          this.leftDrawerOpen = sessionStorage.getItem('leftDrawerOpen') !== '0';
+          this.leftDrawerOpen = sessionStorage.getItem("leftDrawerOpen") !== "0"
         }
       },
     },
@@ -260,19 +256,19 @@ export default defineComponent({
     askLogout() {
       this.$q
         .dialog({
-          title: 'Подтверждение',
-          message: 'Вы уверены что хотите выйти из аккаунта?',
+          title: "Подтверждение",
+          message: "Вы уверены что хотите выйти из аккаунта?",
           cancel: true,
           persistent: true,
         })
         .onOk(() => {
-          this.logout();
-        });
+          this.logout()
+        })
     },
     logout() {
-      void this.storeAuth.logout();
-      void this.$router.push({ name: 'login' });
+      void this.storeAuth.logout()
+      void this.$router.push({ name: "login" })
     },
   },
-});
+})
 </script>

@@ -1,5 +1,6 @@
 <template>
   <q-page class="flex column q-gutter-y-lg">
+    <!-- Top metrics -->
     <div class="row q-px-md q-col-gutter-md">
       <metric-card
         icon="article"
@@ -31,6 +32,7 @@
       />
     </div>
 
+    <!-- Center links -->
     <div class="col-grow flex column flex-center q-col-gutter-y-lg">
       <div class="row justify-center items-center q-gutter-x-md">
         <q-icon
@@ -97,6 +99,11 @@
         </q-list>
       </div>
     </div>
+
+    <!-- Bottom version -->
+    <div class="flex flex-center">
+      <span class="text-subtitle1 text-weight-bold">V {{ appVersion }}</span>
+    </div>
   </q-page>
 </template>
 
@@ -110,6 +117,7 @@ import HandleErrorsMixin, {
 } from "src/modules/HandleErrorsMixin";
 import IsOnlineMixin from "src/modules/IsOnlineMixin";
 import { useAuthStore } from "src/stores/auth";
+
 const card: DefineComponent = MetricCard as Component as DefineComponent;
 
 export default defineComponent({
@@ -125,6 +133,9 @@ export default defineComponent({
     stats(): StatsList | null {
       return this.store.stats;
     },
+    appVersion():string{
+      return this.store.appVersion
+    }
   },
   created() {
     if (this.isOnLine) {

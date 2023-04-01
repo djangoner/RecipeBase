@@ -81,7 +81,11 @@ export const useBaseStore = defineStore("base", {
     conditions: null as WeekPlanCondition[] | null,
   }),
 
-  getters: {},
+  getters: {
+    appVersion(): string {
+      return process.env.PACKAGE_VERSION || "0"
+    },
+  },
 
   actions: {
     // -- Essentials

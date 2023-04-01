@@ -11,6 +11,10 @@
 const { configure } = require("quasar/wrappers");
 const path = require("path");
 
+const fs = require('fs')
+const packageJson = fs.readFileSync('./package.json')
+const version = JSON.parse(packageJson).version || 0
+
 module.exports = configure(function (/* ctx */) {
   return {
     eslint: {
@@ -64,7 +68,9 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        'PACKAGE_VERSION': version,
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,

@@ -81,6 +81,7 @@
           :debounce="100"
           :options="ingredients || []"
           :readonly="item.is_auto || !canEdit"
+          :input-debounce="100"
           option-label="title"
           option-value="id"
           map-options

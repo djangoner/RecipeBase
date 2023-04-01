@@ -393,8 +393,8 @@ export default defineComponent({
       if (isCreating) {
         payload.image = null;
       } else {
-        if (!payload.image) {
-          payload.image = "";
+        if (typeof payload.image === "string"){
+          delete payload.image;
         }
       }
       console.debug("Payload: ", payload);

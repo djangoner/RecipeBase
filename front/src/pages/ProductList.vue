@@ -447,8 +447,10 @@ export default defineComponent({
       return this.store.ingredient_categories
     },
     completedPrc() {
-      const itemsCompleted = this.store.product_list?.items.filter((i) => i.is_completed)?.length
-      const itemsTotal = this.store.product_list?.items?.length
+      const items = this.store.product_list?.items?.filter(i => !i.already_completed);
+
+      const itemsCompleted = items?.filter((i) => i.is_completed)?.length
+      const itemsTotal = items?.length
 
       if (!itemsCompleted || !itemsTotal) {
         return 0

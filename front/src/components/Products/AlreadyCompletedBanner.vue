@@ -1,16 +1,20 @@
 <template>
   <div :style="divStyle" />
-  <q-item
+  <q-banner
     v-if="show"
     v-scroll="onScroll"
     class="bg-info text-white"
     :style="style"
   >
-    <q-item-section avatar>
-      <q-icon name="info" />
-    </q-item-section>
-    <q-item-section>Режим "отметить что уже есть"</q-item-section>
-  </q-item>
+    <template #avatar>
+      <q-icon
+        name="info"
+        size="md"
+      />
+    </template>
+
+    Режим "отметить что уже есть"
+  </q-banner>
 </template>
 
 <script lang="ts">
@@ -29,7 +33,7 @@ export default defineComponent({
   computed: {
     style(){
       if (this.fixedMode){
-        return ["position:fixed", "top: 50px;", "width: 100%;"]
+        return ["position:fixed", "top: 50px;", "width: 100%;", "z-index: 2"]
       }
       return {}
     },
@@ -42,7 +46,6 @@ export default defineComponent({
   },
   methods: {
     onScroll (position: number) {
-      console.debug("scroll: ", position)
       this.fixedMode = position > 30
   }
   }

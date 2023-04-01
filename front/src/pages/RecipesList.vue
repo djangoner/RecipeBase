@@ -437,7 +437,9 @@ export default defineComponent({
   methods: {
     loadRecipes() {
       return new Promise((resolve, reject) => {
-        const payload = {} as { [key: string]: string };
+        const payload = {
+          omit: 'source,source_content'
+        } as { [key: string]: string };
 
         payload.search = this.search;
         payload.page = String(this.page);

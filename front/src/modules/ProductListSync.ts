@@ -183,6 +183,9 @@ export async function productListUpdateItem(updatedItem: ProductListItemSyncable
   } else {
     savedItem = {}
   }
+  if (updatedItem.id) {
+    updatedItem.idLocal = updatedItem.id
+  }
 
   const diffList = simpleDiff(savedItem, objectUnproxy(updatedItem))
 

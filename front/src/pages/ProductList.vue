@@ -221,6 +221,21 @@
       </template>
     </q-list>
 
+    <div
+      v-if="!showCompleted && completedCount && listItemsRaw.length > 2"
+      class="flex flex-center"
+    >
+      <q-btn
+        flat
+        label="Показать завершенные"
+        icon="expand_more"
+        no-caps
+        size="sm"
+        dense
+        @click="showCompleted = true"
+      />
+    </div>
+
     <q-inner-loading :showing="loading" />
   </q-page>
 </template>
@@ -456,6 +471,9 @@ export default defineComponent({
         return 0
       }
       return itemsCompleted / itemsTotal
+    },
+    completedCount(){
+      return this.listItemsRaw.filter(i => i.is_completed).length
     },
     canSync: {
       get() {

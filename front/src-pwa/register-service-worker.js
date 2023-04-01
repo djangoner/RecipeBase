@@ -27,6 +27,7 @@ register(process.env.SERVICE_WORKER_FILE, {
   updatefound(/* registration */) {
     Notify.create({
       type: "info",
+      group: 'sw-state',
       caption: "Обнаружена новая версия приложения, выполняется обновление...",
     })
     // console.log('New content is downloading.')
@@ -36,6 +37,11 @@ register(process.env.SERVICE_WORKER_FILE, {
     Notify.create({
       type: "info",
       caption: "Обновление установлено, обновите страницу чтобы увидеть изменения",
+      group: 'sw-state',
+      actions: [
+        { label: 'Обновить', color: 'yellow', handler: () => { location.reload() } },
+        { label: 'Закрыть', color: 'white', handler: () => { /* ... */ } },
+      ]
     })
     // console.log('New content is available; please refresh.')
   },

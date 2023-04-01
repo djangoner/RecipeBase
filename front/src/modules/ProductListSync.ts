@@ -204,6 +204,26 @@ export async function productListUpdateItem(updatedItem: ProductListItemSyncable
   return newKey
 }
 
+export async function productListUpdateRawItem(updatedItem: ProductListItemSyncable) {
+  const db = await getDB()
+  const tx = db.transaction("product_list_items", "readwrite")
+  const store = tx.objectStore("product_list_items")
+  const itemId = updatedItem.idLocal || updatedItem.id
+  let savedItem
+  if (itemId) {
+    savedItem = (await store.get(itemId)) as ProductListItemSyncable
+  } else {
+    savedItem = {}
+  }
+  if (!updatedItem.idLocal && updatedItem.id) {
+    updatedItem.idLocal = updatedItem.id
+  }
+  const putItem = objectUnproxy(Object.assign({}, savedItem, updatedItem))
+  const newKey = await store.put(putItem)
+  await tx.done
+  return newKey
+}
+
 export async function productListMarkUnchanged(updatedItem: ProductListItemSyncable) {
   const db = await getDB()
   const tx = db.transaction("product_list_items", "readwrite")

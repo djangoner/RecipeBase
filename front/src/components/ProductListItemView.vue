@@ -13,6 +13,7 @@
         <div class="col row">
           <q-checkbox
             v-model="item.is_completed"
+            :color="item.already_completed?'info':'primary'"
             checked-icon="task_alt"
             unchecked-icon="radio_button_unchecked"
             indeterminate-icon="help"

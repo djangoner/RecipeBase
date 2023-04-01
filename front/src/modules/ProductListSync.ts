@@ -170,7 +170,7 @@ export async function recipePlansGetOffline(year: number, week: number) {
   return resObj
 }
 
-export async function productListUpdateItem(updatedItem: ProductListItemSyncable) {
+export async function productListUpdateItem(updatedItem: ProductListItemSyncable): Promise<number> {
   const db = await getDB()
   const tx = db.transaction("product_list_items", "readwrite")
   const store = tx.objectStore("product_list_items")
@@ -204,7 +204,7 @@ export async function productListUpdateItem(updatedItem: ProductListItemSyncable
 
   const newKey = await store.put(putItem)
   await tx.done
-  return newKey
+  return newKey as number
 }
 
 export async function productListUpdateRawItem(updatedItem: ProductListItemSyncable) {

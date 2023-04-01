@@ -760,10 +760,17 @@ export default defineComponent({
     async updateOfflineItem(item: ProductListItemRead) {
       console.debug("Upd item: ", item)
       // Update offline data
-      let newKey = null
+      let newKey: number | null = null
       if (this.store.product_list) {
         newKey = await productListUpdateItem(item) // Update in indexed DB
         this.canSyncFlag = true
+
+        // @ts-expect-error custom model
+        const itemId = this.store.product_list.items.findIndex(i => i.idLocal === newKey)
+        if (itemId !== undefined){
+          console.debug("Updated stored item: ", itemId)
+          this.store.product_list.items[itemId] = item
+        }
       }
 
       try {

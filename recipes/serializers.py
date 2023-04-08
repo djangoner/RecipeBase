@@ -289,7 +289,7 @@ class RecipeShortSerializer(RecipeSerializer):
     # is_planned = None  # type: ignore
 
     class Meta(RecipeSerializer.Meta):
-        exclude = tuple(list(RecipeSerializer.Meta.exclude) + ["author"])
+        exclude = tuple(list(RecipeSerializer.Meta.exclude) + ["author", "content", "content_source", "images", "tags"])
 
 
 class RecipeForRecipeIngredientSerializer(RecipeShortSerializer):

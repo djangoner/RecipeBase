@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@fireworks-js/vue': ^2.10.2
   '@intlify/vite-plugin-vue-i18n': ^3.4.0
   '@oarepo/vue-query-synchronizer': ^3.0.2
   '@quasar/app-vite': ^1.2.1
@@ -22,6 +23,7 @@ specifiers:
   eslint-config-prettier: ^8.8.0
   eslint-plugin-cypress: ^2.12.1
   eslint-plugin-vue: ^9.10.0
+  fireworks-js: ^2.10.2
   form-data: ^4.0.0
   idb: ^7.1.1
   openapi-typescript-codegen: ^0.23.0
@@ -44,11 +46,13 @@ specifiers:
   workbox-strategies: ^6.5.4
 
 dependencies:
+  '@fireworks-js/vue': 2.10.2_vue@3.2.47
   '@oarepo/vue-query-synchronizer': 3.0.2_lavcef455lp3wtm2mcdrwhgymm
   '@quasar/extras': 1.16.0
   '@quasar/fastclick': 1.1.5
   '@vue/eslint-config-typescript': 11.0.2_iexlb7ruw67oas6hcqq7py7rpa
   axios: 0.21.4
+  fireworks-js: 2.10.2
   idb: 7.1.1
   pinia: 2.0.33_hmuptsblhheur2tugfgucj7gc4
   quasar: 2.11.9
@@ -1379,6 +1383,15 @@ packages:
   /@eslint/js/8.36.0:
     resolution: {integrity: sha512-lxJ9R5ygVm8ZWgYdUweoq5ownDlJ4upvoWmO4eLxBYHdMo+vZ/Rx0EN6MbKWDJOSUGrqJy2Gt+Dyv/VKml0fjg==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+
+  /@fireworks-js/vue/2.10.2_vue@3.2.47:
+    resolution: {integrity: sha512-j5S7JJyQcrmV2O+b1GaCybQHCKM4SAojxPPJnjX/WdhXv3gOHZcvSW2qTlb3zJsx7KIE7E2BObhJZ7oTN4Rg1g==}
+    peerDependencies:
+      vue: '>=2.7.0'
+    dependencies:
+      fireworks-js: 2.10.2
+      vue: 3.2.47
+    dev: false
 
   /@hapi/hoek/9.3.0:
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -4004,6 +4017,10 @@ packages:
     dependencies:
       locate-path: 6.0.0
       path-exists: 4.0.0
+
+  /fireworks-js/2.10.2:
+    resolution: {integrity: sha512-2qqKsRdXHB4s40/t10xYxmLUXF6gSQwbrWFJVvySnpiOrK/EQWC2jmnJ+964kO4vUgSmESjPxjdua+Y3haQbcw==}
+    dev: false
 
   /flat-cache/3.0.4:
     resolution: {integrity: sha512-dm9s5Pw7Jc0GvMYbshN6zchCA9RgQlzzEZX3vylR9IqFfS8XciblUXOKfW6SiuJ0e13eDYZoZV5wdrev7P3Nwg==}

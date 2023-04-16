@@ -22,11 +22,13 @@
     "test:component:ci": "cross-env NODE_ENV=test cypress run --component"
   },
   "dependencies": {
+    "@fireworks-js/vue": "^2.10.2",
     "@oarepo/vue-query-synchronizer": "^3.0.2",
     "@quasar/extras": "^1.16.0",
     "@quasar/fastclick": "^1.1.5",
     "@vue/eslint-config-typescript": "^11.0.2",
     "axios": "^0.21.4",
+    "fireworks-js": "^2.10.2",
     "idb": "^7.1.1",
     "pinia": "^2.0.33",
     "quasar": "^2.11.9",

@@ -486,14 +486,16 @@ export default defineComponent({
       LocalStorage.set("enableFireworks", val)
     },
     showFireworks(val: boolean){
-      if (val){
-        document.documentElement.classList.add("no-scroll")
-      } else {
-        document.documentElement.classList.remove("no-scroll")
+      if (this.enableFireworks){
+        if (val){
+          document.documentElement.classList.add("no-scroll")
+        } else {
+          document.documentElement.classList.remove("no-scroll")
+        }
       }
     },
-    fillingPrc(val){ // When plan finished, show fireworks if enabled
-      if (val == 1){
+    fillingPrc(val, oldVal){ // When plan finished, show fireworks if enabled
+      if (val == 1 && oldVal){
         this.showFireworks = true
       }
     }

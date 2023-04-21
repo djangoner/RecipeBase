@@ -118,6 +118,7 @@ class ProductListItemFactory(DjangoModelFactory):
     class Meta:
         model = ProductListItem
 
+    title = factory.Faker("name")
     day = factory.Faker("pyint", min_value=1, max_value=7)
     ingredient = factory.SubFactory(IngredientFactory)
     description = factory.Faker("text")

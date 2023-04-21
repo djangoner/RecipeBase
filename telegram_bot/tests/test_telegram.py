@@ -97,14 +97,17 @@ def test_get_product_list_on_week_filtered(mocker: MockerFixture):
 
     ProductListItemFactory(week=week, day=1)
     ProductListItemFactory(week=week, day=2, is_completed=True)
+    ProductListItemFactory(week=week, day=2)
+    ProductListItemFactory(week=week, day=3)
     ProductListItemFactory(week=week, day=None, is_completed=True)
     plan1: ProductListItem = ProductListItemFactory.create(week=week, day=None)
     plan2: ProductListItem = ProductListItemFactory.create(week=week, day=None)
+    plan3: ProductListItem = ProductListItemFactory.create(week=week, day=4)
 
     mocker.patch("telegram_bot.services.utils.get_today_day", return_value=3)
     res = utils.get_product_list_on_week_filtered(week)
 
-    assert res == [plan1, plan2]
+    assert res == [plan1, plan2, plan3]
 
 
 @pytest.mark.django_db

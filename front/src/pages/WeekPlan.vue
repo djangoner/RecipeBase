@@ -575,6 +575,7 @@ export default defineComponent({
         const payload = {
           search: this.search,
           fields: "id,title",
+          ordering: "-cooked_times",
           // page_size: 1,
         }
 

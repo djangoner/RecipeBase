@@ -1,5 +1,6 @@
 <template>
   <q-select
+    popup-content-class="popup__recipe-select"
     :model-value="modelValue"
     :input-debounce="100"
     :options="recipesList || []"
@@ -10,7 +11,6 @@
     options-dense
     dense
     @update:model-value="$emit('update:model-value', $event)"
-    popup-content-style="height: 400px"
     @filter="filterRecipes"
     @virtual-scroll="onScroll"
   >
@@ -108,3 +108,9 @@ const onScroll = ({ to, index }: { to: number, index: number }) => {
 }
 
 </script>
+
+<style lang="scss">
+.popup__recipe-select {
+  max-height: 400px!important;
+}
+</style>

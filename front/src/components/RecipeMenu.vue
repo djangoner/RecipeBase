@@ -199,9 +199,9 @@ export default defineComponent({
       const plans = this.plan?.plans;
       const plansFilled =
         plans?.filter((p) => p.meal_time.is_primary && p.day === day).length || 0;
-      const plansTotal = plans?.filter((p) => p.day == day).length || 0;
+      const mealTimesTotal = this.meal_time?.filter(m => m.is_primary).length || 0;
 
-      return plansFilled >= plansTotal && plansTotal > 0;
+      return plansFilled >= mealTimesTotal && mealTimesTotal > 0;
     },
     isMtimeFilled(day: number, mtime: MealTime): boolean {
       const plans = this.plan?.plans;

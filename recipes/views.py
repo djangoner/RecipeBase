@@ -224,6 +224,7 @@ class RecipeViewset(viewsets.ModelViewSet):
         "portion_count",
         "cooking_time",
         "last_cooked",
+        "cooked_times",
     ]
 
     def get_serializer_class(self):

@@ -235,6 +235,8 @@ import { useBaseStore } from "src/stores/base.js";
 import { defineComponent } from "vue";
 
 const orderingOptions = [
+  { label: "Кол-во приготовлений - по возрастанию", value: "cooked_times" },
+  { label: "Кол-во приготовлений - по убыванию", value: "-cooked_times" },
   { label: "Создан - по возрастанию", value: "created" },
   { label: "Создан - по убыванию", value: "-created" },
   { label: "Последнее приготовление - по возрастанию", value: "last_cooked" },
@@ -324,7 +326,7 @@ export default defineComponent({
       page: 1,
       page_size: 20,
       loading: false,
-      ordering: "-created",
+      ordering: "-cooked_times",
       tablePagination: {
         rowsPerPage: 20,
         page: 1,

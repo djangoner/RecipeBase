@@ -212,28 +212,18 @@ export const useBaseStore = defineStore("base", {
     },
 
     // -- Recipes
-    async loadRecipes(payload: object): Promise<PaginatedRecipeReadList> {
-      // return new CancelablePromise<PaginatedRecipeReadList>(
-      //   (resolve, reject) => {
-      //     request(OpenAPI, {
-      //       method: "GET",
-      //       url: "/api/v1/recipes/",
-      //       query: payload,
-      //     })
-      //       .then((resp) => {
-      //         this.recipes = (resp as PaginatedRecipeReadList)
-      //           .results as RecipeRead[];
-      //         resolve(resp as PaginatedRecipeReadList);
-      //       })
-      //       .catch((err) => {
-      //         reject(err);
-      //       });
-      //   }
-      // );
+    async loadRecipes(payload: object, loadMore = false): Promise<PaginatedRecipeReadList> {
       return new Promise((resolve, reject) => {
         RecipesService.recipesList(payload)
           .then((resp) => {
-            this.recipes = resp.results as RecipeRead[]
+            if (loadMore){
+              if (!this.recipes){
+                this.recipes = []
+              }
+              this.recipes = this.recipes.concat(resp.results as RecipeRead[])
+            } else {
+              this.recipes = resp.results as RecipeRead[]
+            }
             resolve(resp)
           })
           .catch((err) => {

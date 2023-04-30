@@ -50,18 +50,14 @@
                     dense
                   />
                 </q-item-section>
-                <q-item-section>
-                  Фейерверки
-                </q-item-section>
+                <q-item-section> Фейерверки </q-item-section>
               </q-item>
               <q-item
                 clickable
                 @click="showFireworks = true"
               >
                 <!-- <q-item-section avatar /> -->
-                <q-item-section>
-                  Запустить фейерверки
-                </q-item-section>
+                <q-item-section> Запустить фейерверки </q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -166,27 +162,10 @@
                       </div>
 
                       <div class="col">
-                        <q-select
+                        <recipe-select
                           :model-value="dayPlan?.recipe"
-                          :input-debounce="100"
-                          :options="recipesList || []"
-                          :readonly="readonly"
-                          option-label="title"
-                          use-input
-                          clearable
-                          options-dense
-                          dense
                           @update:model-value="setRecipe(idx, mtime, $event, rec_idx)"
-                          @filter="filterRecipes"
-                        >
-                          <template #no-option>
-                            <q-item>
-                              <q-item-section class="text-grey">
-                                Нет результатов
-                              </q-item-section>
-                            </q-item>
-                          </template>
-                        </q-select>
+                        />
                         <!-- <span>{{ getplan(idx, mtime)?.title }}</span> -->
                       </div>
 
@@ -294,11 +273,11 @@
       height: '100%',
       position: 'fixed',
       background: '#000',
-      'z-index': 9999
+      'z-index': 9999,
     }"
   />
   <div
-    v-if="enableFireworks &&showFireworks"
+    v-if="enableFireworks && showFireworks"
     class="position-absolute absolute-top-right toolbar-topright"
   >
     <q-btn
@@ -317,6 +296,7 @@
 </template>
 
 <script lang="ts">
+import RecipeSelect from "../components/Recipes/RecipeSelect.vue"
 import weekSelect from "components/WeekSelect.vue"
 import { useBaseStore } from "src/stores/base"
 import { date, LocalStorage } from "quasar"
@@ -364,18 +344,13 @@ const fireworksOptions = {
   opacity: 0.5,
   sound: {
     enabled: true,
-    files: [
-        '/sounds/explosion0.mp3',
-        '/sounds/explosion1.mp3',
-        '/sounds/explosion2.mp3'
-      ],
-
+    files: ["/sounds/explosion0.mp3", "/sounds/explosion1.mp3", "/sounds/explosion2.mp3"],
   },
 }
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { weekSelect, recipeCardTooltip, PlanWeekInfo, Fireworks }, // : defineAsyncComponent(() => import("@fireworks-js/vue"))
+  components: { weekSelect, recipeCardTooltip, PlanWeekInfo, Fireworks, RecipeSelect }, // : defineAsyncComponent(() => import("@fireworks-js/vue"))
   directives: {
     print: print as Directive,
   },
@@ -399,7 +374,6 @@ export default defineComponent({
       fireworksOptions: fireworksOptions,
       addMtimeSelect: null,
       meal_time_options: [] as MealTime[] | null,
-      search: "",
       WeekDays,
       WeekDaysColors,
     }
@@ -425,9 +399,6 @@ export default defineComponent({
     },
     meal_time() {
       return this.store.meal_time
-    },
-    recipesList() {
-      return this.store.recipes
     },
     fillingPrc(): number | null {
       if (!this.meal_time) {
@@ -482,23 +453,24 @@ export default defineComponent({
     },
   },
   watch: {
-    enableFireworks(val: boolean){
+    enableFireworks(val: boolean) {
       LocalStorage.set("enableFireworks", val)
     },
-    showFireworks(val: boolean){
-      if (this.enableFireworks){
-        if (val){
+    showFireworks(val: boolean) {
+      if (this.enableFireworks) {
+        if (val) {
           document.documentElement.classList.add("no-scroll")
         } else {
           document.documentElement.classList.remove("no-scroll")
         }
       }
     },
-    fillingPrc(val, oldVal){ // When plan finished, show fireworks if enabled
-      if (val == 1 && oldVal){
+    fillingPrc(val, oldVal) {
+      // When plan finished, show fireworks if enabled
+      if (val == 1 && oldVal) {
         this.showFireworks = true
       }
-    }
+    },
   },
   created() {
     void this.$nextTick(() => {
@@ -568,42 +540,6 @@ export default defineComponent({
         .catch((err: CustomAxiosError) => {
           // this.loading = false;
           this.handleErrors(err, "Ошибка загрузки времени приема пищи")
-        })
-    },
-    loadRecipes() {
-      return new Promise((resolve, reject) => {
-        const payload = {
-          search: this.search,
-          fields: "id,title",
-          ordering: "-cooked_times",
-          // page_size: 1,
-        }
-
-        this.store
-          .loadRecipes(payload)
-          .then(() => {
-            resolve(payload)
-          })
-          .catch((err: CustomAxiosError) => {
-            console.warn(err)
-            reject(err)
-            this.handleErrors(err, "Ошибка загрузки рецептов")
-          })
-      })
-    },
-
-    filterRecipes(val: string, update: CallableFunction) {
-      if (this.search == val && this.recipesList) {
-        update()
-        return
-      }
-      this.search = val
-      this.loadRecipes()
-        .then(() => {
-          update()
-        })
-        .catch(() => {
-          update()
         })
     },
 
@@ -795,7 +731,7 @@ body.body--dark .week-select-page .q-field--dark {
   }
 }
 
-.toolbar-topright{
-  z-index:99999
+.toolbar-topright {
+  z-index: 99999;
 }
 </style>

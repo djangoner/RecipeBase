@@ -24,12 +24,11 @@ steps:
       source: ./
       target: /srv/RecipeBase
       recursive: true
-      pre_script:
+      script:
+        - cd /srv/RecipeBase
         - docker tag src_web recipebase-web:latest
         - docker tag src_web recipebase-qcluster:latest
         - docker tag src_quasar recipebase-quasar:latest
-      script:
-        - cd /srv/RecipeBase
         - docker-compose up -d
 
 environment:

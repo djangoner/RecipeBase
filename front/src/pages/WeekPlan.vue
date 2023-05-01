@@ -164,6 +164,7 @@
                       <div class="col">
                         <recipe-select
                           :model-value="dayPlan?.recipe"
+                          :readonly="readonly"
                           @update:model-value="setRecipe(idx, mtime, $event, rec_idx)"
                         />
                         <!-- <span>{{ getplan(idx, mtime)?.title }}</span> -->

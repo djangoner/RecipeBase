@@ -102,10 +102,10 @@ const filterRecipes = (val: string, update: CallableFunction) => {
 
 const onScroll = ({ to, index }: { to: number, index: number }) => {
   const lastIndex = (recipesList.value?.length || 1) - 1
-  console.debug("Scroll: ", to, index, lastIndex, page.value, lastPage.value)
+  // console.debug("Scroll: ", to, index, lastIndex, page.value, lastPage.value)
 
   if (loading.value !== true && page.value < lastPage.value && index === lastIndex) {
-    console.debug("Loading more!")
+    // console.debug("Loading more!")
     page.value += 1
     void loadRecipes()
   }

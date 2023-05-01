@@ -1,0 +1,47 @@
+---
+kind: pipeline
+type: docker
+name: run_stage
+
+steps:
+  - name: stage
+    image: docker/compose:latest
+    commands:
+      - docker-compose build web quasar
+      - docker-compose run --rm web pytest
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+
+  - name: deploy
+    image: drillster/drone-rsync
+    settings:
+      hosts:
+        - 45.155.207.86
+      user: build
+      key:
+        from_secret: ssh_key
+      source: ./
+      target: /srv/test/testapp
+      recursive: true
+      pre_script:
+        - docker tag src_web recipebase-web:latest
+        - docker tag src_web recipebase-qcluster:latest
+        - docker tag src_quasar recipebase-quasar:latest
+      script:
+        - cd /srv/test/testapp
+        - docker-compose up -d
+
+environment:
+  APP_PORT: 10110
+  NGINX_PORT: 10111
+
+trigger:
+  branch:
+    - master
+    - develop
+
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock

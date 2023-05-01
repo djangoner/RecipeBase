@@ -9,7 +9,7 @@
     use-input
     clearable
     options-dense
-    dense
+    :dense="dense"
     @update:model-value="$emit('update:model-value', $event)"
     @filter="filterRecipes"
     @virtual-scroll="onScroll"
@@ -35,6 +35,10 @@ const props = defineProps({
     type: Object as PropType<RecipeRead>,
     required: false,
     default: undefined,
+  },
+  dense: {
+    type: Boolean,
+    default: true,
   },
   readonly: {
     type: Boolean,

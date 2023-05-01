@@ -53,6 +53,7 @@ HOSTNAME_OVERRIDE = getenv("HOSTNAME_OVERRIDE", None)
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -110,6 +111,7 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = "RecipeBase.asgi.application"
 WSGI_APPLICATION = "RecipeBase.wsgi.application"
 
 INTERNAL_IPS = ["127.0.0.1", *os.getenv("INTERNAL_IPS", "").split(",")]

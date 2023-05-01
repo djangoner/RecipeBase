@@ -25,6 +25,7 @@ pytest-mock = "*"
 django-cachalot = "*"
 gunicorn = "*"
 cachetools = "*"
+channels = {extras = ["daphne"], version = "*"}
 
 [dev-packages]
 pytest = "*"

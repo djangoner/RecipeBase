@@ -14,8 +14,6 @@ services:
             - "${APP_PORT:-8085}:8080"
         volumes:
             - .:/app
-        depends_on:
-            - redis
         restart: unless-stopped # unless-stopped on-failure
 
     quasar:

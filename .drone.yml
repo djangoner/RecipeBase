@@ -35,6 +35,7 @@ steps:
 environment:
   APP_PORT: 10110
   NGINX_PORT: 10111
+  PIPENV_ARGS: "-d"
 
 trigger:
   branch:

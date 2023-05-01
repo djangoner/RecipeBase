@@ -31,6 +31,16 @@ steps:
         - docker tag src_quasar recipebase-quasar:latest
         - docker-compose up -d
 
+  - name: Telegram notification
+    image: appleboy/drone-telegram
+    settings:
+      token:
+        from_secret: telegram_token
+      to: 1016967794
+      template_vars:
+        env: testing
+        app: RecipeBase
+
 environment:
   APP_PORT: 10110
   NGINX_PORT: 10111

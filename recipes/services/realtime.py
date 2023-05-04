@@ -5,7 +5,7 @@ from typing import Callable, Type, TypeAlias
 from django.db.models import Model
 from rest_framework.serializers import ModelSerializer
 from django.dispatch import receiver
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save
 
 log = logging.getLogger("Realtime")
 
@@ -40,14 +40,16 @@ def model_receiver(sender: Type[Model], instance: Type[Model], model_info: Model
     data = data_model.asdict()
     data["type"] = "model_update"
 
-    if instance.id is not None and not created and not deleted:
-        prev_model = sender.objects.get(id=instance.id)
-        is_equal = dict(model_info.serializer(instance).data) == dict(model_info.serializer(prev_model).data)
-        if is_equal:
-            # log.debug("Skipped model by equal", sender, instance.id)
-            return
+    # if instance.id is not None and not created and not deleted:
+    #     prev_model = sender.objects.get(id=instance.id)
+    #     is_equal = dict(model_info.serializer(instance).data) == dict(model_info.serializer(prev_model).data)
+    #     pprint(model_info.serializer(instance).data)
+    #     pprint(model_info.serializer(prev_model).data)
+    #     if is_equal:
+    #         log.info(f"Skipped model by equal {sender} {instance.id}")
+    #         return
 
-    # log.debug("Changed model: ", instance.id)
+    # log.info(f"Changed model: {instance.id}")
 
     try:
         callback(data)
@@ -58,7 +60,7 @@ def model_receiver(sender: Type[Model], instance: Type[Model], model_info: Model
 def register_model(model: ModelInfo, callback):
     handler = partial(model_receiver, model_info=model, callback=callback)
     receiver(post_save, sender=model.model)(handler)
-    receiver(post_delete, sender=model.model)(partial(handler, deleted=True))
+    # receiver(post_delete, sender=model.model)(partial(handler, deleted=True))
 
 
 def register_models(models: list[ModelInfo], callback: TypeCallback) -> None:

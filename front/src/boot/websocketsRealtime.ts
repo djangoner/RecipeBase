@@ -9,6 +9,7 @@ const URL = (location.protocol == "https" ? "wss" : "ws") + "://" + location.hos
 
 const socket = new ReconnectingWebSocket(URL, [], {
   connectionTimeout: 1000,
+  startClosed: !navigator.onLine, // Don't connect when started offline
   // maxRetries: 10,
 })
 

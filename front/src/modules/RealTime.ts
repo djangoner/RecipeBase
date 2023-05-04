@@ -11,6 +11,7 @@ export interface StructureWebsocketData {
 
 export interface ModelUpdateData extends StructureWebsocketData {
   created: boolean
+  deleted: boolean
   model: string
 }
 
@@ -86,9 +87,13 @@ export class RealTime {
 
     if (modelInfo.single_attr) {
       // console.debug("Updated single attr")
-      const currValue = this.getStore(modelInfo.single_attr)
-      if (currValue && currValue[idField] == newModel[idField]) {
-        this.setStore(modelInfo.single_attr, newModel)
+      if (data.deleted) {
+        this.setStore(modelInfo.single_attr, null)
+      } else {
+        const currValue = this.getStore(modelInfo.single_attr)
+        if (currValue && currValue[idField] == newModel[idField]) {
+          this.setStore(modelInfo.single_attr, newModel)
+        }
       }
     }
     if (modelInfo.array_attr) {
@@ -97,6 +102,11 @@ export class RealTime {
       if (data.created) {
         // Create
         arr_before_copy.push(newModel)
+      } else if (data.deleted) {
+        // Delete
+        if (arr_before_idx) {
+          arr_before_copy.splice(arr_before_idx, 1)
+        }
       } else {
         // Update
         if (arr_before_idx) {

@@ -1,9 +1,8 @@
-import { boot, store } from "quasar/wrappers"
+import { boot } from "quasar/wrappers"
 import { useBaseStore } from "src/stores/base"
 import ReconnectingWebSocket from "reconnecting-websocket"
 import { RealTime, StoreMappingObject, ModelUpdateData } from "src/modules/RealTime"
 import { Ref, ref } from "vue"
-import { SocketAddress } from "net"
 
 const URL = (location.protocol == "https" ? "wss" : "ws") + "://" + location.host + "/ws/realtime"
 
@@ -45,6 +44,26 @@ const storeMapping: StoreMappingObject = {
           return
         }
         store.product_list.items = val
+      },
+    },
+  },
+  RecipePlanWeek: {
+    single_attr: "week_plan",
+  },
+  Recipe: {
+    single_attr: "recipe",
+    array_attr: "recipes",
+  },
+  RecipePlan: {
+    array_attr: {
+      get() {
+        return store.week_plan?.plans
+      },
+      set(val: unknown) {
+        if (!store.week_plan?.plans) {
+          return
+        }
+        store.week_plan.plans = val
       },
     },
   },

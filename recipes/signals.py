@@ -4,8 +4,14 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from recipes.consumers import RealtimeConsumer
 
-from recipes.models import ProductListItem, RecipeIngredient, RecipePlanWeek
-from recipes.serializers import ProductListItemSerializer
+from recipes.models import Ingredient, ProductListItem, Recipe, RecipeIngredient, RecipePlan, RecipePlanWeek
+from recipes.serializers import (
+    IngredientSerializer,
+    ProductListItemSerializer,
+    RecipePlanSerializer,
+    RecipePlanWeekSerializer,
+    RecipeSerializer,
+)
 from recipes.services.measurings import amount_to_grams
 from recipes.services.realtime import ModelInfo, register_models
 
@@ -25,7 +31,16 @@ def recipe_pre_save(sender: RecipeIngredient, instance, **kwargs):
     instance.amount_grams = amount_to_grams(instance.amount, instance.amount_type)
 
 
-register_models([ModelInfo(ProductListItem, ProductListItemSerializer)], callback=RealtimeConsumer.send_raw_data)
+register_models(
+    [
+        ModelInfo(ProductListItem, ProductListItemSerializer),
+        ModelInfo(RecipePlan, RecipePlanSerializer),
+        ModelInfo(RecipePlanWeek, RecipePlanWeekSerializer),
+        ModelInfo(Ingredient, IngredientSerializer),
+        ModelInfo(Recipe, RecipeSerializer),
+    ],
+    callback=RealtimeConsumer.send_raw_data,
+)
 
 # @receiver(post_save, sender=Recipe)
 # def recipe_post_save(sender, instance: Recipe, **kwargs):

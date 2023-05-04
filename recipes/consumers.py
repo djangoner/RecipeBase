@@ -1,3 +1,4 @@
+import json
 import logging
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -20,6 +21,10 @@ class RealtimeConsumer(AsyncJsonWebsocketConsumer):
     async def receive_json(self, content: dict, **kwargs):
         logging.info("Socket received: ", content)
         pass
+
+    @classmethod
+    async def encode_json(cls, content):
+        return json.dumps(content, default=str)
 
     async def raw_data(self, event):
         await self.send_json(event["message"])

@@ -69,7 +69,11 @@ export default boot((/* { app, router, ... } */) => {
     console.debug("[Socket] message: ", data)
 
     if (data.type == "model_update") {
-      realTime.onModelUpdate(data as ModelUpdateData)
+      try {
+        realTime.onModelUpdate(data as ModelUpdateData)
+      } catch (error) {
+        console.error("[Socker] model update error: ", error)
+      }
     }
   }
 

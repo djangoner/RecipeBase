@@ -86,22 +86,25 @@ export class RealTime {
 
     if (modelInfo.single_attr) {
       // console.debug("Updated single attr")
-      this.setStore(modelInfo.single_attr, newModel)
+      const currValue = this.getStore(modelInfo.single_attr)
+      if (currValue && currValue[idField] == newModel[idField]) {
+        this.setStore(modelInfo.single_attr, newModel)
+      }
     }
     if (modelInfo.array_attr) {
       const arr_before_copy: unknown[] = this.getStore(modelInfo.array_attr)
       const arr_before_idx = arr_before_copy?.findIndex((i) => i[idField] == newModel[idField])
-      if (arr_before_idx !== undefined) {
-        if (data.created) {
-          // Create
-          arr_before_copy.push(newModel)
-        } else {
-          // Update
+      if (data.created) {
+        // Create
+        arr_before_copy.push(newModel)
+      } else {
+        // Update
+        if (arr_before_idx) {
           arr_before_copy[arr_before_idx] = newModel
         }
-        this.setStore(modelInfo.array_attr, arr_before_copy)
-        // console.debug("Updated array attr")
       }
+      this.setStore(modelInfo.array_attr, arr_before_copy)
+      // console.debug("Updated array attr")
     }
   }
 }

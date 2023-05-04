@@ -66,21 +66,7 @@
             </q-list>
           </q-menu>
         </q-item>
-        <q-item
-          v-if="store.enableWebsocket"
-          class="text-center text-white q-py-xs"
-          :class="[websocketStateBg]"
-          style="min-height: auto"
-        >
-          <q-item-section
-            class="q-py-none"
-          >
-            {{ websocketStateStr }}
-            <q-tooltip>
-              Обновление данных в режиме RealTime
-            </q-tooltip>
-          </q-item-section>
-        </q-item>
+        <status-websocket />
 
         <q-item
           v-if="!isOnLine"
@@ -190,21 +176,21 @@
 </template>
 
 <script lang="ts">
+import StatusWebsocket from 'src/components/Status/StatusWebsocket.vue'
 import { useQuasar } from "quasar"
 import { User } from "src/client"
 import { useAuthStore } from "src/stores/auth"
 import { defineComponent, ref } from "vue"
 import IsOnlineMixin from "src/modules/IsOnlineMixin"
 import { useBaseStore } from "src/stores/base"
-import {websocketState} from 'src/boot/websocketsRealtime'
 
 type DarkMode = boolean | "auto"
 const darkModes: Array<DarkMode> = ["auto", true, false]
 
 export default defineComponent({
   name: "MainLayout",
-
-  components: {},
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  components: { StatusWebsocket },
   mixins: [IsOnlineMixin],
   setup() {
     const leftDrawerOpen = ref(false)
@@ -223,7 +209,6 @@ export default defineComponent({
       storeAuth,
       leftDrawerOpen,
       darkModes,
-      websocketState,
 
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value
@@ -266,26 +251,6 @@ export default defineComponent({
       }
       return this.user.first_name ? [this.user.first_name, this.user.last_name].join(" ").trim() : "@" + this.user.username
     },
-    websocketStateBg(){
-      switch (this.websocketState) {
-        case true:
-          return "bg-green"
-        case false:
-          return "bg-red"
-        default:
-          return "bg-orange"
-      }
-    },
-    websocketStateStr(){
-      switch (this.websocketState) {
-        case true:
-          return "Ок"
-        case false:
-          return "Нет подключения"
-        default:
-          return "Подключение..."
-      }
-    }
   },
   watch: {
     "store.printMode": {

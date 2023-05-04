@@ -127,6 +127,15 @@ if TESTING:
     ]
 
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": os.getenv("CHANNELS_BACKEND", "channels.layers.InMemoryChannelLayer"),
+        #     "CONFIG": {
+        #         "hosts": json.loads(os.getenv("CHANNELS_HOSTS", "[]"))
+        #     }
+    }
+}
+
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
@@ -160,9 +169,7 @@ else:
 
 CACHES = {
     "default": {
-        "BACKEND": os.getenv(
-            "CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"
-        ),
+        "BACKEND": os.getenv("CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"),
         "LOCATION": os.getenv("CACHE_LOCATION", None),
         "KEY_PREFIX": os.getenv("CACHE_PREFIX", "recipebase"),
     }

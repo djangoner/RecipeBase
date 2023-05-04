@@ -10,5 +10,4 @@ export default boot(async (/* { app, router, ... } */) => {
     actions: [{ icon: "close", color: "white" }],
     progress: true,
   })
-  // something to do
 })

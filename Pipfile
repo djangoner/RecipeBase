@@ -26,6 +26,7 @@ django-cachalot = "*"
 gunicorn = "*"
 cachetools = "*"
 channels = {extras = ["daphne"], version = "*"}
+channels-redis = "*"
 
 [dev-packages]
 pytest = "*"

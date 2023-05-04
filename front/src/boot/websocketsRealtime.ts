@@ -3,12 +3,22 @@ import { useBaseStore } from "src/stores/base"
 import ReconnectingWebSocket from "reconnecting-websocket"
 import { RealTime, StoreMappingObject, ModelUpdateData } from "src/modules/RealTime"
 import { Ref, ref } from "vue"
+import { SocketAddress } from "net"
 
 const URL = (location.protocol == "https" ? "wss" : "ws") + "://" + location.host + "/ws/realtime"
 
 const socket = new ReconnectingWebSocket(URL, [], {
   connectionTimeout: 1000,
   // maxRetries: 10,
+})
+
+window.addEventListener("online", () => {
+  console.debug("[Socket] reconnecting by online state")
+  socket.reconnect()
+})
+window.addEventListener("offline", () => {
+  console.debug("[Socket] closed by offline state")
+  socket.close()
 })
 
 interface AnyData {
@@ -44,8 +54,6 @@ const realTime = new RealTime(store, storeMapping)
 export const websocketState: Ref<boolean | null> = ref(null)
 
 export default boot((/* { app, router, ... } */) => {
-  console.debug("Socket init: ", socket)
-
   socket.onmessage = (evt) => {
     let data: StructureWebsocketData
 

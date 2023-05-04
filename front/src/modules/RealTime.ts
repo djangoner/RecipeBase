@@ -85,7 +85,7 @@ export class RealTime {
     // console.debug("Model info: ", modelInfo, getStore(modelInfo.single_attr))
 
     if (modelInfo.single_attr) {
-      console.debug("Updated single attr")
+      // console.debug("Updated single attr")
       this.setStore(modelInfo.single_attr, newModel)
     }
     if (modelInfo.array_attr) {
@@ -100,7 +100,7 @@ export class RealTime {
           arr_before_copy[arr_before_idx] = newModel
         }
         this.setStore(modelInfo.array_attr, arr_before_copy)
-        console.debug("Updated array attr")
+        // console.debug("Updated array attr")
       }
     }
   }

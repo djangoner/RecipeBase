@@ -522,7 +522,6 @@ export default defineComponent({
     listItemsRaw: {
       deep: true,
       handler(val){
-        console.debug("List items upd")
         if (val && this.viewItem){
           const currItem = this.listItemsRaw.find((i) => i.id == this.viewItem.id)
           if (currItem){

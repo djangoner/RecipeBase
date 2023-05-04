@@ -68,8 +68,6 @@
           </q-item-section>
         </q-item>
 
-        <q-separator class="q-mb-md" />
-
         <q-item
           v-if="!isOnLine"
           class="bg-orange text-white"
@@ -79,6 +77,8 @@
           </q-item-section>
           <q-item-section>Нет подключения к интернету</q-item-section>
         </q-item>
+
+        <q-separator class="q-mb-md" />
 
         <q-item
           :to="{ name: 'index' }"

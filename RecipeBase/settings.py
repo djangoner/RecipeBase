@@ -53,6 +53,7 @@ HOSTNAME_OVERRIDE = getenv("HOSTNAME_OVERRIDE", None)
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -110,6 +111,7 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = "RecipeBase.asgi.application"
 WSGI_APPLICATION = "RecipeBase.wsgi.application"
 
 INTERNAL_IPS = ["127.0.0.1", *os.getenv("INTERNAL_IPS", "").split(",")]
@@ -124,6 +126,15 @@ if TESTING:
         "django.contrib.auth.hashers.MD5PasswordHasher",
     ]
 
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": os.getenv("CHANNELS_BACKEND", "channels.layers.InMemoryChannelLayer"),
+        #     "CONFIG": {
+        #         "hosts": json.loads(os.getenv("CHANNELS_HOSTS", "[]"))
+        #     }
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -158,9 +169,7 @@ else:
 
 CACHES = {
     "default": {
-        "BACKEND": os.getenv(
-            "CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"
-        ),
+        "BACKEND": os.getenv("CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"),
         "LOCATION": os.getenv("CACHE_LOCATION", None),
         "KEY_PREFIX": os.getenv("CACHE_PREFIX", "recipebase"),
     }

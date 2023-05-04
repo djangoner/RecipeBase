@@ -264,7 +264,7 @@ import {
   ProductListItemSyncable,
   productListUpdateFromServer,
   productListUpdateItem,
-productListUpdateRawItem,
+  productListUpdateRawItem,
 } from "src/modules/ProductListSync"
 import WorkerMessagesMixin, { WorkerMessage } from "src/modules/WorkerMessages"
 import { DialogChainObject } from "quasar"
@@ -316,6 +316,7 @@ export default defineComponent({
       showCompleted: Boolean(showCompleted),
       createItem: "",
       markAlreadyCompleted: false,
+      listRawLast: null as ProductListItemRead[] | null,
       // week: {
       //   year: null,
       //   week: null,
@@ -462,7 +463,7 @@ export default defineComponent({
       return this.store.ingredient_categories
     },
     completedPrc() {
-      const items = this.store.product_list?.items?.filter(i => !i.already_completed);
+      const items = this.store.product_list?.items?.filter((i) => !i.already_completed)
 
       const itemsCompleted = items?.filter((i) => i.is_completed)?.length
       const itemsTotal = items?.length
@@ -472,8 +473,8 @@ export default defineComponent({
       }
       return itemsCompleted / itemsTotal
     },
-    completedCount(){
-      return this.listItemsRaw.filter(i => i.is_completed).length
+    completedCount() {
+      return this.listItemsRaw.filter((i) => i.is_completed).length
     },
     canSync: {
       get() {
@@ -518,6 +519,35 @@ export default defineComponent({
       if (val && !oldVal && this.canSync) {
         void this.askSyncLocal()
       }
+    },
+    listItemsRaw: {
+      deep: true,
+      handler(val: ProductListItemRead[] | null) {
+        const lastList = this.listRawLast
+        // Update offline diff items
+        if (val && lastList) {
+          for (const item1 of val) {
+            const item2 = lastList.find((x) => x.id === item1.id)
+            const itemEq = item1 === item2
+
+            if (!itemEq) {
+              // itemsDiff.push(item1)
+              void productListUpdateRawItem(item1)
+              console.debug("UPD DIFF: ", item1)
+            }
+          }
+        }
+
+        // Update current viewItem
+        this.listRawLast = val ? val.slice() : []
+        if (val && this.viewItem) {
+          const currItem = this.listItemsRaw.find((i) => i.id == this.viewItem.id)
+          if (currItem) {
+            this.viewItem = currItem
+            console.debug("Updated current viewItem")
+          }
+        }
+      },
     },
   },
   created() {
@@ -648,8 +678,7 @@ export default defineComponent({
       })
     },
     loadIngredientCategories() {
-      void this.store
-        .loadIngredientCategories({ pageSize: 1000 })
+      void this.store.loadIngredientCategories({ pageSize: 1000 })
     },
     syncSaveToLocal() {
       console.debug("syncSaveToLocal")
@@ -766,8 +795,8 @@ export default defineComponent({
         this.canSyncFlag = true
 
         // @ts-expect-error custom model
-        const itemId = this.store.product_list.items.findIndex(i => i.idLocal === newKey)
-        if (itemId !== undefined){
+        const itemId = this.store.product_list.items.findIndex((i) => i.idLocal === newKey)
+        if (itemId !== undefined) {
           console.debug("Updated stored item: ", itemId)
           this.store.product_list.items[itemId] = item
         }

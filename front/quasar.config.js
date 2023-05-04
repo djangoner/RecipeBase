@@ -33,7 +33,7 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
-    boot: ["i18n", "querySync"],
+    boot: ["i18n", "querySync", "notifyDefault", "websocketsRealtime"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ["app.scss"],
@@ -103,6 +103,11 @@ module.exports = configure(function (/* ctx */) {
         "/api": {
           target: "http://127.0.0.1:8000",
           changeOrigin: true,
+        },
+        "/ws": {
+          target: "http://127.0.0.1:8000",
+          changeOrigin: true,
+          ws: true,
         },
         "/admin": {
           target: "http://127.0.0.1:8000",

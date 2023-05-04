@@ -24,7 +24,7 @@ export interface ProductListItemSyncable extends ProductListItemRead {
 export async function getDB() {
   const db = await openDB("recipebase", DBVersion, {
     upgrade(db, oldVersion, newVersion, transaction) {
-      console.debug("[IDB] Upgrading DB" + `${oldVersion} -> ${newVersion || ""}`)
+      console.debug("[IDB] Upgrading DB: " + `${oldVersion} -> ${newVersion || ""}`)
       // switch (oldVersion) {
       //   case 0:
       //   case 1:

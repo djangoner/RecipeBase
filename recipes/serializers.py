@@ -253,6 +253,9 @@ class RecipeSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer,
         now = datetime.now()
         now_week = now.isocalendar()[1]
 
+        if now.isocalendar().weekday >= 5:  # After friday skip week
+            now_week += 1
+
         recipe_week = last_cooked.isocalendar()[1]
         return now_week == recipe_week
 

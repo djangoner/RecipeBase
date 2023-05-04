@@ -83,10 +83,9 @@ export class RealTime {
     const idField = modelInfo.idField || "id"
     const newModel = data.data
 
-    // console.debug("Model info: ", modelInfo, getStore(modelInfo.single_attr))
+    console.debug("[RealTime] Processing model update: ", modelInfo)
 
     if (modelInfo.single_attr) {
-      // console.debug("Updated single attr")
       if (data.deleted) {
         this.setStore(modelInfo.single_attr, null)
       } else {
@@ -95,6 +94,7 @@ export class RealTime {
           this.setStore(modelInfo.single_attr, newModel)
         }
       }
+      console.debug("[RealTime] Updated single attr: ", newModel)
     }
     if (modelInfo.array_attr) {
       const arr_before_copy: unknown[] = this.getStore(modelInfo.array_attr)
@@ -114,7 +114,7 @@ export class RealTime {
         }
       }
       this.setStore(modelInfo.array_attr, arr_before_copy)
-      // console.debug("Updated array attr")
+      console.debug("[RealTime] Updated array attr: ", arr_before_copy)
     }
   }
 }

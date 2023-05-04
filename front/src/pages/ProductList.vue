@@ -533,7 +533,7 @@ export default defineComponent({
             if (!itemEq) {
               // itemsDiff.push(item1)
               void productListUpdateRawItem(item1)
-              console.debug("UPD DIFF: ", item1)
+              // console.debug("UPD DIFF: ", item1)
             }
           }
         }

@@ -80,7 +80,7 @@ export default boot((/* { app, router, ... } */) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data = JSON.parse(evt.data as string)
     } catch (error) {
-      console.error("[Socker] message decoding error: ", error)
+      console.error("[Socket] message decoding error: ", error)
       return
     }
 
@@ -90,7 +90,7 @@ export default boot((/* { app, router, ... } */) => {
       try {
         realTime.onModelUpdate(data as ModelUpdateData)
       } catch (error) {
-        console.error("[Socker] model update error: ", error)
+        console.error("[Socket] model update error: ", error)
       }
     }
   }

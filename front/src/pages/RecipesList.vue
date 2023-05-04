@@ -322,11 +322,11 @@ export default defineComponent({
       store,
       $query: useQuery(),
       storeAuth,
-      search: "",
+      search: SessionStorage.getItem("recipesSearch") ?? "",
       page: 1,
       page_size: 20,
       loading: false,
-      ordering: "-cooked_times",
+      ordering: SessionStorage.getItem("recipesOrdering") ?? "-cooked_times",
       tablePagination: {
         rowsPerPage: 20,
         page: 1,
@@ -407,12 +407,14 @@ export default defineComponent({
   },
 
   watch: {
-    search() {
+    search(val: string) {
       this.page = 1;
       void this.loadRecipes();
+      SessionStorage.set("recipesSearch", val)
     },
-    ordering() {
+    ordering(val: boolean) {
       void this.loadRecipes();
+      SessionStorage.set("recipesOrdering", val)
     },
     compilation() {
       this.page = 1;

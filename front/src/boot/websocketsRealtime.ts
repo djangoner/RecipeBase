@@ -4,7 +4,7 @@ import ReconnectingWebSocket from "reconnecting-websocket"
 import { RealTime, StoreMappingObject, ModelUpdateData } from "src/modules/RealTime"
 import { Ref, ref } from "vue"
 
-const URL = (location.protocol == "https" ? "wss" : "ws") + "://" + location.host + "/ws/realtime"
+const URL = (location.protocol == "https:" ? "wss" : "ws") + "://" + location.host + "/ws/realtime"
 
 const socket = new ReconnectingWebSocket(URL, [], {
   connectionTimeout: 1000,

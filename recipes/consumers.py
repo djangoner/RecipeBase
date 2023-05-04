@@ -1,5 +1,6 @@
 import json
 import logging
+from time import time
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from asgiref.sync import async_to_sync
@@ -14,6 +15,7 @@ class RealtimeConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
         await self.accept()
+        await self.send_json({"type": "ping", "data": time()})
 
     async def disconnect(self, code):
         await self.channel_layer.group_discard(self.group_name, self.channel_name)

@@ -2,6 +2,7 @@ import { boot, store } from "quasar/wrappers"
 import { useBaseStore } from "src/stores/base"
 import ReconnectingWebSocket from "reconnecting-websocket"
 import { RealTime, StoreMappingObject, ModelUpdateData } from "src/modules/RealTime"
+import { Ref, ref } from "vue"
 
 const URL = (location.protocol == "https" ? "wss" : "ws") + "://" + location.host + "/ws/realtime"
 
@@ -40,6 +41,8 @@ const storeMapping: StoreMappingObject = {
 
 const realTime = new RealTime(store, storeMapping)
 
+export const websocketState: Ref<boolean | null> = ref(null)
+
 export default boot((/* { app, router, ... } */) => {
   console.debug("Socket init: ", socket)
 
@@ -63,8 +66,14 @@ export default boot((/* { app, router, ... } */) => {
 
   socket.onopen = () => {
     console.debug("[Socket] connected")
+    websocketState.value = true
   }
-  socket.onclose = () => {
-    console.debug("[Socket] disconnected")
+  socket.onclose = (evt) => {
+    console.debug("[Socket] closed", evt)
+    websocketState.value = false
+  }
+  socket.onerror = (evt) => {
+    console.debug("[Socket] error", evt)
+    websocketState.value = false
   }
 })

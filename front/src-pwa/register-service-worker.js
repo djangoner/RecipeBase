@@ -29,6 +29,7 @@ register(process.env.SERVICE_WORKER_FILE, {
       type: "info",
       group: 'sw-state',
       caption: "Обнаружена новая версия приложения, выполняется обновление...",
+      timeout: 0,
     })
     // console.log('New content is downloading.')
   },
@@ -41,7 +42,8 @@ register(process.env.SERVICE_WORKER_FILE, {
       actions: [
         { label: 'Обновить', color: 'yellow', handler: () => { location.reload() } },
         { label: 'Закрыть', color: 'white', handler: () => { /* ... */ } },
-      ]
+      ],
+      timeout: 0,
     })
     // console.log('New content is available; please refresh.')
   },
@@ -54,7 +56,8 @@ register(process.env.SERVICE_WORKER_FILE, {
     Notify.create({
       type: "error",
       caption: "Ошибка ServiceWorker",
-      description: err.message
+      description: err.message,
+      timeout: 0,
     })
     // console.error('Error during service worker registration:', err)
   }

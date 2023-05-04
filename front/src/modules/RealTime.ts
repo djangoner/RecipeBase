@@ -104,17 +104,17 @@ export class RealTime {
         arr_before_copy.push(newModel)
       } else if (data.deleted) {
         // Delete
-        if (arr_before_idx) {
+        if (arr_before_idx !== -1) {
           arr_before_copy.splice(arr_before_idx, 1)
         }
       } else {
         // Update
-        if (arr_before_idx) {
+        if (arr_before_idx !== -1) {
           arr_before_copy[arr_before_idx] = newModel
         }
       }
       this.setStore(modelInfo.array_attr, arr_before_copy)
-      console.debug("[RealTime] Updated array attr: ", arr_before_copy)
+      console.debug("[RealTime] Updated array attr: ", arr_before_idx, arr_before_copy)
     }
   }
 }

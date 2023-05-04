@@ -11,12 +11,5 @@
       "typescript",
       "ui"
     ]
-  },
-  "@quasar/testing-e2e-cypress": {
-    "options": [
-      "scripts",
-      "typescript",
-      "code-coverage"
-    ]
   }
 }

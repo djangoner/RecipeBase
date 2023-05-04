@@ -9,7 +9,7 @@ FROM base as dependencies
 WORKDIR /app
 COPY front/package*.json front/pnpm-lock.yaml ./
 RUN pnpm add @quasar/cli
-RUN pnpm install --frozen-lockfile --prod
+RUN pnpm install --frozen-lockfile
 # RUN yarn install --production --frozen-lockfile && yarn cache clean
 
 FROM base as build

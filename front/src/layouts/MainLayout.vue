@@ -42,9 +42,20 @@
           <q-menu
             anchor="bottom middle"
             self="top middle"
-            auto-close
           >
             <q-list dense>
+              <q-item tag="label">
+                <q-item-section avatar>
+                  <q-toggle
+                    :model-value="store.enableWebsocket"
+                    dense
+                    @update:model-value="store.setEnableWebsocket($event)"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Включить обновление RealTime</q-item-label>
+                </q-item-section>
+              </q-item>
               <q-item
                 class="justify-center text-negative"
                 clickable
@@ -56,11 +67,14 @@
           </q-menu>
         </q-item>
         <q-item
+          v-if="store.enableWebsocket"
           class="text-center text-white q-py-xs"
           :class="[websocketStateBg]"
           style="min-height: auto"
         >
-          <q-item-section class="q-py-none">
+          <q-item-section
+            class="q-py-none"
+          >
             {{ websocketStateStr }}
             <q-tooltip>
               Обновление данных в режиме RealTime

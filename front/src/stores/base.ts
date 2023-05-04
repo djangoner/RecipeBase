@@ -79,6 +79,9 @@ export const useBaseStore = defineStore("base", {
     ingredient_categories: null as IngredientCategory[] | null,
     shops: null as Shop[] | null,
     conditions: null as WeekPlanCondition[] | null,
+
+    // Settings
+    enableWebsocket: (LocalStorage.getItem("enableWebsocket") as boolean) ?? false,
   }),
 
   getters: {
@@ -88,6 +91,10 @@ export const useBaseStore = defineStore("base", {
   },
 
   actions: {
+    setEnableWebsocket(value: boolean): void {
+      this.enableWebsocket = value
+      LocalStorage.set("enableWebsocket", this.enableWebsocket)
+    },
     // -- Essentials
 
     async loadStats(): Promise<StatsList> {
@@ -216,8 +223,8 @@ export const useBaseStore = defineStore("base", {
       return new Promise((resolve, reject) => {
         RecipesService.recipesList(payload)
           .then((resp) => {
-            if (loadMore){
-              if (!this.recipes){
+            if (loadMore) {
+              if (!this.recipes) {
                 this.recipes = []
               }
               this.recipes = this.recipes.concat(resp.results as RecipeRead[])

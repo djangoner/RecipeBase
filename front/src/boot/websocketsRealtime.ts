@@ -5,10 +5,11 @@ import { RealTime, StoreMappingObject, ModelUpdateData } from "src/modules/RealT
 import { Ref, ref } from "vue"
 
 const URL = (location.protocol == "https:" ? "wss" : "ws") + "://" + location.host + "/ws/realtime"
+const store = useBaseStore()
 
 const socket = new ReconnectingWebSocket(URL, [], {
   connectionTimeout: 1000,
-  startClosed: !navigator.onLine, // Don't connect when started offline
+  startClosed: !navigator.onLine || !store.enableWebsocket, // Don't connect when started offline
   // maxRetries: 10,
 })
 
@@ -28,8 +29,6 @@ interface StructureWebsocketData {
   type: string
   data: AnyData
 }
-
-const store = useBaseStore()
 
 const storeMapping: StoreMappingObject = {
   // const storeMapping = {

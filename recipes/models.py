@@ -344,7 +344,7 @@ class RecipePlan(models.Model):
         return date
 
     def check_date(self):
-        date = self.gen_date()
+        date = self.gen_date().date()
 
         if not self.date or date != self.date:
             self.date = date

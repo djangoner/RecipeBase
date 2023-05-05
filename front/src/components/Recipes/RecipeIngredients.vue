@@ -97,6 +97,7 @@
           </div>
         </q-td>
       </template>
+
       <!-- Bottom row -->
       <template
         v-if="edit"
@@ -126,15 +127,30 @@
   </div>
 </template>
 
-<script lang="ts">
-import AmountTypeSelect from '../Products/AmountTypeSelect.vue'
+<script setup lang="ts">
+import AmountTypeSelect from "../Products/AmountTypeSelect.vue"
 import IngredientSelect from "./IngredientSelect.vue"
 import { IngredientRead, RecipeIngredientRead, RecipeRead } from "src/client"
-import { AmountTypesConvert, AmountTypesTypes } from "src/modules/Globals"
-import { useBaseStore } from "src/stores/base"
-import { defineComponent, PropType } from "vue"
+import { computed, PropType, Ref, ref, watch } from "vue"
+import { useQuasar } from "quasar"
 
-const ingredientsColumns = [
+const $emit = defineEmits(["update:recipe"])
+const $q = useQuasar()
+
+const addIngredientSelect: Ref<IngredientRead | undefined> = ref(undefined)
+
+const props = defineProps({
+  recipe: {
+    type: Object as PropType<RecipeRead>,
+    required: true,
+  },
+  edit: {
+    type: Boolean,
+    required: false,
+  },
+})
+
+const ingredientsColumnsRaw = [
   {
     name: "title",
     label: "Название",
@@ -184,137 +200,91 @@ const ingAddDefault = {
   is_main: false,
 }
 
-export default defineComponent({
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { IngredientSelect, AmountTypeSelect },
-  props: {
-    recipe: {
-      type: Object as PropType<RecipeRead>,
-      required: true,
-    },
-    edit: {
-      type: Boolean,
-      required: false,
-    },
-  },
-  emits: ["update:recipe"],
-  data() {
-    const store = useBaseStore()
-    return {
-      store,
-      ingSearch: "",
-      ingList: null as IngredientRead[] | null,
-      addIngredientSelect: undefined as IngredientRead | undefined,
-      amountTypeList: null as AmountTypesTypes | null,
-      amountTypeConvert: null as AmountTypesConvert | null,
+const ingredientsColumns = computed(() => {
+  const column_actions = {
+    name: "actions",
+    label: "Действия",
+    field: () => "",
+    required: true,
+    sortable: false,
+    style: "width: 75px",
+  }
+  const column_amount_type = {
+    name: "amount_type",
+    label: "Единица измерения",
+    field: () => "",
+    required: true,
+    sortable: false,
+    style: "width: 120px",
+  }
+  let columns = ingredientsColumnsRaw.slice()
+
+  if (props.edit) {
+    columns.push(column_actions)
+    columns.splice(1, 0, column_amount_type)
+  } else {
+    columns = columns?.filter((i) => i.name !== column_actions.name && i.name !== column_amount_type.name)
+  }
+
+  return columns
+})
+
+function updateIngredients(ings: RecipeIngredientRead[]) {
+  const newRecipe = Object.assign({}, props.recipe)
+  newRecipe.ingredients = ings
+  console.debug("Update recipe: ", newRecipe)
+  $emit("update:recipe", newRecipe)
+}
+
+function addIngredient(ingredient?: IngredientRead) {
+  if (!ingredient) {
+    if (!addIngredientSelect.value) return
+    ingredient = addIngredientSelect.value
+  }
+
+  console.debug("Add ingredient: ", ingredient)
+
+  const newIngredient = Object.assign({}, ingAddDefault, {
+    ingredient: ingredient,
+  })
+
+  // @ts-expect-error new ingredient creation
+  updateIngredients([].concat(props.recipe.ingredients, newIngredient))
+  addIngredientSelect.value = undefined
+}
+
+function removeIngredient(row: RecipeIngredientRead) {
+  console.debug("Remove ingredient: ", row)
+  updateIngredients(
+    props.recipe?.ingredients?.filter((t) => {
+      return t != row
+    }) || []
+  )
+}
+
+function askRemoveIngredient(row: RecipeIngredientRead) {
+  if (!props.recipe) {
+    return
+  }
+
+  console.debug("Ask Remove ingredient: ", row)
+  $q.dialog({
+    title: "Подтверждение удаления ингредиента",
+    message: `Вы уверены что хотите удалить ингредиент '${row?.ingredient?.title || "Новый ингредиент"}' ?`,
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    console.debug("Remove ingredient confirmed")
+    if (!props.recipe) {
+      return
     }
-  },
-  computed: {
-    ingredients() {
-      return this.store.ingredients
-    },
-    amount_types() {
-      return this.store.amount_types
-    },
-    ingredientsColumns() {
-      const column_actions = {
-        name: "actions",
-        label: "Действия",
-        field: () => "",
-        required: true,
-        sortable: false,
-        style: "width: 75px",
-      }
-      const column_amount_type = {
-        name: "amount_type",
-        label: "Единица измерения",
-        field: () => "",
-        required: true,
-        sortable: false,
-        style: "width: 120px",
-      }
-      let columns = ingredientsColumns.slice()
+    removeIngredient(row)
+  })
+}
 
-      if (this.edit) {
-        columns.push(column_actions)
-        columns.splice(1, 0, column_amount_type)
-      } else {
-        columns = columns?.filter((i) => i.name !== column_actions.name && i.name !== column_amount_type.name)
-      }
-
-      return columns
-    },
-  },
-  watch: {
-    addIngredientSelect(val: IngredientRead | null) {
-      if (val) {
-        this.addIngredient(val)
-      }
-    },
-  },
-  methods: {
-    updateIngredients(ings: RecipeIngredientRead[]) {
-      const newRecipe = Object.assign({}, this.recipe)
-      newRecipe.ingredients = ings
-      console.debug("Update recipe: ", newRecipe)
-      this.$emit("update:recipe", newRecipe)
-    },
-    addIngredient(ingredient?: IngredientRead) {
-      if (!ingredient) {
-        if (!this.addIngredientSelect) return
-        ingredient = this.addIngredientSelect
-      }
-
-      console.debug("Add ingredient: ", ingredient)
-
-      const newIngredient = Object.assign({}, ingAddDefault, {
-        ingredient: ingredient,
-      })
-
-      // @ts-expect-error new ingredient creation
-      this.updateIngredients([].concat(this.recipe.ingredients, newIngredient))
-      this.addIngredientSelect = undefined
-    },
-    addIngredientNew(name: string) {
-      console.debug("Add new: ", name)
-      this.addIngredientSelect = {
-        // @ts-expect-error new ingredient creation
-        id: null,
-        title: name,
-      }
-      this.addIngredient()
-    },
-
-    removeIngredient(row: RecipeIngredientRead) {
-      console.debug("Remove ingredient: ", row)
-      this.updateIngredients(
-        this.recipe?.ingredients?.filter((t) => {
-          return t != row
-        }) || []
-      )
-    },
-
-    askRemoveIngredient(row: RecipeIngredientRead) {
-      if (!this.recipe) {
-        return
-      }
-
-      console.debug("Ask Remove ingredient: ", row)
-      this.$q
-        .dialog({
-          title: "Подтверждение удаления ингредиента",
-          message: `Вы уверены что хотите удалить ингредиент '${row?.ingredient?.title || "Новый ингредиент"}' ?`,
-          cancel: true,
-          persistent: true,
-        })
-        .onOk(() => {
-          console.debug("Remove ingredient confirmed")
-          if (!this.recipe) {
-            return
-          }
-          this.removeIngredient(row)
-        })
-    },
-  },
+watch(addIngredientSelect, (val) => {
+  if (val) {
+    addIngredient(val)
+  }
 })
 </script>

@@ -13,6 +13,7 @@
     />
     <!-- Top warnings -->
     <already-completed-banner :show="markAlreadyCompleted" />
+    <status-websocket />
     <!-- Modals -->
     <product-list-item-view
       v-model="viewItem"
@@ -275,6 +276,7 @@ import {
 } from "src/modules/ProductListSync"
 import WorkerMessagesMixin, { WorkerMessage } from "src/modules/WorkerMessages"
 import { DialogChainObject } from "quasar"
+import StatusWebsocket from "src/components/Status/StatusWebsocket.vue"
 
 type CustomIngredientCategory = IngredientCategory & {
   items?: ProductListItemRead[]
@@ -302,7 +304,9 @@ export default defineComponent({
     ProductListItems,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     AlreadyCompletedBanner,
-  },
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    StatusWebsocket
+},
   mixins: [HandleErrorsMixin, IsOnlineMixin, WorkerMessagesMixin],
   data() {
     const store = useBaseStore()

@@ -41,6 +41,7 @@
             type="number"
             step="0.01"
             dense
+            required
           >
             <q-tooltip> Единица измерения: {{ slotScope.row.amount_type_str }} </q-tooltip>
           </q-input>

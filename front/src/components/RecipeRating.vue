@@ -20,6 +20,7 @@
           }}
         </td>
 
+
         <td class="cell-rating">
           <q-rating
             :model-value="userRating(user) + 1"
@@ -31,6 +32,9 @@
             :color="$q.dark.isActive ? 'grey-4' : 'primary'"
             @update:model-value="userSetRating(user, $event - 1)"
           />
+          <q-tooltip>
+            Текущая оценка: {{ userRating(user) || "-" }}
+          </q-tooltip>
         </td>
       </tr>
     </tbody>
@@ -104,15 +108,20 @@ export default defineComponent({
       // console.debug('userRating: ', user, exists);
 
       if (exists && exists.length > 0) {
-        return exists[0]?.rating || 0;
+        const rating = exists[0]?.rating
+        return rating !== null ? rating : -2;
       } else {
         return -1;
       }
     },
-    userSetRating(user: User, rating: number) {
+    userSetRating(user: User, rating: number | null) {
       if (!this.modelValue || !this.modelValue?.ratings) {
         return;
       }
+      if (rating == -1){
+        rating = null
+      }
+
       const exists =
         this.modelValue?.ratings.filter((r) => {
           return r.user.id == user.id;

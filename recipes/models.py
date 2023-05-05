@@ -260,7 +260,9 @@ class RecipeRating(models.Model):
         verbose_name=_("Рецепт"),
         blank=True,
     )
-    rating = models.SmallIntegerField(_("Оценка"), validators=[MinValueValidator(0), MaxValueValidator(5)])
+    rating = models.SmallIntegerField(
+        _("Оценка"), validators=[MinValueValidator(0), MaxValueValidator(5)], null=True, blank=True
+    )
     history = HistoricalRecords()
 
     class Meta:

@@ -48,6 +48,13 @@
           dense
         />
       </div>
+      <div>
+        <q-toggle
+          v-model="showAlreadyCompleted"
+          label="Показать уже есть"
+          dense
+        />
+      </div>
 
       <q-space />
       <div>
@@ -301,10 +308,8 @@ export default defineComponent({
     const store = useBaseStore()
     const storeAuth = useAuthStore()
 
-    let showCompleted = this.$q.localStorage.getItem("productsShowCompleted")
-    if (showCompleted === null) {
-      showCompleted = true
-    }
+    const showCompleted = this.$q.localStorage.getItem("productsShowCompleted") ?? true
+    const showAlreadyCompleted = this.$q.localStorage.getItem("productsShowAlreadyCompleted") ?? true
 
     return {
       store,
@@ -314,6 +319,7 @@ export default defineComponent({
       updating: false,
       saving: false,
       showCompleted: Boolean(showCompleted),
+      showAlreadyCompleted: Boolean(showAlreadyCompleted),
       createItem: "",
       markAlreadyCompleted: false,
       listRawLast: null as ProductListItemRead[] | null,
@@ -362,6 +368,9 @@ export default defineComponent({
           // Sort by is_completed(false first), then day(lower first)
           if (!this.showCompleted) {
             res = res.filter((i) => !i.is_completed)
+          }
+          if (!this.showAlreadyCompleted) {
+            res = res.filter((i) => !i.already_completed)
           }
           res.sort((a, b) => {
             if (a.is_completed) {
@@ -514,6 +523,9 @@ export default defineComponent({
   watch: {
     showCompleted(val) {
       this.$q.localStorage.set("productsShowCompleted", val)
+    },
+    showAlreadyCompleted(val) {
+      this.$q.localStorage.set("productsShowAlreadyCompleted", val)
     },
     isOnLine(val, oldVal) {
       if (val && !oldVal && this.canSync) {

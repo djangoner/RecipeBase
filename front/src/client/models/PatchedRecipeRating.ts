@@ -5,6 +5,6 @@
 export type PatchedRecipeRating = {
     readonly id?: number;
     user?: number;
-    rating?: number;
+    rating?: number | null;
     recipe?: number;
 };

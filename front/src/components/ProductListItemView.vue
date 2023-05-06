@@ -104,14 +104,13 @@
             @update:model-value="$emit('updateItem', item)"
           >
             <q-tooltip>
-              Продукт уже есть на начало недели и его не требуется
-              покупать
+              Продукт уже есть и его не требуется покупать
             </q-tooltip>
           </q-toggle>
           <q-select
             v-model.number="item.priority"
             :options="priorityOptions"
-            :readonly="item.is_auto || !canEdit"
+            :readonly="!canEdit"
             label="Приоритет"
             option-label="name"
             option-value="id"
@@ -119,7 +118,6 @@
             emit-value
             dense
             options-dense
-            use-input
             @update:model-value="$emit('updateItem', item)"
           >
             <template #no-option>

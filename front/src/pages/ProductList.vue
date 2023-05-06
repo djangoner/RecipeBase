@@ -780,27 +780,6 @@ export default defineComponent({
         })
     },
     // deleteItem(item) {},
-    regenerateList() {
-      if (!this.week.year || !this.week.week) {
-        return
-      }
-      const payload = {
-        year: this.week.year,
-        week: this.week.week,
-      }
-      this.loading = true
-
-      this.store
-        .generateProductListWeek(payload)
-        .then((resp) => {
-          this.loading = false
-          void productListUpdateFromServer(resp)
-        })
-        .catch((err: CustomAxiosError) => {
-          this.loading = false
-          this.handleErrors(err, "Ошибка обновления списка продуктов")
-        })
-    },
     openItem(item: ProductListItemRead) {
       console.debug("Open item: ", item)
       this.viewItem = item
@@ -887,31 +866,6 @@ export default defineComponent({
         return
       }
       return cat.sorting.find((s) => s.shop.id == this.sortShop)
-    },
-    sendList() {
-      const payload = {
-        year: this.week?.year,
-        week: this.week?.week,
-      }
-      this.$q.loading.show({
-        group: "sending",
-        message: "Отправка списка...",
-        delay: 400, // ms
-      })
-
-      this.store
-        .productListSend(payload)
-        .then(() => {
-          this.$q.loading.hide("sending")
-          this.$q.notify({
-            type: "positive",
-            message: `Список успешно отправлен`,
-          })
-        })
-        .catch((err: CustomAxiosError) => {
-          this.$q.loading.hide("sending")
-          this.handleErrors(err, "Ошибка отправки списка")
-        })
     },
   },
 })

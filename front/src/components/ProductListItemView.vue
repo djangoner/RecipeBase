@@ -210,18 +210,12 @@
 
         <div class="q-my-md q-col-gutter-x-md row">
           <div>
-            <q-btn
-              v-if="isOnLine && canEdit"
-              label="Перенести на неделю..."
-              icon="swap_horiz"
-              size="sm"
-              color="primary"
-              no-caps
-              dense
-              @click="
-                showMoveWeek = true;
-                filterWeeks('', () => {});
-              "
+            <product-list-item-move-week
+              v-if="item"
+              :item="item"
+              :week="week"
+              :can-edit="canEdit"
+              @update:item="$emit('updateItem', $event, true)"
             />
           </div>
           <div>
@@ -281,73 +275,10 @@
       </q-card-actions> -->
     </q-card>
   </q-dialog>
-
-  <!-- Move to another week dialog -->
-
-  <q-dialog
-    v-model="showMoveWeek"
-    persistent
-  >
-    <q-card style="min-width: 350px">
-      <q-card-section>
-        <div class="text-h6">
-          Перенести задачу на другую неделю
-        </div>
-      </q-card-section>
-
-      <q-card-section class="q-pt-none">
-        <q-select
-          v-model="moveWeek"
-          label="Неделя для переноса"
-          :input-debounce="100"
-          :options="weeksList || []"
-          :option-label="(w) => w.year + '.' + w.week"
-          use-input
-          clearable
-          options-dense
-          dense
-          autofocus
-          @filter="filterWeeks"
-        />
-
-        <div class="q-mt-md row justify-around">
-          <q-btn
-            label="Прошлая"
-            icon="navigate_before"
-            color="primary"
-            size="sm"
-            @click="moveWeekDelta(-1)"
-          />
-          <q-btn
-            label="Следующая"
-            icon="navigate_next"
-            color="primary"
-            size="sm"
-            @click="moveWeekDelta(1)"
-          />
-        </div>
-      </q-card-section>
-
-      <q-card-actions
-        align="right"
-        class="text-primary"
-      >
-        <q-btn
-          v-close-popup
-          flat
-          label="Отменить"
-        />
-        <q-btn
-          flat
-          label="Перенести"
-          @click="itemMoveWeek()"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
 </template>
 
 <script lang="ts">
+import ProductListItemMoveWeek from './Products/ProductListItemMoveWeek.vue'
 import { useBaseStore } from "src/stores/base";
 import {
   getDateOfISOWeek,
@@ -360,7 +291,6 @@ import { defineComponent, PropType } from "vue";
 import { priorityOptions } from "src/modules/Globals";
 import {
   ProductListItemRead,
-  ProductListWeekRead,
   RecipeIngredientWithRecipeRead,
   RecipeRead,
   RecipeShort,
@@ -386,7 +316,7 @@ interface ProductListItemAmounts {
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { AmountTypeSelect, AmountCompletedInput },
+  components: { AmountTypeSelect, AmountCompletedInput, ProductListItemMoveWeek },
   mixins: [HandleErrorsMixin, IsOnlineMixin],
   props: {
     modelValue: {
@@ -403,9 +333,6 @@ export default defineComponent({
     return {
       store,
       WeekDays,
-      showMoveWeek: false,
-      searchWeek: "",
-      moveWeek: null as null | ProductListWeekRead,
       priorityOptions,
     };
   },
@@ -419,22 +346,19 @@ export default defineComponent({
     ingredients() {
       return this.store.ingredients;
     },
-    weeksList() {
-      return Object.freeze(this.store?.product_lists);
-    },
     weekDaysOptions() {
       return Object.entries(this.WeekDays).map(([id, name]) => {
         return { id: parseInt(id), name: name };
       });
     },
   },
-  watch: {
-    modelValue(val, oldVal) {
-      if (val !== oldVal) {
-        this.showMoveWeek = false;
-      }
-    },
-  },
+  // watch: {
+  //   modelValue(val, oldVal) {
+  //     if (val !== oldVal) {
+  //       this.showMoveWeek = false;
+  //     }
+  //   },
+  // },
   methods: {
     getDay(idx: number): string {
       const fday = getDateOfISOWeek(this.week.year, this.week.week);
@@ -458,27 +382,6 @@ export default defineComponent({
         return r;
       });
       return texts.join(", ");
-    },
-
-    filterWeeks(val: string, update: CallableFunction) {
-      // if (this.searchWeek == val) {
-      //   update(() => {});
-      //   return;
-      // }
-      this.searchWeek = val || "";
-      const payload = {
-        short: "1",
-        search: this.searchWeek.replaceAll(".", ""),
-      };
-
-      this.store
-        .loadProductListWeeks(payload)
-        .then(() => {
-          update();
-        })
-        .catch(() => {
-          update();
-        });
     },
     loadIngredients(search: string): Promise<void> {
       return new Promise((resolve, reject) => {
@@ -505,37 +408,8 @@ export default defineComponent({
         void update();
       });
     },
-    moveWeekDelta(delta: number) {
-      const year = this.week.year.valueOf();
-      let week = this.week.week.valueOf();
-
-      week = week + delta;
-
-      if (week < 0) {
-        week = 54;
-      } else if (week > 54) {
-        week = 1;
-      }
-
-      const payload = {
-        year: year,
-        week: week,
-      };
-      void this.store.loadProductListWeek(payload, true).then((resp) => {
-        this.moveWeek = resp;
-        // delete this.moveWeek['items'];
-      });
-    },
-    itemMoveWeek() {
-      if (!this.moveWeek) {
-        return;
-      }
-
-      const item = Object.assign({}, this.item);
-
-      item.week = this.moveWeek.id;
+    itemMoveWeek(item: ProductListItemRead) {
       this.$emit("updateItem", item, true);
-      this.showMoveWeek = false;
       this.$emit("update:model-value", false);
     },
     getRecipeDays(recipe: RecipeRead | RecipeShort): null | string[] {

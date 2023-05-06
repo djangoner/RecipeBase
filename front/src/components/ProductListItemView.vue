@@ -157,43 +157,13 @@
           class="q-my-md"
         >
           <span class="text-subtitle-1">Используется в рецептах:</span>
-          <q-list
-            class="q-my-sm"
-            dense
-          >
-            <q-item
-              v-for="ing of item.ingredients"
-              :key="ing.id"
-              class="items-center"
-              clickable
-              :to="{ name: 'recipe', params: { id: ing.recipe.id } }"
-            >
-              <small class="ing-day">{{ getRecipeDays(ing.recipe)?.join(",") }}.&nbsp;</small>
-              {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
-            </q-item>
-
-            <template v-if="item.ingredient && item.ingredient.regular_ingredients">
-              <q-separator />
-              <q-item
-                class="items-center q-mt-xs"
-                items_center
-                clickable
-                :to="{
-                  name: 'recipe',
-                  params: { id: item.ingredient.regular_ingredients.id },
-                }"
-              >
-                <small class="ing-day">-.&nbsp;</small>
-                Регулярный ({{ item.ingredient.regular_ingredients.amount }}
-                {{ item.ingredient.regular_ingredients.amount_type_str }})
-              </q-item>
+          <ingredient-used-recipes :item="item">
+            <template v-if="item.price_full">
+              <div>
+                Цена {{ item.price_full }}₺ (~{{ item.price_part }}₺ необходимо)
+              </div>
             </template>
-          </q-list>
-          <template v-if="item.price_full">
-            <div>
-              Цена {{ item.price_full }}₺ (~{{ item.price_part }}₺ необходимо)
-            </div>
-          </template>
+          </ingredient-used-recipes>
         </div>
 
         <div class="q-my-md q-col-gutter-x-md row">
@@ -256,23 +226,17 @@
           />
         </div>
       </q-card-section>
-
-      <!-- Bottom actions -->
-      <!-- <q-card-actions align="center">
-        <q-btn flat label="OK" color="primary" v-close-popup />
-      </q-card-actions> -->
     </q-card>
   </q-dialog>
 </template>
 
 <script lang="ts">
+import IngredientUsedRecipes from './Products/IngredientUsedRecipes.vue'
 import ProductListItemCheckbox from './Products/ProductListItemCheckbox.vue'
 import ProductListItemMoveWeek from './Products/ProductListItemMoveWeek.vue'
-import { useBaseStore } from "src/stores/base";
 import {
   getDateOfISOWeek,
   WeekDays,
-  WeekDaysShort,
   YearWeek,
 } from "src/modules/WeekUtils";
 import { date } from "quasar";
@@ -280,34 +244,16 @@ import { defineComponent, PropType } from "vue";
 import { priorityOptions } from "src/modules/Globals";
 import {
   ProductListItemRead,
-  RecipeIngredientWithRecipeRead,
-  RecipeRead,
-  RecipeShort,
 } from "src/client";
-import HandleErrorsMixin, {
-  CustomAxiosError,
-} from "src/modules/HandleErrorsMixin";
 import IsOnlineMixin from "src/modules/IsOnlineMixin";
 import AmountTypeSelect from "./Products/AmountTypeSelect.vue";
 import AmountCompletedInput from "./Products/AmountCompletedInput.vue";
 import IngredientSelect from './Recipes/IngredientSelect.vue';
 
-interface ProductListItemAmount {
-  amount: number;
-  amount_type: string;
-  amount_type_str: string;
-  amount_grams: number;
-  is_main: boolean;
-}
-
-interface ProductListItemAmounts {
-  [id: number]: ProductListItemAmount[];
-}
-
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { AmountTypeSelect, AmountCompletedInput, ProductListItemMoveWeek, IngredientSelect, ProductListItemCheckbox },
-  mixins: [HandleErrorsMixin, IsOnlineMixin],
+  components: { AmountTypeSelect, AmountCompletedInput, ProductListItemMoveWeek, IngredientSelect, ProductListItemCheckbox, IngredientUsedRecipes },
+  mixins: [IsOnlineMixin],
   props: {
     modelValue: {
       required: false,
@@ -319,9 +265,7 @@ export default defineComponent({
   },
   emits: ["openItem", "updateItem", "update:model-value"],
   data() {
-    const store = useBaseStore();
     return {
-      store,
       WeekDays,
       priorityOptions,
     };
@@ -329,9 +273,6 @@ export default defineComponent({
   computed: {
     item() {
       return this.modelValue;
-    },
-    plan() {
-      return this.store.week_plan;
     },
     weekDaysOptions() {
       return Object.entries(this.WeekDays).map(([id, name]) => {
@@ -345,34 +286,9 @@ export default defineComponent({
       fday.setDate(fday.getDate() + idx - 1);
       return date.formatDate(fday, "DD.MM");
     },
-    ingUsingStr(ing: RecipeIngredientWithRecipeRead): string {
-      const recipe = ing.recipe;
-      if (!recipe) {
-        return "";
-      }
-
-      const amounts = this.item?.amounts as ProductListItemAmounts;
-      const ings = amounts[recipe.id] || [];
-
-      const texts = ings.map((i) => {
-        let r = String(i.amount) + " " + i.amount_type_str;
-        if (i.is_main) {
-          r += ", основной";
-        }
-        return r;
-      });
-      return texts.join(", ");
-    },
     itemMoveWeek(item: ProductListItemRead) {
       this.$emit("updateItem", item, true);
       this.$emit("update:model-value", false);
-    },
-    getRecipeDays(recipe: RecipeRead | RecipeShort): null | string[] {
-      if (!this.plan) {
-        return null;
-      }
-      const plans = this.plan.plans.filter((p) => p.recipe.id == recipe?.id);
-      return plans.map((p) => (p.day ? WeekDaysShort[p.day] : ("" as string)));
     },
   },
 });

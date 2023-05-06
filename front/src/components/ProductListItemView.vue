@@ -76,22 +76,15 @@
           clearable
           @update:model-value="$emit('updateItem', item)"
         />
-        <q-select
+
+        <ingredient-select
           v-model="item.ingredient"
           label="Ингредиент"
-          :debounce="100"
-          :options="ingredients || []"
-          :readonly="item.is_auto || !canEdit"
-          :input-debounce="100"
-          option-label="title"
-          option-value="id"
-          map-options
-          dense
-          options-dense
-          use-input
           clearable
+          :required="false"
+          :preload-all="false"
+          :readonly="item.is_auto || !canEdit"
           @update:model-value="$emit('updateItem', item)"
-          @filter="filterIngredients"
         />
 
         <q-expansion-item
@@ -301,6 +294,7 @@ import HandleErrorsMixin, {
 import IsOnlineMixin from "src/modules/IsOnlineMixin";
 import AmountTypeSelect from "./Products/AmountTypeSelect.vue";
 import AmountCompletedInput from "./Products/AmountCompletedInput.vue";
+import IngredientSelect from './Recipes/IngredientSelect.vue';
 
 interface ProductListItemAmount {
   amount: number;
@@ -316,7 +310,7 @@ interface ProductListItemAmounts {
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { AmountTypeSelect, AmountCompletedInput, ProductListItemMoveWeek },
+  components: { AmountTypeSelect, AmountCompletedInput, ProductListItemMoveWeek, IngredientSelect },
   mixins: [HandleErrorsMixin, IsOnlineMixin],
   props: {
     modelValue: {
@@ -343,22 +337,12 @@ export default defineComponent({
     plan() {
       return this.store.week_plan;
     },
-    ingredients() {
-      return this.store.ingredients;
-    },
     weekDaysOptions() {
       return Object.entries(this.WeekDays).map(([id, name]) => {
         return { id: parseInt(id), name: name };
       });
     },
   },
-  // watch: {
-  //   modelValue(val, oldVal) {
-  //     if (val !== oldVal) {
-  //       this.showMoveWeek = false;
-  //     }
-  //   },
-  // },
   methods: {
     getDay(idx: number): string {
       const fday = getDateOfISOWeek(this.week.year, this.week.week);
@@ -382,31 +366,6 @@ export default defineComponent({
         return r;
       });
       return texts.join(", ");
-    },
-    loadIngredients(search: string): Promise<void> {
-      return new Promise((resolve, reject) => {
-        const payload = {
-          pageSize: 20,
-          search: search,
-          fields: "id,title",
-        };
-        this.store
-          .loadIngredients(payload)
-          .then(() => {
-            resolve();
-            // this.loading = false;
-          })
-          .catch((err: CustomAxiosError) => {
-            reject(err);
-            // this.loading = false;
-            this.handleErrors(err, "Ошибка загрузки ингредиентов");
-          });
-      });
-    },
-    filterIngredients(val: string, update: CallableFunction) {
-      void this.loadIngredients(val).then(() => {
-        void update();
-      });
     },
     itemMoveWeek(item: ProductListItemRead) {
       this.$emit("updateItem", item, true);

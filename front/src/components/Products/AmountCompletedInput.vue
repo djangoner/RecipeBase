@@ -56,10 +56,10 @@ export default defineComponent({
   },
   computed: {
     sliderStep(): number {
-      // if (this.amountType == "g") {
-      //   return 50;
-      // }
-
+      if (this.max >= 1000){
+        const rounded = (Math.floor(this.max / 100) * 100)
+        return rounded / 10
+      }
       return 1;
     },
     markersCount(): number {

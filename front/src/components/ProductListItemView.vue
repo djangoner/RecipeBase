@@ -26,7 +26,7 @@
               :debounce="500"
               :readonly="item.is_auto || !canEdit"
               dense
-              @update:model-value="$emit('updateItem', item)"
+              @update:model-value="$emit('updateItem', $event)"
             />
 
             <span class="text-body2 text-primary">

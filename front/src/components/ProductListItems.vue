@@ -12,7 +12,7 @@
       <product-list-item-checkbox
         :model-value="item"
         :disable="!canEdit"
-        @update:model-value="$emit('updateItem', item)"
+        @update:model-value="$emit('updateItem', $event)"
       />
 
       <!-- First column -->

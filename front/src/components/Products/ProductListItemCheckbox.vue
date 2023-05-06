@@ -7,7 +7,7 @@
     indeterminate-icon="help"
     size="lg"
     :disable="disable"
-    @update:model-value="$emit('update:model-value', $event)"
+    @update:model-value="onUpdate"
   />
 </template>
 
@@ -28,4 +28,11 @@ const props = defineProps({
 })
 
 const $emit = defineEmits(["update:model-value"])
+
+
+const onUpdate = (checkboxVal: boolean) => {
+  const newItem = Object.assign({}, props.modelValue)
+  newItem.is_completed = checkboxVal
+  $emit('update:model-value', newItem)
+}
 </script>

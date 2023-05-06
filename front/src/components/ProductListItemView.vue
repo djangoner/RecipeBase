@@ -11,13 +11,8 @@
       <!-- Top row -->
       <q-card-section class="row items-center no-wrap q-pb-none">
         <div class="col row">
-          <q-checkbox
-            v-model="item.is_completed"
-            :color="item.already_completed?'info':'primary'"
-            checked-icon="task_alt"
-            unchecked-icon="radio_button_unchecked"
-            indeterminate-icon="help"
-            size="lg"
+          <product-list-item-checkbox
+            v-model="item"
             :disable="!canEdit"
             @update:model-value="$emit('updateItem', item)"
           />
@@ -271,6 +266,7 @@
 </template>
 
 <script lang="ts">
+import ProductListItemCheckbox from './Products/ProductListItemCheckbox.vue'
 import ProductListItemMoveWeek from './Products/ProductListItemMoveWeek.vue'
 import { useBaseStore } from "src/stores/base";
 import {
@@ -310,7 +306,7 @@ interface ProductListItemAmounts {
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { AmountTypeSelect, AmountCompletedInput, ProductListItemMoveWeek, IngredientSelect },
+  components: { AmountTypeSelect, AmountCompletedInput, ProductListItemMoveWeek, IngredientSelect, ProductListItemCheckbox },
   mixins: [HandleErrorsMixin, IsOnlineMixin],
   props: {
     modelValue: {

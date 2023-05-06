@@ -9,12 +9,8 @@
   >
     <div class="row no-wrap">
       <!-- Checkbox -->
-      <q-checkbox
-        v-model="item.is_completed"
-        :color="item.already_completed?'info':'primary'"
-        checked-icon="task_alt"
-        unchecked-icon="radio_button_unchecked"
-        size="lg"
+      <product-list-item-checkbox
+        :model-value="item"
         :disable="!canEdit"
         @update:model-value="$emit('updateItem', item)"
       />
@@ -26,23 +22,12 @@
           {{ item.title }}
 
           <!-- Manual ingredient -->
-          <template
-            v-if="
-              !item.is_auto &&
-                item.ingredient &&
-                item.title.toLowerCase() !== item.ingredient.title.toLowerCase()
-            "
-          >
-            ({{ item.ingredient.title }})
-          </template>
+          <template v-if="!item.is_auto && item.ingredient && item.title.toLowerCase() !== item.ingredient.title.toLowerCase()"> ({{ item.ingredient.title }}) </template>
 
           <!-- Product amount -->
           <template v-if="item.amount">
             (
-            <template v-if="item.packs && item.ingredient.item_weight">
-              ~{{ Math.ceil(item.packs) }}
-              {{ item.ingredient.min_pack_size === 1000 ? "кг" : "шт" }}:
-            </template>
+            <template v-if="item.packs && item.ingredient.item_weight"> ~{{ Math.ceil(item.packs) }} {{ item.ingredient.min_pack_size === 1000 ? "кг" : "шт" }}: </template>
             {{ item.amount }} {{ item.amount_type_str }}
             )
           </template>
@@ -52,9 +37,7 @@
               v-for="(sub_ing, index) of item.ingredients"
               :key="sub_ing.id"
             >
-              {{ sub_ing.amount }} {{ sub_ing.amount_type_str
-              }}<template v-if="index != item.ingredients.length - 1">,
-              </template>
+              {{ sub_ing.amount }} {{ sub_ing.amount_type_str }}<template v-if="index != item.ingredients.length - 1">, </template>
             </span>
             )
           </template>
@@ -69,9 +52,7 @@
             v-if="item.is_auto"
             name="settings"
           >
-            <q-tooltip>
-              Этот рецепт был создан автоматически на основе плана на неделю
-            </q-tooltip>
+            <q-tooltip> Этот рецепт был создан автоматически на основе плана на неделю </q-tooltip>
           </q-icon>
           <q-icon
             v-else
@@ -115,9 +96,7 @@
           <span
             v-if="isEdited(item)"
             class="text-teal"
-          >
-            [Изменено локально]
-          </span>
+          > [Изменено локально] </span>
         </span>
       </div>
     </div>
@@ -137,101 +116,55 @@
   </q-item>
 </template>
 
-<script lang="ts">
-import { date } from "quasar";
-import { ProductListItemRead } from "src/client";
-import { defineComponent, PropType } from "vue";
-import {
-  getDateOfISOWeek,
-  WeekDays,
-  YearWeek,
-  WeekDaysColors,
-  priorityColors,
-} from "src/modules/WeekUtils";
-import { getPackSuffix } from "src/modules/Utils";
-import { productListGetChanged, ProductListItemSyncable } from "src/modules/ProductListSync";
+<script setup lang="ts">
+import ProductListItemCheckbox from "./Products/ProductListItemCheckbox.vue"
+import { date, useQuasar } from "quasar"
+import { ProductListItemRead } from "src/client"
+import { onMounted, PropType, ref, Ref } from "vue"
+import { getDateOfISOWeek, WeekDays, YearWeek, WeekDaysColors, priorityColors } from "src/modules/WeekUtils"
+import { getPackSuffix } from "src/modules/Utils"
+import { productListGetChanged, ProductListItemSyncable } from "src/modules/ProductListSync"
 
-export default defineComponent({
-  props: {
-    listItems: {
-      required: true,
-      type: Array as PropType<ProductListItemRead[]>,
-    },
-    week: { required: true, type: Object as PropType<YearWeek> },
-    canEdit: { default: true, type: Boolean },
+const props = defineProps({
+  listItems: {
+    required: true,
+    type: Array as PropType<ProductListItemRead[]>,
   },
-  emits: ["openItem", "updateItem", "update:model-value"],
+  week: { required: true, type: Object as PropType<YearWeek> },
+  canEdit: { default: true, type: Boolean },
+})
 
-  data() {
-    return {
-      // listItems: null,
-      WeekDays: WeekDays as { [key: number]: string },
-      WeekDaysColors,
-      changedItems: null as number[] |null,
-      priorityColors,
-    };
-  },
-  watch: {
-    // listItems(val, oldVal) {
-    //   if (val == oldVal) {
-    //     return;
-    //   }
-    //   this.$emit('update:model-value', val);
-    // },
-    // modelValue(val, oldVal) {
-    //   if (val == oldVal) {
-    //     return;
-    //   }
-    //   this.listItems = val;
-    // },
-  },
-  async created(){
-    const items = await productListGetChanged(this.week.year, this.week.week)
-    this.changedItems = items.map(i => i.idLocal || i.id)
-  },
-  methods: {
-    getPackSuffix,
-    getDay(idx: number): string | null {
-      if (!this.week) {
-        return null;
-      }
-      // console.debug(this.week, this.week.year, this.week.week);
-      // let fday: Date = getDateOfISOWeek(this.week.year, this.week.week);
-      const fday = getDateOfISOWeek(1, 2);
-      fday.setDate(fday.getDate() + idx - 1);
-      return date.formatDate(fday, "DD.MM");
-    },
-    intFormat(
-      number: number,
-      val1: string,
-      val2: string,
-      val3: string
-    ): string {
-      const n = number.toString();
-      if (number > 10 && number < 20) {
-        return val3;
-      } else if (n.endsWith("1")) {
-        return val1;
-      } else if (n.endsWith("2") || n.endsWith("3") || n.endsWith("4")) {
-        return val2;
-      } else {
-        return val3;
-      }
-      // return number;
-    },
-    isEdited(item: ProductListItemSyncable): boolean | undefined {
-      // let isNotSynced = !!this.$q.localStorage.getItem('local_productlist_updated');
-      const itemId = item.idLocal || item.id
-      // console.debug("isChanged: ", item.is_changed, itemId, item)
-      return item.is_changed || this.changedItems?.indexOf(itemId) !== -1
-    },
-    itemCls(item: ProductListItemRead): string | undefined {
-      if (item?.is_completed && "dark" in this.$q) {
-        return this.$q.dark.isActive ? "bg-grey-9" : "bg-grey-4";
-      }
-    },
-  },
-});
+const $emit = defineEmits(["openItem", "updateItem", "update:model-value"])
+const $q = useQuasar()
+
+const changedItems: Ref<number[] | null> = ref(null)
+
+onMounted(async () => {
+  // props.week.year, props.week.week
+  const items = await productListGetChanged()
+  changedItems.value = items.map((i) => i.idLocal || i.id)
+})
+function getDay(idx: number): string | null {
+  if (!props.week) {
+    return null
+  }
+  // console.debug(week, week.year, week.week);
+  // let fday: Date = getDateOfISOWeek(week.year, week.week);
+  const fday = getDateOfISOWeek(1, 2)
+  fday.setDate(fday.getDate() + idx - 1)
+  return date.formatDate(fday, "DD.MM")
+}
+function isEdited(item: ProductListItemSyncable): boolean | undefined {
+  // let isNotSynced = !!$q.localStorage.getItem('local_productlist_updated');
+  const itemId = item.idLocal || item.id
+  // console.debug("isChanged: ", item.is_changed, itemId, item)
+  return item.is_changed || changedItems.value?.indexOf(itemId) !== -1
+}
+function itemCls(item: ProductListItemRead): string | undefined {
+  if (item?.is_completed && "dark" in $q) {
+    return $q.dark.isActive ? "bg-grey-9" : "bg-grey-4"
+  }
+}
 </script>
 
 <style scoped lang="scss">

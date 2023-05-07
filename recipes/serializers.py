@@ -461,7 +461,7 @@ class ProductListItemReadSerializer(ProductListItemSerializer):
     ingredients = RecipeIngredientWithRecipeReadSerializer(many=True)
 
 
-class ProductListWeekSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class ProductListWeekSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):
     items = ProductListItemSerializer(many=True)
 
     class Meta:

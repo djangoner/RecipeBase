@@ -16,6 +16,9 @@ export default defineConfig({
       "test/vitest/__tests__/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
     ],
     exclude: [...configDefaults.exclude, "**/client/**"],
+    coverage: {
+      reporter: ["lcov"],
+    },
   },
   plugins: [
     vue({

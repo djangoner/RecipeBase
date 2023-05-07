@@ -48,6 +48,20 @@ export function getYearWeek(): [number, number] {
   return [year, week]
 }
 
+export function weekDelta(year: number, week: number, delta: number): YearWeek {
+  week += delta
+
+  if (week <= 0) {
+    week = 52
+    year -= 1
+  } else if (week > 52) {
+    week = 1
+    year += 1
+  }
+
+  return { year: year, week: week }
+}
+
 export const WeekDays: { [key: number]: string } = {
   0: "Вс (прошлый)",
   1: "Понедельник",

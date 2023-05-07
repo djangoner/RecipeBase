@@ -187,7 +187,6 @@ import { productListItemFromRead } from "src/Convert"
 import { useAuthStore } from "src/stores/auth"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import {
-  destroyDB,
   productListGetChanged,
   productListGetOffline,
   productListMarkUnchanged,

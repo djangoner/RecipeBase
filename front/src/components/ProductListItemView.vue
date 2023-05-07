@@ -14,7 +14,7 @@
           <product-list-item-checkbox
             v-model="item"
             :disable="!canEdit"
-            @update:model-value="$emit('updateItem', item)"
+            @update:model-value="$emit('updateItem', $event)"
           />
           <div class="row column col">
             <!-- <span class="text-h6 full-width" v-if="item.is_auto">
@@ -34,9 +34,7 @@
                 v-if="item.is_auto"
                 name="settings"
               >
-                <q-tooltip>
-                  Этот рецепт был создан автоматически на основе плана на неделю
-                </q-tooltip>
+                <q-tooltip> Этот рецепт был создан автоматически на основе плана на неделю </q-tooltip>
               </q-icon>
               <!-- <template v-if="item && item.day">{{ item || item.day === 0 ? getDay(item.day) : "" }}</template> -->
               {{ item.day || item.day === 0 ? WeekDays[item.day] : "" }}
@@ -91,9 +89,7 @@
             label="Уже есть"
             @update:model-value="$emit('updateItem', item)"
           >
-            <q-tooltip>
-              Продукт уже есть и его не требуется покупать
-            </q-tooltip>
+            <q-tooltip> Продукт уже есть и его не требуется покупать </q-tooltip>
           </q-toggle>
           <q-select
             v-model.number="item.priority"
@@ -159,9 +155,7 @@
           <span class="text-subtitle-1">Используется в рецептах:</span>
           <ingredient-used-recipes :item="item">
             <template v-if="item.price_full">
-              <div>
-                Цена {{ item.price_full }}₺ (~{{ item.price_part }}₺ необходимо)
-              </div>
+              <div>Цена {{ item.price_full }}₺ (~{{ item.price_part }}₺ необходимо)</div>
             </template>
           </ingredient-used-recipes>
         </div>
@@ -170,15 +164,15 @@
           <div>
             <product-list-item-move-week
               v-if="item"
-              :item="item"
+              v-model="item.week"
               :week="week"
               :can-edit="canEdit"
-              @update:item="$emit('updateItem', $event, true)"
+              @update:model-value="itemMoveWeek(item)"
             />
           </div>
           <div>
             <q-btn
-              v-if="isOnLine && item?.ingredient"
+              v-if="isOnline && item?.ingredient"
               :to="{ name: 'ingredient', params: { id: item?.ingredient?.id } }"
               label="Открыть ингредиент"
               icon="open_in_new"
@@ -230,68 +224,46 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
-import IngredientUsedRecipes from './Products/IngredientUsedRecipes.vue'
-import ProductListItemCheckbox from './Products/ProductListItemCheckbox.vue'
-import ProductListItemMoveWeek from './Products/ProductListItemMoveWeek.vue'
-import {
-  getDateOfISOWeek,
-  WeekDays,
-  YearWeek,
-} from "src/modules/WeekUtils";
-import { date } from "quasar";
-import { defineComponent, PropType } from "vue";
-import { priorityOptions } from "src/modules/Globals";
-import {
-  ProductListItemRead,
-} from "src/client";
-import IsOnlineMixin from "src/modules/IsOnlineMixin";
-import AmountTypeSelect from "./Products/AmountTypeSelect.vue";
-import AmountCompletedInput from "./Products/AmountCompletedInput.vue";
-import IngredientSelect from './Recipes/IngredientSelect.vue';
+<script setup lang="ts">
+import IngredientUsedRecipes from "./Products/IngredientUsedRecipes.vue"
+import ProductListItemCheckbox from "./Products/ProductListItemCheckbox.vue"
+import ProductListItemMoveWeek from "./Products/ProductListItemMoveWeek.vue"
+import { getDateOfISOWeek, WeekDays, YearWeek } from "src/modules/WeekUtils"
+import { date } from "quasar"
+import { computed, PropType } from "vue"
+import { priorityOptions } from "src/modules/Globals"
+import { ProductListItemRead } from "src/client"
+import AmountTypeSelect from "./Products/AmountTypeSelect.vue"
+import AmountCompletedInput from "./Products/AmountCompletedInput.vue"
+import IngredientSelect from "./Recipes/IngredientSelect.vue"
+import {isOnline} from 'src/modules/isOnline'
 
-export default defineComponent({
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { AmountTypeSelect, AmountCompletedInput, ProductListItemMoveWeek, IngredientSelect, ProductListItemCheckbox, IngredientUsedRecipes },
-  mixins: [IsOnlineMixin],
-  props: {
-    modelValue: {
-      required: false,
-      default: undefined,
-      type: Object as PropType<ProductListItemRead>,
-    },
-    week: { required: true, type: Object as PropType<YearWeek> },
-    canEdit: { default: true, type: Boolean },
+const props = defineProps({
+  modelValue: {
+    required: false,
+    default: undefined,
+    type: Object as PropType<ProductListItemRead>,
   },
-  emits: ["openItem", "updateItem", "update:model-value"],
-  data() {
-    return {
-      WeekDays,
-      priorityOptions,
-    };
-  },
-  computed: {
-    item() {
-      return this.modelValue;
-    },
-    weekDaysOptions() {
-      return Object.entries(this.WeekDays).map(([id, name]) => {
-        return { id: parseInt(id), name: name };
-      });
-    },
-  },
-  methods: {
-    getDay(idx: number): string {
-      const fday = getDateOfISOWeek(this.week.year, this.week.week);
-      fday.setDate(fday.getDate() + idx - 1);
-      return date.formatDate(fday, "DD.MM");
-    },
-    itemMoveWeek(item: ProductListItemRead) {
-      this.$emit("updateItem", item, true);
-      this.$emit("update:model-value", false);
-    },
-  },
-});
+  week: { required: true, type: Object as PropType<YearWeek> },
+  canEdit: { default: true, type: Boolean },
+})
+
+const $emit = defineEmits(["openItem", "updateItem", "update:model-value"])
+
+const item = computed(() => {
+  return props.modelValue
+})
+
+const weekDaysOptions = computed(() => {
+  return Object.entries(WeekDays).map(([id, name]) => {
+    return { id: parseInt(id), name: name }
+  })
+})
+
+function itemMoveWeek(item: ProductListItemRead) {
+  $emit("updateItem", item, true)
+  $emit("update:model-value", false)
+}
 </script>
 
 <style lang="scss">

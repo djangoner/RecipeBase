@@ -56,7 +56,7 @@ export default defineComponent({
   },
   computed: {
     sliderStep(): number {
-      if (this.max >= 1000){
+      if (this.max >= 100){
         const rounded = (Math.floor(this.max / 100) * 100)
         return rounded / 10
       }

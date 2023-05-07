@@ -2,7 +2,7 @@ import { installQuasar } from "@quasar/quasar-app-extension-testing-unit-vitest"
 import { mount } from "@vue/test-utils"
 import { QCheckbox } from "quasar"
 import { describe, expect, it } from "vitest"
-import { nextTick } from 'vue'
+import { nextTick } from "vue"
 import ProductListItemCheckbox from "./ProductListItemCheckbox.vue"
 
 installQuasar()
@@ -12,7 +12,6 @@ const item = {
   is_completed: false,
   is_already_completed: false,
 }
-
 
 const mountComponent = () => {
   return mount(ProductListItemCheckbox, {
@@ -24,15 +23,14 @@ const mountComponent = () => {
 
 describe("ProductListItemCheckbox", () => {
   it("checkbox click", async () => {
-
     const wrapper = mountComponent()
 
     // Toggle to true
     await wrapper.findComponent(QCheckbox).trigger("click")
     await nextTick()
 
-    expect(wrapper.emitted()['update:model-value']).toBeTruthy()
-    expect(wrapper.emitted()['update:model-value'][0]).toStrictEqual([Object.assign(item, { is_completed: true })])
+    expect(wrapper.emitted()["update:model-value"]).toBeTruthy()
+    expect(wrapper.emitted()["update:model-value"][0]).toStrictEqual([Object.assign(item, { is_completed: true })])
   })
 
   it("toggle disabled", async () => {

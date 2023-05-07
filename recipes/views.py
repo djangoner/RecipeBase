@@ -453,6 +453,7 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
     ).distinct()
 
     serializer_class = ProductListWeekSerializer
+    search_fields = ["year", "week"]
 
     def get_serializer_class(self):
         short = self.request.GET.get("short")

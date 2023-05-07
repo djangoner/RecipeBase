@@ -107,7 +107,11 @@ const updatedCallback = (data: UpdatedCallback) => {
     }
   }
 
-  if (data.changed && data.changed.length > 0) {
+  if (data.update.created) {
+    text = "Создан"
+  } else if (data.update.deleted) {
+    text = "Удален"
+  } else if (data.changed && data.changed.length > 0) {
     if (data.changed.length === 1) {
       const changedField = data.changed[0]
       let actName

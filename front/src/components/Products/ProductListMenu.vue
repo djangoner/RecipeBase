@@ -23,6 +23,21 @@
             <q-item-label>Отметить что уже есть</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item
+          v-ripple
+          tag="label"
+        >
+          <q-item-section side>
+            <q-toggle
+              :model-value="showAlreadyCompleted"
+              dense
+              @update:model-value="$emit('update:showAlreadyCompleted', $event)"
+            />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Показать продукты уже есть</q-item-label>
+          </q-item-section>
+        </q-item>
 
         <q-item
           v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
@@ -103,6 +118,10 @@ const props = defineProps({
     type: Object as PropType<YearWeek>,
     required: true,
   },
+  showAlreadyCompleted: {
+    type: Boolean,
+    default: false,
+  },
   markAlreadyCompleted: {
     type: Boolean,
     default: false,
@@ -113,7 +132,7 @@ const props = defineProps({
   },
 })
 
-const $emit = defineEmits(["loading", "askSync", "dialogObj", "update:markAlreadyCompleted", "canSyncFlag"])
+const $emit = defineEmits(["loading", "askSync", "dialogObj", "update:markAlreadyCompleted", "update:showAlreadyCompleted", "canSyncFlag"])
 
 const $q = useQuasar()
 const store = useBaseStore()

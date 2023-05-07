@@ -48,18 +48,12 @@
           dense
         />
       </div>
-      <div>
-        <q-toggle
-          v-model="showAlreadyCompleted"
-          label="Показать уже есть"
-          dense
-        />
-      </div>
 
       <q-space />
       <div>
         <product-list-menu
-          v-model:markAlreadyCompleted="markAlreadyCompleted"
+          v-model:mark-already-completed="markAlreadyCompleted"
+          v-model:show-already-completed="showAlreadyCompleted"
           :week="week"
           :can-sync="canSync"
           @loading="loading = $event"
@@ -78,7 +72,7 @@
           <q-input
             v-if="storeAuth.hasPerm('recipes.add_productlistitem')"
             v-model="createItem"
-            label="Добавить задачу"
+            label="Добавить продукт"
             @keypress.enter="createNewItem()"
           />
         </div>

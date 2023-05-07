@@ -27,7 +27,7 @@
           <!-- Product amount -->
           <template v-if="item.amount">
             (
-            <template v-if="item.packs && item.ingredient.item_weight"> ~{{ Math.ceil(item.packs) }} {{ item.ingredient.min_pack_size === 1000 ? "кг" : "шт" }}: </template>
+            <template v-if="item.packs && itemPacksShow(item)"> ~{{ Math.ceil(item.packs) }} {{ itemPacksStr(item) }}: </template>
             {{ item.amount }} {{ item.amount_type_str }}
             )
           </template>
@@ -164,6 +164,29 @@ function itemCls(item: ProductListItemRead): string | undefined {
   if (item?.is_completed && "dark" in $q) {
     return $q.dark.isActive ? "bg-grey-9" : "bg-grey-4"
   }
+}
+
+function itemPacksShow(item: ProductListItemRead): boolean{
+  if (item.ingredient.type === "grocery"){
+    return false
+  }
+  return true
+}
+
+function itemPacksStr(item: ProductListItemRead): string {
+  if (item.ingredient.type === "liq"){
+    return "л"
+  }
+  else if (item.ingredient.type == "grocery"){
+    return "кг"
+  }
+  else if (item.ingredient.type == "kilo"){
+    return "кг"
+  }
+  else if (item.ingredient.min_pack_size === 1000){
+    return "кг"
+  }
+  return "шт"
 }
 </script>
 

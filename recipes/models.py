@@ -434,7 +434,7 @@ class ProductListItem(models.Model):
     description = models.TextField(_("Описание"), null=True, blank=True)
     priority = models.PositiveSmallIntegerField(
         _("Приоритет"),
-        default=5,
+        default=3,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
     )
 

@@ -26,10 +26,7 @@
 
           <!-- Product amount -->
           <template v-if="item.amount">
-            (
-            <template v-if="item.packs && itemPacksShow(item)"> ~{{ Math.ceil(item.packs) }} {{ itemPacksStr(item) }}: </template>
-            {{ item.amount }} {{ item.amount_type_str }}
-            )
+            (<template v-if="item.packs && itemPacksShow(item)">~{{ Math.ceil(item.packs) }} {{ itemPacksStr(item) }}: </template>{{ item.amount }} {{ item.amount_type_str }})
           </template>
           <template v-else-if="item.ingredients && item.ingredients.length > 0">
             (
@@ -122,7 +119,6 @@ import { date, useQuasar } from "quasar"
 import { ProductListItemRead } from "src/client"
 import { onMounted, PropType, ref, Ref } from "vue"
 import { getDateOfISOWeek, WeekDays, YearWeek, WeekDaysColors, priorityColors } from "src/modules/WeekUtils"
-import { getPackSuffix } from "src/modules/Utils"
 import { productListGetChanged, ProductListItemSyncable } from "src/modules/ProductListSync"
 
 const props = defineProps({
@@ -170,7 +166,7 @@ function itemPacksShow(item: ProductListItemRead): boolean{
   if (item.ingredient.type === "grocery"){
     return false
   }
-  return true
+  return Math.ceil(item.packs) != item.amount
 }
 
 function itemPacksStr(item: ProductListItemRead): string {

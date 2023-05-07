@@ -1,14 +1,14 @@
 import ProductListItemMoveWeek from "./ProductListItemMoveWeek.vue"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { mount, shallowMount } from "@vue/test-utils"
-import { QBtn, QCard, QDialog, QSelect } from "quasar"
+import { mount } from "@vue/test-utils"
+import { QBtn, QSelect } from "quasar"
 import { createPinia, setActivePinia } from "pinia"
 import { nextTick } from "vue"
-import { installQuasar } from "@quasar/quasar-app-extension-testing-unit-vitest"
+import { installQuasarPlugin } from "@quasar/quasar-app-extension-testing-unit-vitest"
 import axios from "axios"
-import { fakeResponse } from "src/modules/Test"
+import { fakeResponse, transitionStub } from "src/modules/Test"
 
-installQuasar()
+installQuasarPlugin()
 
 const mockWeekList = {
   results: [
@@ -24,12 +24,6 @@ const mockWeekList = {
     },
   ],
 }
-
-const transitionStub = () => ({
-  render: function (h) {
-    return this.$options._renderChildren
-  },
-})
 
 const mountComponent = () => {
   return mount(ProductListItemMoveWeek, {

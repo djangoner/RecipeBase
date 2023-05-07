@@ -1,10 +1,10 @@
-import { installQuasar } from "@quasar/quasar-app-extension-testing-unit-vitest"
+import { installQuasarPlugin } from "@quasar/quasar-app-extension-testing-unit-vitest"
 import { it, test, expect, describe, beforeEach, vi } from "vitest"
-import WeekSelect from "../WeekSelect.vue"
+import WeekSelect from "./WeekSelect.vue"
 import { mount } from "@vue/test-utils"
 import { createPinia, setActivePinia } from "pinia"
 
-installQuasar()
+installQuasarPlugin()
 
 const defaultParams = {
   props: {

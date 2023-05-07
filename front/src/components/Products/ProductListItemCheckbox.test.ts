@@ -1,11 +1,11 @@
-import { installQuasar } from "@quasar/quasar-app-extension-testing-unit-vitest"
+import { installQuasarPlugin } from "@quasar/quasar-app-extension-testing-unit-vitest"
 import { mount } from "@vue/test-utils"
 import { QCheckbox } from "quasar"
 import { describe, expect, it } from "vitest"
 import { nextTick } from "vue"
 import ProductListItemCheckbox from "./ProductListItemCheckbox.vue"
 
-installQuasar()
+installQuasarPlugin()
 
 const item = {
   id: 0,

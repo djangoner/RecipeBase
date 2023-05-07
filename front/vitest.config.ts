@@ -17,7 +17,10 @@ export default defineConfig({
     ],
     exclude: [...configDefaults.exclude, "**/client/**"],
     coverage: {
-      reporter: ["lcov"],
+      reporter: ["lcov", "html"],
+      all: true,
+      include: ["src/**/*"],
+      exclude: ["src/client", "src/i18n"],
     },
   },
   plugins: [

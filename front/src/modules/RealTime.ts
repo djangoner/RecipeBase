@@ -101,7 +101,9 @@ export class RealTime {
       const arr_before_idx = arr_before_copy?.findIndex((i) => i[idField] == newModel[idField])
       if (data.created) {
         // Create
-        arr_before_copy.push(newModel)
+        if (!arr_before_idx) {
+          arr_before_copy.push(newModel)
+        }
       } else if (data.deleted) {
         // Delete
         if (arr_before_idx !== -1) {

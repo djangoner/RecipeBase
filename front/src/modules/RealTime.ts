@@ -1,4 +1,5 @@
 import { Pinia } from "pinia"
+import { simpleDiff } from "./Utils"
 
 export interface AnyData {
   [key: string]: unknown
@@ -23,6 +24,7 @@ export interface MappingGetSet {
 export type MappingValue = string | MappingGetSet
 
 export interface Mapping {
+  name?: string
   idField?: string
   single_attr?: MappingValue
   array_attr?: MappingValue
@@ -30,6 +32,14 @@ export interface Mapping {
 
 export interface StoreMappingObject {
   [key: string]: Mapping
+}
+
+export interface UpdatedCallback {
+  type: "single" | "array"
+  old?: object
+  new?: object
+  changed?: string[]
+  update: ModelUpdateData
 }
 
 export class RealTime {
@@ -69,7 +79,7 @@ export class RealTime {
     }
   }
 
-  onModelUpdate(data: ModelUpdateData) {
+  onModelUpdate(data: ModelUpdateData, callback?: (data: UpdatedCallback) => void) {
     // console.debug("Processing model update...")
     // -- Get model info
 
@@ -99,6 +109,14 @@ export class RealTime {
     if (modelInfo.array_attr) {
       const arr_before_copy: unknown[] = this.getStore(modelInfo.array_attr)
       const arr_before_idx = arr_before_copy?.findIndex((i) => i[idField] == newModel[idField])
+      const callbackData = {
+        type: "array",
+        old: arr_before_idx ? (Object.assign({}, arr_before_copy[arr_before_idx]) as object) : undefined,
+        new: newModel,
+        changed: [] as string[],
+        update: data,
+      }
+
       if (data.created) {
         // Create
         if (!arr_before_idx) {
@@ -114,6 +132,12 @@ export class RealTime {
         if (arr_before_idx !== -1) {
           arr_before_copy[arr_before_idx] = newModel
         }
+      }
+      if (callback) {
+        if (callbackData.old) {
+          callbackData.changed = simpleDiff(callbackData.old, callbackData.new).filter((i) => i !== "idLocal")
+        }
+        callback(callbackData)
       }
       this.setStore(modelInfo.array_attr, arr_before_copy)
       console.debug("[RealTime] Updated array attr: ", arr_before_idx, arr_before_copy)

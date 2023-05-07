@@ -5,9 +5,10 @@
 
 import { ProductListItemRead, ProductListWeekRead, RecipePlanWeekRead } from "src/client"
 import { IDBPDatabase, openDB, deleteDB } from "idb"
-import { objectUnproxy, shouldStore, simpleDiff } from "./SyncUtils"
+import { objectUnproxy, shouldStore } from "./SyncUtils"
 import { getYearWeek } from "./WeekUtils"
 import { useBaseStore } from "src/stores/base"
+import { simpleDiff } from "./Utils"
 
 const DBVersion = 1
 

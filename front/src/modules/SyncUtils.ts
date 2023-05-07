@@ -3,36 +3,6 @@ import { OfflineChanges } from "./ProductListSync"
 
 const storeWeeks = 5
 
-export function compareObjects(a: unknown, b: unknown) {
-  if (Array.isArray(a) && Array.isArray(b)) {
-    return JSON.stringify(a) === JSON.stringify(b)
-  } else if (typeof a === "object" && typeof b === "object") {
-    return JSON.stringify(a) === JSON.stringify(b)
-  }
-
-  return a === b
-}
-
-export function simpleDiff(a: object, b: object): string[] {
-  "Return list of changed properties in last object"
-  const res: string[] = []
-
-  for (const key in a) {
-    // @ts-expect-error ignore
-    const oldVal: unknown = a[key]
-    // @ts-expect-error ignore
-    const newVal: unknown = b[key]
-
-    const isEq = compareObjects(oldVal, newVal)
-
-    if (!isEq) {
-      // console.debug("Diff found: ", oldVal, newVal)
-      res.push(key)
-    }
-  }
-  return res
-}
-
 export function shouldStore(year1: number, week1: number, year2: number, week2: number): boolean {
   const date1 = getDateOfISOWeek(year1, week1)
   const date2 = getDateOfISOWeek(year2, week2)

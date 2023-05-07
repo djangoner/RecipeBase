@@ -483,13 +483,11 @@ export const useBaseStore = defineStore("base", {
     },
 
     async createProductListItem(payload: ProductListItem): Promise<ProductListItemRead> {
-      return new Promise((resolve, reject) => {
-        return storeShortcut({
-          promise: ProductListItemService.productListItemCreate({ requestBody: payload }),
-          setValue: (resp: ProductListItemRead) => {
-            this.product_list_item = resp
-          },
-        })
+      return storeShortcut({
+        promise: ProductListItemService.productListItemCreate({ requestBody: payload }),
+        setValue: (resp: ProductListItemRead) => {
+          this.product_list_item = resp
+        },
       })
     },
     async updateProductListItem(payload: ProductListItem): Promise<ProductListItemRead> {

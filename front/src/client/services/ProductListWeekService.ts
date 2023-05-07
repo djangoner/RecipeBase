@@ -18,11 +18,26 @@ export class ProductListWeekService {
      * @throws ApiError
      */
     public static productListWeekList({
+expand,
+fields,
+omit,
 ordering,
 page,
 pageSize,
 search,
 }: {
+/**
+ * Which field should be expanded, comma separated
+ */
+expand?: string,
+/**
+ * Which fields should be returned
+ */
+fields?: string,
+/**
+ * Which fields should be excluded from results
+ */
+omit?: string,
 /**
  * Which field to use when ordering the results.
  */
@@ -44,6 +59,9 @@ search?: string,
             method: 'GET',
             url: '/api/v1/product_list_week/',
             query: {
+                'expand': expand,
+                'fields': fields,
+                'omit': omit,
                 'ordering': ordering,
                 'page': page,
                 'page_size': pageSize,

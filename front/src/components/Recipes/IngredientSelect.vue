@@ -1,10 +1,13 @@
 <template>
   <q-select
     :model-value="ingredient"
-    :input-debounce="0"
+    :input-debounce="preloadAll? 0 : 100"
     :options="ingredients"
     :rules="rules"
     :label="label"
+    :readonly="readonly"
+    :disable="disable"
+    :clearable="clearable"
     option-label="title"
     use-input
     options-dense
@@ -47,6 +50,22 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    readonly: {
+      type: Boolean,
+      default: false,
+    },
+    disable: {
+      type: Boolean,
+      default: false,
+    },
+    clearable: {
+      type: Boolean,
+      default: false,
+    },
+    preloadAll: {
+      type: Boolean,
+      default: true,
+    }
   },
   emits: ["update:ingredient"],
   data() {
@@ -72,13 +91,23 @@ export default defineComponent({
   methods: {
     filterIngredients(val: string, update: CallableFunction) {
       update(() => {
-        this.search = val.toLowerCase()
+        if (this.preloadAll){
+          this.search = val.toLowerCase()
+        } else {
+          this.loadIngredients(val)
+        }
       })
     },
-    loadIngredients() {
+    loadIngredients(search?: string) {
       const payload = {
         fields: "id,title",
+        pageSize: 1000,
+        search: search,
       }
+      if (!this.preloadAll){
+        payload.pageSize = 20
+      }
+
       this.loading = true
       this.store
         .loadIngredients(payload)

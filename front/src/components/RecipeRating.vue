@@ -2,7 +2,7 @@
   <q-markup-table flat>
     <tbody class="table-rating">
       <tr
-        v-for="user of usersRate"
+        v-for="user of usersCanRate"
         :key="user.id"
       >
         <td class="cell-icon">
@@ -13,13 +13,8 @@
         </td>
 
         <td class="cell-name">
-          {{
-            user?.first_name
-              ? user.first_name + " " + user?.last_name
-              : user.username
-          }}
+          {{ user?.first_name ? user.first_name + " " + user?.last_name : user.username }}
         </td>
-
 
         <td class="cell-rating">
           <q-rating
@@ -32,125 +27,106 @@
             :color="$q.dark.isActive ? 'grey-4' : 'primary'"
             @update:model-value="userSetRating(user, $event - 1)"
           />
-          <q-tooltip>
-            Текущая оценка: {{ userRating(user) || "-" }}
-          </q-tooltip>
+          <q-tooltip> Текущая оценка: {{ userRating(user) || "-" }} </q-tooltip>
         </td>
       </tr>
     </tbody>
   </q-markup-table>
 </template>
 
-<script lang="ts">
-import { useBaseStore } from "src/stores/base";
-import { useAuthStore } from "src/stores/auth";
-import { defineComponent, PropType } from "vue";
-import { RecipeRead, User } from "src/client";
-import HandleErrorsMixin, {
-  CustomAxiosError,
-} from "src/modules/HandleErrorsMixin";
+<script setup lang="ts">
+import { useAuthStore } from "src/stores/auth"
+import { computed, onMounted, PropType, ref } from "vue"
+import { RecipeRead, User } from "src/client"
 
-const defaultRating = {};
+const defaultRating = {}
 
-export default defineComponent({
-  mixins: [HandleErrorsMixin],
-  props: {
-    modelValue: { required: true, type: Object as PropType<RecipeRead> },
-    edit: { required: true, type: Boolean },
-  },
-  emits: ['update:model-value'],
-  data() {
-    const store = useBaseStore();
-    const storeAuth = useAuthStore();
-    return {
-      store,
-      storeAuth,
-      loading: false,
-    };
-  },
-  computed: {
-    users() {
-      return this.storeAuth?.users;
-    },
-    usersRate() {
-      const users = this.users;
-      if (!users) {
-        return users;
-      }
-      return users.filter((u) => {
-        return u?.profile?.show_rate;
-      });
-    },
-  },
-  created() {
-    if (!this.users) {
-      this.loadUsers();
-    }
-  },
-  methods: {
-    loadUsers() {
-      const payload = {
-        page_size: 1000,
-        can_rate: true,
-      };
-      this.storeAuth
-        .loadUsers(payload)
-        .finally(() => {
-          this.loading = false;
-        })
-    },
-    userRating(user: User) {
-      const exists = this.modelValue?.ratings?.filter((r) => {
-        return typeof r.user == "number"
-          ? r.user == user.id
-          : r.user.id == user.id;
-      });
-      // console.debug('userRating: ', user, exists);
+const props = defineProps({
+  modelValue: { required: true, type: Object as PropType<RecipeRead> },
+  edit: { required: true, type: Boolean },
+})
 
-      if (exists && exists.length > 0) {
-        const rating = exists[0]?.rating
-        return rating !== null ? rating : -2;
-      } else {
-        return -1;
-      }
-    },
-    userSetRating(user: User, rating: number | null) {
-      if (!this.modelValue || !this.modelValue?.ratings) {
-        return;
-      }
-      if (rating == -1){
-        rating = null
-      }
+const $emit = defineEmits(["update:model-value"])
+const storeAuth = useAuthStore()
 
-      const exists =
-        this.modelValue?.ratings.filter((r) => {
-          return r.user.id == user.id;
-        }) || false;
-      // console.debug('setUserRating: ', user, rating, exists);
+const loading = ref(false)
 
-      if (exists && exists.length > 0 && this.modelValue.ratings) {
-        const mvalue = Object.assign({}, this.modelValue);
-        mvalue.ratings = this.modelValue.ratings.map((r) => {
-          if (r.user.id == user.id) {
-            r.rating = rating;
-          }
-          return r;
-        });
-        this.$emit("update:model-value", mvalue);
-      } else {
-        const mvalue = Object.assign({}, this.modelValue);
-        // @ts-expect-error: Rating will be created
-        mvalue.ratings.push(
-          // @ts-expect-error: Rating will be created
-          Object.assign({}, defaultRating, {
-            recipe: this.modelValue.id,
-            user: user,
-            rating: rating,
-          })
-        );
-        this.$emit("update:model-value", mvalue);
+const users = computed(() => {
+  return storeAuth.users
+})
+
+const usersCanRate = computed(() => {
+  if (!users.value) {
+    return users.value
+  }
+  return users.value.filter((u) => {
+    return u?.profile?.show_rate
+  })
+})
+
+function loadUsers() {
+  const payload = {
+    page_size: 1000,
+    can_rate: true,
+  }
+  storeAuth.loadUsers(payload).finally(() => {
+    loading.value = false
+  })
+}
+function userRating(user: User): number {
+  const exists = props.modelValue?.ratings?.filter((r) => {
+    return typeof r.user == "number" ? r.user == user.id : r.user.id == user.id
+  })
+  // console.debug('userRating: ', user, exists);
+
+  if (exists && exists.length > 0) {
+    const rating = exists[0]?.rating
+    return rating !== null && rating !== undefined ? rating : -2
+  } else {
+    return -1
+  }
+}
+function userSetRating(user: User, rating: number | null) {
+  if (!props.modelValue || !props.modelValue?.ratings) {
+    return
+  }
+  if (rating == -1) {
+    rating = null
+  }
+
+  const exists =
+    props.modelValue?.ratings.filter((r) => {
+      return r.user.id == user.id
+    }) || false
+  // console.debug('setUserRating: ', user, rating, exists);
+
+  if (exists && exists.length > 0 && props.modelValue.ratings) {
+    const mvalue = Object.assign({}, props.modelValue)
+    mvalue.ratings = props.modelValue.ratings.map((r) => {
+      if (r.user.id == user.id) {
+        r.rating = rating
       }
-    },
-  },
-});
+      return r
+    })
+    $emit("update:model-value", mvalue)
+  } else {
+    const mvalue = Object.assign({}, props.modelValue)
+    // @ts-expect-error: Rating will be created
+    mvalue.ratings.push(
+      // @ts-expect-error: Rating will be created
+      Object.assign({}, defaultRating, {
+        recipe: props.modelValue.id,
+        user: user,
+        rating: rating,
+      })
+    )
+    $emit("update:model-value", mvalue)
+  }
+}
+
+onMounted(() => {
+  if (!users.value) {
+    loadUsers()
+  }
+})
 </script>

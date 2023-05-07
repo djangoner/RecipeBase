@@ -51,6 +51,7 @@ import { productListItemFromRead } from "src/Convert"
 import { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
 import { getDB, ProductListItemSyncable, recipePlansGetOffline, recipePlansListUpdateFromServer } from "src/modules/ProductListSync"
 import { mockedPaginatedResponse, objectUnproxy, onlyChangedFields } from "src/modules/SyncUtils"
+import { storeShortcut } from "src/modules/StoreCrud"
 
 const isOnline = () => navigator?.onLine
 
@@ -433,15 +434,13 @@ export const useBaseStore = defineStore("base", {
     },
     async generateProductListWeek(payload: { year: number; week: number }): Promise<ProductListWeekRead> {
       const id = `${payload?.year}_${payload?.week}`
-      return new Promise((resolve, reject) => {
-        ProductListWeekService.productListWeekGenerateRetrieve({ id: id })
-          .then((resp) => {
-            this.product_list = resp
-            resolve(resp)
-          })
-          .catch((err) => {
-            reject(err)
-          })
+
+      return storeShortcut({
+        promise: ProductListWeekService.productListWeekGenerateRetrieve({ id: id }),
+        setValue: (resp: ProductListWeekRead) => {
+          this.product_list = resp
+        },
+        errorTitle: "Ошибка обновления списка продуктов",
       })
     },
     async productListSend(payload: { year: number; week: number }): Promise<void> {
@@ -485,14 +484,12 @@ export const useBaseStore = defineStore("base", {
 
     async createProductListItem(payload: ProductListItem): Promise<ProductListItemRead> {
       return new Promise((resolve, reject) => {
-        ProductListItemService.productListItemCreate({ requestBody: payload })
-          .then((resp) => {
+        return storeShortcut({
+          promise: ProductListItemService.productListItemCreate({ requestBody: payload }),
+          setValue: (resp: ProductListItemRead) => {
             this.product_list_item = resp
-            resolve(resp)
-          })
-          .catch((err) => {
-            reject(err)
-          })
+          },
+        })
       })
     },
     async updateProductListItem(payload: ProductListItem): Promise<ProductListItemRead> {

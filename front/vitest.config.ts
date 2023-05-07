@@ -12,9 +12,16 @@ export default defineConfig({
       // Matches vitest tests in any subfolder of 'src' or into 'test/vitest/__tests__'
       // Matches all files with extension 'js', 'jsx', 'ts' and 'tsx'
       "src/**/*.vitest.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       "test/vitest/__tests__/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
     ],
     exclude: [...configDefaults.exclude, "**/client/**"],
+    coverage: {
+      reporter: ["lcov", "html"],
+      all: true,
+      include: ["src/**/*"],
+      exclude: ["src/client", "src/i18n"],
+    },
   },
   plugins: [
     vue({

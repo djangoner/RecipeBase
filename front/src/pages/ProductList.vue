@@ -22,7 +22,6 @@
       @update-item="updateItem"
     />
     <!-- Contents -->
-
     <div
       class="row items-center q-mt-sm q-ml-sm q-col-gutter-sm q-mr-md no-wrap"
       :class="$q.screen.lt.md ? 'justify-between' : ''"
@@ -59,93 +58,15 @@
 
       <q-space />
       <div>
-        <q-btn
-          icon="menu"
-          size="md"
-          flat
-          round
-          dense
-        >
-          <q-menu>
-            <q-list dense>
-              <q-item
-                v-ripple
-                tag="label"
-              >
-                <q-item-section side>
-                  <q-toggle
-                    v-model="markAlreadyCompleted"
-                    dense
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Отметить что уже есть</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item
-                v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
-                :disable="!isOnLine"
-                clickable
-                @click="regenerateList()"
-              >
-                <q-item-section avatar>
-                  <q-icon
-                    name="refresh"
-                    color="primary"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label> Обновить автоматический список </q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item
-                v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
-                :disable="!canSync"
-                :class="[canSync ? 'bg-green text-white' : '']"
-                clickable
-                @click="askSyncLocal()"
-              >
-                <q-item-section avatar>
-                  <q-icon
-                    name="sync"
-                    color="primary"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label> Синхронизация </q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item
-                clickable
-                @click="askDiscardSync()"
-              >
-                <q-item-section avatar>
-                  <q-icon
-                    name="delete"
-                    color="negative"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label> Очистить локальную БД </q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item
-                v-close-popup
-                clickable
-                @click="sendList()"
-              >
-                <q-item-section avatar>
-                  <q-icon name="send" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label> Отправить в телеграмм </q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+        <product-list-menu
+          v-model:markAlreadyCompleted="markAlreadyCompleted"
+          :week="week"
+          :can-sync="canSync"
+          @loading="loading = $event"
+          @can-sync-flag="canSyncFlag = $event"
+          @dialog-obj="dialog_obj = $event"
+          @ask-sync="askSyncLocal()"
+        />
       </div>
     </div>
 
@@ -249,6 +170,7 @@
 </template>
 
 <script lang="ts">
+import ProductListMenu from '../components/Products/ProductListMenu.vue'
 import AlreadyCompletedBanner from "../components/Products/AlreadyCompletedBanner.vue"
 import ProductListItems from "components/ProductListItems.vue"
 import ProductListItemView from "components/ProductListItemView.vue"
@@ -265,7 +187,6 @@ import { productListItemFromRead } from "src/Convert"
 import { useAuthStore } from "src/stores/auth"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import {
-  destroyDB,
   productListGetChanged,
   productListGetOffline,
   productListMarkUnchanged,
@@ -305,7 +226,7 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     AlreadyCompletedBanner,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    StatusWebsocket
+    StatusWebsocket, ProductListMenu
 },
   mixins: [HandleErrorsMixin, IsOnlineMixin, WorkerMessagesMixin],
   data() {
@@ -720,26 +641,6 @@ export default defineComponent({
           void this.syncLocal()
         })
     },
-    askDiscardSync() {
-      this.dialog_obj = this.$q
-        .dialog({
-          title: "Подтверждение",
-          message: `Вы уверены что хотите удалить локальные данные синхронизации? Это действие необратимо, локальный список продуктов будет стерт.`,
-          cancel: true,
-          persistent: true,
-        })
-        .onOk(() => {
-          void this.discardSync()
-        })
-    },
-    async discardSync() {
-      await destroyDB()
-      this.canSyncFlag = false
-      this.$q.notify({
-        caption: "Локальная БД была очищена, рекомендуется обновить страницу.",
-        type: "warning",
-      })
-    },
     async syncLocal() {
       if (!this.week) {
         return
@@ -878,27 +779,6 @@ export default defineComponent({
         })
     },
     // deleteItem(item) {},
-    regenerateList() {
-      if (!this.week.year || !this.week.week) {
-        return
-      }
-      const payload = {
-        year: this.week.year,
-        week: this.week.week,
-      }
-      this.loading = true
-
-      this.store
-        .generateProductListWeek(payload)
-        .then((resp) => {
-          this.loading = false
-          void productListUpdateFromServer(resp)
-        })
-        .catch((err: CustomAxiosError) => {
-          this.loading = false
-          this.handleErrors(err, "Ошибка обновления списка продуктов")
-        })
-    },
     openItem(item: ProductListItemRead) {
       console.debug("Open item: ", item)
       this.viewItem = item
@@ -985,31 +865,6 @@ export default defineComponent({
         return
       }
       return cat.sorting.find((s) => s.shop.id == this.sortShop)
-    },
-    sendList() {
-      const payload = {
-        year: this.week?.year,
-        week: this.week?.week,
-      }
-      this.$q.loading.show({
-        group: "sending",
-        message: "Отправка списка...",
-        delay: 400, // ms
-      })
-
-      this.store
-        .productListSend(payload)
-        .then(() => {
-          this.$q.loading.hide("sending")
-          this.$q.notify({
-            type: "positive",
-            message: `Список успешно отправлен`,
-          })
-        })
-        .catch((err: CustomAxiosError) => {
-          this.$q.loading.hide("sending")
-          this.handleErrors(err, "Ошибка отправки списка")
-        })
     },
   },
 })

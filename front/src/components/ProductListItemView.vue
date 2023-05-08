@@ -215,7 +215,8 @@
             Изображение рецепта
           </div>
           <q-img
-            :src="item.ingredient.image"
+            :src="item.ingredient.image_thumbnail || item.ingredient.image"
+            :srcset="item.ingredient.image_thumbnail_webp"
             fit="contain"
           />
         </div>
@@ -228,8 +229,7 @@
 import IngredientUsedRecipes from "./Products/IngredientUsedRecipes.vue"
 import ProductListItemCheckbox from "./Products/ProductListItemCheckbox.vue"
 import ProductListItemMoveWeek from "./Products/ProductListItemMoveWeek.vue"
-import { getDateOfISOWeek, WeekDays, YearWeek } from "src/modules/WeekUtils"
-import { date } from "quasar"
+import { WeekDays, YearWeek } from "src/modules/WeekUtils"
 import { computed, PropType } from "vue"
 import { priorityOptions } from "src/modules/Globals"
 import { ProductListItemRead } from "src/client"

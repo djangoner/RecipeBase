@@ -15,7 +15,8 @@
       >
         <!-- <q-icon name="restaurant_menu" size="50px" color="grey"></q-icon> -->
         <q-img
-          :src="previewImage"
+          :src="recipeImage"
+          :srcset="recipeImageWebp"
           placeholder-src="/favicon.png"
           width="100%"
           height="200px"
@@ -57,41 +58,34 @@
   </q-card>
 </template>
 
-<script lang="ts">
-import recipeCardTooltip from 'components/RecipeCardTooltip.vue';
-import { date } from 'quasar';
-import { RecipeRead } from 'src/client';
-import { defineComponent, PropType } from 'vue';
-import RecipeMenu from './RecipeMenu.vue';
+<script setup lang="ts">
+import recipeCardTooltip from "components/RecipeCardTooltip.vue"
+import { RecipeRead } from "src/client"
+import { computed, PropType } from "vue"
+import { useRouter } from "vue-router"
+import RecipeMenu from "./RecipeMenu.vue"
 
-export default defineComponent({
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { recipeCardTooltip, RecipeMenu },
-  props: {
-    recipe: { required: true, type: Object as PropType<RecipeRead> },
-  },
-  emits: ['updateItem'],
-  data() {
-    return {};
-  },
-  computed: {
-    previewImage(): string {
-      if (this.recipe?.images && this.recipe?.images?.length > 0) {
-        const img = this.recipe.images[0];
-        return (img.thumbnails['small'] as string) || img.image;
-      }
-      return '/favicon.png';
-    },
-  },
-  methods: {
-    dateFormat(dt: Date | string): string {
-      return date.formatDate(dt, 'YYYY.MM.DD');
-    },
-    openRecipe(id: number) {
-      void this.$router.push({ name: 'recipe', params: { id: id } });
-    },
-  },
-});
+const props = defineProps({
+  recipe: { required: true, type: Object as PropType<RecipeRead> },
+})
+const $emit = defineEmits(["updateItem"])
+const $router = useRouter()
+
+const recipeRawImage = computed(() => {
+  return props.recipe.images? props.recipe.images[0] : null
+})
+
+const recipeImage = computed(() => {
+  return recipeRawImage.value?.image_thumbnail || recipeRawImage.value?.image
+})
+
+const recipeImageWebp = computed(() => {
+  return recipeRawImage.value?.image_thumbnail_webp || recipeRawImage.value?.image_thumbnail || recipeRawImage.value?.image
+})
+
+function openRecipe(id: number) {
+  void $router.push({ name: "recipe", params: { id: id } })
+}
 </script>
 
 <style lang="scss" scoped>

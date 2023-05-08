@@ -98,9 +98,12 @@
       />
     </div>
 
-    <span v-if="recipes">
+    <div
+      v-if="recipes"
+      class="q-my-sm"
+    >
       Найдено результатов: {{ tablePagination?.rowsNumber }}
-    </span>
+    </div>
 
     <!-- Recipe cards -->
     <div

@@ -15,7 +15,6 @@ python-dotenv = "*"
 pillow = "*"
 psycopg2-binary = "*"
 django-admin-sortable = "*"
-django-thumbnails = "*"
 pytelegrambotapi = "*"
 django-multiselectfield = "*"
 django-q = "*"
@@ -27,6 +26,7 @@ gunicorn = "*"
 cachetools = "*"
 channels = {extras = ["daphne"], version = "*"}
 channels-redis = "*"
+django-imagekit = "*"
 
 [dev-packages]
 pytest = "*"

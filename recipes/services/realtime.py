@@ -65,5 +65,5 @@ def register_model(model: ModelInfo, callback):
 
 def register_models(models: list[ModelInfo], callback: TypeCallback) -> None:
     for model in models:
-        log.info(f"Register model: {model}")
+        # log.debug(f"Register model: {model}")
         register_model(model, callback)

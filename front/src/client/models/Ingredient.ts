@@ -17,6 +17,8 @@ export type Ingredient = {
     category?: number | null;
     readonly regular_ingredients: RegularIngredient;
     image?: string | null;
+    readonly image_thumbnail: string;
+    readonly image_thumbnail_webp: string;
     title: string;
     description?: string | null;
     /**

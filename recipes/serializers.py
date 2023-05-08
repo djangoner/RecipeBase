@@ -46,19 +46,13 @@ class StatusOkSerializer(serializers.Serializer):
 
 
 class RecipeImageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-    thumbnails = serializers.SerializerMethodField()
+    image_thumbnail = serializers.ImageField(read_only=True)
+    image_thumbnail_webp = serializers.ImageField(read_only=True)
 
     class Meta:
         model = RecipeImage
         fields = "__all__"
         # read_only_fields = ("image", )
-
-    @extend_schema_field(OpenApiTypes.OBJECT)
-    def get_thumbnails(self, recipe: RecipeImage):
-        # return recipe.image.thumbnails.all()  # type: ignore
-        if not recipe.image:
-            return {}
-        return {"small": recipe.image.thumbnails.small.url}  # type: ignore
 
 
 class ShopSerializer(serializers.ModelSerializer):
@@ -109,6 +103,8 @@ class IngredientSerializer(FlexFieldsModelSerializer, WritableNestedModelSeriali
     )
     regular_ingredients = RegularIngredientSerializer(read_only=True)
     image = serializers.ImageField(max_length=None, allow_empty_file=True, allow_null=True, required=False)
+    image_thumbnail = serializers.ImageField(read_only=True)
+    image_thumbnail_webp = serializers.ImageField(read_only=True)
 
     class Meta:
         model = Ingredient

@@ -7,7 +7,8 @@
  */
 export type PatchedRecipeImage = {
     readonly id?: number;
-    readonly thumbnails?: Record<string, any>;
+    readonly image_thumbnail?: string;
+    readonly image_thumbnail_webp?: string;
     image?: string;
     title?: string | null;
     num?: number | null;

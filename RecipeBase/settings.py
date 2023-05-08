@@ -61,18 +61,18 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # 3-party
-    "rest_framework",
-    "rest_framework.authtoken",
-    "django_filters",
-    "drf_spectacular",
+    "adminsortable",
+    "cachalot",
     "ckeditor",
     "django_cleanup.apps.CleanupConfig",
-    "adminsortable",
-    "thumbnails",
-    "multiselectfield",
+    "django_filters",
     "django_q",
+    "drf_spectacular",
+    "imagekit",
+    "multiselectfield",
+    "rest_framework",
+    "rest_framework.authtoken",
     "simple_history",
-    "cachalot",
     # Custom
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
@@ -129,9 +129,7 @@ if TESTING:
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": os.getenv(
-            "CHANNELS_BACKEND", "channels.layers.InMemoryChannelLayer"
-        ),
+        "BACKEND": os.getenv("CHANNELS_BACKEND", "channels.layers.InMemoryChannelLayer"),
         #     "CONFIG": {
         #         "hosts": json.loads(os.getenv("CHANNELS_HOSTS", "[]"))
         #     }
@@ -171,9 +169,7 @@ else:
 
 CACHES = {
     "default": {
-        "BACKEND": os.getenv(
-            "CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"
-        ),
+        "BACKEND": os.getenv("CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"),
         "LOCATION": os.getenv("CACHE_LOCATION", None),
         "KEY_PREFIX": os.getenv("CACHE_PREFIX", "recipebase"),
     }

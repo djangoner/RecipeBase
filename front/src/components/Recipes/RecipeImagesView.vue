@@ -11,6 +11,7 @@
     navigation
     infinite
     arrows
+    swipeable
     @mouseenter="autoplay = false"
     @mouseleave="autoplay = true"
   >

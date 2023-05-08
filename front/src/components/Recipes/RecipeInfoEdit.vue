@@ -225,7 +225,7 @@
     v-model="recipe.short_description"
     type="textarea"
     label="Короткое описание"
-    hint="Показывается на карточке рецепта"
+    hint="Отображается на карточке рецепта"
     :readonly="!edit"
   />
   <div v-if="!edit && recipe.comment">

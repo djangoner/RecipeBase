@@ -9,10 +9,11 @@ from django.db.models import F
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 from adminsortable.models import SortableMixin
-from thumbnails.fields import ImageField
+
 
 from recipes.services.measurings import MEASURING_TYPES, short_text
 from simple_history.models import HistoricalRecords
+from imagekit.models import ImageSpecField
 
 # // Helpers
 DESC_LENGTH = 80
@@ -98,7 +99,9 @@ class RecipeImage(models.Model):
         null=True,
         blank=False,
     )
-    image = ImageField(_("Изображение"), upload_to=recipe_image_upload_to)  # type: ignore
+    image = models.ImageField(_("Изображение"), upload_to=recipe_image_upload_to)  # type: ignore
+    image_thumbnail = ImageSpecField(source="image", id="recipes:recipe:image_thumbnail")
+    image_thumbnail_webp = ImageSpecField(source="image", id="recipes:recipe:image_thumbnail_webp")
     title = models.CharField(_("Заголовок"), max_length=100, blank=True, null=True)
     num = models.SmallIntegerField(_("Сортировка"), null=True, blank=True)
     created = models.DateTimeField(_("Время создания"), auto_now_add=True, null=True)
@@ -147,7 +150,9 @@ class Ingredient(models.Model):
     need_buy = models.BooleanField(_("Требует покупки"), default=True)
     edible = models.BooleanField(_("Съедобный"), default=True)
 
-    image = ImageField(_("Изображение"), upload_to=ingredient_upload_to, blank=True, null=True)  # type: ignore
+    image = models.ImageField(_("Изображение"), upload_to=ingredient_upload_to, blank=True, null=True)  # type: ignore
+    image_thumbnail = ImageSpecField(source="image", id="recipes:ingredient:image_thumbnail")
+    image_thumbnail_webp = ImageSpecField(source="image", id="recipes:ingredient:image_thumbnail_webp")
     history = HistoricalRecords()
 
     class Meta:

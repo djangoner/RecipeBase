@@ -78,6 +78,9 @@ def get_notification_text(name: str, **options) -> Optional[str]:
         week_plan = get_current_plan_week()
         plans = get_plan_items_filtered(week_plan, day=day)
         text += render_plan_day(week_plan, plans)
+
+        if not plans:
+            return
         return text
     elif name == "week_plan":
         week_plan = get_current_plan_week()

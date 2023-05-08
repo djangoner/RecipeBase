@@ -218,6 +218,7 @@
             :src="item.ingredient.image_thumbnail || item.ingredient.image"
             :srcset="item.ingredient.image_thumbnail_webp"
             fit="contain"
+            style="max-height: 400px"
           />
         </div>
       </q-card-section>

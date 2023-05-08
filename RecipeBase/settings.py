@@ -49,6 +49,7 @@ TELEGRAM_BOT_ENABLE = TELEGRAM_BOT_TOKEN and len(TELEGRAM_BOT_TOKEN) >= 40
 
 USE_X_FORWARDED_HOST = True
 HOSTNAME_OVERRIDE = getenv("HOSTNAME_OVERRIDE", None)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
 
@@ -129,7 +130,9 @@ if TESTING:
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": os.getenv("CHANNELS_BACKEND", "channels.layers.InMemoryChannelLayer"),
+        "BACKEND": os.getenv(
+            "CHANNELS_BACKEND", "channels.layers.InMemoryChannelLayer"
+        ),
         #     "CONFIG": {
         #         "hosts": json.loads(os.getenv("CHANNELS_HOSTS", "[]"))
         #     }
@@ -169,7 +172,9 @@ else:
 
 CACHES = {
     "default": {
-        "BACKEND": os.getenv("CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"),
+        "BACKEND": os.getenv(
+            "CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"
+        ),
         "LOCATION": os.getenv("CACHE_LOCATION", None),
         "KEY_PREFIX": os.getenv("CACHE_PREFIX", "recipebase"),
     }

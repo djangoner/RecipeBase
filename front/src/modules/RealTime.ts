@@ -1,5 +1,5 @@
 import { Pinia } from "pinia"
-import { simpleDiff } from "./Utils"
+import { simpleDiff } from "./SyncUtils"
 
 export interface AnyData {
   [key: string]: unknown

@@ -5,16 +5,11 @@
 
 import { ProductListItemRead, ProductListWeekRead, RecipePlanWeekRead } from "src/client"
 import { IDBPDatabase, openDB, deleteDB } from "idb"
-import { objectUnproxy, shouldStore } from "./SyncUtils"
+import { objectUnproxy, OfflineChanges, shouldStore } from "./SyncUtils"
 import { getYearWeek } from "./WeekUtils"
-import { useBaseStore } from "src/stores/base"
-import { simpleDiff } from "./Utils"
+import { simpleDiff } from "./SyncUtils"
 
 const DBVersion = 1
-
-export interface OfflineChanges {
-  [id: string]: unknown
-}
 
 export interface ProductListItemSyncable extends ProductListItemRead {
   idLocal?: number

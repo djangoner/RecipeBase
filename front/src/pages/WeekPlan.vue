@@ -468,7 +468,7 @@ export default defineComponent({
     },
     fillingPrc(val, oldVal) {
       // When plan finished, show fireworks if enabled
-      if (val == 1 && oldVal) {
+      if (val == 1 && oldVal && oldVal !== 1) {
         this.showFireworks = true
       }
     },

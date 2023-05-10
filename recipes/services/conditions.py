@@ -230,9 +230,9 @@ def get_plan_value(cond: WeekPlanCondition, plan: RecipePlan):
             return 0
 
         if field == WeekPlanCondition.Field.MIN_RATING:
-            return min(ratings)
+            return min(ratings) if ratings else 0
         elif field == WeekPlanCondition.Field.MAX_RATING:
-            return max(ratings)
+            return max(ratings) if ratings else 0
 
     elif field == WeekPlanCondition.Field.DUPLICATES:
         return get_week_duplicates(plan)

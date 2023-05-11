@@ -168,7 +168,7 @@ def get_plan_day_ratings(plan: RecipePlan, filter_user: Optional[int] = None) ->
                     continue
             ratings.append(r)
 
-    ratings_num = [r.rating for r in ratings]
+    ratings_num = [r.rating for r in ratings if r.rating is not None]
     return ratings_num
 
 

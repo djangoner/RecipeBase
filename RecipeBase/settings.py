@@ -298,26 +298,6 @@ SPECTACULAR_SETTINGS = {
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
 }
 
-THUMBNAILS = {
-    "METADATA": {
-        "BACKEND": "RecipeBase.thumbnails_backend.ThumbnailDBBackend",
-    },
-    "STORAGE": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "SIZES": {
-        "small": {
-            "PROCESSORS": [
-                {
-                    "PATH": "thumbnails.processors.resize",
-                    "width": 200,
-                    "height": 200,
-                    "method": "fill",
-                },
-            ],
-        },
-    },
-}
 
 Q_CLUSTER = {
     # 'name': "recipebase",

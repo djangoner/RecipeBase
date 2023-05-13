@@ -120,8 +120,8 @@ class RecipesTestCase(TestCase):
         meal_time = MealTime.objects.create(title="Test")
         r1 = Recipe.objects.create(is_archived=True)
         r2 = Recipe.objects.create(is_archived=False)
-        RecipePlan.objects.create(meal_time=meal_time, week=week, recipe=r1, day=1, date=datetime(2022, 1, 1))
-        RecipePlan.objects.create(meal_time=meal_time, week=week, recipe=r2, day=1, date=datetime(2022, 1, 1))
+        RecipePlan.objects.create(meal_time=meal_time, week=week, recipe=r1, day=1, date=datetime(2022, 1, 1).date())
+        RecipePlan.objects.create(meal_time=meal_time, week=week, recipe=r2, day=1, date=datetime(2022, 1, 1).date())
 
         resp = self.client.get("/api/v1/recipes/", {"compilation": "vlong_uncooked"})
         self.assertEqual(resp.status_code, 200)
@@ -154,8 +154,8 @@ class RecipesTestCase(TestCase):
         meal_time = MealTime.objects.create(title="Test")
         r1 = Recipe.objects.create(is_archived=True)
         r2 = Recipe.objects.create(is_archived=False)
-        RecipePlan.objects.create(meal_time=meal_time, week=week, recipe=r1, day=1, date=datetime(2022, 1, 1))
-        RecipePlan.objects.create(meal_time=meal_time, week=week, recipe=r2, day=1, date=datetime(2022, 1, 1))
+        RecipePlan.objects.create(meal_time=meal_time, week=week, recipe=r1, day=1, date=datetime(2022, 1, 1).date())
+        RecipePlan.objects.create(meal_time=meal_time, week=week, recipe=r2, day=1, date=datetime(2022, 1, 1).date())
 
         resp = self.client.get("/api/v1/recipes/", {"compilation": "top10"})
         self.assertEqual(resp.status_code, 200)
@@ -175,7 +175,7 @@ class RecipesTestCase(TestCase):
         r1 = RecipeFactory.create()  # Will be removed by filter
         RecipeFactory.create()  # Will be in results
 
-        RecipePlanFactory.create(meal_time=meal_time, week=week, recipe=r1, day=1, date=datetime(2022, 1, 1))
+        RecipePlanFactory.create(meal_time=meal_time, week=week, recipe=r1, day=1, date=datetime(2022, 1, 1).date())
 
         resp = self.client.get("/api/v1/recipes/", {"compilation": "new"})
         self.assertEqual(resp.status_code, 200)

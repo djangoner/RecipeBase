@@ -158,6 +158,12 @@ def get_notification_text(name: str, **options) -> Optional[str]:
 
         return text
 
+    elif name == "products_filled":
+        return "✅ Список продуктов готов! Рекомендуется выполнить синхронизацию."
+
+    elif name == "weekplan_ready":
+        return "✅ План на неделю готов!"
+
     elif name == "notif_synced":
         return "Успешно выполнена фоновая синхронизация"
 

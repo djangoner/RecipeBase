@@ -4,7 +4,15 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from recipes.consumers import RealtimeConsumer
 
-from recipes.models import Ingredient, ProductListItem, Recipe, RecipeIngredient, RecipePlan, RecipePlanWeek
+from recipes.models import (
+    Ingredient,
+    ProductListItem,
+    ProductListWeek,
+    Recipe,
+    RecipeIngredient,
+    RecipePlan,
+    RecipePlanWeek,
+)
 from recipes.serializers import (
     IngredientSerializer,
     ProductListItemSerializer,
@@ -14,6 +22,7 @@ from recipes.serializers import (
 )
 from recipes.services.measurings import amount_to_grams
 from recipes.services.realtime import ModelInfo, register_models
+from telegram_bot.services.notifications import send_notification
 
 # from recipes.services.plans import update_plan_week
 
@@ -29,6 +38,28 @@ def get_current_plan_week():
 @receiver(pre_save, sender=RecipeIngredient)
 def recipe_pre_save(sender: RecipeIngredient, instance, **kwargs):
     instance.amount_grams = amount_to_grams(instance.amount, instance.amount_type)
+
+
+@receiver(pre_save, sender=ProductListWeek)
+def product_list_week_changed(sender, instance, **kwargs):
+    try:
+        old = ProductListWeek.objects.get(pk=instance.pk)
+    except ProductListWeek.DoesNotExist:
+        old = instance
+
+    if instance.is_filled and not old.is_filled:
+        send_notification("products_filled")
+
+
+@receiver(pre_save, sender=RecipePlanWeek)
+def plan_week_changed(sender, instance, **kwargs):
+    try:
+        old = RecipePlanWeek.objects.get(pk=instance.pk)
+    except RecipePlanWeek.DoesNotExist:
+        old = instance
+
+    if instance.is_filled and not old.is_filled:
+        send_notification("weekplan_ready")
 
 
 register_models(

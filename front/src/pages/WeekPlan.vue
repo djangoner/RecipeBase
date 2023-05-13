@@ -468,8 +468,9 @@ export default defineComponent({
     },
     fillingPrc(val, oldVal) {
       // When plan finished, show fireworks if enabled
-      if (val == 1 && oldVal && oldVal !== 1) {
-        this.showFireworks = true
+      if (val == 1 && oldVal && !this.plan.is_filled) {
+        this.askPlanCompleted()
+        // this.showFireworks = true
       }
     },
   },
@@ -526,6 +527,13 @@ export default defineComponent({
           this.saving = false
           this.handleErrors(err, "Ошибка загрузки плана")
         })
+    },
+    markPlanCompleted(){
+      if (!this.plan){
+        return
+      }
+      this.plan.is_filled = true;
+      this.saveWeekPlan()
     },
     loadMealTime() {
       const payload = {
@@ -706,6 +714,17 @@ export default defineComponent({
     },
     getCondition(id: number) {
       return this.conditions?.find((c) => c.id == id) || null
+    },
+    askPlanCompleted(){
+      const dialog = this.$q.dialog({
+        title: "Подтверждение",
+        message: `Отметить план как завершенный?`,
+        cancel: true,
+        persistent: true,
+      })
+      .onOk(() => {
+        this.markPlanCompleted()
+      })
     },
   },
 })

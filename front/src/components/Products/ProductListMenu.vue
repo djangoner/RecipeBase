@@ -23,7 +23,7 @@
             <q-item-label>Отметить что уже есть</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item
+        <!-- <q-item
           v-ripple
           tag="label"
         >
@@ -37,7 +37,7 @@
           <q-item-section>
             <q-item-label>Показать продукты уже есть</q-item-label>
           </q-item-section>
-        </q-item>
+        </q-item> -->
 
         <q-item
           v-if="storeAuth.hasPerm('recipes.change_productlistitem')"

@@ -534,6 +534,7 @@ export default defineComponent({
       }
       this.plan.is_filled = true;
       this.saveWeekPlan()
+      this.showFireworks = true;
     },
     loadMealTime() {
       const payload = {

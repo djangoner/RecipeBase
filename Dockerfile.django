@@ -1,4 +1,7 @@
 FROM python:3.11-slim-buster
+ARG PIPENV_ARGS
+ENV PIPENV_ARGS $PIPENV_ARGS
+
 WORKDIR /app
 COPY Pipfile .
 COPY Pipfile.lock .

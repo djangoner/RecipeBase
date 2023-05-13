@@ -15,4 +15,5 @@ export type PatchedProductListWeek = {
     items?: Array<ProductListItem>;
     year?: number;
     week?: number;
+    is_filled?: boolean;
 };

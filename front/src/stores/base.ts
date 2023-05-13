@@ -99,16 +99,13 @@ export const useBaseStore = defineStore("base", {
     // -- Essentials
 
     async loadStats(): Promise<StatsList> {
-      return new Promise((resolve, reject) => {
-        StatsService.statsList()
-          .then((resp) => {
-            const stat = resp[0] || resp
-            this.stats = stat
-            resolve(stat)
-          })
-          .catch((err) => {
-            reject(err)
-          })
+      return storeShortcut({
+        promise: StatsService.statsList(),
+        setValue: (resp: StatsList[]) => {
+          const stat = resp[0] || resp
+          this.stats = stat
+        },
+        errorTitle: "Ошибка загрузки статистики",
       })
     },
     async loadAmountTypes(): Promise<AmountTypes> {
@@ -418,18 +415,14 @@ export const useBaseStore = defineStore("base", {
     },
     async saveProductListWeek(payload: { year: number; week: number } & ProductListWeek): Promise<ProductListWeekRead> {
       const id = `${payload?.year}_${payload?.week}`
-      return new Promise((resolve, reject) => {
-        ProductListWeekService.productListWeekUpdate({
+      return storeShortcut({
+        promise: ProductListWeekService.productListWeekUpdate({
           id: id,
           requestBody: payload,
-        })
-          .then((resp) => {
-            this.product_list = resp
-            resolve(resp)
-          })
-          .catch((err) => {
-            reject(err)
-          })
+        }),
+        setValue: (resp: ProductListWeekRead) => {
+          this.product_list = resp
+        },
       })
     },
     async generateProductListWeek(payload: { year: number; week: number }): Promise<ProductListWeekRead> {

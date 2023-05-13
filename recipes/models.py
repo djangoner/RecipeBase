@@ -284,6 +284,8 @@ class RecipePlanWeek(models.Model):
     week = models.SmallIntegerField(_("Неделя"))
 
     comments = models.JSONField(_("Комментарии"), default=get_default_comments)
+    is_filled = models.BooleanField(_("Заполнен"), default=False)
+
     plans: models.QuerySet["RecipePlan"]
 
     class Meta:
@@ -359,7 +361,9 @@ class RecipePlan(models.Model):
 class ProductListWeek(models.Model):
     year = models.SmallIntegerField(_("Год"))
     week = models.SmallIntegerField(_("Неделя"))
-    # items: models.QuerySet["ProductListItem"]
+
+    is_filled = models.BooleanField(_("Заполнен"), default=False)
+    items: models.QuerySet["ProductListItem"]
 
     class Meta:
         ordering = ["-year", "-week"]

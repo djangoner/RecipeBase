@@ -15,4 +15,5 @@ export type RecipePlanWeek = {
     year: number;
     week: number;
     comments?: Record<string, any>;
+    is_filled?: boolean;
 };

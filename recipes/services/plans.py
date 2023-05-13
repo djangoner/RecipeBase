@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 import logging
 from typing import Optional, Tuple, TypeAlias
 
@@ -29,6 +30,20 @@ class WeekIngredientInfo:
     amounts: IngredientAmounts = field(default_factory=list)
     amount: Optional[int | float] = None
     min_day: int = field(default=7)
+
+
+def get_current_or_next_week():
+    now = datetime.now()
+    year, week = now.year, now.isocalendar()[1]
+
+    if now.isocalendar()[2] >= 5:  # If friday
+        week += 1
+
+    if week > 54:
+        year += 1
+        week = 1
+
+    return year, week
 
 
 def is_convertible(measuring: str, advanced: bool = True) -> bool:

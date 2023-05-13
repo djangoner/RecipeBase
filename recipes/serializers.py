@@ -458,7 +458,7 @@ class ProductListItemReadSerializer(ProductListItemSerializer):
 
 
 class ProductListWeekSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):
-    items = ProductListItemSerializer(many=True)
+    items = ProductListItemSerializer(many=True, required=False)
 
     class Meta:
         model = ProductListWeek

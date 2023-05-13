@@ -56,6 +56,25 @@
           </q-item-section>
         </q-item>
         <q-item
+          v-if="storeAuth.hasPerm('recipes.change_productlist')"
+          :disable="!isOnline || store.product_list?.is_filled"
+          clickable
+          @click="completeList()"
+        >
+          <q-item-section avatar>
+            <q-icon
+              name="done"
+              color="primary"
+            />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label> Завершить отмечание списка </q-item-label>
+          </q-item-section>
+          <q-tooltip>
+            Завершить отмечание продуктов которые уже есть
+          </q-tooltip>
+        </q-item>
+        <q-item
           v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
           :disable="!canSync"
           :class="[canSync ? 'bg-green text-white' : '']"
@@ -109,7 +128,7 @@ import { useQuasar } from "quasar"
 import { YearWeek } from "src/modules/Globals"
 import { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
 import { useBaseStore } from "src/stores/base"
-import { computed, PropType } from "vue"
+import { computed, PropType, watch } from "vue"
 import { destroyDB, productListUpdateFromServer } from "src/modules/ProductListSync"
 import { useAuthStore } from "src/stores/auth"
 
@@ -201,6 +220,47 @@ function askClearDB() {
   $emit("dialogObj", dialog)
 }
 
+
+function completeList(){
+  const upd = {
+    is_filled: true,
+  }
+
+  const payload = Object.assign({year: props.week.year, week: props.week.week}, store.product_list, upd)
+
+  // @ts-expect-error ignore items
+  delete payload["items"]
+
+  const notif = $q.notify({
+    type: 'ongoing',
+    message: 'Завершение списка...'
+  })
+
+  void store.saveProductListWeek(payload).then(() => {
+    notif({
+      type: 'positive',
+      message: 'Список успешно завершен',
+      timeout: 1000
+    })
+  }).catch(() => {
+    notif({})
+  })
+}
+
+function askCompleteList() {
+  const dialog = $q
+    .dialog({
+      title: "Подтверждение",
+      message: `Завершить отмечание списка продуктов которые уже есть?`,
+      cancel: true,
+      persistent: true,
+    })
+    .onOk(() => {
+      completeList()
+    })
+}
+
+
 async function runClearDB() {
   await destroyDB()
   $emit("canSyncFlag", false)
@@ -209,4 +269,12 @@ async function runClearDB() {
     type: "warning",
   })
 }
+
+watch(() => props.markAlreadyCompleted, (val: boolean, oldVal: boolean) => {
+  if (val === false && oldVal === true){
+    if (!store.product_list?.is_filled){
+      askCompleteList()
+    }
+  }
+})
 </script>

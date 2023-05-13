@@ -64,7 +64,7 @@ from recipes.services.measurings import (
     MEASURING_SHORT,
     MEASURING_TYPES,
 )
-from recipes.services.plans import update_plan_week
+from recipes.services.plans import get_current_or_next_week, update_plan_week
 from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import fields
@@ -594,15 +594,40 @@ class StatsViewset(viewsets.ViewSet):
                 "ingredients": fields.IntegerField(),
                 "plans": fields.IntegerField(),
                 "tasks": fields.IntegerField(),
+                #
+                "year": fields.IntegerField(),
+                "week": fields.IntegerField(),
+                "week_plan_progress": fields.IntegerField(),
+                "week_plan_filled": fields.IntegerField(),
+                "week_product_progress": fields.IntegerField(),
+                "week_product_filled": fields.IntegerField(),
             },
         )
     )
     def list(self, request):
+        year, week = get_current_or_next_week()
+
+        plan_week, _ = RecipePlanWeek.objects.get_or_create(year=year, week=week)
+        product_week, _ = ProductListWeek.objects.get_or_create(year=year, week=week)
+
+        plan_progress = plan_week.plans.filter(meal_time__is_primary=True).count() / (
+            MealTime.objects.filter(is_primary=True).count() * 5
+        )
+
+        product_items = product_week.items.filter(already_completed=False)
+        product_progress = product_items.filter(is_completed=True).count() / product_items.count()
+
         data = {
             "recipes": Recipe.objects.filter(is_archived=False).count(),
             "ingredients": Ingredient.objects.count(),
             "plans": RecipePlanWeek.objects.filter(plans__gte=1).distinct().count(),
             "tasks": Task.objects.count(),
+            "year": year,
+            "week": week,
+            "week_plan_progress": round(plan_progress, 2),
+            "week_plan_filled": plan_week.is_filled,
+            "week_product_progress": round(product_progress, 2),
+            "week_product_filled": product_week.is_filled,
         }
         return response.Response(data)
 

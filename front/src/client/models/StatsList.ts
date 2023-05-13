@@ -7,4 +7,10 @@ export type StatsList = {
     ingredients: number;
     plans: number;
     tasks: number;
+    year: number;
+    week: number;
+    week_plan_progress: number;
+    week_plan_filled: number;
+    week_product_progress: number;
+    week_product_filled: number;
 };

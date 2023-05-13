@@ -32,6 +32,10 @@
       />
     </div>
 
+    <div class="q-px-md">
+      <index-page-status />
+    </div>
+
     <!-- Center links -->
     <div class="col-grow flex column flex-center q-col-gutter-y-lg">
       <div class="row justify-center items-center q-gutter-x-md">
@@ -107,53 +111,43 @@
   </q-page>
 </template>
 
-<script lang="ts">
-import { StatsList } from "src/client";
-import MetricCard from "src/components/MetricCard.vue";
-import { useBaseStore } from "src/stores/base";
-import { Component, DefineComponent, defineComponent } from "vue";
-import HandleErrorsMixin, {
-  CustomAxiosError,
-} from "src/modules/HandleErrorsMixin";
-import IsOnlineMixin from "src/modules/IsOnlineMixin";
-import { useAuthStore } from "src/stores/auth";
+<script setup lang="ts">
+import IndexPageStatus from "../components/Status/IndexPageStatus.vue"
+import MetricCard from "src/components/MetricCard.vue"
+import { useBaseStore } from "src/stores/base"
+import { computed, onMounted, ref } from "vue"
+import { useAuthStore } from "src/stores/auth"
+import { promiseSetLoading } from "src/modules/StoreCrud"
+import { isOnline } from "src/modules/isOnline"
+import {useIntervalFn} from '@vueuse/core'
 
-const card: DefineComponent = MetricCard as Component as DefineComponent;
+const store = useBaseStore()
+const storeAuth = useAuthStore()
+const loading = ref(false)
 
-export default defineComponent({
-  name: "IndexPage",
-  components: { metricCard: card },
-  mixins: [HandleErrorsMixin, IsOnlineMixin],
-  data() {
-    const store = useBaseStore();
-    const storeAuth = useAuthStore();
-    return { store, storeAuth, loading: false };
-  },
-  computed: {
-    stats(): StatsList | null {
-      return this.store.stats;
-    },
-    appVersion():string{
-      return this.store.appVersion
-    }
-  },
-  created() {
-    if (this.isOnLine) {
-      this.loadStats();
-    }
-  },
-  methods: {
-    loadStats() {
-      this.store
-        .loadStats()
-        .then(() => {
-          this.loading = false;
-        })
-        .catch((err: CustomAxiosError) => {
-          this.loading = false;
-          this.handleErrors(err, "Ошибка загрузки статистики");
-        });
-    },
-  },
-});
+const stats = computed(() => {
+  return store.stats
+})
+
+const appVersion = computed(() => {
+  return store.appVersion
+})
+
+function loadStats() {
+  if (!isOnline.value){
+    return
+  }
+  const prom = store
+    .loadStats()
+  promiseSetLoading(prom, loading)
+}
+
+onMounted(() => {
+  loadStats()
+})
+
+const {isActive} = useIntervalFn(() => {
+  loadStats()
+}, 15000)
+
 </script>

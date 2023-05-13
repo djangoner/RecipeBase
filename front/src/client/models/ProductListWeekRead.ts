@@ -15,4 +15,5 @@ export type ProductListWeekRead = {
     items: Array<ProductListItemRead>;
     year: number;
     week: number;
+    is_filled?: boolean;
 };

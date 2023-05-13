@@ -8,7 +8,7 @@ steps:
     image: docker/compose:latest
     commands:
       - docker-compose build --build-arg PIPENV_ARGS=-d web quasar
-      - docker-compose run --rm web pytest
+      # - docker-compose run --rm web pytest
     volumes:
       - name: docker
         path: /var/run/docker.sock

@@ -3,7 +3,7 @@
     v-if="stats"
     :model-value="step"
     flat
-    :alternative-labels="false"
+    :vertical="$q.screen.lt.md"
     inactive-color="grey"
     done-color="green"
     active-color="light-blue"

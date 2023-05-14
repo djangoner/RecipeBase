@@ -4,6 +4,7 @@
       v-ripple
       class="row cursor-pointer q-hoverable no-wrap"
       :class="[
+        mobile && 'compact',
         mobile ? 'q-px-xs' : 'q-px-md',
         mobile ? 'justify-start' : 'justify-between',
       ]"
@@ -55,3 +56,13 @@ const component = defineComponent({
 
 export default component;
 </script>
+
+
+<style lang="scss" scoped>
+:deep(.q-card).compact {
+  .q-card__section{
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+</style>

@@ -1,7 +1,10 @@
 <template>
-  <q-page class="flex column q-gutter-y-lg">
+  <q-page
+    class="flex column"
+    padding
+  >
     <!-- Top metrics -->
-    <div class="row q-px-md q-col-gutter-md">
+    <div class="row q-col-gutter-md">
       <metric-card
         icon="article"
         title="Рецептов"
@@ -32,7 +35,7 @@
       />
     </div>
 
-    <div class="q-px-md">
+    <div>
       <index-page-status />
     </div>
 

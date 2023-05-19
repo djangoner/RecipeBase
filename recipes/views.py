@@ -615,7 +615,10 @@ class StatsViewset(viewsets.ViewSet):
         )
 
         product_items = product_week.items.filter(already_completed=False)
-        product_progress = product_items.filter(is_completed=True).count() / product_items.count()
+
+        product_progress = 0
+        if products_count := product_items.count():
+            product_progress = product_items.filter(is_completed=True).count() / products_count
 
         data = {
             "recipes": Recipe.objects.filter(is_archived=False).count(),

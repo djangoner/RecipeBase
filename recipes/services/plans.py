@@ -250,8 +250,11 @@ def update_plan_week(week: RecipePlanWeek):
             },
         )
 
-        plan_item.ingredients.set(ing_info.ingredients)
-        plan_item.save()
+        ids_curr = list(plan_item.ingredients.values_list("id", flat=True))
+        ids_generated = [i.pk for i in ing_info.ingredients]
+        if ids_curr != ids_generated:
+            plan_item.ingredients.set(ing_info.ingredients)
+            plan_item.save()
         edited_plans.append(plan_item.pk)
 
     old_items = plan_week.items.filter(is_auto=True).exclude(id__in=edited_plans)

@@ -28,6 +28,7 @@
     "@quasar/fastclick": "^1.1.5",
     "@vue/eslint-config-typescript": "^11.0.3",
     "@vueuse/core": "^10.1.2",
+    "@vueuse/math": "^10.1.2",
     "axios": "^0.21.4",
     "fireworks-js": "^2.10.3",
     "idb": "^7.1.1",

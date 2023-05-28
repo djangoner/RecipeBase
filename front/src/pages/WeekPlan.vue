@@ -153,13 +153,15 @@ import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
 // import { useQuery } from "@oarepo/vue-query-synchronizer";
 import Fireworks from "@fireworks-js/vue"
-import { useStorage } from "@vueuse/core"
+import { useActiveElement, useStorage } from "@vueuse/core"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import { isOnline } from "src/modules/isOnline"
 import { RecipePlanWeekFromRead } from "src/Convert"
-import { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
+import { CustomAxiosError } from "src/modules/HandleErrorsMixin"
 import { date, useQuasar } from "quasar"
 import { WarningPriorities } from "src/modules/Globals"
+import { useMagicKeys, whenever } from '@vueuse/core'
+import { logicAnd } from '@vueuse/math'
 
 type QueryInterface = YearWeek
 
@@ -362,6 +364,21 @@ watch(fillingPrc, (val, oldVal) => {
         // this.showFireworks = true
       }
     })
+
+// Shortcuts
+const activeElement = useActiveElement()
+
+const notUsingInput = computed(() =>
+  activeElement.value?.tagName !== 'INPUT'
+  && activeElement.value?.tagName !== 'TEXTAREA',
+)
+
+const keys = useMagicKeys()
+
+whenever(logicAnd(keys.shift_e, notUsingInput, canEdit), () => {
+  console.debug("Toggle edit!",)
+  editMode.value = !editMode.value
+})
 
 </script>
 

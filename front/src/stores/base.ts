@@ -158,9 +158,10 @@ export const useBaseStore = defineStore("base", {
               await db.put("meal_time", objectUnproxy(item))
             }
           })
-          .catch(async (err) => {
+          .catch(async (err: CustomAxiosError) => {
             const res = (await db.getAll("meal_time")) as MealTime[]
             this.meal_time = res
+            handleErrors(err)
             reject(err)
           })
       })
@@ -348,11 +349,12 @@ export const useBaseStore = defineStore("base", {
             void recipePlansListUpdateFromServer(resp)
             resolve(resp)
           })
-          .catch(async (err) => {
+          .catch(async (err: CustomAxiosError) => {
             const resObj = await recipePlansGetOffline(payload.year, payload.week)
             if (resObj) {
               this.week_plan = resObj
             }
+            handleErrors(err, "Ошибка загрузки плана")
             reject(err)
           })
       })
@@ -371,18 +373,14 @@ export const useBaseStore = defineStore("base", {
     },
     async saveWeekPlan(payload: RecipePlanWeek): Promise<RecipePlanWeekRead> {
       const id = `${payload?.year}_${payload?.week}`
-      return new Promise((resolve, reject) => {
-        RecipePlanWeekService.recipePlanWeekUpdate({
+      return storeShortcut({
+        promise: RecipePlanWeekService.recipePlanWeekUpdate({
           id: id,
           requestBody: payload,
-        })
-          .then((resp) => {
-            this.week_plan = resp
-            resolve(resp)
-          })
-          .catch((err) => {
-            reject(err)
-          })
+        }),
+        setValue: (resp: RecipePlanWeekRead) => {
+          this.week_plan = resp
+        },
       })
     },
 

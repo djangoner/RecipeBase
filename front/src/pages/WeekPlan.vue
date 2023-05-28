@@ -14,7 +14,7 @@
     padding
   >
     <div class="row items-center q-col-gutter-x-md print-hide">
-      <div>
+      <div v-if="canEdit">
         <q-toggle
           v-model="editMode"
           label="Режим редактирования"
@@ -76,7 +76,7 @@
         >
           <day-card
             :day-idx="parseInt(idx)"
-            :day-str="getDay(idx-1)"
+            :day-str="getDay(idx - 1)"
             :warned-plans="warnedPlans"
             :loading="loading"
             :readonly="readonly"
@@ -141,40 +141,27 @@
   <q-inner-loading :showing="loading" />
 </template>
 
-<script lang="ts">
-import DayCard from '../components/Plan/DayCard.vue'
+<script lang="ts" setup>
+import DayCard from "../components/Plan/DayCard.vue"
 import weekSelect from "components/WeekSelect.vue"
 import { useBaseStore } from "src/stores/base"
-import { date, LocalStorage } from "quasar"
 import PlanWeekInfo from "src/components/PlanWeekInfo.vue"
-import { defineComponent } from "vue"
+import { computed, nextTick, onMounted, ref, watch } from "vue"
 import { getDateOfISOWeek, YearWeek } from "src/modules/WeekUtils"
-import HandleErrorsMixin, { CustomAxiosError } from "src/modules/HandleErrorsMixin"
 import { WeekDays } from "src/modules/WeekUtils"
-import { MealTime, RecipeRead, RecipePlanRead, RecipePlan } from "src/client"
-import { RecipePlanWeekFromRead } from "src/Convert"
 import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
-import { Directive } from "vue"
-import { WarningPriorities } from "src/modules/Globals"
-import { getWarningPriorityColor } from "src/modules/Utils"
 // import { useQuery } from "@oarepo/vue-query-synchronizer";
-import IsOnlineMixin from "src/modules/IsOnlineMixin"
 import Fireworks from "@fireworks-js/vue"
-
-const WeekDaysColors: { [key: number]: string } = {
-  1: "bg-amber-2",
-  2: "bg-cyan-3",
-  3: "bg-light-blue-3",
-  4: "bg-blue-4",
-  5: "bg-indigo-3",
-}
+import { useStorage } from "@vueuse/core"
+import { useQuery } from "@oarepo/vue-query-synchronizer"
+import { isOnline } from "src/modules/isOnline"
+import { RecipePlanWeekFromRead } from "src/Convert"
+import { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
+import { date, useQuasar } from "quasar"
+import { WarningPriorities } from "src/modules/Globals"
 
 type QueryInterface = YearWeek
-
-interface PlanComments {
-  [id: number]: string
-}
 
 interface WarnedPlan {
   priority: string | null
@@ -193,273 +180,192 @@ const fireworksOptions = {
   },
 }
 
-export default defineComponent({
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { weekSelect, PlanWeekInfo, Fireworks, DayCard }, // : defineAsyncComponent(() => import("@fireworks-js/vue"))
-  directives: {
-    print: print as Directive,
-  },
-  mixins: [HandleErrorsMixin, IsOnlineMixin],
-  data() {
-    const store = useBaseStore()
-    const storeAuth = useAuthStore()
+const $query = useQuery()
+const $q = useQuasar()
+const store = useBaseStore()
+const storeAuth = useAuthStore()
+
+const editMode = ref(false)
+const loading = ref(false)
+const saving = ref(false)
+const enableFireworks = useStorage("enableFireworks", false)
+const showFireworks = ref(false)
+
+const week = computed({
+  get() {
     return {
-      store,
-      storeAuth,
-      // $query: useQuery(),
-      // week: {
-      //   year: null,
-      //   week: null,
-      // },
-      loading: false,
-      editMode: null as boolean | null,
-      saving: false,
-      enableFireworks: Boolean(LocalStorage.getItem("enableFireworks")),
-      showFireworks: false,
-      fireworksOptions: fireworksOptions,
-      addMtimeSelect: null,
-      meal_time_options: [] as MealTime[] | null,
-      WeekDays,
-      WeekDaysColors,
-    }
+      year: ($query as QueryInterface)?.year as string | number | null,
+      week: ($query as QueryInterface)?.week as string | number | null,
+    } as YearWeek
   },
-  computed: {
-    week: {
-      get() {
-        return {
-          year: (this.$query as QueryInterface)?.year as string | number | null,
-          week: (this.$query as QueryInterface)?.week as string | number | null,
-        } as YearWeek
-      },
-      set(val: YearWeek) {
-        ;(this.$query as QueryInterface).year = val?.year
-        ;(this.$query as QueryInterface).week = val?.week
-      },
-    },
-    readonly() {
-      return !this.editMode || !this.canEdit || !this.isOnLine
-    },
-    plan() {
-      return this.store.week_plan
-    },
-    meal_time() {
-      return this.store.meal_time
-    },
-    fillingPrc(): number | null {
-      if (!this.meal_time) {
+  set(val: YearWeek) {
+    ;($query as QueryInterface).year = val?.year
+    ;($query as QueryInterface).week = val?.week
+  },
+})
+
+const canEdit = computed(() => {
+  return storeAuth.hasPerm("recipes.change_recipeplanweek")
+})
+
+const readonly = computed(() => {
+  return !editMode.value || !canEdit.value || !isOnline
+})
+
+const plan = computed(() => {
+  return store.week_plan
+})
+
+const conditions = computed(() => {
+  return store.conditions
+})
+
+const fw = ref(null)
+const refFireworks = computed(() => {
+  return fw.value
+})
+const warnedPlans = computed(() => {
+  const warnings = plan.value?.warnings || []
+  const res: WarnedPlans = {}
+
+  for (const warning of warnings) {
+    let cond = getCondition(warning.condition)
+    const plan = warning.plan
+    if (!Object.hasOwn(res, plan)) {
+      cond = getCondition(warning.condition)
+      res[plan] = {
+        icon: String(cond?.icon) || null,
+        priority: String(cond?.priority) || null,
+      }
+    }
+
+    const prioritySaved = WarningPriorities.indexOf(res[plan].priority || "")
+    const priorityCurr = WarningPriorities.indexOf(String(cond?.priority) || "")
+
+    if (priorityCurr > prioritySaved) {
+      res[plan].priority = WarningPriorities[priorityCurr]
+    }
+  }
+  return res
+  // return [...new Set(plans)];
+})
+
+const meal_time = computed(() => {
+  return store.meal_time
+})
+const fillingPrc = computed(() => {
+      if (!meal_time.value) {
         return null
       }
-      const plans = this.store.week_plan?.plans
+      const plans = store.week_plan?.plans
       let plansFilled
       if (plans) {
-        plansFilled = plans.filter((p) => p.meal_time.is_primary).length
+        plansFilled = plans.filter((p) => p.meal_time.is_primary && p.day < 6).length
       }
-      const plansTotal = this.meal_time.filter((m) => m.is_primary).length * 5
+      const plansTotal = meal_time.value.filter((m) => m.is_primary).length * 5
 
       if (!plansFilled || !plansTotal) {
         return 0
       }
 
       return plansFilled / plansTotal
-    },
-    canEdit() {
-      return this.storeAuth.hasPerm("recipes.change_recipeplanweek")
-    },
-    conditions() {
-      return this.store.conditions
-    },
-    warnedPlans(): WarnedPlans {
-      const warnings = this.plan?.warnings || []
-      const res: WarnedPlans = {}
+})
 
-      for (const warning of warnings) {
-        let cond = this.getCondition(warning.condition)
-        const plan = warning.plan
-        if (!Object.hasOwn(res, plan)) {
-          cond = this.getCondition(warning.condition)
-          res[plan] = {
-            icon: String(cond?.icon) || null,
-            priority: String(cond?.priority) || null,
-          }
-        }
+function onPrint() {
+  console.debug("Print before")
+  store.printMode = true
+  void nextTick(() => {
+    window.print()
+    store.printMode = false
+    console.debug("Print after")
+  })
+}
 
-        const prioritySaved = WarningPriorities.indexOf(res[plan].priority || "")
-        const priorityCurr = WarningPriorities.indexOf(String(cond?.priority) || "")
+function loadWeekPlan() {
+  if (!week.value?.year || !week.value?.week) {
+    return
+  }
+  const payload = {
+    year: week.value.year,
+    week: week.value.week,
+  }
+  loading.value = true
 
-        if (priorityCurr > prioritySaved) {
-          res[plan].priority = WarningPriorities[priorityCurr]
-        }
+  store
+    .loadWeekPlan(payload)
+    .then(() => {
+      loading.value = false
+      if (editMode.value === null) {
+        editMode.value = !(plan.value?.plans && plan.value?.plans?.length > 0)
       }
-      return res
-      // return [...new Set(plans)];
-    },
-    refFireworks() {
-      return this.$refs.fw as InstanceType<typeof Fireworks>
-    },
-  },
-  watch: {
-    enableFireworks(val: boolean) {
-      LocalStorage.set("enableFireworks", val)
-    },
-    showFireworks(val: boolean) {
-      if (this.enableFireworks) {
-        if (val) {
-          document.documentElement.classList.add("no-scroll")
-        } else {
-          document.documentElement.classList.remove("no-scroll")
-        }
-      }
-    },
-    fillingPrc(val, oldVal) {
-      // When plan finished, show fireworks if enabled
-      if (val == 1 && oldVal && !this.plan.is_filled) {
-        this.askPlanCompleted()
-        // this.showFireworks = true
-      }
-    },
-  },
-  created() {
-    void this.$nextTick(() => {
-      this.loadMealTime()
     })
-  },
-  methods: {
-    onPrint() {
-      console.debug("Print before")
-      this.store.printMode = true
-      void this.$nextTick(() => {
-        window.print()
-        this.store.printMode = false
-        console.debug("Print after")
-      })
-    },
-    loadWeekPlan() {
-      if (!this.week?.year || !this.week?.week) {
-        return
-      }
-      const payload = {
-        year: this.week.year,
-        week: this.week.week,
-      }
-      this.loading = true
+    .catch((err: CustomAxiosError) => {
+      loading.value = false
+    })
+}
+function saveWeekPlan() {
+  // let payload = Object.assign({}, plan);
+  const payload = RecipePlanWeekFromRead(Object.assign({}, plan.value))
+  delete payload["plans"]
+  saving.value = true
+  console.debug("Save: ", payload)
 
-      this.store
-        .loadWeekPlan(payload)
-        .then(() => {
-          this.loading = false
-          if (this.editMode === null) {
-            this.editMode = !(this.plan?.plans && this.plan?.plans?.length > 0)
-          }
-        })
-        .catch((err: CustomAxiosError) => {
-          this.loading = false
-          this.handleErrors(err, "Ошибка загрузки плана")
-        })
-    },
-    saveWeekPlan() {
-      // let payload = Object.assign({}, this.plan);
-      const payload = RecipePlanWeekFromRead(Object.assign({}, this.plan))
-      delete payload["plans"]
-      this.saving = true
-      console.debug("Save: ", payload)
-
-      this.store
-        .saveWeekPlan(payload)
-        .then(() => {
-          this.saving = false
-        })
-        .catch((err: CustomAxiosError) => {
-          this.saving = false
-          this.handleErrors(err, "Ошибка загрузки плана")
-        })
-    },
-    markPlanCompleted(){
-      if (!this.plan){
-        return
-      }
-      this.plan.is_filled = true;
-      this.saveWeekPlan()
-      this.showFireworks = true;
-    },
-    loadMealTime() {
-      const payload = {
-        pageSize: 1000,
-      }
-      // this.loading = true;
-
-      this.store
-        .loadMealTime(payload)
-        .then(() => {
-          // this.loading = false;
-        })
-        .catch((err: CustomAxiosError) => {
-          // this.loading = false;
-          this.handleErrors(err, "Ошибка загрузки времени приема пищи")
-        })
-    },
-    // Utils
-    getRecipe(day: number, mtime: MealTime) {
-      if (!this.plan) {
-        return
-      }
-      const recipes = this.plan?.plans.filter((plan) => {
-        return plan.day == day && plan.meal_time.id == mtime.id
-      })
-      return recipes[0]?.recipe
-    },
-    getDayPlans(day: number, mtime: MealTime) {
-      if (!this.plan) {
-        return []
-      }
-      const plans = this.plan?.plans.filter((plan) => {
-        return plan.day == day && plan.meal_time.id == mtime.id
-      })
-
-      if (mtime.is_primary) {
-        if (plans.length < 1) {
-          return [null]
-        }
-      }
-      return plans //.map((r) => r.recipe);
-    },
-    getDay(idx: number): string {
-      const fday = getDateOfISOWeek(this.week.year, this.week.week)
-      fday.setDate(fday.getDate() + idx)
-      return date.formatDate(fday, "DD.MM")
-    },
-    isToday(day: string) {
-      const d = new Date()
-      const d_str = String(d.getDate()) + "." + (d.getMonth() + 1).toString().padStart(2, "0")
-      return day == d_str
-      // return day.getUTCDate() == new Date().getUTCDate();
-    },
-    getWarning(plan: RecipePlanRead) {
-      return this.warnedPlans[plan.id] || null
-    },
-    getWarningColor(plan: RecipePlanRead) {
-      const warn = this.getWarning(plan)
-      return getWarningPriorityColor(warn.priority)
-    },
-    getCondition(id: number) {
-      return this.conditions?.find((c) => c.id == id) || null
-    },
-    askPlanCompleted(){
-      const dialog = this.$q.dialog({
+  store
+    .saveWeekPlan(payload)
+    .then(() => {
+      saving.value = false
+    })
+    .catch((err: CustomAxiosError) => {
+      saving.value = false
+    })
+}
+function markPlanCompleted() {
+  if (!plan.value) {
+    return
+  }
+  plan.value.is_filled = true
+  saveWeekPlan()
+  showFireworks.value = true
+}
+function getDay(idx: number): string {
+  const fday = getDateOfISOWeek(week.value.year, week.value.week)
+  fday.setDate(fday.getDate() + idx)
+  return date.formatDate(fday, "DD.MM")
+}
+function getCondition(id: number) {
+  return conditions.value?.find((c) => c.id == id) || null
+}
+function askPlanCompleted(){
+      $q.dialog({
         title: "Подтверждение",
         message: `Отметить план как завершенный?`,
         cancel: true,
         persistent: true,
       })
       .onOk(() => {
-        this.markPlanCompleted()
+        markPlanCompleted()
       })
-    },
-  },
+    }
+
+    function loadMealTime(){
+      void store.loadMealTime({pageSize: 1000})
+    }
+
+onMounted(() => {
+  loadMealTime()
 })
+
+watch(fillingPrc, (val, oldVal) => {
+      // When plan finished, show fireworks if enabled
+      if (val == 1 && oldVal && !plan.value?.is_filled) {
+        askPlanCompleted()
+        // this.showFireworks = true
+      }
+    })
+
 </script>
 
 <style lang="scss">
-
 body.body--dark .week-select-page {
   .q-card {
     color: black !important;

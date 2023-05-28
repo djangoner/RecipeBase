@@ -45,6 +45,8 @@ import {
   TaskService,
   WeekPlanCondition,
   ConditionsService,
+  RecipePlan,
+  RecipePlanService,
 } from "src/client"
 import { request } from "src/client/core/request"
 import { productListItemFromRead } from "src/Convert"
@@ -381,6 +383,24 @@ export const useBaseStore = defineStore("base", {
           .catch((err) => {
             reject(err)
           })
+      })
+    },
+
+    async createWeekPlanItem(payload: RecipePlan): Promise<RecipePlan> {
+      return storeShortcut({
+        promise: RecipePlanService.recipePlanCreate({ requestBody: payload }),
+      })
+    },
+
+    async updateWeekPlanItem(id: number, payload: RecipePlan): Promise<RecipePlan> {
+      return storeShortcut({
+        promise: RecipePlanService.recipePlanPartialUpdate({ id, requestBody: payload }),
+      })
+    },
+
+    async deleteWeekPlanItem(id: number): Promise<void> {
+      return storeShortcut({
+        promise: RecipePlanService.recipePlanDestroy({ id }),
       })
     },
 

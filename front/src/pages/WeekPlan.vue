@@ -95,7 +95,6 @@
                 v-if="plan?.comments"
                 icon="announcement"
                 :color="plan.comments[idx] ? 'red' : 'grey'"
-                :disable="saving"
                 flat
                 round
                 @click="openComment(idx)"
@@ -307,7 +306,7 @@ import { defineComponent, defineAsyncComponent } from "vue"
 import { getDateOfISOWeek, YearWeek } from "src/modules/WeekUtils"
 import HandleErrorsMixin, { CustomAxiosError } from "src/modules/HandleErrorsMixin"
 import { WeekDays } from "src/modules/WeekUtils"
-import { MealTime, RecipeRead, RecipePlanRead } from "src/client"
+import { MealTime, RecipeRead, RecipePlanRead, RecipePlan } from "src/client"
 import { RecipePlanWeekFromRead } from "src/Convert"
 import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
@@ -317,6 +316,7 @@ import { getWarningPriorityColor } from "src/modules/Utils"
 // import { useQuery } from "@oarepo/vue-query-synchronizer";
 import IsOnlineMixin from "src/modules/IsOnlineMixin"
 import Fireworks from "@fireworks-js/vue"
+import { promiseSetLoading } from "src/modules/StoreCrud"
 
 const WeekDaysColors: { [key: number]: string } = {
   1: "bg-amber-2",
@@ -393,7 +393,7 @@ export default defineComponent({
       },
     },
     readonly() {
-      return this.saving || !this.editMode || !this.canEdit || !this.isOnLine
+      return !this.editMode || !this.canEdit || !this.isOnLine
     },
     plan() {
       return this.store.week_plan
@@ -515,6 +515,7 @@ export default defineComponent({
     saveWeekPlan() {
       // let payload = Object.assign({}, this.plan);
       const payload = RecipePlanWeekFromRead(Object.assign({}, this.plan))
+      delete payload["plans"]
       this.saving = true
       console.debug("Save: ", payload)
 
@@ -593,7 +594,8 @@ export default defineComponent({
       }
       return plans //.map((r) => r.recipe);
     },
-    setRecipe(day: number, mtime: MealTime, value: RecipeRead, rec_idx?: number) {
+    setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: number) {
+
       console.debug("setRecipe: ", day, mtime, value)
       const plans =
         this.plan?.plans?.filter((plan) => {
@@ -601,25 +603,70 @@ export default defineComponent({
         }) || []
 
       const plan = plans[rec_idx || 0]
-      if (plan) {
-        console.debug("Updating recipe...")
-        plan.recipe = value
-        // this.plan.plans.map((p) => {
-        //   if (p == recipe) {
-        //     p = value;
-        //   }
-        //   return p;
-        // });
-      } else {
-        // @ts-expect-error: Plan will be created
-        this.plan.plans.push({
-          // week: this.id,
-          day: day,
-          meal_time: mtime,
-          recipe: value,
-        })
+
+      // const prom = plan?
+      const newPlan: RecipePlan = Object.assign({}, plan, {
+        week: this.plan?.id,meal_time: mtime.id, day:day, recipe: value?.id
+      })
+      let prom: Promise<RecipePlan>;
+      let action: "create" | "delete" | "update";
+
+      if (plan && value){
+        prom = this.store.updateWeekPlanItem(plan.id, newPlan)
+        action = "update";
       }
-      this.saveWeekPlan()
+      else if (plan){
+        prom = this.store.deleteWeekPlanItem(plan.id)
+        action = "delete";
+      } else {
+        prom = this.store.createWeekPlanItem(newPlan)
+        action = "create";
+      }
+
+      this.saving = true
+      void prom.then((resp: RecipePlan | undefined) => {
+        const foundIdx = this.plan?.plans?.findIndex(p => p.id === plan?.id)
+
+
+        if (resp && resp.id && this.plan){
+          console.debug("Updated/Created plan: ", resp.id, foundIdx, resp)
+
+          if (foundIdx != -1){
+            this.plan.plans[foundIdx] = resp
+          } else {
+            this.plan.plans.push(resp)
+          }
+        }
+        else if (action == "delete"){
+          console.debug("Deleted plan: ", plan.id)
+          if (foundIdx){
+            this.plan?.plans.splice(foundIdx, 1)
+          }
+        }
+      }).finally(()=>{
+        this.saving = false
+      }
+      )
+
+      // if (plan) {
+      //   console.debug("Updating recipe...")
+      //   plan.recipe = value
+      //   // this.plan.plans.map((p) => {
+      //   //   if (p == recipe) {
+      //   //     p = value;
+      //   //   }
+      //   //   return p;
+      //   // });
+      // } else {
+      //   // @ts-expect-error: Plan will be created
+      //   this.plan.plans.push({
+      //     // week: this.id,
+      //     day: day,
+      //     meal_time: mtime,
+      //     recipe: value,
+      //   })
+      // }
+      // this.saveWeekPlan()
     },
     addMtime(day_idx: string | number, mtime: MealTime) {
       console.debug("addMtime: ", day_idx, mtime)
@@ -671,7 +718,8 @@ export default defineComponent({
             type: "textarea",
             autogrow: true,
             inputStyle: { minHeight: "3rem", maxHeight: "10rem" },
-            readonly: !this.editMode,
+            // readonly: !this.editMode,
+            readonly: !this.canEdit
           },
           cancel: true,
           persistent: true,

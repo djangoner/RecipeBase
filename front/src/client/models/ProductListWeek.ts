@@ -12,7 +12,7 @@ import type { ProductListItem } from './ProductListItem';
  */
 export type ProductListWeek = {
     readonly id: number;
-    items: Array<ProductListItem>;
+    items?: Array<ProductListItem>;
     year: number;
     week: number;
     is_filled?: boolean;

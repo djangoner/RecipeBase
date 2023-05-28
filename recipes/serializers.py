@@ -360,8 +360,8 @@ class ConditionWarningSerializer(serializers.Serializer):
         return fields
 
 
-class RecipePlanWeekSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-    plans = RecipePlanShortSerializer(many=True)
+class RecipePlanWeekSerializer(serializers.ModelSerializer):
+    plans = RecipePlanShortSerializer(many=True, required=False)
     warnings = serializers.SerializerMethodField()
 
     class Meta:

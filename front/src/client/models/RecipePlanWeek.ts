@@ -5,12 +5,9 @@
 import type { ConditionWarning } from './ConditionWarning';
 import type { RecipePlanShort } from './RecipePlanShort';
 
-/**
- * Adds nested create feature
- */
 export type RecipePlanWeek = {
     readonly id: number;
-    plans: Array<RecipePlanShort>;
+    plans?: Array<RecipePlanShort>;
     readonly warnings: Array<ConditionWarning>;
     year: number;
     week: number;

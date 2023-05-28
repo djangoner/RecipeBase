@@ -295,10 +295,10 @@ function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: n
   let prom: Promise<RecipePlan>
   let action: "create" | "delete" | "update"
 
-  if (planItem && value) {
+  if (planItem?.id && value) {
     prom = store.updateWeekPlanItem(planItem.id, newPlan)
     action = "update"
-  } else if (planItem) {
+  } else if (planItem?.id) {
     prom = store.deleteWeekPlanItem(planItem.id)
     action = "delete"
   } else {

@@ -74,168 +74,14 @@
           class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3"
           :class="`weekday-col-${idx}`"
         >
-          <q-card
-            class="row column justify-around q-px-xs q-py-sm full-height"
-            :class="[
-              idx >= 6 ? 'bg-grey-3 print-hide print-week-hide' : '',
-              WeekDaysColors[idx],
-              // isToday(getDay(idx - 1)) ? 'shadow-5' : '',
-              `weekday-${idx}`,
-            ]"
-            style="min-height: 300px"
-          >
-            <q-card-section class="row justify-between">
-              <span
-                class="text-h6"
-                :class="isToday(getDay(idx - 1)) ? 'day-active' : ''"
-              >
-                <b>{{ getDay(idx - 1) }}</b> {{ day }}
-              </span>
-              <q-btn
-                v-if="plan?.comments"
-                icon="announcement"
-                :color="plan.comments[idx] ? 'red' : 'grey'"
-                flat
-                round
-                @click="openComment(idx)"
-              >
-                <q-tooltip v-if="plan.comments[idx]">
-                  {{ plan.comments[idx] }}
-                </q-tooltip>
-              </q-btn>
-            </q-card-section>
-
-            <q-card-section>
-              <div
-                v-if="loading"
-                class="q-gutter-y-md"
-              >
-                <q-skeleton type="QInput" />
-                <q-skeleton type="QInput" />
-              </div>
-              <div
-                v-else
-                class="flex column"
-              >
-                <template v-for="mtime of meal_time">
-                  <div
-                    v-if="getDayPlans(idx, mtime).length > 0 || mtime.is_primary"
-                    :key="mtime.id"
-                  >
-                    <div
-                      v-for="(dayPlan, rec_idx) of getDayPlans(idx, mtime)"
-                      :key="rec_idx"
-                      class="row q-col-gutter-x-sm wrap"
-                    >
-                      <div class="col-auto">
-                        <div>
-                          <span class="text-subtitle1 q-my-none relative-position q-py-xs">
-                            {{ mtime.title }}
-                            <q-badge
-                              v-if="dayPlan && getWarning(dayPlan)"
-                              :color="getWarningColor(dayPlan)"
-                              rounded
-                              floating
-                            />
-                          </span>
-                          <q-icon
-                            v-if="dayPlan?.recipe?.comment"
-                            name="notes"
-                            size="xs"
-                            color="primary"
-                          >
-                            <q-tooltip
-                              anchor="top middle"
-                              self="bottom middle"
-                              :offset="[10, 10]"
-                            >
-                              Комментарий:
-                              {{ dayPlan?.recipe?.comment }}
-                            </q-tooltip>
-                          </q-icon>
-                          <q-tooltip>
-                            {{ mtime.title }} -
-                            {{ timeFormat(mtime.time || null) }}
-                          </q-tooltip>
-                        </div>
-                      </div>
-
-                      <div class="col">
-                        <recipe-select
-                          :model-value="dayPlan?.recipe"
-                          :readonly="readonly"
-                          @update:model-value="setRecipe(idx, mtime, $event, rec_idx)"
-                        />
-                        <!-- <span>{{ getplan(idx, mtime)?.title }}</span> -->
-                      </div>
-
-                      <div
-                        v-if="dayPlan?.recipe"
-                        class="flex flex-center col-auto"
-                      >
-                        <q-btn
-                          v-if="storeAuth.hasPerm('recipes.view_recipe')"
-                          :to="{
-                            name: 'recipe',
-                            params: { id: dayPlan.recipe.id },
-                          }"
-                          icon="open_in_new"
-                          size="sm"
-                          flat
-                          dense
-                          round
-                        >
-                          <q-tooltip>Открыть рецепт</q-tooltip>
-                        </q-btn>
-                      </div>
-                      <div
-                        v-else-if="!mtime.is_primary"
-                        class="flex flex-center col-auto"
-                      >
-                        <q-btn
-                          icon="close"
-                          size="sm"
-                          flat
-                          dense
-                          round
-                          @click="delPlan(idx, mtime)"
-                        >
-                          <q-tooltip>Убрать</q-tooltip>
-                        </q-btn>
-                      </div>
-
-                      <recipe-card-tooltip
-                        v-if="dayPlan?.recipe && $q.screen.gt.xs"
-                        :recipe="dayPlan.recipe"
-                      />
-                    </div>
-                  </div>
-                </template>
-              </div>
-            </q-card-section>
-            <q-space />
-
-            <q-card-section>
-              <div class="row q-mt-sm">
-                <q-select
-                  class="col"
-                  :model-value="null"
-                  :options="meal_time_options || []"
-                  :input-debounce="0"
-                  :readonly="readonly"
-                  option-value="id"
-                  option-label="title"
-                  label="Добавить"
-                  map-options
-                  use-input
-                  options-dense
-                  dense
-                  @update:model-value="addMtime(idx, $event)"
-                  @filter="filterMealTime"
-                />
-              </div>
-            </q-card-section>
-          </q-card>
+          <day-card
+            :day-idx="parseInt(idx)"
+            :day-str="getDay(idx-1)"
+            :warned-plans="warnedPlans"
+            :loading="loading"
+            :readonly="readonly"
+            @update-plan="saveWeekPlan"
+          />
         </div>
       </template>
 
@@ -296,13 +142,12 @@
 </template>
 
 <script lang="ts">
-import RecipeSelect from "../components/Recipes/RecipeSelect.vue"
+import DayCard from '../components/Plan/DayCard.vue'
 import weekSelect from "components/WeekSelect.vue"
 import { useBaseStore } from "src/stores/base"
 import { date, LocalStorage } from "quasar"
-import recipeCardTooltip from "components/RecipeCardTooltip.vue"
 import PlanWeekInfo from "src/components/PlanWeekInfo.vue"
-import { defineComponent, defineAsyncComponent } from "vue"
+import { defineComponent } from "vue"
 import { getDateOfISOWeek, YearWeek } from "src/modules/WeekUtils"
 import HandleErrorsMixin, { CustomAxiosError } from "src/modules/HandleErrorsMixin"
 import { WeekDays } from "src/modules/WeekUtils"
@@ -316,7 +161,6 @@ import { getWarningPriorityColor } from "src/modules/Utils"
 // import { useQuery } from "@oarepo/vue-query-synchronizer";
 import IsOnlineMixin from "src/modules/IsOnlineMixin"
 import Fireworks from "@fireworks-js/vue"
-import { promiseSetLoading } from "src/modules/StoreCrud"
 
 const WeekDaysColors: { [key: number]: string } = {
   1: "bg-amber-2",
@@ -351,7 +195,7 @@ const fireworksOptions = {
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { weekSelect, recipeCardTooltip, PlanWeekInfo, Fireworks, RecipeSelect }, // : defineAsyncComponent(() => import("@fireworks-js/vue"))
+  components: { weekSelect, PlanWeekInfo, Fireworks, DayCard }, // : defineAsyncComponent(() => import("@fireworks-js/vue"))
   directives: {
     print: print as Directive,
   },
@@ -553,22 +397,6 @@ export default defineComponent({
           this.handleErrors(err, "Ошибка загрузки времени приема пищи")
         })
     },
-
-    filterMealTime(val: string, update: CallableFunction) {
-      update(() => {
-        // let isUsed = (mtime: MealTime) => {
-        //   //   // console.debug(ing, this.recipe.ingredients);
-        //   return this.plan?.plans.some((plan) => {
-        //     return plan.meal_time.id == mtime.id;
-        //   });
-        //   //   return this.recipe.ingredients.some((t) => t.ingredient.id == ing.id);
-        // };
-        const needle = val.toLowerCase()
-
-        this.meal_time_options = this.meal_time?.filter((v) => !v.is_primary && v.title.toLowerCase().indexOf(needle) > -1) || []
-        // console.debug(needle, this.tagList, tags);
-      })
-    },
     // Utils
     getRecipe(day: number, mtime: MealTime) {
       if (!this.plan) {
@@ -593,155 +421,6 @@ export default defineComponent({
         }
       }
       return plans //.map((r) => r.recipe);
-    },
-    setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: number) {
-
-      console.debug("setRecipe: ", day, mtime, value)
-      const plans =
-        this.plan?.plans?.filter((plan) => {
-          return plan.day == day && plan.meal_time.id == mtime.id
-        }) || []
-
-      const plan = plans[rec_idx || 0]
-
-      // const prom = plan?
-      const newPlan: RecipePlan = Object.assign({}, plan, {
-        week: this.plan?.id,meal_time: mtime.id, day:day, recipe: value?.id
-      })
-      let prom: Promise<RecipePlan>;
-      let action: "create" | "delete" | "update";
-
-      if (plan && value){
-        prom = this.store.updateWeekPlanItem(plan.id, newPlan)
-        action = "update";
-      }
-      else if (plan){
-        prom = this.store.deleteWeekPlanItem(plan.id)
-        action = "delete";
-      } else {
-        prom = this.store.createWeekPlanItem(newPlan)
-        action = "create";
-      }
-
-      this.saving = true
-      void prom.then((resp: RecipePlan | undefined) => {
-        const foundIdx = this.plan?.plans?.findIndex(p => p.id === plan?.id)
-
-
-        if (resp && resp.id && this.plan){
-          console.debug("Updated/Created plan: ", resp.id, foundIdx, resp)
-
-          if (foundIdx != -1){
-            this.plan.plans[foundIdx] = resp
-          } else {
-            this.plan.plans.push(resp)
-          }
-        }
-        else if (action == "delete"){
-          console.debug("Deleted plan: ", plan.id)
-          if (foundIdx){
-            this.plan?.plans.splice(foundIdx, 1)
-          }
-        }
-      }).finally(()=>{
-        this.saving = false
-      }
-      )
-
-      // if (plan) {
-      //   console.debug("Updating recipe...")
-      //   plan.recipe = value
-      //   // this.plan.plans.map((p) => {
-      //   //   if (p == recipe) {
-      //   //     p = value;
-      //   //   }
-      //   //   return p;
-      //   // });
-      // } else {
-      //   // @ts-expect-error: Plan will be created
-      //   this.plan.plans.push({
-      //     // week: this.id,
-      //     day: day,
-      //     meal_time: mtime,
-      //     recipe: value,
-      //   })
-      // }
-      // this.saveWeekPlan()
-    },
-    addMtime(day_idx: string | number, mtime: MealTime) {
-      console.debug("addMtime: ", day_idx, mtime)
-      this.plan?.plans?.push(
-        // @ts-expect-error: Meal time will be added
-        Object.assign(
-          {},
-          {
-            day: typeof day_idx == "number" ? day_idx : parseInt(day_idx),
-            meal_time: mtime,
-            recipe: null,
-          }
-        )
-      )
-    },
-    delPlan(idx: number, mtime: MealTime) {
-      if (!this.plan || !this.plan.plans) {
-        return
-      }
-      console.debug("delPlan: ", idx, mtime, this.plan?.plans)
-      let delOne = false
-      this.plan.plans =
-        this.plan?.plans?.filter((p) => {
-          const r = p.day != idx || p.meal_time != mtime || p.recipe != null
-          if (!r && !delOne) {
-            delOne = true
-            return false
-          }
-
-          return true
-        }) || []
-    },
-
-    openComment(idx: number) {
-      if (!this.plan) {
-        return
-      }
-      if (!this.plan?.comments) {
-        this.plan.comments = {}
-      }
-      const comments = this.plan?.comments as PlanComments
-      const startPlanID = this.plan.id
-
-      this.$q
-        .dialog({
-          title: `Комментарий - ${this.getDay(idx - 1)}. ${WeekDays[idx]}`,
-          prompt: {
-            model: comments[idx],
-            type: "textarea",
-            autogrow: true,
-            inputStyle: { minHeight: "3rem", maxHeight: "10rem" },
-            // readonly: !this.editMode,
-            readonly: !this.canEdit
-          },
-          cancel: true,
-          persistent: true,
-        })
-        .onOk((comment: string) => {
-          if (!this.plan || this.plan.id !== startPlanID) {
-            console.debug("Comment update invalidated")
-            return
-          }
-          if (!this.editMode || !this.canEdit) {
-            return
-          }
-          ;(this.plan.comments as PlanComments)[idx] = comment
-          this.saveWeekPlan()
-        })
-    },
-
-    timeFormat(raw: string | null) {
-      if (!raw) {
-        return raw
-      }
-      return raw.slice(0, raw.length - 3)
     },
     getDay(idx: number): string {
       const fday = getDateOfISOWeek(this.week.year, this.week.week)
@@ -780,9 +459,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.day-active {
-  text-decoration: underline;
-}
 
 body.body--dark .week-select-page {
   .q-card {

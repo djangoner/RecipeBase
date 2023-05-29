@@ -30,9 +30,11 @@ from recipes.models import (
     Shop,
     WeekPlanCondition,
 )
+from recipes.services.conditions import process_conditions_tree, warnings_json
 from telegram_bot.services.notifications import send_notif_synced, send_product_list
 from tasks.models import Task
 from recipes.serializers import (
+    ConditionWarningSerializer,
     IngredientReadSerializer,
     IngredientSerializer,
     MealTimeSerializer,
@@ -382,6 +384,23 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
             return plan_week
 
         return super().get_object()
+
+    @extend_schema(
+        parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)],
+        responses=ConditionWarningSerializer,
+    )
+    @decorators.action(["GET"], detail=True)
+    def warnings(self, request, pk=None):
+        year, week = None, None
+        try:
+            year, week = pk.split("_")
+        except ValueError:
+            pass
+        plan = get_object_or_404(RecipePlanWeek, year=year, week=week)
+
+        conditions = process_conditions_tree(plan)
+        warnings = warnings_json(conditions.warnings)
+        return response.Response(warnings)
 
 
 @extend_schema_view(

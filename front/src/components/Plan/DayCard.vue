@@ -185,7 +185,7 @@ const props = defineProps({
     required: true,
   },
 })
-const $emit = defineEmits(["update-plan"])
+const $emit = defineEmits(["update-plan", "update-recipe"])
 
 const store = useBaseStore()
 const storeAuth = useAuthStore()
@@ -309,6 +309,7 @@ function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: n
   saving.value = true
   void prom
     .then((resp: RecipePlan | undefined) => {
+      $emit("update-recipe")
       const foundIdx = plan.value?.plans?.findIndex((p) => p.id === planItem?.id)
 
       if (resp && resp.id && plan.value) {

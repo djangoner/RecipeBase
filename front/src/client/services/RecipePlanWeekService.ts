@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ConditionWarning } from '../models/ConditionWarning';
 import type { PaginatedRecipePlanWeekReadList } from '../models/PaginatedRecipePlanWeekReadList';
 import type { PatchedRecipePlanWeek } from '../models/PatchedRecipePlanWeek';
 import type { RecipePlanWeek } from '../models/RecipePlanWeek';
@@ -145,6 +146,24 @@ id: string,
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/recipe_plan_week/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+
+    /**
+     * @returns ConditionWarning 
+     * @throws ApiError
+     */
+    public static recipePlanWeekWarningsRetrieve({
+id,
+}: {
+id: string,
+}): CancelablePromise<ConditionWarning> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/recipe_plan_week/{id}/warnings/',
             path: {
                 'id': id,
             },

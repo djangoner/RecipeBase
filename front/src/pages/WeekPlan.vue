@@ -81,6 +81,7 @@
             :loading="loading"
             :readonly="readonly"
             @update-plan="saveWeekPlan"
+            @update-recipe="debouncedLoadWarnings"
           />
         </div>
       </template>
@@ -153,7 +154,7 @@ import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
 // import { useQuery } from "@oarepo/vue-query-synchronizer";
 import Fireworks from "@fireworks-js/vue"
-import { useActiveElement, useStorage } from "@vueuse/core"
+import { useActiveElement, useDebounceFn, useStorage } from "@vueuse/core"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import { isOnline } from "src/modules/isOnline"
 import { RecipePlanWeekFromRead } from "src/Convert"
@@ -222,12 +223,16 @@ const conditions = computed(() => {
   return store.conditions
 })
 
-const fw = ref(null)
-const refFireworks = computed(() => {
-  return fw.value
-})
+const debouncedLoadWarnings = useDebounceFn(() => {
+  void store.loadWeekWarnings({year: week.value.year, week: week.value.week})
+}, 5000)
+
+// const fw = ref(null)
+// const refFireworks = computed(() => {
+//   return fw.value
+// })
 const warnedPlans = computed(() => {
-  const warnings = plan.value?.warnings || []
+  const warnings = store.condWarnings || []
   const res: WarnedPlans = {}
 
   for (const warning of warnings) {

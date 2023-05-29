@@ -37,7 +37,7 @@
       </template>
       <condition-warnings
         v-else-if="conditions"
-        :warnings="plan.warnings"
+        :warnings="store.condWarnings"
         :week="week"
       />
       <q-inner-loading :showing="!conditions" />
@@ -163,10 +163,10 @@ export default defineComponent({
       return this.store.conditions;
     },
     warningsCount(): number {
-      if (!this.plan || !this.plan.warnings) {
+      if (!this.plan || !this.store.condWarnings) {
         return 0;
       }
-      return this.plan.warnings.length;
+      return this.store.condWarnings.length;
     },
   },
   watch: {

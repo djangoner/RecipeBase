@@ -94,8 +94,8 @@ const filterRecipes = (val: string, update: CallableFunction) => {
     return
   }
   search.value = val
+  page.value = 1
   loadRecipes().finally(() => {
-    page.value = 1
     update()
   })
 }

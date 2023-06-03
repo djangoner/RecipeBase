@@ -166,7 +166,7 @@
               v-if="item"
               v-model="item.week"
               :week="week"
-              :can-edit="canEdit"
+              :can-edit="canEdit && !item.is_auto"
               @update:model-value="itemMoveWeek(item)"
             />
           </div>

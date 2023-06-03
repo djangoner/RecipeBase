@@ -2,6 +2,7 @@
   <q-layout view="lHh Lpr lFf">
     <q-header
       class="print-hide"
+      :class="isDev?'bg-info':''"
       elevated
     >
       <q-toolbar>
@@ -13,7 +14,12 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-        <q-toolbar-title> База рецептов </q-toolbar-title>
+        <q-toolbar-title>
+          База рецептов
+          <template v-if="isDev">
+            (DEV)
+          </template>
+        </q-toolbar-title>
       </q-toolbar>
     </q-header>
 
@@ -244,6 +250,9 @@ export default defineComponent({
   computed: {
     user(): User | null {
       return this.storeAuth.account
+    },
+    isDev(){
+      return process.env.NODE_ENV === "development"
     },
     userReadable(): string | undefined {
       if (!this.user) {

@@ -224,6 +224,9 @@ const conditions = computed(() => {
 })
 
 const debouncedLoadWarnings = useDebounceFn(() => {
+  if (!week.value){
+    void debouncedLoadWarnings()
+  }
   void store.loadWeekWarnings({year: week.value.year, week: week.value.week})
 }, 5000)
 

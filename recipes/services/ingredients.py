@@ -1,12 +1,14 @@
 import math
 from recipes.models import ProductListItem, RecipeIngredient
+from recipes.services.measurings import convert_all_to_grams
 
 
 def recipe_ingredient_packs(ing: ProductListItem | RecipeIngredient) -> float:
     if not (ing.amount and ing.ingredient and ing.ingredient.min_pack_size):
         return 0
 
-    return round(ing.amount / ing.ingredient.min_pack_size, 3)
+    meas, amount = convert_all_to_grams([(ing.amount_type or "g", ing.amount)])
+    return round(amount / ing.ingredient.min_pack_size, 3)
 
 
 def recipe_ingredient_price_part(ing: ProductListItem | RecipeIngredient) -> float | None:

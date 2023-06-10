@@ -1,5 +1,8 @@
+import logging
+from typing import Tuple, TypeAlias
 from django.utils.translation import gettext_lazy as _
 
+IngredientAmounts: TypeAlias = list[tuple[str, int | float | None]]
 
 MEASURING_TYPES = (
     ("g", _("Граммы")),
@@ -27,6 +30,7 @@ MEASURING_CONVERT = {
 }
 
 MEASURING_LIQUIDS = ["l", "ml", "g"]
+CONVERT_ADVANCED = ["l", "ml"]
 
 
 def short_text(tx: str, length: int = 100):
@@ -53,3 +57,44 @@ def measuring_str(meas: str | None):
         return str(meas_types[meas])
 
     return meas
+
+
+def is_convertible(measuring: str, advanced: bool = True) -> bool:
+    return measuring in MEASURING_CONVERT or (advanced and measuring in CONVERT_ADVANCED)
+
+
+def convert_all_to_grams(measurings: IngredientAmounts) -> Tuple[str, int | float]:
+    res: float = 0
+    all_meas = "g"
+
+    non_empty = list(filter(lambda m: m[1], measurings))
+    all_liquids = all([meas in MEASURING_LIQUIDS for meas, amount in non_empty])
+    all_grams = all([meas == "g" for meas, amount in non_empty])
+    all_normal = all([is_convertible(meas, advanced=False) for meas, amount in non_empty])
+
+    for meas, amount in measurings:
+        if not amount:
+            continue
+
+        if all_liquids and not all_grams:
+            if meas == "l":
+                res += amount * 1000
+                all_meas = "ml"
+            elif meas in ["ml", "g"]:
+                res += amount
+                all_meas = "ml"
+            else:
+                logging.debug(f"[liquids]Invalid measuring: {meas}")  # pragma: no cover
+        elif all_normal:
+            if is_convertible(meas, advanced=False):
+                amount_grams = amount_to_grams(amount, meas)
+                if amount_grams:
+                    res += amount_grams
+            # elif meas == "items":
+            #     res += amount
+            else:
+                logging.debug(f"[grams]Invalid measuring: {meas}")  # pragma: no cover
+        else:
+            logging.debug(f"[mixed]Invalid measuring: {meas}")
+
+    return all_meas, res

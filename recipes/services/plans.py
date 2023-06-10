@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 import logging
-from typing import Optional, Tuple, TypeAlias
+from typing import Optional
 
 from recipes.models import (
     Ingredient,
@@ -13,13 +13,9 @@ from recipes.models import (
     RegularIngredient,
 )
 from recipes.serializers import amount_str
-from recipes.services.measurings import MEASURING_CONVERT, MEASURING_LIQUIDS, amount_to_grams
+from recipes.services.measurings import IngredientAmounts, convert_all_to_grams, is_convertible
 
 log = logging.getLogger("PlansGen")
-CONVERT_ADVANCED = ["l", "ml"]
-
-
-IngredientAmounts: TypeAlias = list[tuple[str, int | float | None]]
 
 
 @dataclass
@@ -46,10 +42,6 @@ def get_current_or_next_week():
     return year, week
 
 
-def is_convertible(measuring: str, advanced: bool = True) -> bool:
-    return measuring in MEASURING_CONVERT or (advanced and measuring in CONVERT_ADVANCED)
-
-
 def get_ingredient_packs(ing: RecipeIngredient | ProductListItem) -> float | int:
     if not (ing.amount and ing.ingredient and ing.ingredient.min_pack_size):
         return 0
@@ -57,43 +49,6 @@ def get_ingredient_packs(ing: RecipeIngredient | ProductListItem) -> float | int
     # if obj.amount_type == "items":
     #     return obj.amount
     return round(ing.amount / ing.ingredient.min_pack_size, 3)
-
-
-def convert_all_to_grams(measurings: IngredientAmounts) -> Tuple[str, int | float]:
-    res: float = 0
-    all_meas = "g"
-
-    non_empty = list(filter(lambda m: m[1], measurings))
-    all_liquids = all([meas in MEASURING_LIQUIDS for meas, amount in non_empty])
-    all_grams = all([meas == "g" for meas, amount in non_empty])
-    all_normal = all([is_convertible(meas, advanced=False) for meas, amount in non_empty])
-
-    for meas, amount in measurings:
-        if not amount:
-            continue
-
-        if all_liquids and not all_grams:
-            if meas == "l":
-                res += amount * 1000
-                all_meas = "ml"
-            elif meas in ["ml", "g"]:
-                res += amount
-                all_meas = "ml"
-            else:
-                logging.debug(f"[liquids]Invalid measuring: {meas}")  # pragma: no cover
-        elif all_normal:
-            if is_convertible(meas, advanced=False):
-                amount_grams = amount_to_grams(amount, meas)
-                if amount_grams:
-                    res += amount_grams
-            # elif meas == "items":
-            #     res += amount
-            else:
-                logging.debug(f"[grams]Invalid measuring: {meas}")  # pragma: no cover
-        else:
-            logging.debug(f"[mixed]Invalid measuring: {meas}")
-
-    return all_meas, res
 
 
 def get_default_ing() -> dict:

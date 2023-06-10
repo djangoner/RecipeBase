@@ -96,7 +96,7 @@
             :loading="loading"
             :readonly="readonly"
             @update-plan="saveWeekPlan"
-            @update-recipe="debouncedLoadWarnings"
+            @update-recipe="onUpdateRecipe()"
           />
         </div>
       </template>
@@ -270,7 +270,8 @@ const editedTimeStr = computed(() => {
   if (!plan.value){
     return "";
   }
-  const diff = Math.abs(new Date() - new Date(plan.value?.edited_first)) / 1000
+  // const diff = Math.abs(new Date() - new Date(plan.value?.edited_first)) / 1000
+  const diff = Math.abs(new Date(plan.value?.edited_last) - new Date(plan.value?.edited_first)) / 1000
   const hours = Math.floor(diff / 3600);
   const mins = Math.floor((diff / 60) % 60)
   const secs = Math.floor((diff) % 60)
@@ -290,6 +291,16 @@ const editedTimeStr = computed(() => {
   }
   return res;
 })
+
+function onUpdateRecipe(){
+  if (plan.value){
+    if (!plan.value?.edited_first){
+      plan.value.edited_first = new Date().toISOString()
+    }
+    plan.value.edited_last = new Date().toISOString()
+  }
+  void debouncedLoadWarnings()
+}
 
 const debouncedLoadWarnings = useDebounceFn(() => {
   if (!week.value){

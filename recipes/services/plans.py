@@ -12,8 +12,7 @@ from recipes.models import (
     RecipePlanWeek,
     RegularIngredient,
 )
-from recipes.serializers import amount_str
-from recipes.services.measurings import IngredientAmounts, convert_all_to_grams, is_convertible
+from recipes.services.measurings import IngredientAmounts, convert_all_to_grams, is_convertible, measuring_str
 
 log = logging.getLogger("PlansGen")
 
@@ -172,7 +171,7 @@ def get_ingredients_amounts(ingredients: list[RecipeIngredient]) -> dict[int, li
                 "amount": ing.amount,
                 "amount_grams": ing.amount_grams,
                 "amount_type": ing.amount_type,
-                "amount_type_str": amount_str(ing.amount_type),
+                "amount_type_str": measuring_str(ing.amount_type),
                 "is_main": ing.is_main,
             }
         )

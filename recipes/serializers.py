@@ -29,20 +29,10 @@ from recipes.services.ingredients import (
     recipe_ingredient_price_full,
     recipe_ingredient_price_part,
 )
-from recipes.services.measurings import MEASURING_SHORT, MEASURING_TYPES
+from recipes.services.measurings import measuring_str
 from users.models import User
 from users.serializers import ShortUserSerializer
 from rest_flex_fields import FlexFieldsModelSerializer
-
-
-def amount_str(meas: str | None):
-    meas_types = dict(MEASURING_TYPES)
-    if meas in MEASURING_SHORT:
-        return str(MEASURING_SHORT[meas])
-    elif meas in meas_types:
-        return str(meas_types[meas])
-
-    return meas
 
 
 class StatusOkSerializer(serializers.Serializer):
@@ -96,7 +86,7 @@ class RegularIngredientSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OpenApiTypes.STR)
     def get_amount_type_str(self, obj: RecipeIngredient):
-        return amount_str(obj.amount_type)
+        return measuring_str(obj.amount_type)
 
 
 class IngredientSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -147,7 +137,7 @@ class RecipeIngredientSerializer(FlexFieldsModelSerializer, WritableNestedModelS
 
     @extend_schema_field(OpenApiTypes.STR)
     def get_amount_type_str(self, obj: RecipeIngredient):
-        return amount_str(obj.amount_type)
+        return measuring_str(obj.amount_type)
 
     @extend_schema_field(OpenApiTypes.NUMBER)
     def get_packs(self, obj: RecipeIngredient):
@@ -379,7 +369,7 @@ class ProductListItemSerializer(FlexFieldsModelSerializer, WritableNestedModelSe
 
     @extend_schema_field(OpenApiTypes.STR)
     def get_amount_type_str(self, obj: ProductListItem):
-        return amount_str(obj.amount_type)
+        return measuring_str(obj.amount_type)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

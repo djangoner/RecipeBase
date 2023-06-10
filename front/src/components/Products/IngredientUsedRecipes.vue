@@ -10,8 +10,13 @@
       clickable
       :to="{ name: 'recipe', params: { id: ing.recipe.id } }"
     >
-      <small class="ing-day">{{ getRecipeDays(ing.recipe)?.join(",") }}.&nbsp;</small>
-      {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
+      <q-item-section avatar>
+        <small class="ing-day">{{ getRecipeDays(ing.recipe)?.join(",") }}.&nbsp;</small>
+      </q-item-section>
+      <q-item-section>
+        {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
+      </q-item-section>
+      <recipe-card-tooltip :recipe="item" />
     </q-item>
 
     <template v-if="item.ingredient && item.ingredient.regular_ingredients">
@@ -25,14 +30,19 @@
           params: { id: item.ingredient.regular_ingredients.id },
         }"
       >
-        <small class="ing-day">-.&nbsp;</small>
-        Регулярный ({{ item.ingredient.regular_ingredients.amount }} {{ item.ingredient.regular_ingredients.amount_type_str }})
+        <q-item-section avatar>
+          <small class="ing-day">-.&nbsp;</small>
+        </q-item-section>
+        <q-item-section>
+          Регулярный ({{ item.ingredient.regular_ingredients.amount }} {{ item.ingredient.regular_ingredients.amount_type_str }})
+        </q-item-section>
       </q-item>
     </template>
   </q-list>
 </template>
 
 <script setup lang="ts">
+import RecipeCardTooltip from '../RecipeCardTooltip.vue'
 import { ProductListItemRead, RecipeIngredientWithRecipeRead, RecipeRead, RecipeShort } from "src/client"
 import { WeekDaysShort } from "src/modules/WeekUtils"
 import { useBaseStore } from "src/stores/base"

@@ -9,6 +9,7 @@ from django.db.models import F
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 from adminsortable.models import SortableMixin
+from computedfields.models import ComputedFieldsModel, computed
 
 
 from recipes.services.measurings import MEASURING_TYPES, short_text
@@ -46,7 +47,7 @@ def get_default_comments():
 # // Models \\
 
 
-class Recipe(models.Model):
+class Recipe(ComputedFieldsModel):
     title = models.CharField(_("Название"), max_length=100, db_index=True)
     content = RichTextField(_("Содержание"), blank=True)
     content_source = RichTextField(_("Содержание (изначальное) "), blank=True)
@@ -64,7 +65,7 @@ class Recipe(models.Model):
     author = models.ForeignKey(User, models.SET_NULL, null=True, blank=True)
     is_archived = models.BooleanField(_("Архивирован"), default=False)
 
-    history = HistoricalRecords(excluded_fields=["created", "edited"])
+    history = HistoricalRecords(excluded_fields=["created", "edited", "price_part", "price_full"])
 
     ingredients: models.QuerySet["RecipeIngredient"]
     images: models.QuerySet["RecipeImage"]
@@ -88,6 +89,32 @@ class Recipe(models.Model):
         return short_text(strip_tags(self.content) or strip_tags(self.content_source), length)
 
     get_short_description.short_description = _("Краткое содержание")  # type: ignore
+
+    @computed(
+        models.PositiveSmallIntegerField(_("Частичная цена"), default=0),
+        depends=[
+            ("ingredients", ["ingredient", "amount", "amount_type"]),
+            ("ingredients.ingredient", ["price", "item_weight", "min_pack_size"]),
+        ],
+    )
+    def price_part(self):
+        from recipes.services.ingredients import recipe_ingredient_price_part
+
+        prices: list[float] = [recipe_ingredient_price_part(i) or 0 for i in self.ingredients.all()]
+        return int(sum(prices))
+
+    @computed(
+        models.PositiveSmallIntegerField(_("Полная цена"), default=0),
+        depends=[
+            ("ingredients", ["ingredient", "amount", "amount_type"]),
+            ("ingredients.ingredient", ["price", "item_weight", "min_pack_size"]),
+        ],
+    )
+    def price_full(self):
+        from recipes.services.ingredients import recipe_ingredient_price_full
+
+        prices: list[float] = [recipe_ingredient_price_full(i) or 0 for i in self.ingredients.all()]
+        return int(sum(prices))
 
 
 class RecipeImage(models.Model):

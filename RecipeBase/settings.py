@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "simple_history",
     "djangoql",
+    "computedfields",
     # Custom
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
@@ -236,6 +237,10 @@ CKEDITOR_UPLOAD_PATH = "uploads/ckeditor/"
 if DEBUGBAR:
     INSTALLED_APPS += ["debug_toolbar"]
     MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+
+
+COMPUTEDFIELDS_ADMIN = True
+
 
 CKEDITOR_CONFIGS = {
     "default": {

@@ -29,4 +29,6 @@ export type RecipeShort = {
     readonly created: string | null;
     readonly edited: string | null;
     is_archived?: boolean;
+    readonly price_part: number;
+    readonly price_full: number;
 };

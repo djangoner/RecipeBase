@@ -128,6 +128,7 @@ export const IngredientTypes = {
   grocery: "Зелень/фрукты/овощи",
   liq: "Жидкость (в литрах)",
   kilo: "Измеряется в КГ",
+  item: "Поштучный",
 }
 
 export interface RangeValue {

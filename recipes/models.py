@@ -123,6 +123,7 @@ class Ingredient(models.Model):
         GROCERY = "grocery", _("Зелень/фрукты/овощи")
         LIQUID = "liq", _("Жидкость (в литрах)")
         kilo = "kilo", _("Измеряется в КГ")
+        item = "item", _("Поштучный")
 
     title = models.CharField(_("Название"), unique=True, max_length=100)
     description = models.TextField(_("Описание"), null=True, blank=True)

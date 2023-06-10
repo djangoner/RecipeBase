@@ -1,4 +1,3 @@
-import math
 from datetime import date, datetime
 
 from drf_spectacular.types import OpenApiTypes
@@ -25,6 +24,11 @@ from recipes.models import (
     WeekPlanCondition,
 )
 from recipes.services.conditions import process_conditions_tree, warnings_json
+from recipes.services.ingredients import (
+    recipe_ingredient_packs,
+    recipe_ingredient_price_full,
+    recipe_ingredient_price_part,
+)
 from recipes.services.measurings import MEASURING_SHORT, MEASURING_TYPES
 from users.models import User
 from users.serializers import ShortUserSerializer
@@ -147,42 +151,15 @@ class RecipeIngredientSerializer(FlexFieldsModelSerializer, WritableNestedModelS
 
     @extend_schema_field(OpenApiTypes.NUMBER)
     def get_packs(self, obj: RecipeIngredient):
-        if not (obj.amount and obj.ingredient and obj.ingredient.min_pack_size):
-            return 0
-
-        # if obj.amount_type == "items":
-        #     return obj.amount
-        return round(obj.amount / obj.ingredient.min_pack_size, 3)
+        return round(recipe_ingredient_packs(obj), 3)
 
     @extend_schema_field(OpenApiTypes.NUMBER)
-    def get_price_part(self, obj: RecipeIngredient):
-        if not (
-            obj.ingredient
-            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
-            and obj.ingredient.price
-            and obj.amount
-        ):
-            return
-
-        packs = self.get_packs(obj)
-        if obj.amount_type == "items" and obj.ingredient.item_weight and obj.ingredient.min_pack_size:
-            return round(packs * obj.ingredient.item_weight / obj.ingredient.min_pack_size)
-        return round(packs * obj.ingredient.price)
+    def get_price_part(self, obj: ProductListItem):
+        return recipe_ingredient_price_part(obj)
 
     @extend_schema_field(OpenApiTypes.NUMBER)
-    def get_price_full(self, obj: RecipeIngredient):
-        if not (
-            obj.ingredient
-            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
-            and obj.ingredient.price
-            and obj.amount
-        ):
-            return
-
-        packs = math.ceil(self.get_packs(obj))
-        if obj.amount_type == "items" and obj.ingredient.item_weight and obj.ingredient.min_pack_size:
-            return round(obj.amount * obj.ingredient.item_weight / obj.ingredient.min_pack_size * obj.ingredient.price)
-        return round(packs * obj.ingredient.price)
+    def get_price_full(self, obj: ProductListItem):
+        return recipe_ingredient_price_full(obj)
 
 
 class RecipeTagSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -413,43 +390,16 @@ class ProductListItemSerializer(FlexFieldsModelSerializer, WritableNestedModelSe
         return representation
 
     @extend_schema_field(OpenApiTypes.NUMBER)
-    def get_packs(self, obj: ProductListItem):
-        if not (obj.amount and obj.ingredient and obj.ingredient.min_pack_size):
-            return 0
-
-        # if obj.amount_type == "items":
-        #     return obj.amount
-        return round(obj.amount / obj.ingredient.min_pack_size, 3)
+    def get_packs(self, obj: RecipeIngredient):
+        return round(recipe_ingredient_packs(obj), 3)
 
     @extend_schema_field(OpenApiTypes.NUMBER)
     def get_price_part(self, obj: ProductListItem):
-        if not (
-            obj.ingredient
-            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
-            and obj.ingredient.price
-            and obj.amount
-        ):
-            return
-
-        packs = self.get_packs(obj)
-        if obj.amount_type == "items" and obj.ingredient.item_weight and obj.ingredient.min_pack_size:
-            return round(packs * obj.ingredient.item_weight / obj.ingredient.min_pack_size)
-        return round(packs * obj.ingredient.price)
+        return recipe_ingredient_price_part(obj)
 
     @extend_schema_field(OpenApiTypes.NUMBER)
     def get_price_full(self, obj: ProductListItem):
-        if not (
-            obj.ingredient
-            and (obj.ingredient.min_pack_size or obj.ingredient.item_weight)
-            and obj.ingredient.price
-            and obj.amount
-        ):
-            return
-
-        packs = math.ceil(self.get_packs(obj))
-        if obj.amount_type == "items" and obj.ingredient.item_weight and obj.ingredient.min_pack_size:
-            return round(obj.amount * obj.ingredient.item_weight / obj.ingredient.min_pack_size * obj.ingredient.price)
-        return round(packs * obj.ingredient.price)
+        return recipe_ingredient_price_full(obj)
 
 
 class ProductListItemReadSerializer(ProductListItemSerializer):

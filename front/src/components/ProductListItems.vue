@@ -179,6 +179,9 @@ function itemPacksStr(item: ProductListItemRead): string {
   else if (item.ingredient.type == "kilo"){
     return "кг"
   }
+  else if (item.ingredient.type == "item"){
+    return "упак"
+  }
   else if (item.ingredient.min_pack_size === 1000){
     return "кг"
   }

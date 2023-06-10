@@ -86,12 +86,22 @@
         />
       </div>
       <!-- Prices total -->
-      <span class="q-px-md q-pt-xs">
-        {{ pricesCompleted }}₺ / {{ pricesTotal }}₺
-        <template v-if="productsWithoutPrice"> ({{ productsWithoutPrice }}/{{ listItemsRaw.length }} продуктов без цены) </template>
+      <div class="row q-gutter-x-sm q-px-md q-pt-xs">
+        <q-badge color="grey">
+          {{ pricesCompleted }}₺ / {{ pricesTotal }}₺
 
-        <q-tooltip>~ уже потрачено / стоимость продуктов</q-tooltip>
-      </span>
+          <q-tooltip>~ уже потрачено / стоимость продуктов</q-tooltip>
+        </q-badge>
+        <q-badge color="grey">
+          Вес: {{ weightCompleted }} / {{ weightTotal }} кг
+        </q-badge>
+        <q-badge
+          v-if="productsWithoutPrice"
+          color="grey"
+        >
+          {{ productsWithoutPrice }}/{{ listItemsRaw.length }} продуктов без цены
+        </q-badge>
+      </div>
 
       <!-- Product list item -->
       <template v-if="sortShop">
@@ -423,6 +433,30 @@ export default defineComponent({
         .filter((i) => !i.already_completed)
         .map((i) => i.price_full)
         .reduce((a, b) => a + b, 0)
+    },
+    weightCompleted(){
+      const weight = this.listItemsRaw
+        .filter((i) => i.is_completed && !i.already_completed)
+        .filter((i) => i.amount_type == "g" && i.amount)
+        .map((i) => i.amount)
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        .reduce((a, b) => a + b, 0)
+      if (!weight){
+        return 0
+      }
+      return (weight / 1000).toPrecision(1)
+    },
+    weightTotal(){
+      const weight = this.listItemsRaw
+      .filter((i) => !i.already_completed)
+        .filter((i) => i.amount_type == "g" && i.amount)
+        .map((i) => i.amount)
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        .reduce((a, b) => a + b, 0)
+      if (!weight){
+        return 0
+      }
+      return (weight / 1000).toPrecision(1)
     },
     productsWithoutPrice() {
       return this.listItemsRaw.filter((i) => !i.price_full).length

@@ -112,7 +112,9 @@ def get_ingredient_key(ing: RecipeIngredient):
 
 
 def extract_ingredient_amount(ing: RecipeIngredient | RegularIngredient):
-    if ing.amount_type == "items" and ing.ingredient.item_weight:  # Convert items to grams
+    if (
+        ing.amount_type == "items" and ing.ingredient.item_weight and ing.ingredient.type != "item"
+    ):  # Convert items to grams
         return ("g", int(ing.amount * ing.ingredient.item_weight))
     else:
         return (ing.amount_type, ing.amount)

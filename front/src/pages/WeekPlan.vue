@@ -228,7 +228,7 @@ const debouncedLoadWarnings = useDebounceFn(() => {
     void debouncedLoadWarnings()
   }
   void store.loadWeekWarnings({year: week.value.year, week: week.value.week})
-}, 5000)
+}, 2000)
 
 // const fw = ref(null)
 // const refFireworks = computed(() => {

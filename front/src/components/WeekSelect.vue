@@ -1,5 +1,5 @@
 <template>
-  <q-bar class="bar_week_select">
+  <q-bar class="bar_week_select col-grow">
     <div class="col text-bold">
       <div class="row justify-center items-center q-col-gutter-x-md">
         <q-btn

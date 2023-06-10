@@ -338,6 +338,7 @@ class RecipePlan(models.Model):
         blank=True,
         related_name="plans",
     )
+    created = models.DateTimeField(_("Время создания"), auto_now_add=True)
 
     class Meta:
         ordering = ["day", "meal_time__num"]

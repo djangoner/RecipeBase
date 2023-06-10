@@ -9,6 +9,8 @@ export type RecipePlanWeekRead = {
     readonly id: number;
     plans: Array<RecipePlanRead>;
     readonly warnings: Array<ConditionWarning>;
+    readonly edited_first: string;
+    readonly edited_last: string;
     year: number;
     week: number;
     comments?: Record<string, any>;

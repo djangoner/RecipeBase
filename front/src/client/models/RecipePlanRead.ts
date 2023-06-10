@@ -11,5 +11,6 @@ export type RecipePlanRead = {
     meal_time: MealTime;
     day?: number | null;
     date?: string | null;
+    readonly created: string;
     week?: number;
 };

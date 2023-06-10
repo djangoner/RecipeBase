@@ -1,17 +1,8 @@
 <template>
-  <week-select
-    v-model="week"
-    @update:model-value="loadWeekPlan()"
-  />
-  <q-linear-progress
-    :value="fillingPrc || undefined"
-    :indeterminate="saving"
-    :instant-feedback="saving"
-    :animation-speed="500"
-  />
   <q-page
     id="week_plan_print"
     padding
+    style="padding-top: 40px"
   >
     <div class="row items-center q-col-gutter-x-md print-hide">
       <div v-if="canEdit">
@@ -21,19 +12,18 @@
           :readonly="!canEdit"
         />
       </div>
-      <div>
-        <q-btn
-          icon="print"
-          color="primary"
-          size="sm"
-          no-caps
-          unelevated
-          @click="onPrint()"
-        >
-          Распечатать план
-        </q-btn>
-      </div>
       <q-space />
+      <div v-if="plan && $q.screen.gt.sm">
+        <small
+          class="text-grey"
+        >
+          Время заполнения: {{ editedTimeStr }}
+          <q-tooltip>
+            Время заполнения плана
+            ({{ dateTimeFormat(plan?.edited_first) }} - {{ dateTimeFormat(plan.edited_last) }})
+          </q-tooltip>
+        </small>
+      </div>
       <div>
         <q-btn
           icon="menu"
@@ -43,6 +33,17 @@
         >
           <q-menu>
             <q-list dense>
+              <q-item
+                clickable
+                @click="onPrint()"
+              >
+                <q-item-section side>
+                  <q-icon name="print" />
+                </q-item-section>
+                <q-item-section>
+                  Распечатать план
+                </q-item-section>
+              </q-item>
               <q-item tag="label">
                 <q-item-section side>
                   <q-toggle
@@ -58,6 +59,20 @@
               >
                 <!-- <q-item-section avatar /> -->
                 <q-item-section> Запустить фейерверки </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <small
+                    class="text-grey"
+                  >
+                    Время заполнения: {{ editedTimeStr }}
+                    <q-tooltip>
+                      Время заполнения плана
+                      <br>
+                      ({{ dateTimeFormat(plan?.edited_first) }} - {{ dateTimeFormat(plan.edited_last) }})
+                    </q-tooltip>
+                  </small>
+                </q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -107,7 +122,25 @@
         </q-expansion-item>
       </div>
     </div>
+
+    <q-page-sticky
+      position="top"
+      expand
+    >
+      <week-select
+        v-model="week"
+        @update:model-value="loadWeekPlan()"
+      />
+      <q-linear-progress
+        :value="fillingPrc || undefined"
+        :indeterminate="saving"
+        :instant-feedback="saving"
+        :animation-speed="500"
+      />
+    </q-page-sticky>
   </q-page>
+
+  <!-- Fireworks -->
   <Fireworks
     v-if="enableFireworks && showFireworks"
     ref="fw"
@@ -123,20 +156,29 @@
       'z-index': 9999,
     }"
   />
+  <!-- Fireworks overlay -->
   <div
     v-if="enableFireworks && showFireworks"
-    class="position-absolute absolute-top-right toolbar-topright"
   >
-    <q-btn
-      flat
-      no-caps
-      color="white"
-      text-color="black"
-      style="background: white"
-      @click="showFireworks = false"
+    <div class="position-absolute absolute-top fireworks-overlay text-white">
+      <div class="text-h6 text-center q-my-md">
+        План заполнен за {{ editedTimeStr }}!
+      </div>
+    </div>
+    <div
+      class="position-absolute absolute-top-right fireworks-overlay"
     >
-      Закрыть
-    </q-btn>
+      <q-btn
+        flat
+        no-caps
+        color="white"
+        text-color="black"
+        style="background: white"
+        @click="showFireworks = false"
+      >
+        Закрыть
+      </q-btn>
+    </div>
   </div>
 
   <q-inner-loading :showing="loading" />
@@ -163,6 +205,7 @@ import { date, useQuasar } from "quasar"
 import { WarningPriorities } from "src/modules/Globals"
 import { useMagicKeys, whenever } from '@vueuse/core'
 import { logicAnd } from '@vueuse/math'
+import { dateTimeFormat } from "src/modules/Utils"
 
 type QueryInterface = YearWeek
 
@@ -221,6 +264,31 @@ const plan = computed(() => {
 
 const conditions = computed(() => {
   return store.conditions
+})
+
+const editedTimeStr = computed(() => {
+  if (!plan.value){
+    return "";
+  }
+  const diff = Math.abs(new Date() - new Date(plan.value?.edited_first)) / 1000
+  const hours = Math.floor(diff / 3600);
+  const mins = Math.floor((diff / 60) % 60)
+  const secs = Math.floor((diff) % 60)
+  let res = '';
+  const pad = (num: number) => {
+    return num.toString().padStart(2, '0')
+  }
+
+  if (hours){
+    res += `${pad(hours)}:`
+  }
+  if (mins){
+    res += `${pad(mins)}:`
+  }
+  if (secs){
+    res += `${pad(secs)}`
+  }
+  return res;
 })
 
 const debouncedLoadWarnings = useDebounceFn(() => {
@@ -407,7 +475,7 @@ body.body--dark .week-select-page .q-field--dark {
   }
 }
 
-.toolbar-topright {
+.fireworks-overlay {
   z-index: 99999;
 }
 </style>

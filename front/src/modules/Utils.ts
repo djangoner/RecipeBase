@@ -21,7 +21,7 @@ export function dateTimeFormat(raw: Date | string | null): string {
   if (!raw) {
     return "-"
   }
-  return date.formatDate(raw, "YYYY.MM.DD hh:mm")
+  return date.formatDate(raw, "YYYY.MM.DD HH:mm")
 }
 
 export function clearPayload(payload: object): object {

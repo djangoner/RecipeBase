@@ -330,6 +330,8 @@ class ConditionWarningSerializer(serializers.Serializer):
 class RecipePlanWeekSerializer(serializers.ModelSerializer):
     plans = RecipePlanShortSerializer(many=True, required=False)
     warnings = serializers.SerializerMethodField()
+    edited_first = serializers.SerializerMethodField()
+    edited_last = serializers.SerializerMethodField()
 
     class Meta:
         model = RecipePlanWeek
@@ -341,6 +343,16 @@ class RecipePlanWeekSerializer(serializers.ModelSerializer):
         res = process_conditions_tree(instance)
         warnings = warnings_json(res.warnings)
         return warnings
+
+    @extend_schema_field(serializers.DateTimeField)
+    def get_edited_first(self, instance: RecipePlanWeek):
+        plan: RecipePlan | None = instance.plans.filter(created__gte=datetime.now().date()).order_by("created").first()
+        return plan.created if plan else None
+
+    @extend_schema_field(serializers.DateTimeField)
+    def get_edited_last(self, instance: RecipePlanWeek):
+        plan: RecipePlan | None = instance.plans.filter(created__gte=datetime.now().date()).order_by("created").last()
+        return plan.created if plan else None
 
 
 class RecipePlanWeekShortSerializer(RecipePlanWeekSerializer, serializers.ModelSerializer):

@@ -83,7 +83,7 @@ const routes = [
             },
           },
           {
-            path: "/:id",
+            path: ":id",
             component: () => import("pages/IngredientView.vue"),
             name: "ingredient",
             meta: {

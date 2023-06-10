@@ -244,6 +244,8 @@ const orderingOptions = [
   { label: "Создан - по убыванию", value: "-created" },
   { label: "Последнее приготовление - по возрастанию", value: "last_cooked" },
   { label: "Последнее приготовление - по убыванию", value: "-last_cooked" },
+  { label: "Цена - по возрастанию", value: "price_part" },
+  { label: "Цена - по убыванию", value: "-price_part" },
   { label: "Название - по возрастанию", value: "title" },
   { label: "Название - по убыванию", value: "-title" },
 ];

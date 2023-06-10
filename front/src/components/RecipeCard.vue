@@ -1,7 +1,7 @@
 <template>
   <q-card
     v-ripple
-    class="recipe-card cursor-pointer q-hoverable relative-position"
+    class="recipe-card cursor-pointer q-hoverable"
     :class="[recipe.is_planned ? 'recipe-used' : '']"
     @click="openRecipe(recipe.id)"
   >

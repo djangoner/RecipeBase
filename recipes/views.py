@@ -227,6 +227,8 @@ class RecipeViewset(viewsets.ModelViewSet):
         "cooking_time",
         "last_cooked",
         "cooked_times",
+        "price_part",
+        "price_full",
     ]
 
     def get_serializer_class(self):

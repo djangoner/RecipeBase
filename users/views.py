@@ -22,7 +22,7 @@ class CustomObtainAuthToken(ObtainAuthToken):
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
-    queryset = User.objects.all().order_by(F("profile__num").asc(nulls_last=True))
+    queryset = User.objects.exclude(first_name="service").order_by(F("profile__num").asc(nulls_last=True))
     permission_classes = [permissions.IsAdminUser | permissions.IsAuthenticatedOrReadOnly]
 
     search_fields = ["fio", "username", "phone"]

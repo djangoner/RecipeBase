@@ -21,6 +21,7 @@ from recipes.models import (
 )
 from adminsortable.admin import NonSortableParentAdmin, SortableTabularInline
 from simple_history.admin import SimpleHistoryAdmin
+from djangoql.admin import DjangoQLSearchMixin
 
 
 class RecipeIngredientsInline(admin.StackedInline):
@@ -59,7 +60,7 @@ class WeekPlanConditionInline(admin.StackedInline):
 
 
 @admin.register(Recipe)
-class RecipeAdmin(SimpleHistoryAdmin):
+class RecipeAdmin(DjangoQLSearchMixin, SimpleHistoryAdmin):
     list_display = ["title", "created", "edited", "get_cooked_times"]
     search_fields = ["title", "content"]
     filter_horizontal = ("tags",)
@@ -77,7 +78,7 @@ class RecipeAdmin(SimpleHistoryAdmin):
 
 
 @admin.register(Ingredient)
-class IngredientAdmin(SimpleHistoryAdmin):
+class IngredientAdmin(DjangoQLSearchMixin, SimpleHistoryAdmin):
     list_display = ["title", "category", "min_pack_size", "price", "edible", "need_buy"]
     list_filter = ["need_buy", "edible", "category"]
     autocomplete_fields = ["category"]
@@ -85,62 +86,62 @@ class IngredientAdmin(SimpleHistoryAdmin):
 
 
 @admin.register(RecipeIngredient)
-class RecipeIngredientAdmin(SimpleHistoryAdmin):
+class RecipeIngredientAdmin(DjangoQLSearchMixin, SimpleHistoryAdmin):
     list_display = ["recipe", "ingredient"]
     search_fields = ["recipe__title", "ingredient__title"]
     autocomplete_fields = ["recipe", "ingredient"]
 
 
 @admin.register(RegularIngredient)
-class RegularIngredientAdmin(SimpleHistoryAdmin):
+class RegularIngredientAdmin(DjangoQLSearchMixin, SimpleHistoryAdmin):
     list_display = ["ingredient", "amount", "amount_type"]
     search_fields = ["ingredient__title"]
     autocomplete_fields = ["ingredient"]
 
 
 @admin.register(RecipeImage)
-class RecipeImageAdmin(admin.ModelAdmin):
+class RecipeImageAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ["id", "image", "title", "recipe_id", "created"]
     list_filter = ["created"]
     search_fields = ["image", "title"]
 
 
 @admin.register(RecipeTag)
-class RecipeTagAdmin(admin.ModelAdmin):
+class RecipeTagAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ("title", "recipes_count")
     search_fields = ("title",)
 
 
 @admin.register(MealTime)
-class MealTimeAdmin(admin.ModelAdmin):
+class MealTimeAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ["title", "time", "num", "is_primary"]
     search_fields = ["title", "time"]
     list_editable = ["num"]
 
 
 @admin.register(RecipePlanWeek)
-class RecipePlanWeekAdmin(admin.ModelAdmin):
+class RecipePlanWeekAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ("id", "year", "week")
     list_filter = ("year", "week")
     inlines = [RecipePlanInline]
 
 
 @admin.register(RecipePlan)
-class RecipePlanAdmin(admin.ModelAdmin):
+class RecipePlanAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ["week", "meal_time", "recipe"]
     list_filter = ["meal_time", "week__year", "week__week"]
     search_fields = ["week__year", "week__week", "recipe__title"]
 
 
 @admin.register(ProductListWeek)
-class ProductListWeekAdmin(admin.ModelAdmin):
+class ProductListWeekAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ("id", "year", "week")
     list_filter = ("year", "week")
     search_fields = ["year", "week"]
 
 
 @admin.register(ProductListItem)
-class ProductListItemAdmin(SimpleHistoryAdmin):
+class ProductListItemAdmin(DjangoQLSearchMixin, SimpleHistoryAdmin):
     list_display = [
         "week",
         "title",
@@ -165,20 +166,20 @@ class ProductListItemAdmin(SimpleHistoryAdmin):
 
 
 @admin.register(Shop)
-class ShopAdmin(NonSortableParentAdmin, admin.ModelAdmin):
+class ShopAdmin(DjangoQLSearchMixin, NonSortableParentAdmin, admin.ModelAdmin):
     list_display = ("id", "title")
     search_fields = ["title"]
     inlines = [ShopIngredientCategoryInline]
 
 
 @admin.register(IngredientCategory)
-class IngredientCategoryAdmin(admin.ModelAdmin):
+class IngredientCategoryAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ("id", "title", "icon")
     search_fields = ["title"]
 
 
 @admin.register(WeekPlanCondition)
-class WeekPlanConditionAdmin(admin.ModelAdmin):
+class WeekPlanConditionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = [
         "id",
         "title",

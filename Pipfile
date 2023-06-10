@@ -27,6 +27,7 @@ cachetools = "*"
 channels = {extras = ["daphne"], version = "*"}
 channels-redis = "*"
 django-imagekit = "*"
+djangoql = "*"
 
 [dev-packages]
 pytest = "*"

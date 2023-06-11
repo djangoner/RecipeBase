@@ -13,6 +13,7 @@ from recipes.models import (
     RegularIngredient,
 )
 from recipes.services.measurings import IngredientAmounts, convert_all_to_grams, is_convertible, measuring_str
+from django.db import transaction
 
 log = logging.getLogger("PlansGen")
 
@@ -187,31 +188,32 @@ def update_plan_week(week: RecipePlanWeek):
         log.warning(f"Strange ingredients: {ingredients}")
         return
 
-    for ing_name, ing_info in ingredients.items():
-        # ing: RecipeIngredient = ing_info["ingredient"]
+    with transaction.atomic():
+        for ing_name, ing_info in ingredients.items():
+            # ing: RecipeIngredient = ing_info["ingredient"]
 
-        plan_item: ProductListItem
-        amounts = get_ingredients_amounts(ing_info.ingredients)
+            plan_item: ProductListItem
+            amounts = get_ingredients_amounts(ing_info.ingredients)
 
-        plan_item, _ = plan_week.items.update_or_create(
-            ingredient=ing_info.ingredient,
-            is_auto=True,
-            defaults={
-                "title": ing_name,
-                "amount": ing_info.amount,
-                "amounts": amounts,
-                "amount_type": ing_info.measuring,
-                "day": ing_info.min_day - 1,
-                "is_deleted": False,
-            },
-        )
+            plan_item, _ = plan_week.items.update_or_create(
+                ingredient=ing_info.ingredient,
+                is_auto=True,
+                defaults={
+                    "title": ing_name,
+                    "amount": ing_info.amount,
+                    "amounts": amounts,
+                    "amount_type": ing_info.measuring,
+                    "day": ing_info.min_day - 1,
+                    "is_deleted": False,
+                },
+            )
 
-        ids_curr = list(plan_item.ingredients.values_list("id", flat=True))
-        ids_generated = [i.pk for i in ing_info.ingredients]
-        if ids_curr != ids_generated:
-            plan_item.ingredients.set(ing_info.ingredients)
-            plan_item.save()
-        edited_plans.append(plan_item.pk)
+            ids_curr = list(plan_item.ingredients.values_list("id", flat=True))
+            ids_generated = [i.pk for i in ing_info.ingredients]
+            if ids_curr != ids_generated:
+                plan_item.ingredients.set(ing_info.ingredients)
+                plan_item.save()
+            edited_plans.append(plan_item.pk)
 
     old_items = plan_week.items.filter(is_auto=True).exclude(id__in=edited_plans)
     # old_items.update(is_deleted=True)

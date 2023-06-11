@@ -189,7 +189,7 @@ import DayCard from "../components/Plan/DayCard.vue"
 import weekSelect from "components/WeekSelect.vue"
 import { useBaseStore } from "src/stores/base"
 import PlanWeekInfo from "src/components/PlanWeekInfo.vue"
-import { computed, nextTick, onMounted, ref, watch } from "vue"
+import { computed, nextTick, onMounted, Ref, ref, watch } from "vue"
 import { getDateOfISOWeek, YearWeek } from "src/modules/WeekUtils"
 import { WeekDays } from "src/modules/WeekUtils"
 import { useAuthStore } from "src/stores/auth"
@@ -231,7 +231,7 @@ const $q = useQuasar()
 const store = useBaseStore()
 const storeAuth = useAuthStore()
 
-const editMode = ref(false)
+const editMode: Ref<boolean | null> = ref(null)
 const loading = ref(false)
 const saving = ref(false)
 const enableFireworks = useStorage("enableFireworks", false)
@@ -303,7 +303,8 @@ function onUpdateRecipe(){
 }
 
 const debouncedLoadWarnings = useDebounceFn(() => {
-  if (!week.value){
+  if (!week.value || !week.value.year){
+    console.debug("re-running debounced load warnings")
     void debouncedLoadWarnings()
   }
   void store.loadWeekWarnings({year: week.value.year, week: week.value.week})

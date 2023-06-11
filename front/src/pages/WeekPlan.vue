@@ -389,7 +389,7 @@ function loadWeekPlan() {
         editMode.value = !(plan.value?.plans && plan.value?.plans?.length > 0)
       }
     })
-    .catch((err: CustomAxiosError) => {
+    .catch(() => {
       loading.value = false
     })
 }
@@ -405,7 +405,7 @@ function saveWeekPlan() {
     .then(() => {
       saving.value = false
     })
-    .catch((err: CustomAxiosError) => {
+    .catch(() => {
       saving.value = false
     })
 }

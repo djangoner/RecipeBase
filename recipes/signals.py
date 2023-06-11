@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from recipes.consumers import RealtimeConsumer
 
@@ -35,6 +35,20 @@ def get_current_plan_week():
     return plan
 
 
+def get_product_list(year: int, week: int):
+    product_week: ProductListWeek | None = ProductListWeek.objects.filter(year=year, week=week).first()
+    return product_week
+
+
+def unactual_product_list(year: int, week: int):
+    product_week = get_product_list(year, week)
+    print("Unactual Product List ", year, week, product_week)
+    if product_week and product_week.is_actual:
+        print("CHANGING")
+        product_week.is_actual = False
+        product_week.save(update_fields=["is_actual"])
+
+
 @receiver(pre_save, sender=RecipeIngredient)
 def recipe_pre_save(sender: RecipeIngredient, instance, **kwargs):
     instance.amount_grams = amount_to_grams(instance.amount, instance.amount_type)
@@ -60,6 +74,12 @@ def plan_week_changed(sender, instance, **kwargs):
 
     if instance.is_filled and not old.is_filled:
         send_notification("weekplan_ready")
+
+
+@receiver(pre_delete, sender=RecipePlan)
+@receiver(pre_save, sender=RecipePlan)
+def recipe_plan_changed(sender, instance: RecipePlan, **kwargs):
+    unactual_product_list(instance.week.year, instance.week.week)
 
 
 register_models(

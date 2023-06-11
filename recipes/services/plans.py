@@ -217,4 +217,8 @@ def update_plan_week(week: RecipePlanWeek):
     # old_items.update(is_deleted=True)
     old_items.delete()
 
+    if not plan_week.is_actual:
+        plan_week.is_actual = True
+        plan_week.save(update_fields=["is_actual"])
+
     return ingredients

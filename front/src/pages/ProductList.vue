@@ -12,8 +12,12 @@
       :animation-speed="500"
     />
     <!-- Top warnings -->
-    <already-completed-banner :show="markAlreadyCompleted" />
     <status-websocket />
+    <already-completed-banner :show="markAlreadyCompleted" />
+    <not-actual-list-banner
+      :show="productList && !isActual"
+      @reload="$refs.menu.regenerateList()"
+    />
     <!-- Modals -->
     <product-list-item-view
       v-model="viewItem"
@@ -52,6 +56,7 @@
       <q-space />
       <div>
         <product-list-menu
+          ref="menu"
           v-model:mark-already-completed="markAlreadyCompleted"
           v-model:show-already-completed="showAlreadyCompleted"
           :week="week"
@@ -174,6 +179,7 @@
 </template>
 
 <script lang="ts">
+import NotActualListBanner from '../components/Products/NotActualListBanner.vue'
 import ProductListMenu from '../components/Products/ProductListMenu.vue'
 import AlreadyCompletedBanner from "../components/Products/AlreadyCompletedBanner.vue"
 import ProductListItems from "components/ProductListItems.vue"
@@ -230,7 +236,7 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     AlreadyCompletedBanner,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    StatusWebsocket, ProductListMenu
+    StatusWebsocket, ProductListMenu, NotActualListBanner
 },
   mixins: [HandleErrorsMixin, IsOnlineMixin, WorkerMessagesMixin],
   data() {
@@ -413,6 +419,12 @@ export default defineComponent({
     },
     completedCount() {
       return this.listItemsRaw.filter((i) => i.is_completed).length
+    },
+    productList(){
+      return this.store.product_list
+    },
+    isActual(){
+      return this.store.product_list?.is_actual
     },
     canSync: {
       get() {

@@ -16,4 +16,5 @@ export type ProductListWeekRead = {
     year: number;
     week: number;
     is_filled?: boolean;
+    is_actual?: boolean;
 };

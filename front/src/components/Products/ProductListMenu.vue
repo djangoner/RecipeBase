@@ -277,4 +277,6 @@ watch(() => props.markAlreadyCompleted, (val: boolean, oldVal: boolean) => {
     }
   }
 })
+
+defineExpose({regenerateList})
 </script>

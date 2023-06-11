@@ -392,6 +392,7 @@ class ProductListWeek(models.Model):
     week = models.SmallIntegerField(_("Неделя"))
 
     is_filled = models.BooleanField(_("Заполнен"), default=False)
+    is_actual = models.BooleanField(_("Актуальный список"), default=False)
     items: models.QuerySet["ProductListItem"]
 
     class Meta:

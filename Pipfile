@@ -29,6 +29,7 @@ channels-redis = "*"
 django-imagekit = "*"
 djangoql = "*"
 django-computedfields = "*"
+tqdm = "*"
 
 [dev-packages]
 pytest = "*"

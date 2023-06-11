@@ -98,6 +98,10 @@ class RecipeFilterSet(filters.FilterSet):
     )
     cooking_time_gt = filters.NumberFilter("cooking_time", lookup_expr="gte")
     cooking_time_lt = filters.NumberFilter("cooking_time", lookup_expr="lte")
+    price_part_gt = filters.NumberFilter("price_part", lookup_expr="gte")
+    price_part_lt = filters.NumberFilter("price_part", lookup_expr="lte")
+    price_full_gt = filters.NumberFilter("price_full", lookup_expr="gte")
+    price_full_lt = filters.NumberFilter("price_full", lookup_expr="lte")
 
     class Meta:
         model = Recipe

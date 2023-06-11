@@ -141,6 +141,11 @@ export interface RecipesFilters {
     min: number
     max: number
   }
+  price: {
+    min: number
+    max: number
+  }
+  priceUseFull: boolean
   tags_include: number[]
   tags_exclude: number[]
   ingredients_include: number[]

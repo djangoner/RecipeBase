@@ -246,6 +246,8 @@ const orderingOptions = [
   { label: "Последнее приготовление - по убыванию", value: "-last_cooked" },
   { label: "Цена - по возрастанию", value: "price_part" },
   { label: "Цена - по убыванию", value: "-price_part" },
+  { label: "Полная цена - по возрастанию", value: "price_full" },
+  { label: "Полная цена - по убыванию", value: "-price_full" },
   { label: "Название - по возрастанию", value: "title" },
   { label: "Название - по убыванию", value: "-title" },
 ];
@@ -302,12 +304,14 @@ interface QueryInterface {
 
 const defaultFilters = {
       cooking_time: { min: 5, max: 120 },
+      price: { min: 0, max: 1000 },
+      priceUseFull: false,
       tags_include: [],
       tags_exclude: [],
       ingredients_include: [],
       ingredients_exclude: [],
       ratings: {},
-    };
+    } as RecipesFilters;
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -492,11 +496,19 @@ export default defineComponent({
 
         // Cooking time
         if (this.filters.cooking_time) {
-          if (this.filters.cooking_time.min > 5) {
+          if (this.filters.cooking_time.min > defaultFilters.cooking_time.min) {
             payload.cookingTimeGt = String(this.filters.cooking_time.min);
           }
-          if (this.filters.cooking_time.max < 120) {
+          if (this.filters.cooking_time.max < defaultFilters.cooking_time.max) {
             payload.cookingTimeLt = String(this.filters.cooking_time.max);
+          }
+        }
+        if (this.filters.price) {
+          if (this.filters.price.min > defaultFilters.price.min) {
+            payload[this.filters.priceUseFull?'priceFullGt': 'pricePartGt'] = String(this.filters.price.min);
+          }
+          if (this.filters.price.max < defaultFilters.price.max) {
+            payload[this.filters.priceUseFull?'priceFullLt': 'pricePartLt'] = String(this.filters.price.max);
           }
         }
 

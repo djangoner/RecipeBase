@@ -51,11 +51,41 @@
       <h6 class="q-my-sm text-subtitle2 text-bold">
         Рейтинг
       </h6>
+      <search-rating v-model="filters" />
     </div>
 
     <div class="q-my-sm">
-      <search-rating v-model="filters" />
+      <div class="q-my-sm">
+        <div class="row justify-between">
+          <h6 class="q-my-sm text-subtitle2 text-bold">
+            Цена
+            <span class="text-caption text-grey">
+              {{ filters.price.min }} - {{ filters.price.max }}
+            </span>
+          </h6>
 
+          <q-toggle
+            v-model="filters.priceUseFull"
+            size="sm"
+            dense
+          >
+            <q-tooltip>
+              Фильтр по полной цене
+            </q-tooltip>
+          </q-toggle>
+        </div>
+        <q-range
+          v-model="filters.price"
+          class="q-px-md"
+          :min="0"
+          :max="1000"
+          :step="5"
+          label
+        />
+      </div>
+    </div>
+
+    <div class="q-my-sm">
       <div class="row justify-around">
         <q-btn
           type="reset"

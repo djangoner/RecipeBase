@@ -46,98 +46,43 @@
             v-if="getDayPlans(dayIdx, mtime).length > 0 || mtime.is_primary"
             :key="mtime.id"
           >
-            <div
-              v-for="(dayPlan, rec_dayIdx) of getDayPlans(dayIdx, mtime)"
-              :key="rec_dayIdx"
-              class="row q-col-gutter-x-sm wrap"
+            <draggable
+              :list="getDayPlans(dayIdx, mtime)"
+              :item-key="getItemKey"
+              :sort="false"
+              :data-day="dayIdx"
+              :disabled="readonly"
+              group="plans"
+              filter=".not-draggable"
+              ghost-class="ghost-class"
+              @move="onDrag"
+              @change="onChange"
+              @end="onEnd"
             >
-              <div class="col-auto">
-                <div>
-                  <span class="text-subtitle1 q-my-none relative-position q-py-xs">
-                    {{ mtime.title }}
-                    <q-badge
-                      v-if="dayPlan && getWarning(dayPlan)"
-                      :color="getWarningColor(dayPlan)"
-                      rounded
-                      floating
-                    />
-                  </span>
-                  <q-icon
-                    v-if="dayPlan?.recipe?.comment"
-                    name="notes"
-                    size="xs"
-                    color="primary"
-                  >
-                    <q-tooltip
-                      anchor="top middle"
-                      self="bottom middle"
-                      :offset="[10, 10]"
-                    >
-                      Комментарий:
-                      {{ dayPlan?.recipe?.comment }}
-                    </q-tooltip>
-                  </q-icon>
-                  <q-tooltip>
-                    {{ mtime.title }} -
-                    {{ MealTimeFormat(mtime.time || null) }}
-                  </q-tooltip>
-                </div>
-              </div>
-
-              <div class="col">
-                <recipe-select
-                  :model-value="dayPlan?.recipe"
+              <!-- <div>{{ element }}</div> -->
+              <template #item="{element, index}">
+                <plan-item-row
+                  :plan="element"
+                  :index="index"
+                  :mtime="mtime"
+                  :warning="getWarning(element)"
+                  :day-idx="dayIdx"
                   :readonly="readonly"
-                  @update:model-value="setRecipe(dayIdx, mtime, $event, rec_dayIdx)"
+                  @delete-meal-time="delMealTime"
+                  @set-recipe="setRecipe"
                 />
-                <!-- <span>{{ getplan(dayIdx, mtime)?.title }}</span> -->
-              </div>
+              </template>
+            </draggable>
 
-              <div
-                v-if="dayPlan?.recipe"
-                class="flex flex-center col-auto"
-              >
-                <q-btn
-                  v-if="storeAuth.hasPerm('recipes.view_recipe')"
-                  :to="{
-                    name: 'recipe',
-                    params: { id: dayPlan.recipe.id },
-                  }"
-                  icon="open_in_new"
-                  size="sm"
-                  flat
-                  dense
-                  round
-                >
-                  <q-tooltip>Открыть рецепт</q-tooltip>
-                </q-btn>
-              </div>
-              <div
-                v-else-if="!mtime.is_primary"
-                class="flex flex-center col-auto"
-              >
-                <q-btn
-                  icon="close"
-                  size="sm"
-                  flat
-                  dense
-                  round
-                  @click="delMealTime(mtime)"
-                >
-                  <q-tooltip>Убрать</q-tooltip>
-                </q-btn>
-              </div>
-
-              <recipe-card-tooltip
-                v-if="dayPlan?.recipe && $q.screen.gt.xs"
-                :recipe="dayPlan.recipe"
-              />
-            </div>
+            <!-- Recipe rows -->
+            <!-- v-for="(dayPlan, rec_dayIdx) of getDayPlans(dayIdx, mtime)" -->
           </div>
         </template>
       </div>
     </q-card-section>
     <q-space />
+
+    <!-- Bottom add mealtime -->
 
     <q-card-section>
       <div class="row q-mt-sm">
@@ -152,16 +97,16 @@
 </template>
 
 <script setup lang="ts">
-import RecipeCardTooltip from "../RecipeCardTooltip.vue"
-import RecipeSelect from "../Recipes/RecipeSelect.vue"
+import PlanItemRow from './PlanItemRow.vue'
+
 import MealtimeSelect from "./MealtimeSelect.vue"
 import ButtonComment from "./ButtonComment.vue"
 import { useBaseStore } from "src/stores/base"
 import { computed, PropType, ref } from "vue"
 import { useAuthStore } from "src/stores/auth"
 import { WarnedPlans, WeekDays } from "src/modules/Globals"
-import { getWarningPriorityColor } from "src/modules/Utils"
 import { MealTime, RecipePlan, RecipePlanRead, RecipeRead } from "src/client"
+import draggable from 'vuedraggable'
 
 const props = defineProps({
   dayIdx: {
@@ -218,14 +163,12 @@ const WeekDaysColors: { [key: number]: string } = {
   5: "bg-indigo-3",
 }
 
-function getWarning(plan: RecipePlanRead) {
+function getWarning(plan: RecipePlanRead | null) {
+  if (!plan){
+    return null
+  }
   return props.warnedPlans[plan.id] || null
 }
-function getWarningColor(plan: RecipePlanRead) {
-  const warn = getWarning(plan)
-  return getWarningPriorityColor(warn.priority)
-}
-
 function getDayPlans(day: number, mtime: MealTime) {
   if (!plan.value) {
     return []
@@ -242,12 +185,6 @@ function getDayPlans(day: number, mtime: MealTime) {
   return plans //.map((r) => r.recipe);
 }
 
-function MealTimeFormat(raw: string | null) {
-  if (!raw) {
-    return raw
-  }
-  return raw.slice(0, raw.length - 3)
-}
 
 function addMtime(mtime: MealTime) {
   plan.value?.plans?.push(
@@ -276,14 +213,17 @@ function delMealTime(mtime: MealTime) {
     plan.value.plans.splice(foundIdx, 1)
   }
 }
-function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: number) {
-  console.debug("setRecipe: ", day, mtime, value)
-  const plans =
-    plan.value?.plans?.filter((plan) => {
-      return plan.day == day && plan.meal_time.id == mtime.id
-    }) || []
 
-  const planItem = plans[rec_idx || 0]
+function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: number, planItem?: RecipePlanRead) {
+  console.debug("setRecipe: ", day, mtime, value)
+
+  if (!planItem){
+    const plans =
+      plan.value?.plans?.filter((plan) => {
+        return plan.day == day && plan.meal_time.id == mtime.id
+      }) || []
+    planItem = plans[rec_idx || 0]
+  }
 
   // const prom = plan?
   const newPlan: RecipePlan = Object.assign({}, planItem, {
@@ -330,6 +270,50 @@ function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: n
     .finally(() => {
       saving.value = false
     })
+}
+
+function getItemKey(item: RecipePlanRead | null){
+  return item?.id || 0
+}
+
+function onDrag(e: Event, perform=false){
+  // @ts-expect-error ignore
+  const elFrom = e.from as HTMLElement
+  // @ts-expect-error ignore
+  const elTo = e.to as HTMLElement
+  // @ts-expect-error ignore
+  const elItem = (e.dragged || e.item) as HTMLElement
+
+  const dayFrom = Number(elFrom.dataset.day) || null
+  const dayTo = Number(elTo.dataset.day) || null
+  const planId = Number(elItem.dataset.plan_id ) || null
+
+  // console.debug("Drag", {dayFrom, dayTo, planId, perform}, e)
+  if (!planId){
+    // console.debug("Plan without ID ")
+    return false
+  }
+
+  const planItem = plan.value?.plans.find(p => p.id == planId)
+  if (!planItem){
+    // console.debug("Plan not found ")
+    return false
+  }
+
+  if (perform){
+    if (dayTo && dayTo != planItem.day){
+      setRecipe(dayTo, planItem.meal_time, planItem.recipe, 0, planItem)
+    }
+  }
+}
+
+function onEnd(e: Event){
+  console.debug("END", e)
+  onDrag(e, true)
+}
+
+function onChange(e, type){
+  console.debug("Change", e, type)
 }
 </script>
 

@@ -100,6 +100,9 @@ class Recipe(ComputedFieldsModel):
     def price_part(self):
         from recipes.services.ingredients import recipe_ingredient_price_part
 
+        if not self.pk:
+            return 0
+
         prices: list[float] = [recipe_ingredient_price_part(i) or 0 for i in self.ingredients.all()]
         return int(sum(prices))
 
@@ -112,6 +115,9 @@ class Recipe(ComputedFieldsModel):
     )
     def price_full(self):
         from recipes.services.ingredients import recipe_ingredient_price_full
+
+        if not self.pk:
+            return 0
 
         prices: list[float] = [recipe_ingredient_price_full(i) or 0 for i in self.ingredients.all()]
         return int(sum(prices))

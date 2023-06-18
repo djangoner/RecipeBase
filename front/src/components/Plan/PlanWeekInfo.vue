@@ -4,6 +4,11 @@
     dense
   >
     <q-tab
+      name="info"
+      icon="info"
+      class="text-info"
+    />
+    <q-tab
       name="warnings"
       icon="warning"
       class="text-orange"
@@ -29,6 +34,14 @@
     style="height: 230px"
     animated
   >
+    <q-tab-panel
+      name="info"
+      class=" q-pb-xs"
+    >
+      <plan-tab-info
+        @update-plan="$emit('update-plan', $event)"
+      />
+    </q-tab-panel>
     <q-tab-panel name="warnings">
       <template v-if="plan.warnings.length === 0">
         <div class="text-subtitle1 flex flex-center full-height">
@@ -88,14 +101,12 @@
 </template>
 
 <script lang="ts">
+import PlanTabInfo from './PlanTabInfo.vue'
 import { RecipePlanWeekRead, User } from "src/client";
 import { WeekDaysShort, YearWeek } from "src/modules/WeekUtils";
 import { useAuthStore } from "src/stores/auth";
 import { useBaseStore } from "src/stores/base";
 import { defineComponent, PropType } from "vue";
-import HandleErrorsMixin, {
-  CustomAxiosError,
-} from "../modules/HandleErrorsMixin";
 import ConditionWarnings from "./ConditionWarnings.vue";
 
 const ratingColors: { [key: number]: string } = {
@@ -112,12 +123,13 @@ interface TagsStats {
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { ConditionWarnings },
-  mixins: [HandleErrorsMixin],
+  components: { ConditionWarnings, PlanTabInfo },
   props: {
     plan: { required: true, type: Object as PropType<RecipePlanWeekRead> },
     week: { required: true, type: Object as PropType<YearWeek> },
+    readonly: {type: Boolean, default: false},
   },
+  emits: ["update-plan"],
   data() {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
@@ -226,9 +238,7 @@ export default defineComponent({
     },
     loadConditions() {
       const payload = { pageSize: 1000 };
-      void this.store.loadConditions(payload).catch((err: CustomAxiosError) => {
-        this.handleErrors(err);
-      });
+      void this.store.loadConditions(payload)
     },
     weekDaysRatings(user: User) {
       // :set="(rating = getRating(day, user))"

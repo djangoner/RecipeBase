@@ -95,7 +95,7 @@
             :warned-plans="warnedPlans"
             :loading="loading"
             :readonly="readonly"
-            @update-plan="saveWeekPlan"
+            @update-plan="onUpdatePlan"
             @update-recipe="onUpdateRecipe()"
           />
         </div>
@@ -116,6 +116,7 @@
               <plan-week-info
                 :plan="plan"
                 :week="week"
+                @update-plan="onUpdatePlan"
               />
             </q-card-section>
           </q-card>
@@ -188,7 +189,7 @@
 import DayCard from "../components/Plan/DayCard.vue"
 import weekSelect from "components/WeekSelect.vue"
 import { useBaseStore } from "src/stores/base"
-import PlanWeekInfo from "src/components/PlanWeekInfo.vue"
+import PlanWeekInfo from "src/components/Plan/PlanWeekInfo.vue"
 import { computed, nextTick, onMounted, Ref, ref, watch } from "vue"
 import { getDateOfISOWeek, YearWeek } from "src/modules/WeekUtils"
 import { WeekDays } from "src/modules/WeekUtils"
@@ -196,7 +197,7 @@ import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
 // import { useQuery } from "@oarepo/vue-query-synchronizer";
 import Fireworks from "@fireworks-js/vue"
-import { useActiveElement, useDebounceFn, useStorage } from "@vueuse/core"
+import { useActiveElement, useDebounceFn, useDocumentVisibility, useStorage } from "@vueuse/core"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import { isOnline } from "src/modules/isOnline"
 import { RecipePlanWeekFromRead } from "src/Convert"
@@ -206,6 +207,7 @@ import { WarningPriorities } from "src/modules/Globals"
 import { useMagicKeys, whenever } from '@vueuse/core'
 import { logicAnd } from '@vueuse/math'
 import { dateTimeFormat } from "src/modules/Utils"
+import { useDebounceFnState } from "src/modules/VueUtils"
 
 type QueryInterface = YearWeek
 
@@ -236,6 +238,9 @@ const loading = ref(false)
 const saving = ref(false)
 const enableFireworks = useStorage("enableFireworks", false)
 const showFireworks = ref(false)
+
+const visibility = useDocumentVisibility()
+const debouncedSaveWeekPlan = useDebounceFnState(saveWeekPlan, 5000, {maxWait: 15000})
 
 const week = computed({
   get() {
@@ -301,6 +306,10 @@ function onUpdateRecipe(){
   }
   void debouncedLoadWarnings()
 }
+
+watch(debouncedSaveWeekPlan.state, (state: boolean) => {
+  console.debug("Debounced state: ", state)
+})
 
 const debouncedLoadWarnings = useDebounceFn(() => {
   if (!week.value || !week.value.year){
@@ -393,8 +402,17 @@ function loadWeekPlan() {
       loading.value = false
     })
 }
+
+function onUpdatePlan(instant = false){
+  if (instant){
+    saveWeekPlan()
+  } else {
+    void debouncedSaveWeekPlan.debounced()
+  }
+}
+
 function saveWeekPlan() {
-  // let payload = Object.assign({}, plan);
+  debouncedSaveWeekPlan.state.value = false
   const payload = RecipePlanWeekFromRead(Object.assign({}, plan.value))
   delete payload["plans"]
   saving.value = true
@@ -408,6 +426,7 @@ function saveWeekPlan() {
     .catch(() => {
       saving.value = false
     })
+  return true
 }
 function markPlanCompleted() {
   if (!plan.value) {
@@ -462,6 +481,15 @@ const notUsingInput = computed(() =>
 )
 
 const keys = useMagicKeys()
+
+watch(visibility, (current, previous) => {
+  console.debug("visibility", String(current), debouncedSaveWeekPlan.state.value)
+  if (current == "hidden" && debouncedSaveWeekPlan.state.value){
+    console.debug("Saving week plan before leaving")
+    debouncedSaveWeekPlan.state.value = false
+    saveWeekPlan()
+  }
+})
 
 whenever(logicAnd(keys.shift_e, notUsingInput, canEdit), () => {
   console.debug("Toggle edit!",)

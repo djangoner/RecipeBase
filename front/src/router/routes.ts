@@ -38,7 +38,7 @@ const routes = [
       },
       {
         path: "/week_plan",
-        component: () => import("pages/WeekPlan.vue"),
+        component: () => import("pages/RecipeWeekPlan.vue"),
         name: "week_plan",
         meta: {
           requiresAuth: true,
@@ -123,6 +123,6 @@ const routes = [
     path: "/:catchAll(.*)*",
     component: () => import("pages/ErrorNotFound.vue"),
   },
-];
+]
 
-export default routes;
+export default routes

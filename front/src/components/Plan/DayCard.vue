@@ -25,7 +25,7 @@
         :day-idx="dayIdx"
         :day-str="dayStr"
         :can-edit="canEdit"
-        @update-plan="$emit('update-plan')"
+        @update-plan="$emit('update-plan', true)"
       />
     </q-card-section>
 

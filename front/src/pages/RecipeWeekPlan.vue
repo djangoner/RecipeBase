@@ -37,6 +37,19 @@
                 </q-item-section>
                 <q-item-section> Распечатать план </q-item-section>
               </q-item>
+              <q-item
+                v-if="plan"
+                tag="label"
+              >
+                <q-item-section side>
+                  <q-toggle
+                    v-model="plan.is_filled"
+                    dense
+                    @update:model-value="saveWeekPlan()"
+                  />
+                </q-item-section>
+                <q-item-section> План завершен </q-item-section>
+              </q-item>
               <q-item tag="label">
                 <q-item-section side>
                   <q-toggle
@@ -184,7 +197,7 @@ import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
 // import { useQuery } from "@oarepo/vue-query-synchronizer";
 import Fireworks from "@fireworks-js/vue"
-import { useActiveElement, useDebounceFn, useDocumentVisibility, useStorage } from "@vueuse/core"
+import { useActiveElement, useDebounceFn, useDocumentVisibility, useNow, useStorage } from "@vueuse/core"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import { isOnline } from "src/modules/isOnline"
 import { RecipePlanWeekFromRead } from "src/Convert"
@@ -218,6 +231,7 @@ const $query = useQuery()
 const $q = useQuasar()
 const store = useBaseStore()
 const storeAuth = useAuthStore()
+const now = useNow({interval: 1000})
 
 const editMode: Ref<boolean | null> = ref(null)
 const loading = ref(false)
@@ -262,7 +276,10 @@ const editedTimeStr = computed(() => {
     return ""
   }
   // const diff = Math.abs(new Date() - new Date(plan.value?.edited_first)) / 1000
-  const diff = Math.abs(new Date(plan.value?.edited_last) - new Date(plan.value?.edited_first)) / 1000
+  const daysFromStart: number = date.getDateDiff(now.value,new Date(plan.value.edited_first), "days")
+
+  const lastEdited = plan.value.is_filled || daysFromStart > 2 ? new Date(plan.value?.edited_last) : now.value
+  const diff = Math.abs(Number(lastEdited) - Number(new Date(plan.value?.edited_first))) / 1000
   const hours = Math.floor(diff / 3600)
   const mins = Math.floor((diff / 60) % 60)
   const secs = Math.floor(diff % 60)

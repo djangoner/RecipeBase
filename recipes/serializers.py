@@ -346,12 +346,22 @@ class RecipePlanWeekSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.DateTimeField)
     def get_edited_first(self, instance: RecipePlanWeek):
-        plan: RecipePlan | None = instance.plans.filter(created__gte=datetime.now().date()).order_by("created").first()
+        plans = instance.plans
+        if not instance.is_filled:
+            plans = plans.filter(created__gte=datetime.now().date())
+        plan: RecipePlan | None = plans.order_by("created").first()
         return plan.created if plan else None
 
     @extend_schema_field(serializers.DateTimeField)
     def get_edited_last(self, instance: RecipePlanWeek):
-        plan: RecipePlan | None = instance.plans.filter(created__gte=datetime.now().date()).order_by("created").last()
+        plans = instance.plans
+        if not instance.is_filled:
+            plans = plans.filter(created__gte=datetime.now().date())
+        else:
+            edited_first = self.get_edited_first(instance)
+            if edited_first:
+                plans = plans.filter(created__gt=edited_first)
+        plan: RecipePlan | None = plans.order_by("created").last()
         return plan.created if plan else None
 
 

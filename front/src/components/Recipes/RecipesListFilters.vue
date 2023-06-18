@@ -92,6 +92,7 @@
           color="negative"
           size="sm"
           icon="close"
+          unelevated
         >
           Сбросить
         </q-btn>
@@ -100,6 +101,7 @@
           color="primary"
           size="sm"
           icon="search"
+          unelevated
         >
           Поиск
         </q-btn>

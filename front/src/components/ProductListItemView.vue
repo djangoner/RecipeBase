@@ -180,10 +180,12 @@
               color="primary"
               no-caps
               dense
+              unelevated
             />
           </div>
         </div>
 
+        <!-- Product list ingredient description -->
         <!-- Product list ingredient description -->
         <q-input
           v-model="item.description"

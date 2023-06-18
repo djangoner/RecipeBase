@@ -35,6 +35,7 @@
         <q-btn
           icon="arrow_back"
           size="sm"
+          color="grey"
           @click="$router.go(-1)"
         >
           Назад
@@ -215,6 +216,8 @@
               type="submit"
               icon="save"
               color="positive"
+              no-caps
+              unelevated
               :loading="saving"
               :disable="deleting"
             >
@@ -226,6 +229,8 @@
               v-if="exists && storeAuth.hasPerm('recipes.delete_ingredient')"
               icon="delete"
               color="negative"
+              no-caps
+              unelevated
               :loading="deleting"
               :disable="saving"
               @click="askDelete()"

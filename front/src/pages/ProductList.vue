@@ -72,12 +72,16 @@
     <!-- Product list -->
     <q-list class="row column q-col-gutter-y-md q-py-md q-px-none q-px-sm-lg">
       <!-- New item -->
-      <div class="row items-center q-px-md">
+      <div
+v-if="storeAuth.hasPerm('recipes.add_productlistitem')"
+           class="row items-center q-px-md q-mb-sm"
+>
         <div class="col-grow">
           <q-input
-            v-if="storeAuth.hasPerm('recipes.add_productlistitem')"
             v-model="createItem"
             label="Добавить продукт"
+            dense
+            outlined
             @keypress.enter="createNewItem()"
           />
         </div>
@@ -87,6 +91,8 @@
           size="sm"
           color="green"
           dense
+          rounded
+          unelevated
           @click="createNewItem()"
         />
       </div>
@@ -839,6 +845,9 @@ export default defineComponent({
       // this.$query.task = item.id;
     },
     async createNewItem() {
+      if (!this.createItem){
+        return
+      }
       const payload = {
         title: this.createItem,
         week: this.store.product_list?.id,

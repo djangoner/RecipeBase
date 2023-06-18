@@ -8,13 +8,14 @@
         <q-table
           v-model:pagination="tablePagination"
           title="Ингредиенты"
+          class="shadow-1"
           :rows="ingredients || []"
           :columns="tableColumns"
           :loading="loading"
           :filter="tableFilter"
           :rows-per-page-options="[1, 5, 10, 15, 20, 50, 100]"
-          binary-state-sort
           :dense="$q.screen.lt.md"
+          binary-state-sort
           @row-click="onRowClick"
           @request="loadIngredients"
         >
@@ -26,6 +27,7 @@
               icon="add"
               size="sm"
               color="positive"
+              unelevated
               @click="
                 $router.push({ name: 'ingredient', params: { id: 'new' } })
               "
@@ -36,6 +38,7 @@
               icon="tune"
               color="primary"
               size="sm"
+              unelevated
               @click="showFilters = !showFilters"
             >
               Фильтры
@@ -108,7 +111,10 @@
           class="col-12 col-md-3 col-lg-2 col-shrink"
           :class="$q.screen.gt.sm ? '' : 'order-first'"
         >
-          <q-card class="position-sticky">
+          <q-card
+            class="position-sticky shadow-1"
+
+          >
             <q-card-section>
               <h6 class="q-my-sm text-center text-bold">
                 Фильтры
@@ -217,6 +223,7 @@
                     color="negative"
                     size="sm"
                     icon="close"
+                    unelevated
                   >
                     Сбросить
                   </q-btn>
@@ -225,6 +232,7 @@
                     color="primary"
                     size="sm"
                     icon="search"
+                    unelevated
                   >
                     Поиск
                   </q-btn>

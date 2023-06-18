@@ -70,6 +70,7 @@
         icon="add"
         color="secondary"
         size="sm"
+        unelevated
         @click="openRecipe('new')"
       >
         Добавить рецепт
@@ -79,6 +80,7 @@
         icon="tune"
         color="primary"
         size="sm"
+        unelevated
         @click="showFilters = !showFilters"
       >
         Фильтры
@@ -195,7 +197,7 @@
           class="col-12 col-md-3 col-lg-2 col-shrink"
           :class="$q.screen.gt.sm ? '' : 'order-first'"
         >
-          <q-card class="position-sticky">
+          <q-card class="position-sticky shadow-1">
             <q-card-section>
               <h6 class="q-my-sm text-center text-bold">
                 Фильтры

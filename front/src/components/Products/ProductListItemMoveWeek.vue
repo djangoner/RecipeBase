@@ -72,6 +72,7 @@
     color="primary"
     no-caps
     dense
+    unelevated
     @click="
       onOpenMove()
     "

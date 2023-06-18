@@ -120,6 +120,7 @@
               <plan-week-info
                 :plan="plan"
                 :week="week"
+                :readonly="readonly"
                 @update-plan="onUpdatePlan"
               />
             </q-card-section>

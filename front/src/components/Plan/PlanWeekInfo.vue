@@ -39,6 +39,7 @@
       class=" q-pb-xs"
     >
       <plan-tab-info
+        :readonly="readonly"
         @update-plan="$emit('update-plan', $event)"
       />
     </q-tab-panel>

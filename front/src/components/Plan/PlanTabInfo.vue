@@ -10,9 +10,10 @@
       type="textarea"
       class="col-grow"
       label="Заметки на неделю"
+      outlined
       :input-style="{ resize: 'none' }"
       :debounce="0"
-      outlined
+      :readonly="readonly"
       :model-value="currentComment"
       @update:model-value="updateComment"
       @blur="$emit('update-plan', true)"
@@ -25,6 +26,12 @@ import { sumArray } from "src/modules/Utils"
 import { useBaseStore } from "src/stores/base"
 import { computed } from "vue"
 
+defineProps({
+  readonly: {
+    type: Boolean,
+    default: false,
+  }
+})
 const $emit = defineEmits(["update-plan"])
 
 const store = useBaseStore()

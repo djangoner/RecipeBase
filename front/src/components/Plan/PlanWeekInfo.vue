@@ -108,6 +108,7 @@ import { useAuthStore } from "src/stores/auth";
 import { useBaseStore } from "src/stores/base";
 import { defineComponent, PropType } from "vue";
 import ConditionWarnings from "./ConditionWarnings.vue";
+import { useShortcutcs } from 'src/modules/VueUtils';
 
 const ratingColors: { [key: number]: string } = {
   5: "bg-positive",
@@ -185,6 +186,13 @@ export default defineComponent({
     tab(val: string) {
       this.$q.localStorage.set("week_tab", val);
     },
+  },
+  mounted(){
+    useShortcutcs({
+      alt_1: () => this.tab = "info",
+      alt_2: () => this.tab = "warnings",
+      alt_3: () => this.tab = "eats",
+    })
   },
   created() {
     if (!this.users) {

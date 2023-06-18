@@ -189,6 +189,8 @@ import { useAuthStore } from "src/stores/auth"
 import { defineComponent, ref } from "vue"
 import IsOnlineMixin from "src/modules/IsOnlineMixin"
 import { useBaseStore } from "src/stores/base"
+import { useShortcutcs } from 'src/modules/VueUtils'
+import { useRouter } from 'vue-router'
 
 type DarkMode = boolean | "auto"
 const darkModes: Array<DarkMode> = ["auto", true, false]
@@ -203,12 +205,22 @@ export default defineComponent({
     const store = useBaseStore()
     const storeAuth = useAuthStore()
     const $q = useQuasar()
+    const $router = useRouter()
 
     const preferredMode: DarkMode | null = $q.localStorage.getItem("preferredMode")
 
     if (preferredMode !== null) {
       $q.dark.set(preferredMode)
     }
+
+    useShortcutcs({
+      alt_h: () => $router.push({name: "index"}),
+      alt_r: () => $router.push({name: "recipes"}),
+      alt_w: () => $router.push({name: "week_plan"}),
+      alt_p: () => $router.push({name: "product_list"}),
+      alt_i: () => $router.push({name: "ingredients"}),
+      alt_t: () => $router.push({name: "tasks"}),
+    })
 
     return {
       store,

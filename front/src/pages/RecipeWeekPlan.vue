@@ -197,16 +197,14 @@ import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
 // import { useQuery } from "@oarepo/vue-query-synchronizer";
 import Fireworks from "@fireworks-js/vue"
-import { useActiveElement, useDebounceFn, useDocumentVisibility, useNow, useStorage } from "@vueuse/core"
+import { useDebounceFn, useDocumentVisibility, useNow, useStorage } from "@vueuse/core"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import { isOnline } from "src/modules/isOnline"
 import { RecipePlanWeekFromRead } from "src/Convert"
 import { date, useQuasar } from "quasar"
 import { WarningPriorities } from "src/modules/Globals"
-import { useMagicKeys, whenever } from "@vueuse/core"
-import { logicAnd } from "@vueuse/math"
 import { dateTimeFormat } from "src/modules/Utils"
-import { useDebounceFnState } from "src/modules/VueUtils"
+import { useDebounceFnState, useShortcutcs } from "src/modules/VueUtils"
 
 type QueryInterface = YearWeek
 
@@ -471,12 +469,11 @@ watch(fillingPrc, (val, oldVal) => {
   }
 })
 
-// Shortcuts
-const activeElement = useActiveElement()
 
-const notUsingInput = computed(() => activeElement.value?.tagName !== "INPUT" && activeElement.value?.tagName !== "TEXTAREA")
-
-const keys = useMagicKeys()
+useShortcutcs({
+  shift_e: () => editMode.value = !editMode.value,
+  shift_f: () => showFireworks.value = !showFireworks.value,
+})
 
 watch(visibility, (current: "hidden" | "visible") => {
   if (current == "hidden" && debouncedSaveWeekPlan.state.value) {
@@ -486,10 +483,6 @@ watch(visibility, (current: "hidden" | "visible") => {
   }
 })
 
-whenever(logicAnd(keys.shift_e, notUsingInput, canEdit), () => {
-  console.debug("Toggle edit!")
-  editMode.value = !editMode.value
-})
 </script>
 
 <style lang="scss">

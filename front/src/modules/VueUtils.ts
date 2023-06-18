@@ -1,5 +1,41 @@
-import { useDebounceFn } from "@vueuse/core"
-import { ref } from "vue"
+import { useActiveElement, useDebounceFn, useMagicKeys } from "@vueuse/core"
+import { computed, ref, watch } from "vue"
+
+const aliasMap = {
+  й: "q",
+  ц: "w",
+  у: "e",
+  к: "r",
+  е: "t",
+  н: "y",
+  г: "u",
+  ш: "i",
+  щ: "o",
+  з: "p",
+  х: "[",
+  ъ: "]",
+  ф: "a",
+  ы: "s",
+  в: "d",
+  а: "f",
+  п: "g",
+  р: "h",
+  о: "j",
+  л: "k",
+  д: "l",
+  ж: ";",
+  э: "'",
+  я: "z",
+  ч: "x",
+  с: "c",
+  м: "v",
+  и: "b",
+  т: "n",
+  ь: "m",
+  б: ",",
+  ю: ".",
+  ".": "/",
+}
 
 export function useDebounceFnState(...parameters: Parameters<typeof useDebounceFn>) {
   const state = ref(false)
@@ -34,4 +70,31 @@ export function useDebounceFnState(...parameters: Parameters<typeof useDebounceF
     state,
     debounced: wrapped,
   }
+}
+
+interface KeyBindingMap {
+  [keybinding: string]: (keys: string[]) => void
+}
+interface ShortcutsOptions {
+  allowInput: boolean
+}
+
+export function useShortcutcs(keymap: KeyBindingMap, options?: ShortcutsOptions) {
+  const keys = useMagicKeys({ aliasMap: aliasMap })
+  const activeElement = useActiveElement()
+  const notUsingInput = computed(() => activeElement.value?.tagName !== "INPUT" && activeElement.value?.tagName !== "TEXTAREA")
+
+  watch(keys.current, () => {
+    if (!(options?.allowInput || notUsingInput.value)) {
+      return
+    }
+    const keysActive = Array.from(keys.current.values())
+    const keysStr = keysActive.join("_")
+
+    const keybindingActive = Object.keys(keymap).find((keys) => keysStr.indexOf(keys) !== -1)
+    // console.debug("[Keys]: ", { keysStr, keybindingActive })
+    if (keybindingActive) {
+      keymap[keybindingActive](keysActive)
+    }
+  })
 }

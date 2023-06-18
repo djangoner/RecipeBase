@@ -33,59 +33,54 @@ export default route(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
+  const store = useAuthStore()
 
   Router.beforeEach((to, from, next) => {
-    const store = useAuthStore();
-    const isAuthorized = store.isAuthenticated;
+    store.pageLoading = true
+    const isAuthorized = store.isAuthenticated
     const routerLogout = () => {
       void store.logout().then(() => {
         void Router.push({
           name: "login",
           query: { next: to.fullPath },
-        });
-      });
-    };
+        })
+      })
+    }
 
     if (isAuthorized && !store.account) {
-      console.debug("Checking user account...");
+      console.debug("Checking user account...")
       store.loadAccountInfo().catch((err: AxiosError | AxiosResponse) => {
         if ("response" in err) {
-          if (
-            !err.response &&
-            (!err.code ||
-              err.code === "ERR_NETWORK" ||
-              err.code == "ERR_INTERNET_DISCONNECTED")
-          ) {
+          if (!err.response && (!err.code || err.code === "ERR_NETWORK" || err.code == "ERR_INTERNET_DISCONNECTED")) {
             // Ignore internet errors
           } else {
-            console.debug("Unknown error, logging out...");
-            routerLogout();
+            console.debug("Unknown error, logging out...")
+            routerLogout()
           }
         } else if ("status" in err) {
           if (err.status == 401) {
-            console.debug("Unauthorized, logging out...");
-            routerLogout();
+            console.debug("Unauthorized, logging out...")
+            routerLogout()
           }
         } else {
-          console.debug("Unknown error type, logging out...");
-          routerLogout();
+          console.debug("Unknown error type, logging out...")
+          routerLogout()
         }
-      });
+      })
     }
 
-    if (
-      to.matched.some((record) => record.meta.requiresAuth) &&
-      !isAuthorized
-    ) {
-      next({ name: "login", query: { next: to.fullPath } });
+    if (to.matched.some((record) => record.meta.requiresAuth) && !isAuthorized) {
+      next({ name: "login", query: { next: to.fullPath } })
     } else if (to.name === "login" && isAuthorized) {
-      next({ name: "index" });
+      next({ name: "index" })
     } else {
-      next();
+      next()
     }
-  });
-  // Router.afterEach(() => {
-  // })
+  })
+
+  Router.afterEach(() => {
+    store.pageLoading = false
+  })
 
   return Router;
 });

@@ -19,6 +19,7 @@ export const useAuthStore = defineStore("auth", {
     authToken: localStorage.getItem("authToken"),
     account: null as User | null,
     users: null as Array<User> | null,
+    pageLoading: false,
   }),
 
   getters: {

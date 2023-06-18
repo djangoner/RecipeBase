@@ -5,6 +5,15 @@
       :class="isDev?'bg-info':''"
       elevated
     >
+      <q-page-sticky position="top">
+        <q-linear-progress
+          v-if="storeAuth.pageLoading"
+          :indeterminate="storeAuth.pageLoading"
+          instant-feedback
+          class="absolute absolute-top"
+          color="cyan"
+        />
+      </q-page-sticky>
       <q-toolbar>
         <q-btn
           flat

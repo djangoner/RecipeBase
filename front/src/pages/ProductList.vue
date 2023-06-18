@@ -179,8 +179,8 @@
 </template>
 
 <script lang="ts">
-import NotActualListBanner from '../components/Products/NotActualListBanner.vue'
-import ProductListMenu from '../components/Products/ProductListMenu.vue'
+import NotActualListBanner from "../components/Products/NotActualListBanner.vue"
+import ProductListMenu from "../components/Products/ProductListMenu.vue"
 import AlreadyCompletedBanner from "../components/Products/AlreadyCompletedBanner.vue"
 import ProductListItems from "components/ProductListItems.vue"
 import ProductListItemView from "components/ProductListItemView.vue"
@@ -236,8 +236,12 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     AlreadyCompletedBanner,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    StatusWebsocket, ProductListMenu, NotActualListBanner
-},
+    StatusWebsocket,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    ProductListMenu,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    NotActualListBanner,
+  },
   mixins: [HandleErrorsMixin, IsOnlineMixin, WorkerMessagesMixin],
   data() {
     const store = useBaseStore()
@@ -308,11 +312,21 @@ export default defineComponent({
             res = res.filter((i) => !i.already_completed)
           }
           res.sort((a, b) => {
-            if (a.is_completed) {
+            // Completed sort
+            if (a.is_completed && !b.is_completed) {
               return 1
-            } else if (b.is_completed) {
+            } else if (b.is_completed && !a.is_completed) {
               return -1
+            } else if (a.is_completed && b.is_completed) {
+              // If both completed
+              if (a.title < b.title) {
+                return -1
+              }
+              if (a.title > b.title) {
+                return 1
+              }
             }
+            // Day sort
             if (!a.day || !b.day) {
               return 0
             }
@@ -420,10 +434,10 @@ export default defineComponent({
     completedCount() {
       return this.listItemsRaw.filter((i) => i.is_completed).length
     },
-    productList(){
+    productList() {
       return this.store.product_list
     },
-    isActual(){
+    isActual() {
       return this.store.product_list?.is_actual
     },
     canSync: {
@@ -446,26 +460,26 @@ export default defineComponent({
         .map((i) => i.price_full)
         .reduce((a, b) => a + b, 0)
     },
-    weightCompleted(){
+    weightCompleted() {
       const weight = this.listItemsRaw
         .filter((i) => i.is_completed && !i.already_completed)
         .filter((i) => i.amount_type == "g" && i.amount)
         .map((i) => i.amount)
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         .reduce((a, b) => a + b, 0)
-      if (!weight){
+      if (!weight) {
         return 0
       }
       return (weight / 1000).toPrecision(1)
     },
-    weightTotal(){
+    weightTotal() {
       const weight = this.listItemsRaw
-      .filter((i) => !i.already_completed)
+        .filter((i) => !i.already_completed)
         .filter((i) => i.amount_type == "g" && i.amount)
         .map((i) => i.amount)
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         .reduce((a, b) => a + b, 0)
-      if (!weight){
+      if (!weight) {
         return 0
       }
       return (weight / 1000).toPrecision(1)

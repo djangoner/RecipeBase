@@ -14,14 +14,9 @@
       </div>
       <q-space />
       <div v-if="plan && $q.screen.gt.sm">
-        <small
-          class="text-grey"
-        >
+        <small class="text-grey">
           Время заполнения: {{ editedTimeStr }}
-          <q-tooltip>
-            Время заполнения плана
-            ({{ dateTimeFormat(plan?.edited_first) }} - {{ dateTimeFormat(plan.edited_last) }})
-          </q-tooltip>
+          <q-tooltip> Время заполнения плана ({{ dateTimeFormat(plan?.edited_first) }} - {{ dateTimeFormat(plan.edited_last) }}) </q-tooltip>
         </small>
       </div>
       <div>
@@ -40,9 +35,7 @@
                 <q-item-section side>
                   <q-icon name="print" />
                 </q-item-section>
-                <q-item-section>
-                  Распечатать план
-                </q-item-section>
+                <q-item-section> Распечатать план </q-item-section>
               </q-item>
               <q-item tag="label">
                 <q-item-section side>
@@ -62,9 +55,7 @@
               </q-item>
               <q-item>
                 <q-item-section>
-                  <small
-                    class="text-grey"
-                  >
+                  <small class="text-grey">
                     Время заполнения: {{ editedTimeStr }}
                     <q-tooltip>
                       Время заполнения плана
@@ -158,17 +149,13 @@
     }"
   />
   <!-- Fireworks overlay -->
-  <div
-    v-if="enableFireworks && showFireworks"
-  >
+  <div v-if="enableFireworks && showFireworks">
     <div class="position-absolute absolute-top fireworks-overlay text-white">
       <div class="text-h6 text-center q-my-md">
         План заполнен за {{ editedTimeStr }}!
       </div>
     </div>
-    <div
-      class="position-absolute absolute-top-right fireworks-overlay"
-    >
+    <div class="position-absolute absolute-top-right fireworks-overlay">
       <q-btn
         flat
         no-caps
@@ -201,11 +188,10 @@ import { useActiveElement, useDebounceFn, useDocumentVisibility, useStorage } fr
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import { isOnline } from "src/modules/isOnline"
 import { RecipePlanWeekFromRead } from "src/Convert"
-import { CustomAxiosError } from "src/modules/HandleErrorsMixin"
 import { date, useQuasar } from "quasar"
 import { WarningPriorities } from "src/modules/Globals"
-import { useMagicKeys, whenever } from '@vueuse/core'
-import { logicAnd } from '@vueuse/math'
+import { useMagicKeys, whenever } from "@vueuse/core"
+import { logicAnd } from "@vueuse/math"
 import { dateTimeFormat } from "src/modules/Utils"
 import { useDebounceFnState } from "src/modules/VueUtils"
 
@@ -240,7 +226,7 @@ const enableFireworks = useStorage("enableFireworks", false)
 const showFireworks = ref(false)
 
 const visibility = useDocumentVisibility()
-const debouncedSaveWeekPlan = useDebounceFnState(saveWeekPlan, 5000, {maxWait: 15000})
+const debouncedSaveWeekPlan = useDebounceFnState(saveWeekPlan, 5000, { maxWait: 15000 })
 
 const week = computed({
   get() {
@@ -272,34 +258,34 @@ const conditions = computed(() => {
 })
 
 const editedTimeStr = computed(() => {
-  if (!plan.value){
-    return "";
+  if (!plan.value) {
+    return ""
   }
   // const diff = Math.abs(new Date() - new Date(plan.value?.edited_first)) / 1000
   const diff = Math.abs(new Date(plan.value?.edited_last) - new Date(plan.value?.edited_first)) / 1000
-  const hours = Math.floor(diff / 3600);
+  const hours = Math.floor(diff / 3600)
   const mins = Math.floor((diff / 60) % 60)
-  const secs = Math.floor((diff) % 60)
-  let res = '';
+  const secs = Math.floor(diff % 60)
+  let res = ""
   const pad = (num: number) => {
-    return num.toString().padStart(2, '0')
+    return num.toString().padStart(2, "0")
   }
 
-  if (hours){
+  if (hours) {
     res += `${pad(hours)}:`
   }
-  if (mins){
+  if (mins) {
     res += `${pad(mins)}:`
   }
-  if (secs){
+  if (secs) {
     res += `${pad(secs)}`
   }
-  return res;
+  return res
 })
 
-function onUpdateRecipe(){
-  if (plan.value){
-    if (!plan.value?.edited_first){
+function onUpdateRecipe() {
+  if (plan.value) {
+    if (!plan.value?.edited_first) {
       plan.value.edited_first = new Date().toISOString()
     }
     plan.value.edited_last = new Date().toISOString()
@@ -312,17 +298,14 @@ watch(debouncedSaveWeekPlan.state, (state: boolean) => {
 })
 
 const debouncedLoadWarnings = useDebounceFn(() => {
-  if (!week.value || !week.value.year){
+  if (!week.value || !week.value.year) {
     console.debug("re-running debounced load warnings")
     void debouncedLoadWarnings()
   }
-  void store.loadWeekWarnings({year: week.value.year, week: week.value.week})
+  void store.loadWeekWarnings({ year: week.value.year, week: week.value.week })
 }, 2000)
 
-// const fw = ref(null)
-// const refFireworks = computed(() => {
-//   return fw.value
-// })
+
 const warnedPlans = computed(() => {
   const warnings = store.condWarnings || []
   const res: WarnedPlans = {}
@@ -353,21 +336,21 @@ const meal_time = computed(() => {
   return store.meal_time
 })
 const fillingPrc = computed(() => {
-      if (!meal_time.value) {
-        return null
-      }
-      const plans = store.week_plan?.plans
-      let plansFilled
-      if (plans) {
-        plansFilled = plans.filter((p) => p.meal_time.is_primary && p.day < 6).length
-      }
-      const plansTotal = meal_time.value.filter((m) => m.is_primary).length * 5
+  if (!meal_time.value) {
+    return null
+  }
+  const plans = store.week_plan?.plans
+  let plansFilled
+  if (plans) {
+    plansFilled = plans.filter((p) => p.meal_time.is_primary && p.day < 6).length
+  }
+  const plansTotal = meal_time.value.filter((m) => m.is_primary).length * 5
 
-      if (!plansFilled || !plansTotal) {
-        return 0
-      }
+  if (!plansFilled || !plansTotal) {
+    return 0
+  }
 
-      return plansFilled / plansTotal
+  return plansFilled / plansTotal
 })
 
 function onPrint() {
@@ -403,8 +386,8 @@ function loadWeekPlan() {
     })
 }
 
-function onUpdatePlan(instant = false){
-  if (instant){
+function onUpdatePlan(instant = false) {
+  if (instant) {
     saveWeekPlan()
   } else {
     void debouncedSaveWeekPlan.debounced()
@@ -444,46 +427,42 @@ function getDay(idx: number): string {
 function getCondition(id: number) {
   return conditions.value?.find((c) => c.id == id) || null
 }
-function askPlanCompleted(){
-      $q.dialog({
-        title: "Подтверждение",
-        message: `Отметить план как завершенный?`,
-        cancel: true,
-        persistent: true,
-      })
-      .onOk(() => {
-        markPlanCompleted()
-      })
-    }
+function askPlanCompleted() {
+  $q.dialog({
+    title: "Подтверждение",
+    message: `Отметить план как завершенный?`,
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    markPlanCompleted()
+  })
+}
 
-    function loadMealTime(){
-      void store.loadMealTime({pageSize: 1000})
-    }
+function loadMealTime() {
+  void store.loadMealTime({ pageSize: 1000 })
+}
 
 onMounted(() => {
   loadMealTime()
 })
 
 watch(fillingPrc, (val, oldVal) => {
-      // When plan finished, show fireworks if enabled
-      if (val == 1 && oldVal && !plan.value?.is_filled) {
-        askPlanCompleted()
-        // this.showFireworks = true
-      }
-    })
+  // When plan finished, show fireworks if enabled
+  if (val == 1 && oldVal && !plan.value?.is_filled) {
+    askPlanCompleted()
+    // this.showFireworks = true
+  }
+})
 
 // Shortcuts
 const activeElement = useActiveElement()
 
-const notUsingInput = computed(() =>
-  activeElement.value?.tagName !== 'INPUT'
-  && activeElement.value?.tagName !== 'TEXTAREA',
-)
+const notUsingInput = computed(() => activeElement.value?.tagName !== "INPUT" && activeElement.value?.tagName !== "TEXTAREA")
 
 const keys = useMagicKeys()
 
-watch(visibility, (current, previous) => {
-  if (current == "hidden" && debouncedSaveWeekPlan.state.value){
+watch(visibility, (current: "hidden" | "visible") => {
+  if (current == "hidden" && debouncedSaveWeekPlan.state.value) {
     console.debug("Saving week plan before leaving")
     debouncedSaveWeekPlan.state.value = false
     saveWeekPlan()
@@ -491,10 +470,9 @@ watch(visibility, (current, previous) => {
 })
 
 whenever(logicAnd(keys.shift_e, notUsingInput, canEdit), () => {
-  console.debug("Toggle edit!",)
+  console.debug("Toggle edit!")
   editMode.value = !editMode.value
 })
-
 </script>
 
 <style lang="scss">

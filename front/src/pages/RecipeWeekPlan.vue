@@ -483,7 +483,6 @@ const notUsingInput = computed(() =>
 const keys = useMagicKeys()
 
 watch(visibility, (current, previous) => {
-  console.debug("visibility", String(current), debouncedSaveWeekPlan.state.value)
   if (current == "hidden" && debouncedSaveWeekPlan.state.value){
     console.debug("Saving week plan before leaving")
     debouncedSaveWeekPlan.state.value = false

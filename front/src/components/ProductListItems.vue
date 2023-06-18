@@ -136,7 +136,6 @@ const $q = useQuasar()
 const changedItems: Ref<number[] | null> = ref(null)
 
 onMounted(async () => {
-  // props.week.year, props.week.week
   const items = await productListGetChanged()
   changedItems.value = items.map((i) => i.idLocal || i.id)
 })
@@ -144,16 +143,12 @@ function getDay(idx: number): string | null {
   if (!props.week) {
     return null
   }
-  // console.debug(week, week.year, week.week);
-  // let fday: Date = getDateOfISOWeek(week.year, week.week);
-  const fday = getDateOfISOWeek(1, 2)
+  const fday: Date = getDateOfISOWeek(props.week.year, props.week.week);
   fday.setDate(fday.getDate() + idx - 1)
   return date.formatDate(fday, "DD.MM")
 }
 function isEdited(item: ProductListItemSyncable): boolean | undefined {
-  // let isNotSynced = !!$q.localStorage.getItem('local_productlist_updated');
   const itemId = item.idLocal || item.id
-  // console.debug("isChanged: ", item.is_changed, itemId, item)
   return item.is_changed || changedItems.value?.indexOf(itemId) !== -1
 }
 function itemCls(item: ProductListItemRead): string | undefined {

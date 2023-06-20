@@ -113,6 +113,13 @@
             type="number"
             filled
           />
+          <q-input
+            v-model.number="ingredient.fresh_days"
+            :readonly="!canEdit"
+            label="Свежий дней"
+            type="number"
+            filled
+          />
 
           <q-input
             v-model.number="ingredient.price"

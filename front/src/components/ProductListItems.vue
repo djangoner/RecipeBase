@@ -58,7 +58,19 @@
           <q-icon
             v-if="!item.is_auto && item.ingredient"
             name="restaurant"
-          />
+          >
+            <q-tooltip>
+              Указан ингредиент
+            </q-tooltip>
+          </q-icon>
+          <q-icon
+            v-if="item?.ingredient?.fresh_days"
+            name="kitchen"
+          >
+            <q-tooltip>
+              Свежий {{ item.ingredient.fresh_days }} {{ pluralize(item.ingredient.fresh_days, ["день", "дня", "дней"]) }}
+            </q-tooltip>
+          </q-icon>
 
           <q-icon
             v-if="item?.ingredient?.description"
@@ -120,6 +132,7 @@ import { ProductListItemRead } from "src/client"
 import { onMounted, PropType, ref, Ref } from "vue"
 import { getDateOfISOWeek, WeekDays, YearWeek, WeekDaysColors, priorityColors } from "src/modules/WeekUtils"
 import { productListGetChanged, ProductListItemSyncable } from "src/modules/ProductListSync"
+import { pluralize } from "src/modules/Utils"
 
 const props = defineProps({
   listItems: {
@@ -139,6 +152,7 @@ onMounted(async () => {
   const items = await productListGetChanged()
   changedItems.value = items.map((i) => i.idLocal || i.id)
 })
+
 function getDay(idx: number): string | null {
   if (!props.week) {
     return null
@@ -147,14 +161,46 @@ function getDay(idx: number): string | null {
   fday.setDate(fday.getDate() + idx - 1)
   return date.formatDate(fday, "DD.MM")
 }
+
+function getDayDate(idx: number){
+  const fday: Date = getDateOfISOWeek(props.week.year, props.week.week);
+  fday.setDate(fday.getDate() + idx - 1)
+  return fday
+}
+
 function isEdited(item: ProductListItemSyncable): boolean | undefined {
   const itemId = item.idLocal || item.id
   return item.is_changed || changedItems.value?.indexOf(itemId) !== -1
 }
-function itemCls(item: ProductListItemRead): string | undefined {
-  if (item?.is_completed && "dark" in $q) {
-    return $q.dark.isActive ? "bg-grey-9" : "bg-grey-4"
+
+function itemInactive(item: ProductListItemRead): boolean {
+  if (!item.ingredient){
+    return false
   }
+
+  if (item.ingredient.fresh_days && item.day){
+    const daysLeft = date.getDateDiff(getDayDate(item.day), new Date())
+    console.debug(item.title, daysLeft)
+    if (daysLeft > 0 && daysLeft > item.ingredient.fresh_days){
+      return true
+    }
+  }
+  return false
+}
+
+function itemCls(item: ProductListItemRead): string[] | undefined {
+  const res = []
+
+  if (item?.is_completed && "dark" in $q) {
+    res.push($q.dark.isActive ? "bg-grey-9" : "bg-grey-4")
+  }
+
+  const inactive = itemInactive(item)
+  if (inactive){
+    res.push("bg-blue-1")
+  }
+
+  return res
 }
 
 function itemPacksShow(item: ProductListItemRead): boolean{

@@ -30,4 +30,12 @@ export type Ingredient = {
     price?: number | null;
     need_buy?: boolean;
     edible?: boolean;
+    /**
+     * Сколько дней продукт хранится свежим
+     */
+    fresh_days?: number | null;
+    /**
+     * Номер дня на который отложить покупку
+     */
+    buy_later?: number | null;
 };

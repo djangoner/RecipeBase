@@ -29,18 +29,32 @@
               @update:model-value="$emit('updateItem', item)"
             />
 
-            <span class="text-body2 text-primary">
-              <q-icon
-                v-if="item.is_auto"
-                name="settings"
+            <!-- Subtitle row -->
+            <div class="row q-gutter-x-md">
+              <span class="text-body2 text-primary">
+                <q-icon
+                  v-if="item.is_auto"
+                  name="settings"
+                >
+                  <q-tooltip> Этот рецепт был создан автоматически на основе плана на неделю </q-tooltip>
+                </q-icon>
+                <!-- <template v-if="item && item.day">{{ item || item.day === 0 ? getDay(item.day) : "" }}</template> -->
+                {{ item.day || item.day === 0 ? WeekDays[item.day] : "" }}
+
+              </span>
+              <q-badge v-if="item.day && item.ingredient.fresh_days && itemDaysLeft(item) > -1">
+                Через дней: {{ itemDaysLeft(item) }}
+              </q-badge>
+
+              <q-badge
+                v-if="item.ingredient.fresh_days"
               >
-                <q-tooltip> Этот рецепт был создан автоматически на основе плана на неделю </q-tooltip>
-              </q-icon>
-              <!-- <template v-if="item && item.day">{{ item || item.day === 0 ? getDay(item.day) : "" }}</template> -->
-              {{ item.day || item.day === 0 ? WeekDays[item.day] : "" }}
-            </span>
+                (Хранится лней: {{ item.ingredient.fresh_days }})
+              </q-badge>
+            </div>
           </div>
         </div>
+        <!-- Top right -->
         <q-btn
           v-close-popup
           class="col-auto"
@@ -232,7 +246,7 @@
 import IngredientUsedRecipes from "./Products/IngredientUsedRecipes.vue"
 import ProductListItemCheckbox from "./Products/ProductListItemCheckbox.vue"
 import ProductListItemMoveWeek from "./Products/ProductListItemMoveWeek.vue"
-import { WeekDays, YearWeek } from "src/modules/WeekUtils"
+import { getDateOfISOWeek, WeekDays, YearWeek } from "src/modules/WeekUtils"
 import { computed, PropType } from "vue"
 import { priorityOptions } from "src/modules/Globals"
 import { ProductListItemRead } from "src/client"
@@ -240,6 +254,7 @@ import AmountTypeSelect from "./Products/AmountTypeSelect.vue"
 import AmountCompletedInput from "./Products/AmountCompletedInput.vue"
 import IngredientSelect from "./Recipes/IngredientSelect.vue"
 import {isOnline} from 'src/modules/isOnline'
+import { date } from "quasar"
 
 const props = defineProps({
   modelValue: {
@@ -262,6 +277,17 @@ const weekDaysOptions = computed(() => {
     return { id: parseInt(id), name: name }
   })
 })
+
+function itemDaysLeft(item: ProductListItemRead) {
+  if (!item.day){
+    return 0
+  }
+
+  const itemDate: Date = getDateOfISOWeek(props.week.year, props.week.week);
+  itemDate.setDate(itemDate.getDate() + item.day - 1)
+  const daysLeft = date.getDateDiff(itemDate, new Date())
+  return daysLeft
+}
 
 function itemMoveWeek(item: ProductListItemRead) {
   $emit("updateItem", item, true)

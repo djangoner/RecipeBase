@@ -183,6 +183,9 @@ class Ingredient(models.Model):
     price = models.PositiveSmallIntegerField(_("Цена"), null=True, blank=True)
     need_buy = models.BooleanField(_("Требует покупки"), default=True)
     edible = models.BooleanField(_("Съедобный"), default=True)
+    fresh_days = models.PositiveSmallIntegerField(
+        _("Свежий дней"), null=True, blank=True, help_text="Сколько дней продукт хранится свежим"
+    )
 
     image = models.ImageField(_("Изображение"), upload_to=ingredient_upload_to, blank=True, null=True)  # type: ignore
     image_thumbnail = ImageSpecField(source="image", id="recipes:ingredient:image_thumbnail")
@@ -500,6 +503,9 @@ class ProductListItem(models.Model):
         blank=True,
     )
     created = models.DateTimeField(_("Время создания"), auto_now_add=True)
+    buy_later = models.PositiveSmallIntegerField(
+        _("Купить позже"), null=True, blank=True, help_text="Номер дня на который отложить покупку"
+    )
     # edited = models.DateTimeField(_("Время полследнего редактирования"), auto_now=True)
 
     history = HistoricalRecords(excluded_fields=["created"])

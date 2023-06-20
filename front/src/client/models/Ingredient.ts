@@ -34,8 +34,4 @@ export type Ingredient = {
      * Сколько дней продукт хранится свежим
      */
     fresh_days?: number | null;
-    /**
-     * Номер дня на который отложить покупку
-     */
-    buy_later?: number | null;
 };

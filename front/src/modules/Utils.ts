@@ -1,5 +1,6 @@
 import { date } from "quasar"
 import { IngredientRead, Task, TaskCategory } from "src/client"
+import { T } from "vitest/dist/types-b7007192"
 import { TaskOrCategory } from "./Globals"
 
 export function isTaskCategory(item: Task | TaskCategory): item is TaskCategory {
@@ -63,4 +64,16 @@ export function pluralize(count: number, words: string[]): string {
 
 export function sumArray(array: Array<number> | undefined): number | undefined {
   return array?.reduce((partialSum, a) => partialSum + a, 0)
+}
+
+export function sortChains<T>(arr: Array<T>, chains: ((a: T, b: T) => number | undefined)[]): Array<T> {
+  return arr.sort((a, b) => {
+    for (const comparator of chains) {
+      const res = comparator(a, b)
+      if (res !== 0 && res !== undefined) {
+        return res
+      }
+    }
+    return 0
+  })
 }

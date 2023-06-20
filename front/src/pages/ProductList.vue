@@ -73,9 +73,9 @@
     <q-list class="row column q-col-gutter-y-md q-py-md q-px-none q-px-sm-lg">
       <!-- New item -->
       <div
-v-if="storeAuth.hasPerm('recipes.add_productlistitem')"
-           class="row items-center q-px-md q-mb-sm"
->
+          v-if="storeAuth.hasPerm('recipes.add_productlistitem')"
+          class="row items-center q-px-md q-mb-sm"
+        >
         <div class="col-grow">
           <q-input
             v-model="createItem"
@@ -214,6 +214,7 @@ import {
 import WorkerMessagesMixin, { WorkerMessage } from "src/modules/WorkerMessages"
 import { DialogChainObject } from "quasar"
 import StatusWebsocket from "src/components/Status/StatusWebsocket.vue"
+import { sortChains } from "src/modules/Utils"
 
 type CustomIngredientCategory = IngredientCategory & {
   items?: ProductListItemRead[]
@@ -289,8 +290,8 @@ export default defineComponent({
         }
       },
       set(val: YearWeek) {
-        ;(this.$query as QueryInterface).year = val.year || undefined
-        ;(this.$query as QueryInterface).week = val.week || undefined
+        ; (this.$query as QueryInterface).year = val.year || undefined
+          ; (this.$query as QueryInterface).week = val.week || undefined
       },
     },
     sortShop: {
@@ -298,7 +299,7 @@ export default defineComponent({
         return (this.$query as QueryInterface).shop || null
       },
       set(val: number | null) {
-        ;(this.$query as QueryInterface).shop = val || undefined
+        ; (this.$query as QueryInterface).shop = val || undefined
       },
     },
     listItemsRaw() {
@@ -317,27 +318,35 @@ export default defineComponent({
           if (!this.showAlreadyCompleted) {
             res = res.filter((i) => !i.already_completed)
           }
-          res.sort((a, b) => {
-            // Completed sort
-            if (a.is_completed && !b.is_completed) {
-              return 1
-            } else if (b.is_completed && !a.is_completed) {
-              return -1
-            } else if (a.is_completed && b.is_completed) {
-              // If both completed
-              if (a.title < b.title) {
+          sortChains(res, [
+            (a, b) => { // Is completed
+              if (a.is_completed && !b.is_completed) {
+                return 1
+              } else if (b.is_completed && !a.is_completed) {
                 return -1
               }
-              if (a.title > b.title) {
-                return 1
+            },
+            (a, b) => { // Name sort (If completed)
+              if (a.is_completed && b.is_completed) {
+                if (a.title < b.title) {
+                  return -1
+                }
+                if (a.title > b.title) {
+                  return 1
+                }
               }
-            }
-            // Day sort
-            if (!a.day || !b.day) {
-              return 0
-            }
-            return a.day - b.day
-          })
+            },
+            (a, b) => { // Buy later
+              return (new Date(a.buy_later || 0)) - (new Date(b.buy_later || 0))
+            },
+            (a, b) => {
+              // Days sort
+              if (!a.day || !b.day) {
+                return 0
+              }
+              return a.day - b.day
+            },
+          ])
         }
         return res
       },
@@ -355,20 +364,24 @@ export default defineComponent({
           return []
         }
         const categoriesArr: CustomIngredientCategory[] = this.ingredientCategories.slice()
+        const today = new Date().getDate()
 
         categoriesArr.forEach((item, idx) => (categoriesArr[idx].items = [])) // Add items array
 
         const categories: CategoriesMapping = categoriesArr.reduce(
           (obj: CategoriesMapping, cur: CustomIngredientCategory) =>
-            ({
-              ...obj,
-              [cur.id]: cur,
-            } as CategoriesMapping),
+          ({
+            ...obj,
+            [cur.id]: cur,
+          } as CategoriesMapping),
           {} as CategoriesMapping
         ) // Convert to object
         let items = this.listItems.slice()
         const itemsCompleted = items.filter((i) => i?.is_completed)
-        items = items.filter((i) => itemsCompleted.indexOf(i) === -1)
+        const itemsLater = items.filter((i) => i.buy_later && new Date(i.buy_later) > today)
+        // Remove items from other lists. These items will not be in categorized list.
+        items = items.filter((i) => itemsCompleted.indexOf(i) === -1 && itemsLater.indexOf(i) === -1)
+        console.debug("Sort: ", { itemsLater, itemsCompleted, items })
 
         for (const [idx, item] of items.entries()) {
           const catItem = item?.ingredient?.category
@@ -388,9 +401,16 @@ export default defineComponent({
         }
         // @ts-expect-error Custom category
         categories[-2] = {
-          id: -1,
+          id: -2,
           title: "Завершенные",
           items: itemsCompleted,
+          custom: true,
+        }
+        // @ts-expect-error Custom category
+        categories[-3] = {
+          id: -3,
+          title: "Отложенные",
+          items: itemsLater,
           custom: true,
         }
         const categoriesList: CustomIngredientCategory[] = [...(Object.values(categories) as CustomIngredientCategory[])]
@@ -845,7 +865,7 @@ export default defineComponent({
       // this.$query.task = item.id;
     },
     async createNewItem() {
-      if (!this.createItem){
+      if (!this.createItem) {
         return
       }
       const payload = {

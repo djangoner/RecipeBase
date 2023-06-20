@@ -30,7 +30,7 @@
             />
 
             <!-- Subtitle row -->
-            <div class="row q-gutter-x-md">
+            <div class="row q-gutter-x-sm q-mt-xs">
               <span class="text-body2 text-primary">
                 <q-icon
                   v-if="item.is_auto"
@@ -42,14 +42,21 @@
                 {{ item.day || item.day === 0 ? WeekDays[item.day] : "" }}
 
               </span>
-              <q-badge v-if="item.day && item.ingredient.fresh_days && itemDaysLeft(item) > -1">
+              <q-badge v-if="item.day && item?.ingredient?.fresh_days && itemDaysLeft(item) > -1">
                 Через дней: {{ itemDaysLeft(item) }}
               </q-badge>
 
               <q-badge
-                v-if="item.ingredient.fresh_days"
+                v-if="item?.ingredient?.fresh_days"
               >
-                (Хранится лней: {{ item.ingredient.fresh_days }})
+                Хранится лней: {{ item.ingredient.fresh_days }}
+              </q-badge>
+
+              <q-badge
+                v-if="item.buy_later"
+                color="info"
+              >
+                Отложено до: {{ WeekDays[new Date(item.buy_later).getDay()] }} ({{ dateFormat(item.buy_later) }})
               </q-badge>
             </div>
           </div>
@@ -255,6 +262,7 @@ import AmountCompletedInput from "./Products/AmountCompletedInput.vue"
 import IngredientSelect from "./Recipes/IngredientSelect.vue"
 import {isOnline} from 'src/modules/isOnline'
 import { date } from "quasar"
+import { dateFormat } from "src/modules/Utils"
 
 const props = defineProps({
   modelValue: {

@@ -503,7 +503,7 @@ class ProductListItem(models.Model):
         blank=True,
     )
     created = models.DateTimeField(_("Время создания"), auto_now_add=True)
-    buy_later = models.PositiveSmallIntegerField(
+    buy_later = models.DateField(
         _("Купить позже"), null=True, blank=True, help_text="Номер дня на который отложить покупку"
     )
     # edited = models.DateTimeField(_("Время полследнего редактирования"), auto_now=True)

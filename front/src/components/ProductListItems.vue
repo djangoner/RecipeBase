@@ -1,128 +1,147 @@
 <template>
-  <q-item
-    v-for="item of listItems"
-    :key="item.id"
-    class="cursor-pointer non-selectable column"
-    :class="itemCls(item)"
-    clickable
-    @click="$emit('openItem', item)"
-  >
-    <div class="row no-wrap">
-      <!-- Checkbox -->
-      <product-list-item-checkbox
-        :model-value="item"
-        :disable="!canEdit"
-        @update:model-value="$emit('updateItem', $event)"
-      />
-
-      <!-- First column -->
-      <div class="row column">
-        <span class="text-subtitile2">
-          <!-- Product title -->
-          {{ item.title }}
-
-          <!-- Manual ingredient -->
-          <template v-if="!item.is_auto && item.ingredient && item.title.toLowerCase() !== item.ingredient.title.toLowerCase()"> ({{ item.ingredient.title }}) </template>
-
-          <!-- Product amount -->
-          <template v-if="item.amount">
-            (<template v-if="item.packs && itemPacksShow(item)">~{{ Math.ceil(item.packs) }} {{ itemPacksStr(item) }}: </template>{{ item.amount }} {{ item.amount_type_str }})
-          </template>
-          <template v-else-if="item.ingredients && item.ingredients.length > 0">
-            (
-            <span
-              v-for="(sub_ing, index) of item.ingredients"
-              :key="sub_ing.id"
-            >
-              {{ sub_ing.amount }} {{ sub_ing.amount_type_str }}<template v-if="index != item.ingredients.length - 1">, </template>
-            </span>
-            )
-          </template>
-          <template v-if="item.price_full">, ~{{ item.price_full }}₺</template>
-        </span>
-        <!-- First column bottom row, date -->
-        <span
-          class="text-body2"
-          :class="item.day || item.day === 0 ? WeekDaysColors[item.day] : ''"
-        >
-          <q-icon
-            v-if="item.is_auto"
-            name="settings"
-          >
-            <q-tooltip> Этот рецепт был создан автоматически на основе плана на неделю </q-tooltip>
-          </q-icon>
-          <q-icon
-            v-else
-            name="edit"
-          />
-          <q-icon
-            v-if="!item.is_auto && item.ingredient"
-            name="restaurant"
-          >
-            <q-tooltip>
-              Указан ингредиент
-            </q-tooltip>
-          </q-icon>
-          <q-icon
-            v-if="item?.ingredient?.fresh_days"
-            name="kitchen"
-          >
-            <q-tooltip>
-              Свежий {{ item.ingredient.fresh_days }} {{ pluralize(item.ingredient.fresh_days, ["день", "дня", "дней"]) }}
-            </q-tooltip>
-          </q-icon>
-
-          <q-icon
-            v-if="item?.ingredient?.description"
-            class="q-ml-xs"
-            color="primary"
-            size="xs"
-            name="notes"
-          />
-
-          <q-badge
-            class="q-mx-sm q-py-xs"
-            :color="item.priority ? priorityColors[item.priority] : ''"
-          >
-            <q-icon
-              name="flag"
-              size="10px"
-            />
-            <span class="q-ml-xs">
-              {{ item.priority }}
-            </span>
-          </q-badge>
-          <q-icon
-            v-if="item.description"
-            name="notes"
-            size="17px"
-            color="blue-grey"
-          />
-
-          {{ item.day || item.day === 0 ? getDay(item.day) : "" }}
-          {{ item.day || item.day === 0 ? WeekDays[item.day] : "" }}
-
-          <span
-            v-if="isEdited(item)"
-            class="text-teal"
-          > [Изменено локально] </span>
-        </span>
-      </div>
-    </div>
-
-    <div
-      v-if="item.amount_completed && item.amount"
-      class="item__count row items-center no-wrap q-mx-md"
+  <q-list>
+    <q-slide-item
+      v-for="item of listItems"
+      :key="item.id"
+      @right="itemLater(item, $event)"
     >
-      <span class="item__count-text">{{ item.amount_completed }} /
-        {{ Math.ceil(item.packs || item.amount) }}
-      </span>
-      <q-linear-progress
-        :value="item.amount_completed / Math.ceil(item.packs || item.amount)"
-        class="col-grow"
-      />
-    </div>
-  </q-item>
+      <!-- <template #left>
+        Left content
+      </template> -->
+      <template #right>
+        <div class="row items-center">
+          Отложить <q-icon
+            right
+            name="alarm"
+          />
+        </div>
+      </template>
+
+
+      <q-item
+        class="cursor-pointer non-selectable column"
+        :class="itemCls(item)"
+        clickable
+        @click="$emit('openItem', item)"
+      >
+        <div class="row no-wrap">
+          <!-- Checkbox -->
+          <product-list-item-checkbox
+            :model-value="item"
+            :disable="!canEdit"
+            @update:model-value="$emit('updateItem', $event)"
+          />
+
+          <!-- First column -->
+          <div class="row column">
+            <span class="text-subtitile2">
+              <!-- Product title -->
+              {{ item.title }}
+
+              <!-- Manual ingredient -->
+              <template v-if="!item.is_auto && item.ingredient && item.title.toLowerCase() !== item.ingredient.title.toLowerCase()"> ({{ item.ingredient.title }}) </template>
+
+              <!-- Product amount -->
+              <template v-if="item.amount">
+                (<template v-if="item.packs && itemPacksShow(item)">~{{ Math.ceil(item.packs) }} {{ itemPacksStr(item) }}: </template>{{ item.amount }} {{ item.amount_type_str }})
+              </template>
+              <template v-else-if="item.ingredients && item.ingredients.length > 0">
+                (
+                <span
+                  v-for="(sub_ing, index) of item.ingredients"
+                  :key="sub_ing.id"
+                >
+                  {{ sub_ing.amount }} {{ sub_ing.amount_type_str }}<template v-if="index != item.ingredients.length - 1">, </template>
+                </span>
+                )
+              </template>
+              <template v-if="item.price_full">, ~{{ item.price_full }}₺</template>
+            </span>
+            <!-- First column bottom row, date -->
+            <span
+              class="text-body2"
+              :class="item.day || item.day === 0 ? WeekDaysColors[item.day] : ''"
+            >
+              <q-icon
+                v-if="item.is_auto"
+                name="settings"
+              >
+                <q-tooltip> Этот рецепт был создан автоматически на основе плана на неделю </q-tooltip>
+              </q-icon>
+              <q-icon
+                v-else
+                name="edit"
+              />
+              <q-icon
+                v-if="!item.is_auto && item.ingredient"
+                name="restaurant"
+              >
+                <q-tooltip>
+                  Указан ингредиент
+                </q-tooltip>
+              </q-icon>
+              <q-icon
+                v-if="item?.ingredient?.fresh_days"
+                name="kitchen"
+              >
+                <q-tooltip>
+                  Свежий {{ item.ingredient.fresh_days }} {{ pluralize(item.ingredient.fresh_days, ["день", "дня", "дней"]) }}
+                </q-tooltip>
+              </q-icon>
+
+              <q-icon
+                v-if="item?.ingredient?.description"
+                class="q-ml-xs"
+                color="primary"
+                size="xs"
+                name="notes"
+              />
+
+              <q-badge
+                class="q-mx-sm q-py-xs"
+                :color="item.priority ? priorityColors[item.priority] : ''"
+              >
+                <q-icon
+                  name="flag"
+                  size="10px"
+                />
+                <span class="q-ml-xs">
+                  {{ item.priority }}
+                </span>
+              </q-badge>
+              <q-icon
+                v-if="item.description"
+                name="notes"
+                size="17px"
+                color="blue-grey"
+              />
+
+              {{ item.day || item.day === 0 ? getDay(item.day) : "" }}
+              {{ item.day || item.day === 0 ? WeekDays[item.day] : "" }}
+
+              <span
+                v-if="isEdited(item)"
+                class="text-teal"
+              > [Изменено локально] </span>
+            </span>
+          </div>
+        </div>
+
+        <div
+          v-if="item.amount_completed && item.amount"
+          class="item__count row items-center no-wrap q-mx-md"
+        >
+          <span class="item__count-text">{{ item.amount_completed }} /
+            {{ Math.ceil(item.packs || item.amount) }}
+          </span>
+          <q-linear-progress
+            :value="item.amount_completed / Math.ceil(item.packs || item.amount)"
+            class="col-grow"
+          />
+        </div>
+      </q-item>
+    </q-slide-item>
+  </q-list>
 </template>
 
 <script setup lang="ts">
@@ -133,6 +152,7 @@ import { onMounted, PropType, ref, Ref } from "vue"
 import { getDateOfISOWeek, WeekDays, YearWeek, WeekDaysColors, priorityColors } from "src/modules/WeekUtils"
 import { productListGetChanged, ProductListItemSyncable } from "src/modules/ProductListSync"
 import { pluralize } from "src/modules/Utils"
+import { useNow } from "@vueuse/core"
 
 const props = defineProps({
   listItems: {
@@ -145,6 +165,7 @@ const props = defineProps({
 
 const $emit = defineEmits(["openItem", "updateItem", "update:model-value"])
 const $q = useQuasar()
+const now = useNow({interval: 60000})
 
 const changedItems: Ref<number[] | null> = ref(null)
 
@@ -174,17 +195,24 @@ function isEdited(item: ProductListItemSyncable): boolean | undefined {
 }
 
 function itemInactive(item: ProductListItemRead): boolean {
+  // -- Ingredient independent
+  if (item.buy_later){
+    return new Date(item.buy_later) > now.value
+  }
+
   if (!item.ingredient){
     return false
   }
+  // -- Ingredient dependent
 
   if (item.ingredient.fresh_days && item.day){
     const daysLeft = date.getDateDiff(getDayDate(item.day), new Date())
-    console.debug(item.title, daysLeft)
     if (daysLeft > 0 && daysLeft > item.ingredient.fresh_days){
       return true
     }
   }
+
+
   return false
 }
 
@@ -227,6 +255,27 @@ function itemPacksStr(item: ProductListItemRead): string {
     return "кг"
   }
   return "шт"
+}
+
+function itemLater(item: ProductListItemRead, {reset}: {reset: CallableFunction}){
+
+  const today = new Date();
+  const newLater = today
+  newLater.setDate(newLater.getDate() + 1)
+  const newDate = date.formatDate(newLater, "YYYY-MM-DD")
+
+
+  console.debug("Item later: ", item.buy_later, newDate, item)
+  if (item.buy_later == newDate){
+    item.buy_later = null
+  } else {
+    item.buy_later = newDate
+  }
+
+  $emit('updateItem', item)
+  setTimeout(() => {
+    reset()
+  }, 300)
 }
 </script>
 

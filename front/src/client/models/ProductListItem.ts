@@ -31,6 +31,10 @@ export type ProductListItem = {
     description?: string | null;
     priority?: number;
     readonly created: string;
+    /**
+     * Номер дня на который отложить покупку
+     */
+    buy_later?: string | null;
     author?: number | null;
     assigned?: number | null;
     readonly ingredients: Array<number>;

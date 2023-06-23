@@ -110,6 +110,20 @@ def clear_recipes_recommendations(plan: RecipePlanWeek, recs: list[Recommendatio
     return res
 
 
+def clear_ingredients_recommendations(plan: RecipePlanWeek, recs: list[Recommendation]) -> list[Recommendation]:
+    rec_ings = plan.recommendations_ingredients.all()
+    res = recs.copy()
+
+    for rec in recs:
+        if not rec.ingredient:
+            continue
+
+        if rec.ingredient in rec_ings:
+            rec.accepted = True
+
+    return res
+
+
 def generate_recommendations(plan: RecipePlanWeek) -> list[Recommendation]:
     res: list[Recommendation] = []
     ## -- Generate recommendations
@@ -117,6 +131,7 @@ def generate_recommendations(plan: RecipePlanWeek) -> list[Recommendation]:
 
     ## -- Clear recommendations
     res = clear_recipes_recommendations(plan, res)
+    res = clear_ingredients_recommendations(plan, res)
 
     ## -- Process and return
     for i in range(len(res)):
@@ -148,7 +163,9 @@ def accept_recommendation_recipe(plan: RecipePlanWeek, recommendation: Recommend
 
 
 def accept_recommendation_ingredient(plan: RecipePlanWeek, recommendation: Recommendation):
-    pass
+    assert recommendation.ingredient is not None
+
+    plan.recommendations_ingredients.add(recommendation.ingredient)
 
 
 def accept_recommendation(plan: RecipePlanWeek, recommendation: Recommendation) -> bool | None:

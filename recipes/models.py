@@ -357,6 +357,10 @@ class RecipePlanWeek(models.Model):
     comments = models.JSONField(_("Комментарии"), default=get_default_comments)
     is_filled = models.BooleanField(_("Заполнен"), default=False)
 
+    recommendations_ingredients = models.ManyToManyField(
+        RecipeIngredientRecommendation, blank=True, verbose_name="Принятые рекомендации ингредиентов"
+    )
+
     plans: models.QuerySet["RecipePlan"]
 
     class Meta:

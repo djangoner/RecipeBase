@@ -38,6 +38,18 @@
         </q-item-section>
       </q-item>
     </template>
+
+    <template v-if="item.ingredient && ingAccepted(item.ingredient)">
+      <q-separator />
+      <q-item class="items-center q-mt-xs">
+        <q-item-section avatar>
+          <small class="ing-day">-.&nbsp;</small>
+        </q-item-section>
+        <q-item-section>
+          Рекомендация ({{ ingAccepted(item.ingredient).amount }} {{ ingAccepted(item.ingredient).amount_type_str }})
+        </q-item-section>
+      </q-item>
+    </template>
   </q-list>
 </template>
 
@@ -72,6 +84,12 @@ const store = useBaseStore()
 const plan = computed(() => {
   return store.week_plan
 })
+
+const recommendationAccepted = computed(() => plan.value?.recommendations_ingredients)
+
+function ingAccepted(ing:RecipeIngredientWithRecipeRead ): boolean{
+  return recommendationAccepted.value?.find(r => r.ingredient == ing.id)
+}
 
 function getRecipeDays(recipe: RecipeRead | RecipeShort): null | string[] {
   if (!plan.value) {

@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { ConditionWarning } from './ConditionWarning';
+import type { Nested } from './Nested';
 import type { RecipePlanRead } from './RecipePlanRead';
 
 export type RecipePlanWeekRead = {
@@ -15,4 +16,5 @@ export type RecipePlanWeekRead = {
     week: number;
     comments?: Record<string, any>;
     is_filled?: boolean;
+    readonly recommendations_ingredients: Array<Nested>;
 };

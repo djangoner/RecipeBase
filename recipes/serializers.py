@@ -328,11 +328,36 @@ class ConditionWarningSerializer(serializers.Serializer):
         return fields
 
 
+class RecipeIngredientRecommendationSerializer(serializers.ModelSerializer):
+    amount_type_str = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RecipeIngredientRecommendation
+        exclude = ()
+
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_amount_type_str(self, obj):
+        if not obj.amount_type:
+            return ""
+        return measuring_str(obj.amount_type)
+
+
+class RecommendationsSerializer(serializers.Serializer):
+    idx = serializers.IntegerField()
+    accepted = serializers.BooleanField()
+    hash = serializers.CharField()
+    recipe = RecipeReadSerializer()
+    recipe_tag = RecipeTagSerializer()
+    ingredient = RecipeIngredientRecommendationSerializer()
+    plan = serializers.IntegerField()
+
+
 class RecipePlanWeekSerializer(serializers.ModelSerializer):
     plans = RecipePlanShortSerializer(many=True, required=False)
     warnings = serializers.SerializerMethodField()
     edited_first = serializers.SerializerMethodField()
     edited_last = serializers.SerializerMethodField()
+    recommendations_ingredients = RecipeIngredientRecommendationSerializer(many=True)
 
     class Meta:
         model = RecipePlanWeek
@@ -447,27 +472,3 @@ class WeekPlanConditionSerializer(serializers.ModelSerializer):
     @extend_schema_field(OpenApiTypes.BOOL)
     def get_full_day(self, instance: WeekPlanCondition):
         return instance.full_day
-
-
-class RecipeIngredientRecommendationSerializer(serializers.ModelSerializer):
-    amount_type_str = serializers.SerializerMethodField()
-
-    class Meta:
-        model = RecipeIngredientRecommendation
-        exclude = ()
-
-    @extend_schema_field(OpenApiTypes.STR)
-    def get_amount_type_str(self, obj):
-        if not obj.amount_type:
-            return ""
-        return measuring_str(obj.amount_type)
-
-
-class RecommendationsSerializer(serializers.Serializer):
-    idx = serializers.IntegerField()
-    accepted = serializers.BooleanField()
-    hash = serializers.CharField()
-    recipe = RecipeReadSerializer()
-    recipe_tag = RecipeTagSerializer()
-    ingredient = RecipeIngredientRecommendationSerializer()
-    plan = serializers.IntegerField()

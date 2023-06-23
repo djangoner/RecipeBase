@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { ConditionWarning } from './ConditionWarning';
-import type { Nested } from './Nested';
+import type { RecipeIngredientRecommendation } from './RecipeIngredientRecommendation';
 import type { RecipePlanShort } from './RecipePlanShort';
 
 export type PatchedRecipePlanWeek = {
@@ -12,9 +12,9 @@ export type PatchedRecipePlanWeek = {
     readonly warnings?: Array<ConditionWarning>;
     readonly edited_first?: string;
     readonly edited_last?: string;
+    recommendations_ingredients?: Array<RecipeIngredientRecommendation>;
     year?: number;
     week?: number;
     comments?: Record<string, any>;
     is_filled?: boolean;
-    readonly recommendations_ingredients?: Array<Nested>;
 };

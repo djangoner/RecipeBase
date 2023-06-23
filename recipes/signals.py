@@ -47,6 +47,10 @@ def unactual_product_list(year: int, week: int):
         product_week.save(update_fields=["is_actual"])
 
 
+def unactual_plan_product_list(plan: RecipePlanWeek):
+    unactual_product_list(plan.year, plan.week)
+
+
 @receiver(pre_save, sender=RecipeIngredient)
 def recipe_pre_save(sender: RecipeIngredient, instance, **kwargs):
     instance.amount_grams = amount_to_grams(instance.amount, instance.amount_type)

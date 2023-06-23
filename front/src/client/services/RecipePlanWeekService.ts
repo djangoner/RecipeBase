@@ -178,6 +178,29 @@ recommendation?: string,
     }
 
     /**
+     * @returns StatusOk 
+     * @throws ApiError
+     */
+    public static recipePlanWeekRecommendationCancelCreate({
+id,
+recommendation,
+}: {
+id: string,
+recommendation?: string,
+}): CancelablePromise<StatusOk> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/recipe_plan_week/{id}/recommendation_cancel/',
+            path: {
+                'id': id,
+            },
+            query: {
+                'recommendation': recommendation,
+            },
+        });
+    }
+
+    /**
      * @returns Recommendations 
      * @throws ApiError
      */

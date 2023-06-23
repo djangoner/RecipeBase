@@ -12,6 +12,8 @@ from recipes.models import (
 from rest_framework import exceptions
 from constance import config
 
+from recipes.signals import unactual_plan_product_list
+
 
 @dataclass(unsafe_hash=True, eq=True)
 class Recommendation:
@@ -159,20 +161,54 @@ def accept_recommendation_recipe(plan: RecipePlanWeek, recommendation: Recommend
         return False
 
     RecipePlan.objects.create(week=plan, day=recommendation.plan.day, meal_time=meal_time, recipe=recommendation.recipe)
+    unactual_plan_product_list(plan)
+    return True
+
+
+def cancel_recommendation_recipe(plan: RecipePlanWeek, recommendation: Recommendation, remove_old: bool = False):
+    assert recommendation.recipe is not None
+    assert recommendation.plan is not None
+
+    meal_time_id: int = config.RECOMMENDATION_MEAL_TIME  # noqa
+    meal_time = MealTime.objects.filter(id=meal_time_id).first()
+    if not meal_time:
+        logging.warning("Recommendation default meal time not found")
+        return False
+
+    RecipePlan.objects.get(
+        week=plan, day=recommendation.plan.day, meal_time=meal_time, recipe=recommendation.recipe
+    ).delete()
+    unactual_plan_product_list(plan)
     return True
 
 
 def accept_recommendation_ingredient(plan: RecipePlanWeek, recommendation: Recommendation):
     assert recommendation.ingredient is not None
-
     plan.recommendations_ingredients.add(recommendation.ingredient)
+    unactual_plan_product_list(plan)
+
+
+def cancel_recommendation_ingredient(plan: RecipePlanWeek, recommendation: Recommendation):
+    assert recommendation.ingredient is not None
+    plan.recommendations_ingredients.remove(recommendation.ingredient)
+    unactual_plan_product_list(plan)
 
 
 def accept_recommendation(plan: RecipePlanWeek, recommendation: Recommendation) -> bool | None:
-    logging.info("Acception recommendation...")
+    logging.info("Accept on recommendation...")
     if recommendation.recipe:
         return accept_recommendation_recipe(plan, recommendation)
     elif recommendation.ingredient:
         return accept_recommendation_ingredient(plan, recommendation)
     elif recommendation.recipe_tag:
         raise exceptions.APIException("Can't accept recipe tag", "cant_accept")
+
+
+def cancel_recommendation(plan: RecipePlanWeek, recommendation: Recommendation) -> bool | None:
+    logging.info("canceling recommendation...")
+    if recommendation.recipe:
+        return cancel_recommendation_recipe(plan, recommendation)
+    elif recommendation.ingredient:
+        return cancel_recommendation_ingredient(plan, recommendation)
+
+    raise exceptions.APIException("Unsupported recommendation for cancel", "cant_cancel")

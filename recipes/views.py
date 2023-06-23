@@ -28,6 +28,7 @@ from recipes.models import (
 from recipes.services.conditions import process_conditions_tree, warnings_json
 from recipes.services.recommendations import (
     accept_recommendation,
+    cancel_recommendation,
     find_recommendation,
     generate_recommendations,
 )
@@ -442,6 +443,30 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
         if not recommendation:
             raise exceptions.ValidationError("Invalid recommendation", code="invalid_recommendation")
         accept_recommendation(plan, recommendation)
+
+        return response.Response({"ok": True})
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH),
+            OpenApiParameter("recommendation", OpenApiTypes.STR, OpenApiParameter.QUERY),
+        ],
+        request=None,
+        responses=StatusOkSerializer,
+    )
+    @decorators.action(["POST"], detail=True)
+    def recommendation_cancel(self, request, pk=None):
+        plan = self.get_object()
+        recommendation_id = request.GET.get("recommendation")
+
+        if not recommendation_id:
+            raise exceptions.ValidationError("Invalid empty recommendation", code="invalid_recommendation")
+
+        # recommendation_obj = from_dict(data_class=data=recommendation)
+        recommendation = find_recommendation(plan, recommendation_id)
+        if not recommendation:
+            raise exceptions.ValidationError("Invalid recommendation", code="invalid_recommendation")
+        cancel_recommendation(plan, recommendation)
 
         return response.Response({"ok": True})
 

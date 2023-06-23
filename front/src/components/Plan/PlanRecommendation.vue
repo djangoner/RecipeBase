@@ -40,31 +40,45 @@
     <!-- Actions -->
     <q-item-section side>
       <div
-        v-if="!rec.accepted"
         class="row q-gutter-x-sm"
       >
-        <q-btn
-          v-if="rec.recipe_tag"
-          label="Найти"
-          icon="search"
-          color="primary"
-          size="sm"
-          dense
-          no-caps
-          unelevated
-        />
-        <q-btn
-          v-else
-          label="Добавить"
-          icon="add"
-          color="positive"
-          size="sm"
-          dense
-          no-caps
-          unelevated
-          :loading="saving"
-          @click="runPerform()"
-        />
+        <template v-if="rec.accepted">
+          <q-btn
+            v-if="canCancell"
+            label="Отменить"
+            icon="delete"
+            color="negative"
+            size="sm"
+            dense
+            no-caps
+            unelevated
+            @click="onCancell"
+          />
+        </template>
+        <template v-else>
+          <q-btn
+            v-if="rec.recipe_tag"
+            label="Найти"
+            icon="search"
+            color="primary"
+            size="sm"
+            dense
+            no-caps
+            unelevated
+          />
+          <q-btn
+            v-else
+            label="Добавить"
+            icon="add"
+            color="positive"
+            size="sm"
+            dense
+            no-caps
+            unelevated
+            :loading="saving"
+            @click="runPerform()"
+          />
+        </template>
       </div>
     </q-item-section>
   </q-item>
@@ -133,6 +147,24 @@ const sectionText = computed(() => {
   return ""
 })
 
+const canCancell = computed(() => {
+  return rec.value.ingredient
+})
+
+
+function onCancell(){
+  $q
+    .dialog({
+      title: "Подтверждение",
+      message: "Вы уверены что хотите отменить рекомендацию?",
+      cancel: true,
+      persistent: true,
+    })
+    .onOk(() => {
+      runCancell()
+    });
+}
+
 function getIngredient(id: number){
   return store.ingredients?.find(i => i.id == id)
 }
@@ -155,6 +187,29 @@ function runPerform(){
     $q.notify({
       type: "positive",
       caption: "Рекомендация успешно принята"
+    })
+  })
+
+  promiseSetLoading(prom, saving)
+}
+
+function runCancell(){
+  saving.value = true
+
+  const payload = {
+    year: props.week.year,
+    week: props.week.week,
+    recommendation: rec.value.hash,
+  }
+  console.debug("Cancelling recommendation: ", payload)
+
+  const prom = store.cancellWeekRecommendation(payload)
+
+  void prom.then(() => {
+    $emit("updated")
+    $q.notify({
+      type: "positive",
+      caption: "Рекомендация успешно отменена"
     })
   })
 

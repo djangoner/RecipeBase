@@ -129,7 +129,8 @@ onMounted(() => {
 
 watch(
   () => store.week_plan,
-  () => {
+  (val, oldVal) => {
+    if (!oldVal){return}
     void debouncedLoad()
   },
   {deep: true}
@@ -137,7 +138,8 @@ watch(
 
 watch(
   () => props.week,
-  () => {
+  (val, oldVal) => {
+    if (!oldVal){return}
     void debouncedLoad()
   }
 )

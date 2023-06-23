@@ -465,6 +465,7 @@ class RecipeIngredientRecommendationSerializer(serializers.ModelSerializer):
 
 class RecommendationsSerializer(serializers.Serializer):
     idx = serializers.IntegerField()
+    accepted = serializers.BooleanField()
     hash = serializers.CharField()
     recipe = RecipeReadSerializer()
     recipe_tag = RecipeTagSerializer()

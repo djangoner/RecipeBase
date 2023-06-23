@@ -7,6 +7,13 @@
     <!-- Icon -->
     <q-item-section avatar>
       <q-icon
+        v-if="rec.accepted"
+        name="done"
+        color="positive"
+        size="sm"
+      />
+      <q-icon
+        v-else
         :name="iconName"
         color="grey"
         size="sm"
@@ -15,7 +22,7 @@
 
     <!-- Title -->
     <q-item-section>
-      <q-item-label>
+      <q-item-label :class="{'text-positive':rec.accepted}">
         {{ sectionTitle }}
       </q-item-label>
       <q-item-label caption>
@@ -32,7 +39,10 @@
 
     <!-- Actions -->
     <q-item-section side>
-      <div class="row q-gutter-x-sm">
+      <div
+        v-if="!rec.accepted"
+        class="row q-gutter-x-sm"
+      >
         <q-btn
           v-if="rec.recipe_tag"
           label="Найти"

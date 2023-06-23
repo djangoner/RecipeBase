@@ -15,9 +15,9 @@ from constance import config
 
 @dataclass(unsafe_hash=True, eq=True)
 class Recommendation:
-
     idx: Optional[int] = None
-    hash: Optional[str] = field(init=False, compare=False, hash=False)
+    accepted: bool = False
+    hash: Optional[str] = field(default=None, compare=False, hash=False)
     recipe: Optional[Recipe] = None
     recipe_tag: Optional[RecipeTag] = None
     ingredient: Optional[RecipeIngredientRecommendation] = None
@@ -92,12 +92,33 @@ def get_week_recipes_recommendations(plan: RecipePlanWeek) -> list[Recommendatio
     return res
 
 
+def clear_recipes_recommendations(plan: RecipePlanWeek, recs: list[Recommendation]) -> list[Recommendation]:
+    db_plans = plan.plans.all()
+    res = recs.copy()
+
+    for rec in recs:
+        if not rec.recipe or not rec.plan:
+            continue
+
+        for db_plan in db_plans:
+            if rec not in res:
+                continue
+
+            if db_plan.recipe and db_plan.recipe.pk == rec.recipe.pk and db_plan.day == rec.plan.day:
+                rec.accepted = True
+
+    return res
+
+
 def generate_recommendations(plan: RecipePlanWeek) -> list[Recommendation]:
     res: list[Recommendation] = []
-
+    ## -- Generate recommendations
     res.extend(get_week_recipes_recommendations(plan))
 
-    ## Process and return
+    ## -- Clear recommendations
+    res = clear_recipes_recommendations(plan, res)
+
+    ## -- Process and return
     for i in range(len(res)):
         # res[i].idx = i
         res[i].hash = str(gen_recommendation_hash(res[i]))

@@ -8,6 +8,7 @@ import type { RecipeTag } from './RecipeTag';
 
 export type Recommendations = {
     idx: number;
+    accepted: boolean;
     hash: string;
     recipe: RecipeRead;
     recipe_tag: RecipeTag;

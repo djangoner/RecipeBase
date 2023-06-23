@@ -6,6 +6,8 @@ import type { PaginatedRecipePlanWeekReadList } from '../models/PaginatedRecipeP
 import type { PatchedRecipePlanWeek } from '../models/PatchedRecipePlanWeek';
 import type { RecipePlanWeek } from '../models/RecipePlanWeek';
 import type { RecipePlanWeekRead } from '../models/RecipePlanWeekRead';
+import type { Recommendations } from '../models/Recommendations';
+import type { StatusOk } from '../models/StatusOk';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -146,6 +148,47 @@ id: string,
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/recipe_plan_week/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+
+    /**
+     * @returns StatusOk 
+     * @throws ApiError
+     */
+    public static recipePlanWeekRecommendationAcceptCreate({
+id,
+recommendation,
+}: {
+id: string,
+recommendation?: string,
+}): CancelablePromise<StatusOk> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/recipe_plan_week/{id}/recommendation_accept/',
+            path: {
+                'id': id,
+            },
+            query: {
+                'recommendation': recommendation,
+            },
+        });
+    }
+
+    /**
+     * @returns Recommendations 
+     * @throws ApiError
+     */
+    public static recipePlanWeekRecommendationsRetrieve({
+id,
+}: {
+id: string,
+}): CancelablePromise<Recommendations> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/recipe_plan_week/{id}/recommendations/',
             path: {
                 'id': id,
             },

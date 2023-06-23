@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Nested } from './Nested';
 import type { RecipeIngredient } from './RecipeIngredient';
 import type { RecipeRating } from './RecipeRating';
 
@@ -31,4 +32,6 @@ export type RecipeShort = {
     is_archived?: boolean;
     readonly price_part: number;
     readonly price_full: number;
+    readonly recommendations_recipes: Array<Nested>;
+    readonly recommendations_tags: Array<Nested>;
 };

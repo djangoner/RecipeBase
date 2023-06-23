@@ -10,6 +10,7 @@ from recipes.models import (
     Recipe,
     RecipeImage,
     RecipeIngredient,
+    RecipeIngredientRecommendation,
     RecipePlan,
     RecipePlanWeek,
     RecipeRating,
@@ -27,7 +28,7 @@ from djangoql.admin import DjangoQLSearchMixin
 class RecipeIngredientsInline(admin.StackedInline):
     extra = 0
     model = RecipeIngredient
-    readonly_fields = ["amount_grams"]
+    readonly_fields = ["amount_grams", "ingredient"]
 
 
 class RecipeImageInline(admin.TabularInline):
@@ -47,6 +48,12 @@ class RecipeRatingInline(admin.TabularInline):
     autocomplete_fields = ["recipe", "user"]
 
 
+class RecipeIngredientRecommendationInline(admin.TabularInline):
+    extra = 0
+    model = RecipeIngredientRecommendation
+    autocomplete_fields = ["recipe", "ingredient"]
+
+
 class ShopIngredientCategoryInline(SortableTabularInline):
     extra = 0
     model = ShopIngredientCategory
@@ -63,9 +70,9 @@ class WeekPlanConditionInline(admin.StackedInline):
 class RecipeAdmin(DjangoQLSearchMixin, SimpleHistoryAdmin):
     list_display = ["title", "created", "edited", "get_cooked_times"]
     search_fields = ["title", "content"]
-    filter_horizontal = ("tags",)
+    filter_horizontal = ("tags", "recommendations_recipes", "recommendations_tags")
 
-    inlines = [RecipeIngredientsInline, RecipeImageInline, RecipeRatingInline]
+    inlines = [RecipeIngredientsInline, RecipeImageInline, RecipeIngredientRecommendationInline, RecipeRatingInline]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

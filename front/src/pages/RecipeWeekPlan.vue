@@ -129,6 +129,12 @@
       </div>
     </div>
 
+    <plan-week-recommendations
+      ref="recommendationsRef"
+      :week="week"
+      @updated="loadWeekPlan()"
+    />
+
     <q-page-sticky
       position="top"
       expand
@@ -187,6 +193,7 @@
 </template>
 
 <script lang="ts" setup>
+import PlanWeekRecommendations from '../components/Plan/PlanWeekRecommendations.vue'
 import DayCard from "../components/Plan/DayCard.vue"
 import weekSelect from "components/WeekSelect.vue"
 import { useBaseStore } from "src/stores/base"
@@ -237,6 +244,7 @@ const loading = ref(false)
 const saving = ref(false)
 const enableFireworks = useStorage("enableFireworks", false)
 const showFireworks = ref(false)
+const recommendationsRef = ref(null);
 
 const visibility = useDocumentVisibility()
 const debouncedSaveWeekPlan = useDebounceFnState(saveWeekPlan, 5000, { maxWait: 15000 })

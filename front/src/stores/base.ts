@@ -48,6 +48,7 @@ import {
   RecipePlan,
   RecipePlanService,
   ConditionWarning,
+  Recommendations,
 } from "src/client"
 import { request } from "src/client/core/request"
 import { productListItemFromRead } from "src/Convert"
@@ -84,6 +85,7 @@ export const useBaseStore = defineStore("base", {
     shops: null as Shop[] | null,
     conditions: null as WeekPlanCondition[] | null,
     condWarnings: null as ConditionWarning[] | null,
+    weekRecommendations: null as Recommendations[] | null,
 
     // Settings
     enableWebsocket: (LocalStorage.getItem("enableWebsocket") as boolean) ?? false,
@@ -370,6 +372,21 @@ export const useBaseStore = defineStore("base", {
         setValue: (resp: ConditionWarning[]) => {
           this.condWarnings = resp
         },
+      })
+    },
+    async loadWeekRecommendations(payload: { year: number; week: number }) {
+      const id = `${payload?.year}_${payload?.week}`
+      return storeShortcut({
+        promise: RecipePlanWeekService.recipePlanWeekRecommendationsRetrieve({ id }),
+        setValue: (resp: ConditionWarning[]) => {
+          this.weekRecommendations = resp
+        },
+      })
+    },
+    async acceptWeekRecommendation(payload: { year: number; week: number; recommendation: Recommendations }) {
+      const id = `${payload?.year}_${payload?.week}`
+      return storeShortcut({
+        promise: RecipePlanWeekService.recipePlanWeekRecommendationAcceptCreate({ id, recommendation: payload.recommendation }),
       })
     },
     async loadWeekPlans(payload: object): Promise<PaginatedRecipePlanWeekReadList> {

@@ -67,6 +67,12 @@ class Recipe(ComputedFieldsModel):
 
     history = HistoricalRecords(excluded_fields=["created", "edited", "price_part", "price_full"])
 
+    ## Recommendations
+    recommendations_recipes = models.ManyToManyField("self", blank=True, verbose_name="Рекомендации рецептов")
+    recommendations_tags = models.ManyToManyField("RecipeTag", blank=True, verbose_name="Рекомендации меток")
+    recommendations_ingredients: models.QuerySet["RecipeIngredientRecommendation"]
+    ##
+
     ingredients: models.QuerySet["RecipeIngredient"]
     images: models.QuerySet["RecipeImage"]
     ratings: models.QuerySet["RecipeRating"]
@@ -205,14 +211,14 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         models.CASCADE,
-        related_name="ingredients",
+        related_name="recommendations_ingredients",
         verbose_name=_("Рецепт"),
         blank=True,
     )
     ingredient = models.ForeignKey(
         Ingredient,
         models.CASCADE,
-        related_name="recipe_ingredients",
+        related_name="recipe_recommendations_ingredients",
         verbose_name=_("Ингредиент"),
     )
     amount = models.FloatField(_("Количество"), max_length=15)
@@ -227,6 +233,28 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f"{self.recipe}: {self.ingredient}"
+
+
+class RecipeIngredientRecommendation(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        models.CASCADE,
+        related_name="ingredients",
+        verbose_name=_("Рецепт"),
+        blank=True,
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        models.CASCADE,
+        related_name="recipe_ingredients",
+        verbose_name=_("Ингредиент"),
+    )
+    amount = models.FloatField(_("Количество"), max_length=15)
+    amount_type = models.CharField(_("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15)
+
+    class Meta:
+        verbose_name = _("Ингредиент рекомендации")
+        verbose_name_plural = _("Ингредиенты рекомендаций")
 
 
 class RegularIngredient(models.Model):

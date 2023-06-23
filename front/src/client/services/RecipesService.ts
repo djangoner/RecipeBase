@@ -45,6 +45,8 @@ pricePart,
 pricePartGt,
 pricePartLt,
 rating,
+recommendationsRecipes,
+recommendationsTags,
 search,
 shortDescription,
 sourceLink,
@@ -110,6 +112,8 @@ pricePartLt?: number,
  * Rating filter
  */
 rating?: string,
+recommendationsRecipes?: Array<number>,
+recommendationsTags?: Array<number>,
 /**
  * A search term.
  */
@@ -158,6 +162,8 @@ title?: string,
                 'price_part_gt': pricePartGt,
                 'price_part_lt': pricePartLt,
                 'rating': rating,
+                'recommendations_recipes': recommendationsRecipes,
+                'recommendations_tags': recommendationsTags,
                 'search': search,
                 'short_description': shortDescription,
                 'source_link': sourceLink,

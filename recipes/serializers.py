@@ -14,6 +14,7 @@ from recipes.models import (
     Recipe,
     RecipeImage,
     RecipeIngredient,
+    RecipeIngredientRecommendation,
     RecipePlan,
     RecipePlanWeek,
     RecipeRating,
@@ -446,3 +447,26 @@ class WeekPlanConditionSerializer(serializers.ModelSerializer):
     @extend_schema_field(OpenApiTypes.BOOL)
     def get_full_day(self, instance: WeekPlanCondition):
         return instance.full_day
+
+
+class RecipeIngredientRecommendationSerializer(serializers.ModelSerializer):
+    amount_type_str = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RecipeIngredientRecommendation
+        exclude = ()
+
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_amount_type_str(self, obj):
+        if not obj.amount_type:
+            return ""
+        return measuring_str(obj.amount_type)
+
+
+class RecommendationsSerializer(serializers.Serializer):
+    idx = serializers.IntegerField()
+    hash = serializers.CharField()
+    recipe = RecipeReadSerializer()
+    recipe_tag = RecipeTagSerializer()
+    ingredient = RecipeIngredientRecommendationSerializer()
+    plan = serializers.IntegerField()

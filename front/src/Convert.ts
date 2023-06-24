@@ -49,24 +49,30 @@ export function RecipeFromRead(source: RecipeRead | null): Recipe {
     images: source?.images || [],
     ingredients: [] as RecipeIngredient[],
     ratings: [] as RecipeRating[],
-  };
+    recommendations_recipes: [] as number[],
+  }
 
   payloadReplaces.ratings =
     source?.ratings?.map((r) => {
-      const rep = { user: null as number | null };
+      const rep = { user: null as number | null }
       if (r.user?.id) {
-        rep.user = r.user.id;
+        rep.user = r.user.id
       }
-      return Object.assign({}, r, rep);
-    }) || [];
+      return Object.assign({}, r, rep)
+    }) || []
 
   payloadReplaces.ingredients =
     source?.ingredients?.map((r) => {
       const rep = {
         ingredient: r.ingredient.id,
-      };
-      return Object.assign({}, r, rep);
-    }) || [];
+      }
+      return Object.assign({}, r, rep)
+    }) || []
+
+  payloadReplaces.recommendations_recipes =
+    source?.recommendations_recipes?.map((r) => {
+      return r.id
+    }) || []
 
   return Object.assign({}, source, payloadReplaces);
 }

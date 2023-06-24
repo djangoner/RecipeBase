@@ -2,9 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Nested } from './Nested';
 import type { RecipeIngredient } from './RecipeIngredient';
 import type { RecipeRating } from './RecipeRating';
+import type { RecipeTag } from './RecipeTag';
 
 /**
  * A ModelSerializer that takes additional arguments for
@@ -20,6 +20,8 @@ export type RecipeShort = {
     readonly is_planned: boolean;
     ingredients?: Array<RecipeIngredient>;
     ratings?: Array<RecipeRating>;
+    recommendations_tags: Array<RecipeTag>;
+    recommendations_recipes?: Array<number | null>;
     title: string;
     short_description?: string | null;
     comment?: string | null;
@@ -32,6 +34,4 @@ export type RecipeShort = {
     is_archived?: boolean;
     readonly price_part: number;
     readonly price_full: number;
-    readonly recommendations_recipes: Array<Nested>;
-    readonly recommendations_tags: Array<Nested>;
 };

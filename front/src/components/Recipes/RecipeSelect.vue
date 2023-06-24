@@ -10,6 +10,7 @@
     clearable
     options-dense
     :dense="dense"
+    v-bind="$attrs"
     @update:model-value="$emit('update:model-value', $event)"
     @filter="filterRecipes"
     @virtual-scroll="onScroll"

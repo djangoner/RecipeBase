@@ -2,7 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Nested } from './Nested';
 import type { RecipeImage } from './RecipeImage';
 import type { RecipeIngredientRead } from './RecipeIngredientRead';
 import type { RecipeRatingRead } from './RecipeRatingRead';
@@ -26,6 +25,8 @@ export type RecipeRead = {
     ingredients?: Array<RecipeIngredientRead>;
     ratings?: Array<RecipeRatingRead>;
     readonly author: ShortUser;
+    recommendations_tags: Array<RecipeTag>;
+    recommendations_recipes?: Array<number | null>;
     title: string;
     content?: string;
     content_source?: string;
@@ -40,6 +41,4 @@ export type RecipeRead = {
     is_archived?: boolean;
     readonly price_part: number;
     readonly price_full: number;
-    readonly recommendations_recipes: Array<Nested>;
-    readonly recommendations_tags: Array<Nested>;
 };

@@ -79,6 +79,13 @@
             <q-card-section>
               <recipe-info :recipe="recipe" />
               <recipe-prices :recipe="recipe" />
+              <!-- Recommendations -->
+              <q-expansion-item label="Рекомендации">
+                <recipe-recommendations
+                  v-model:recipe="recipe"
+                  :edit="edit"
+                />
+              </q-expansion-item>
               <!-- Ingredients -->
               <recipe-ingredients
                 v-model:recipe="recipe"
@@ -109,6 +116,7 @@
 </template>
 
 <script lang="ts">
+import RecipeRecommendations from '../components/Recipes/RecipeRecommendations.vue'
 import RecipeInfoEdit from '../components/Recipes/RecipeInfoEdit.vue'
 
 import RecipeIngredients from "../components/Recipes/RecipeIngredients.vue"
@@ -152,7 +160,7 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     RecipeIngredients,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    RecipeInfoEdit
+    RecipeInfoEdit, RecipeRecommendations
   },
   mixins: [HandleErrorsMixin],
   beforeRouteUpdate(to) {

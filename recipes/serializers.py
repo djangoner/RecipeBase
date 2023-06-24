@@ -185,6 +185,10 @@ class RecipeSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer,
     ingredients = RecipeIngredientSerializer(many=True, required=False)
     ratings = RecipeRatingSerializer(many=True, required=False)
     author = ShortUserSerializer(read_only=True)
+    recommendations_tags = RecipeTagSerializer(many=True)
+    recommendations_recipes = serializers.PrimaryKeyRelatedField(
+        queryset=Recipe.objects.all(), many=True, required=False, allow_null=True, default=None
+    )
 
     class Meta:
         model = Recipe
@@ -192,9 +196,10 @@ class RecipeSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer,
         read_only_fields = ("author",)
         depth = 2
 
-    # def to_representation(self, instance):
-    #     self.fields["author"] = ShortUserSerializer()
-    #     return super().to_representation(instance)
+    def to_representation(self, instance):
+        self.fields["recommendations_recipes"] = RecipeSerializer(many=True)
+        # self.fields["author"] = ShortUserSerializer()
+        return super().to_representation(instance)
 
     @extend_schema_field(OpenApiTypes.STR)
     def get_short_description_str(self, obj: Recipe):

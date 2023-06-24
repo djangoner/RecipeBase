@@ -126,6 +126,29 @@ def clear_ingredients_recommendations(plan: RecipePlanWeek, recs: list[Recommend
     return res
 
 
+def clear_tags_recommendations(plan: RecipePlanWeek, recs: list[Recommendation]) -> list[Recommendation]:
+    db_plans = plan.plans.all()
+    res = recs.copy()
+
+    for rec in recs:
+        if not rec.recipe_tag or not rec.plan:
+            continue
+
+        for db_plan in db_plans:
+            if rec not in res:
+                continue
+
+            if (
+                db_plan.recipe
+                and db_plan.day
+                and db_plan.day == rec.plan.day
+                and db_plan.recipe.tags.contains(rec.recipe_tag)
+            ):
+                rec.accepted = True
+
+    return res
+
+
 def generate_recommendations(plan: RecipePlanWeek) -> list[Recommendation]:
     res: list[Recommendation] = []
     ## -- Generate recommendations
@@ -134,6 +157,7 @@ def generate_recommendations(plan: RecipePlanWeek) -> list[Recommendation]:
     ## -- Clear recommendations
     res = clear_recipes_recommendations(plan, res)
     res = clear_ingredients_recommendations(plan, res)
+    res = clear_tags_recommendations(plan, res)
 
     ## -- Process and return
     for i in range(len(res)):

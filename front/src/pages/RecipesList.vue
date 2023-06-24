@@ -443,7 +443,7 @@ export default defineComponent({
     loadRecipes() {
       return new Promise((resolve, reject) => {
         const payload = {
-          omit: "content,content_source",
+          omit: "content,content_source,recommendations_ingredients,recommendations_recipes,recommendations_tags",
         } as { [key: string]: string }
 
         payload.search = this.search

@@ -21,10 +21,10 @@
               :key="plan"
             >
               <q-expansion-item
-                :label="getPlan(plan)?.recipe?.title"
                 default-opened
                 dense
               >
+                <!-- Recipe title -->
                 <template #header>
                   <q-item-section avatar>
                     <q-icon
@@ -39,13 +39,18 @@
                         {{ WeekDaysShort[getPlan(plan)?.day] }}.
                       </span>
                       {{ getPlan(plan)?.recipe?.title }}
+
                       <small class="text-grey">
                         ({{ getPlan(plan)?.meal_time?.title }})
                       </small>
+                      <span class="text-grey">
+                        {{ getItemsAccepted(items) }}/{{ getItemsAll(items) }}
+                      </span>
                     </q-item-label>
                   </q-item-section>
                 </template>
 
+                <!-- Recipe Recommendations -->
                 <plan-recommendation
                   v-for="(recommendation, idx) of items"
                   :key="idx"
@@ -71,7 +76,7 @@ import { YearWeek } from "src/modules/Globals"
 import { promiseSetLoading } from "src/modules/StoreCrud"
 import { useBaseStore } from "src/stores/base"
 import { computed, onMounted, PropType, ref, watch } from "vue"
-import { Recommendations } from 'src/client'
+import { RecipePlanWeek, Recommendations } from 'src/client'
 import { WeekDaysShort } from 'src/modules/WeekUtils'
 
 const props = defineProps({
@@ -120,6 +125,14 @@ function onUpdated(){
 
 function getPlan(id: number){
   return store.week_plan?.plans?.find(i => i.id == id)
+}
+
+function getItemsAccepted(items: Recommendations[]){
+  return items.filter(i => i.accepted).length
+}
+
+function getItemsAll(items: Recommendations[]){
+  return items.length
 }
 
 onMounted(() => {

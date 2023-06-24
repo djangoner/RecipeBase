@@ -46,7 +46,7 @@
           <q-btn
             v-if="canCancell"
             label="Отменить"
-            icon="delete"
+            icon="undo"
             color="negative"
             size="sm"
             dense

@@ -357,7 +357,7 @@ class RecipePlanWeekSerializer(serializers.ModelSerializer):
     warnings = serializers.SerializerMethodField()
     edited_first = serializers.SerializerMethodField()
     edited_last = serializers.SerializerMethodField()
-    recommendations_ingredients = RecipeIngredientRecommendationSerializer(many=True)
+    recommendations_ingredients = RecipeIngredientRecommendationSerializer(many=True, read_only=True)
 
     class Meta:
         model = RecipePlanWeek

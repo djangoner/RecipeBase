@@ -1,5 +1,5 @@
-import { useActiveElement, useDebounceFn, useMagicKeys } from "@vueuse/core"
-import { computed, ref, watch } from "vue"
+import { useActiveElement, useDebounceFn, useMagicKeys, tryOnUnmounted } from "@vueuse/core"
+import { computed, Ref, ref, watch } from "vue"
 
 const aliasMap = {
   й: "q",
@@ -37,40 +37,89 @@ const aliasMap = {
   ".": "/",
 }
 
-export function useDebounceFnState(...parameters: Parameters<typeof useDebounceFn>) {
-  const state = ref(false)
-  if (!parameters[2]) {
-    parameters.push({})
-  }
-  if (parameters) {
-    parameters[2]["rejectOnCancel"] = true
-  }
-  const debounced = useDebounceFn(...parameters)
+export interface debounceOptions {
+  maxWait: number
+}
 
-  const wrapped = (...args: Parameters<(typeof parameters)[0]>) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const prom = debounced(...args)
-    const alreadyStarted = state.value
-    if (!alreadyStarted) {
-      state.value = true
-      // console.debug("Started")
+export function useDebounceFnCustom(fn: CallableFunction, ms = 1000, options: debounceOptions = {}) {
+  const timer: Ref<ReturnType<typeof setTimeout> | null> = ref(null)
+  const timerMax: Ref<ReturnType<typeof setTimeout> | null> = ref(null)
+  const state = ref(false)
+
+  const clearTimer = (tm: typeof timer) => {
+    if (tm.value) {
+      console.debug("Cleared timeout")
+      clearTimeout(tm.value)
     }
-    prom
-      .then((value: unknown) => {
-        // console.debug("Then", value)
-        state.value = false
-      })
-      .catch((e) => {
-        // console.debug("Cancelled", e)
-      })
-    return prom
   }
+
+  const callTimer = (isMax = false) => {
+    fn()
+
+    if (isMax) {
+      clearTimer(timerMax)
+    } else {
+      state.value = false
+      clearTimer(timer)
+    }
+  }
+
+  const debounce = () => {
+    clearTimer(timer)
+    state.value = true
+    timer.value = setTimeout(callTimer, ms)
+    if (options.maxWait && !timerMax.value) {
+      clearTimer(timerMax)
+      timerMax.value = setTimeout(callTimer, options.maxWait, ms, true)
+    }
+  }
+
+  tryOnUnmounted(() => {
+    clearTimer(timer)
+    clearTimer(timerMax)
+  })
 
   return {
     state,
-    debounced: wrapped,
+    debounce,
+    callNow: callTimer,
   }
 }
+
+// export function useDebounceFnState(...parameters: Parameters<typeof useDebounceFn>) {
+//   const state = ref(false)
+//   if (!parameters[2]) {
+//     parameters.push({})
+//   }
+//   if (parameters) {
+//     parameters[2]["rejectOnCancel"] = true
+//   }
+//   const debounced = useDebounceFn(...parameters)
+
+//   const wrapped = (...args: Parameters<(typeof parameters)[0]>) => {
+//     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+//     const prom = debounced(...args)
+//     const alreadyStarted = state.value
+//     if (!alreadyStarted) {
+//       state.value = true
+//       // console.debug("Started")
+//     }
+//     prom
+//       .then((value: unknown) => {
+//         // console.debug("Then", value)
+//         state.value = false
+//       })
+//       .catch((e) => {
+//         // console.debug("Cancelled", e)
+//       })
+//     return prom
+//   }
+
+//   return {
+//     state,
+//     debounced: wrapped,
+//   }
+// }
 
 interface KeyBindingMap {
   [keybinding: string]: (keys: string[]) => void

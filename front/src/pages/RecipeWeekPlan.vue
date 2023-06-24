@@ -212,7 +212,7 @@ import { RecipePlanWeekFromRead } from "src/Convert"
 import { date, useQuasar } from "quasar"
 import { WarningPriorities } from "src/modules/Globals"
 import { dateTimeFormat } from "src/modules/Utils"
-import { useDebounceFnState, useShortcutcs } from "src/modules/VueUtils"
+import { useDebounceFnCustom, useDebounceFnState, useShortcutcs } from "src/modules/VueUtils"
 
 type QueryInterface = YearWeek
 
@@ -247,7 +247,7 @@ const showFireworks = ref(false)
 const recommendationsRef = ref(null);
 
 const visibility = useDocumentVisibility()
-const debouncedSaveWeekPlan = useDebounceFnState(saveWeekPlan, 5000, { maxWait: 15000 })
+const debouncedSaveWeekPlan = useDebounceFnCustom(saveWeekPlan, 5000, { maxWait: 15000 })
 
 const week = computed({
   get() {
@@ -412,9 +412,9 @@ function loadWeekPlan() {
 
 function onUpdatePlan(instant = false) {
   if (instant) {
-    saveWeekPlan()
+    void debouncedSaveWeekPlan.callNow()
   } else {
-    void debouncedSaveWeekPlan.debounced()
+    void debouncedSaveWeekPlan.debounce()
   }
 }
 

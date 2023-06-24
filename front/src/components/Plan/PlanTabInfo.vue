@@ -16,7 +16,7 @@
       :readonly="readonly"
       :model-value="currentComment"
       @update:model-value="updateComment"
-      @blur="$emit('update-plan', true)"
+      @blur="onBlur"
     />
   </div>
 </template>
@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { sumArray } from "src/modules/Utils"
 import { useBaseStore } from "src/stores/base"
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
 
 defineProps({
   readonly: {
@@ -36,6 +36,7 @@ const $emit = defineEmits(["update-plan"])
 
 const store = useBaseStore()
 const plan = computed(() => store.week_plan)
+const changed = ref(false)
 
 const commentId = "week"
 
@@ -57,6 +58,18 @@ const updateComment = (value: string | number) => {
   }
 
   plan.value.comments[commentId] = value
+  changed.value = true
   $emit("update-plan", false)
 }
+
+function onBlur(){ // Update plan on blur if changed
+  if (changed.value){
+    $emit('update-plan', true)
+  }
+}
+
+watch(plan, () => {
+  changed.value = false
+})
+
 </script>

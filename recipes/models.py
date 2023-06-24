@@ -278,6 +278,9 @@ class RegularIngredient(models.Model):
     )
     amount = models.FloatField(_("Количество"), max_length=15)
     amount_type = models.CharField(_("Единица измерения"), choices=MEASURING_TYPES, default="g", max_length=15)
+
+    active = models.BooleanField(_("Активен"), default=True)
+
     history = HistoricalRecords()
 
     class Meta:
@@ -286,6 +289,10 @@ class RegularIngredient(models.Model):
 
     def __str__(self):
         return f"{self.ingredient}"
+
+    @classmethod
+    def get_active(cls):
+        return cls.objects.filter(active=True)
 
 
 class RecipeTag(models.Model):

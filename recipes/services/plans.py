@@ -117,7 +117,7 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, WeekIngredientInfo]:
         res[ing_key].amounts.append(extract_ingredient_amount(rec_ing))
 
     # Add regular ingredients
-    for regular_ing in RegularIngredient.objects.all():
+    for regular_ing in RegularIngredient.get_active().all():
         ing_key = regular_ing.ingredient.title
         if ing_key not in res:  # Create default ingredient
             res[ing_key] = WeekIngredientInfo(ingredient=regular_ing.ingredient)

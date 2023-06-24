@@ -101,8 +101,9 @@ class RecipeIngredientAdmin(DjangoQLSearchMixin, SimpleHistoryAdmin):
 
 @admin.register(RegularIngredient)
 class RegularIngredientAdmin(DjangoQLSearchMixin, SimpleHistoryAdmin):
-    list_display = ["ingredient", "amount", "amount_type"]
+    list_display = ["ingredient", "amount", "amount_type", "active"]
     search_fields = ["ingredient__title"]
+    list_editable = ["amount", "amount_type", "active"]
     autocomplete_fields = ["ingredient"]
 
 

@@ -3,15 +3,14 @@
 /* eslint-disable */
 
 import type { RecipeIngredientRecommendation } from './RecipeIngredientRecommendation';
-import type { RecipeRead } from './RecipeRead';
 import type { RecipeTag } from './RecipeTag';
 
 export type Recommendations = {
     idx: number;
     accepted: boolean;
     hash: string;
-    recipe: RecipeRead;
     recipe_tag: RecipeTag;
     ingredient: RecipeIngredientRecommendation;
     plan: number;
+    readonly recipe: Record<string, any>;
 };

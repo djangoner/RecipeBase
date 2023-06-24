@@ -81,10 +81,12 @@
               <recipe-prices :recipe="recipe" />
               <!-- Recommendations -->
               <q-expansion-item label="Рекомендации">
+                <q-separator />
                 <recipe-recommendations
                   v-model:recipe="recipe"
                   :edit="edit"
                 />
+                <q-separator />
               </q-expansion-item>
               <!-- Ingredients -->
               <recipe-ingredients

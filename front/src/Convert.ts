@@ -69,12 +69,23 @@ export function RecipeFromRead(source: RecipeRead | null): Recipe {
       return Object.assign({}, r, rep)
     }) || []
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   payloadReplaces.recommendations_recipes =
     source?.recommendations_recipes?.map((r) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return r.id
     }) || []
 
-  return Object.assign({}, source, payloadReplaces);
+  payloadReplaces.recommendations_ingredients =
+    source?.recommendations_ingredients?.map((r) => {
+      const rep = {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        ingredient: r.ingredient.id,
+      }
+      return Object.assign({}, r, rep)
+    }) || []
+
+  return Object.assign({}, source, payloadReplaces)
 }
 
 export function productListItemFromRead(

@@ -129,13 +129,13 @@ const iconName = computed(() => {
 
 const sectionTitle = computed(() => {
   if (rec.value.recipe){
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return rec.value.recipe.title
   } else if (rec.value.recipe_tag){
     return rec.value.recipe_tag.title
   } else if (rec.value.ingredient){
-    const ingId = rec.value.ingredient.ingredient
-    const ing = getIngredient(ingId)
-    return ing?.title
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return rec.value.ingredient.ingredient?.title
   }
   return "?"
 })

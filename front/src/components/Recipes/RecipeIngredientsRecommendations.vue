@@ -1,13 +1,13 @@
 <template>
   <div class="q-my-sm">
     <div class="text-h6 text-center q-mb-sm">
-      Ингредиенты:
+      Рекомендовать ингредиенты:
     </div>
 
     <q-table
-      v-if="(recipe?.ingredients || [])?.length > 0 || edit"
+      v-if="(recipe?.recommendations_ingredients || [])?.length > 0 || edit"
       class="no-bottom"
-      :rows="recipe.ingredients"
+      :rows="recipe.recommendations_ingredients"
       :columns="ingredientsColumns"
       :rows-per-page-options="[0]"
       :hide-pagination="true"
@@ -49,7 +49,7 @@
         </td>
       </template>
 
-      <template #body-cell-is_main="slotScope">
+      <!-- <template #body-cell-is_main="slotScope">
         <td
           class="text-right"
           style="width: 30px"
@@ -60,7 +60,7 @@
             size="sm"
           />
         </td>
-      </template>
+      </template> -->
 
       <!-- Custom columns -->
       <template
@@ -107,7 +107,7 @@
           <td colspan="3">
             <ingredient-select
               v-model:ingredient="addIngredientSelect"
-              label="Добавить ингредиент"
+              label="Добавить рекомендованный ингредиент"
               :required="false"
             />
           </td>
@@ -130,7 +130,7 @@
 <script setup lang="ts">
 import AmountTypeSelect from "../Products/AmountTypeSelect.vue"
 import IngredientSelect from "./IngredientSelect.vue"
-import { IngredientRead, RecipeIngredientRead, RecipeRead } from "src/client"
+import { IngredientRead, RecipeIngredientRecommendation, RecipeRead } from "src/client"
 import { computed, PropType, Ref, ref, watch } from "vue"
 import { useQuasar } from "quasar"
 
@@ -154,7 +154,8 @@ const ingredientsColumnsRaw = [
   {
     name: "title",
     label: "Название",
-    field: (row: RecipeIngredientRead) => row.ingredient?.title,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    field: (row: RecipeIngredientRecommendation) => row.ingredient?.title,
     required: true,
     sortable: true,
     style: "width: 50px",
@@ -170,34 +171,33 @@ const ingredientsColumnsRaw = [
   {
     name: "amount_rec",
     label: "Вес (рецепт)",
-    field: (row: RecipeIngredientRead) => String(row.amount) + "  (" + row.amount_type_str + ")",
+    field: (row: RecipeIngredientRecommendation) => String(row.amount) + "  (" + row.amount_type_str + ")",
     required: true,
     sortable: true,
     style: "width: 20px",
   },
-  {
-    name: "amount_g",
-    label: "Вес (гр.)",
-    field: (row: RecipeIngredientRead) => (row.amount_grams ? String(row.amount_grams) + " гр." : "-"),
-    required: true,
-    sortable: true,
-    style: "width: 30px",
-  },
-  {
-    name: "is_main",
-    label: "Основной",
-    field: "is_main",
-    required: true,
-    sortable: true,
-    style: "width: 30px",
-  },
+  // {
+  //   name: "amount_g",
+  //   label: "Вес (гр.)",
+  //   field: (row: RecipeIngredientRecommendation) => (row.amount_grams ? String(row.amount_grams) + " гр." : "-"),
+  //   required: true,
+  //   sortable: true,
+  //   style: "width: 30px",
+  // },
+  // {
+  //   name: "is_main",
+  //   label: "Основной",
+  //   field: "is_main",
+  //   required: true,
+  //   sortable: true,
+  //   style: "width: 30px",
+  // },
 ]
 
 const ingAddDefault = {
   select: null as { id: number | null; title: string } | null,
   amount: null,
   amount_type: "g",
-  is_main: false,
 }
 
 const ingredientsColumns = computed(() => {
@@ -229,9 +229,9 @@ const ingredientsColumns = computed(() => {
   return columns
 })
 
-function updateIngredients(ings: RecipeIngredientRead[]) {
+function updateIngredients(ings: RecipeIngredientRecommendation[]) {
   const newRecipe = Object.assign({}, props.recipe)
-  newRecipe.ingredients = ings
+  newRecipe.recommendations_ingredients = ings
   console.debug("Update recipe: ", newRecipe)
   $emit("update:recipe", newRecipe)
 }
@@ -249,28 +249,29 @@ function addIngredient(ingredient?: IngredientRead) {
   })
 
   // @ts-expect-error new ingredient creation
-  updateIngredients([].concat(props.recipe.ingredients, newIngredient))
+  updateIngredients([].concat(props.recipe.recommendations_ingredients, newIngredient))
   addIngredientSelect.value = undefined
 }
 
-function removeIngredient(row: RecipeIngredientRead) {
+function removeIngredient(row: RecipeIngredientRecommendation) {
   console.debug("Remove ingredient: ", row)
   updateIngredients(
-    props.recipe?.ingredients?.filter((t) => {
+    props.recipe?.recommendations_ingredients?.filter((t) => {
       return t != row
     }) || []
   )
 }
 
-function askRemoveIngredient(row: RecipeIngredientRead) {
+function askRemoveIngredient(row: RecipeIngredientRecommendation) {
   if (!props.recipe) {
     return
   }
 
   console.debug("Ask Remove ingredient: ", row)
   $q.dialog({
-    title: "Подтверждение удаления ингредиента",
-    message: `Вы уверены что хотите удалить ингредиент '${row?.ingredient?.title || "Новый ингредиент"}' ?`,
+    title: "Подтверждение удаления рекомендованного ингредиента",
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    message: `Вы уверены что хотите удалить рекомендованный ингредиент '${row?.ingredient?.title || "Новый ингредиент"}' ?`,
     cancel: true,
     persistent: true,
   }).onOk(() => {

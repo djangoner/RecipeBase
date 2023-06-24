@@ -4,7 +4,6 @@
 
 import type { RecipeIngredient } from './RecipeIngredient';
 import type { RecipeRating } from './RecipeRating';
-import type { RecipeTag } from './RecipeTag';
 
 /**
  * A ModelSerializer that takes additional arguments for
@@ -20,8 +19,6 @@ export type RecipeShort = {
     readonly is_planned: boolean;
     ingredients?: Array<RecipeIngredient>;
     ratings?: Array<RecipeRating>;
-    recommendations_tags: Array<RecipeTag>;
-    recommendations_recipes?: Array<number | null>;
     title: string;
     short_description?: string | null;
     comment?: string | null;

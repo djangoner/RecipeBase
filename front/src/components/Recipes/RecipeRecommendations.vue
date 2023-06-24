@@ -15,10 +15,15 @@
       outlined
       use-chips
     />
+    <recipe-ingredients-recommendations
+      v-model:recipe="value"
+      :edit="edit"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import RecipeIngredientsRecommendations from './RecipeIngredientsRecommendations.vue'
 import RecipeSelect from './RecipeSelect.vue'
 import RecipeTagsSelect from './RecipeTagsSelect.vue'
 import { RecipeRead } from "src/client"

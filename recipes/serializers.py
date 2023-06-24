@@ -175,6 +175,42 @@ class RecipeRatingReadSerializer(RecipeRatingSerializer):
     user = ShortUserSerializer()
 
 
+class RecipeIngredientRecommendationSerializer(serializers.ModelSerializer):
+    # ingredient = IngredientReadSerializer()
+    ingredient = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all(), required=False, allow_null=True, default=None
+    )
+    amount_type_str = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RecipeIngredientRecommendation
+        exclude = ()
+
+    def to_representation(self, instance):
+        self.fields["ingredient"] = IngredientSerializer(instance.ingredient) if instance.ingredient else None
+        return super().to_representation(instance)
+
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_amount_type_str(self, obj):
+        if not obj.amount_type:
+            return ""
+        return measuring_str(obj.amount_type)
+
+
+class RecommendationsSerializer(serializers.Serializer):
+    idx = serializers.IntegerField()
+    accepted = serializers.BooleanField()
+    hash = serializers.CharField()
+    # recipe = RecipeReadSerializer()
+    recipe_tag = RecipeTagSerializer()
+    ingredient = RecipeIngredientRecommendationSerializer()
+    plan = serializers.IntegerField()
+
+    def to_representation(self, instance):
+        self.fields["recipe"] = RecipeShortSerializer()
+        return super().to_representation(instance)
+
+
 class RecipeSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):
     short_description_str = serializers.SerializerMethodField()
     last_cooked = serializers.SerializerMethodField()
@@ -189,6 +225,7 @@ class RecipeSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer,
     recommendations_recipes = serializers.PrimaryKeyRelatedField(
         queryset=Recipe.objects.all(), many=True, required=False, allow_null=True, default=None
     )
+    recommendations_ingredients = RecipeIngredientRecommendationSerializer(many=True)
 
     class Meta:
         model = Recipe
@@ -197,7 +234,7 @@ class RecipeSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer,
         depth = 2
 
     def to_representation(self, instance):
-        self.fields["recommendations_recipes"] = RecipeSerializer(many=True)
+        self.fields["recommendations_recipes"] = RecipeShortSerializer(many=True)
         # self.fields["author"] = ShortUserSerializer()
         return super().to_representation(instance)
 
@@ -258,10 +295,16 @@ class RecipeShortSerializer(RecipeSerializer):
     content = None  # type: ignore
     content_source = None  # type: ignore
     images = None  # type: ignore
+    recommendations_recipes = None  # type: ignore
+    recommendations_ingredients = None  # type: ignore
+    recommendations_tags = None  # type: ignore
     # is_planned = None  # type: ignore
 
     class Meta(RecipeSerializer.Meta):
-        exclude = tuple(list(RecipeSerializer.Meta.exclude) + ["author", "content", "content_source", "tags"])
+        exclude = tuple(
+            list(RecipeSerializer.Meta.exclude)
+            + ["author", "content", "content_source", "tags", "recommendations_recipes", "recommendations_tags"]
+        )
 
 
 class RecipeForRecipeIngredientSerializer(RecipeShortSerializer):
@@ -331,30 +374,6 @@ class ConditionWarningSerializer(serializers.Serializer):
         fields = super().get_fields()
         fields["childrens"] = ConditionWarningSerializer(many=True)
         return fields
-
-
-class RecipeIngredientRecommendationSerializer(serializers.ModelSerializer):
-    amount_type_str = serializers.SerializerMethodField()
-
-    class Meta:
-        model = RecipeIngredientRecommendation
-        exclude = ()
-
-    @extend_schema_field(OpenApiTypes.STR)
-    def get_amount_type_str(self, obj):
-        if not obj.amount_type:
-            return ""
-        return measuring_str(obj.amount_type)
-
-
-class RecommendationsSerializer(serializers.Serializer):
-    idx = serializers.IntegerField()
-    accepted = serializers.BooleanField()
-    hash = serializers.CharField()
-    recipe = RecipeReadSerializer()
-    recipe_tag = RecipeTagSerializer()
-    ingredient = RecipeIngredientRecommendationSerializer()
-    plan = serializers.IntegerField()
 
 
 class RecipePlanWeekSerializer(serializers.ModelSerializer):

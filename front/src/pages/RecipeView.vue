@@ -5,6 +5,7 @@
         <q-btn
           icon="arrow_back"
           size="sm"
+          color="grey"
           @click="$router.go(-1)"
         >
           Назад
@@ -33,7 +34,7 @@
       >
         <div class="col-xs-12 col-md-6">
           <!--  col-lg-8 -->
-          <q-card>
+          <q-card class="shadow-1">
             <q-card-section
               class="flex column"
               :class="dense ? 'q-gutter-y-sm' : 'q-gutter-y-md'"
@@ -51,6 +52,8 @@
                     icon="save"
                     color="positive"
                     :loading="saving"
+                    no-caps
+                    unelevated
                     @click="saveAndContinue = false"
                   >
                     Сохранить
@@ -63,6 +66,8 @@
                     icon="save"
                     color="positive"
                     :loading="saving"
+                    no-caps
+                    unelevated
                     @click="saveAndContinue = true"
                   >
                     Сохранить и продолжить
@@ -75,10 +80,19 @@
         <div class="col-xs-12 col-md-6 q-gutter-y-sm">
           <!--  col-lg-4 -->
           <!-- Aside information -->
-          <q-card class="q-mt-none position-sticky">
+          <q-card class="q-mt-none position-sticky shadow-1">
             <q-card-section>
               <recipe-info :recipe="recipe" />
               <recipe-prices :recipe="recipe" />
+              <!-- Recommendations -->
+              <q-expansion-item label="Рекомендации">
+                <q-separator />
+                <recipe-recommendations
+                  v-model:recipe="recipe"
+                  :edit="edit"
+                />
+                <q-separator />
+              </q-expansion-item>
               <!-- Ingredients -->
               <recipe-ingredients
                 v-model:recipe="recipe"
@@ -109,6 +123,7 @@
 </template>
 
 <script lang="ts">
+import RecipeRecommendations from '../components/Recipes/RecipeRecommendations.vue'
 import RecipeInfoEdit from '../components/Recipes/RecipeInfoEdit.vue'
 
 import RecipeIngredients from "../components/Recipes/RecipeIngredients.vue"
@@ -152,7 +167,7 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     RecipeIngredients,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    RecipeInfoEdit
+    RecipeInfoEdit, RecipeRecommendations
   },
   mixins: [HandleErrorsMixin],
   beforeRouteUpdate(to) {

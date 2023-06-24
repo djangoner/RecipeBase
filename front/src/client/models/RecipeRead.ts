@@ -4,6 +4,7 @@
 
 import type { RecipeImage } from './RecipeImage';
 import type { RecipeIngredientRead } from './RecipeIngredientRead';
+import type { RecipeIngredientRecommendation } from './RecipeIngredientRecommendation';
 import type { RecipeRatingRead } from './RecipeRatingRead';
 import type { RecipeTag } from './RecipeTag';
 import type { ShortUser } from './ShortUser';
@@ -25,6 +26,9 @@ export type RecipeRead = {
     ingredients?: Array<RecipeIngredientRead>;
     ratings?: Array<RecipeRatingRead>;
     readonly author: ShortUser;
+    recommendations_tags: Array<RecipeTag>;
+    recommendations_recipes?: Array<number | null>;
+    recommendations_ingredients: Array<RecipeIngredientRecommendation>;
     title: string;
     content?: string;
     content_source?: string;

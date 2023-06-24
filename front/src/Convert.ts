@@ -49,26 +49,43 @@ export function RecipeFromRead(source: RecipeRead | null): Recipe {
     images: source?.images || [],
     ingredients: [] as RecipeIngredient[],
     ratings: [] as RecipeRating[],
-  };
+    recommendations_recipes: [] as number[],
+  }
 
   payloadReplaces.ratings =
     source?.ratings?.map((r) => {
-      const rep = { user: null as number | null };
+      const rep = { user: null as number | null }
       if (r.user?.id) {
-        rep.user = r.user.id;
+        rep.user = r.user.id
       }
-      return Object.assign({}, r, rep);
-    }) || [];
+      return Object.assign({}, r, rep)
+    }) || []
 
   payloadReplaces.ingredients =
     source?.ingredients?.map((r) => {
       const rep = {
         ingredient: r.ingredient.id,
-      };
-      return Object.assign({}, r, rep);
-    }) || [];
+      }
+      return Object.assign({}, r, rep)
+    }) || []
 
-  return Object.assign({}, source, payloadReplaces);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  payloadReplaces.recommendations_recipes =
+    source?.recommendations_recipes?.map((r) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return r.id
+    }) || []
+
+  payloadReplaces.recommendations_ingredients =
+    source?.recommendations_ingredients?.map((r) => {
+      const rep = {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        ingredient: r.ingredient.id,
+      }
+      return Object.assign({}, r, rep)
+    }) || []
+
+  return Object.assign({}, source, payloadReplaces)
 }
 
 export function productListItemFromRead(

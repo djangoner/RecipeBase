@@ -5,12 +5,7 @@ from django.db.models import Count, F, Max, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters import rest_framework as filters
-from rest_framework import (
-    decorators,
-    response,
-    viewsets,
-    permissions,
-)
+from rest_framework import decorators, response, viewsets, permissions, exceptions
 
 # from django_q.tasks import async_task
 from recipes.models import (
@@ -31,6 +26,12 @@ from recipes.models import (
     WeekPlanCondition,
 )
 from recipes.services.conditions import process_conditions_tree, warnings_json
+from recipes.services.recommendations import (
+    accept_recommendation,
+    cancel_recommendation,
+    find_recommendation,
+    generate_recommendations,
+)
 from telegram_bot.services.notifications import send_notif_synced, send_product_list
 from tasks.models import Task
 from recipes.serializers import (
@@ -56,6 +57,7 @@ from recipes.serializers import (
     RecipeShortSerializer,
     RecipeTagSerializer,
     IngredientCategorySerializer,
+    RecommendationsSerializer,
     RegularIngredientSerializer,
     ShopSerializer,
     StatusOkSerializer,
@@ -374,8 +376,8 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
 
         return self.serializer_class
 
-    def get_object(self):
-        pk = self.kwargs.get("pk", None)
+    def get_object(self, pk: str | None = None):
+        pk = self.kwargs.get("pk", pk)
         year, week = None, None
         if pk in ["current", "now"]:
             year, week = datetime.now().year, datetime.now().isocalendar()[1]
@@ -397,16 +399,76 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
     )
     @decorators.action(["GET"], detail=True)
     def warnings(self, request, pk=None):
-        year, week = None, None
-        try:
-            year, week = pk.split("_")
-        except ValueError:
-            pass
-        plan = get_object_or_404(RecipePlanWeek, year=year, week=week)
+        plan = self.get_object()
 
         conditions = process_conditions_tree(plan)
         warnings = warnings_json(conditions.warnings)
         return response.Response(warnings)
+
+    @extend_schema(
+        parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)],
+        responses=RecommendationsSerializer,
+    )
+    @decorators.action(["GET"], detail=True)
+    def recommendations(self, request, pk=None):
+        plan = self.get_object()
+
+        recommendations = generate_recommendations(plan).copy()
+
+        data_json = []
+        for i in recommendations:
+            i.plan = i.plan.pk  # noqa
+            data_json.append(RecommendationsSerializer(i).data)
+
+        return response.Response(data_json)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH),
+            OpenApiParameter("recommendation", OpenApiTypes.STR, OpenApiParameter.QUERY),
+        ],
+        request=None,
+        responses=StatusOkSerializer,
+    )
+    @decorators.action(["POST"], detail=True)
+    def recommendation_accept(self, request, pk=None):
+        plan = self.get_object()
+        recommendation_id = request.GET.get("recommendation")
+
+        if not recommendation_id:
+            raise exceptions.ValidationError("Invalid empty recommendation", code="invalid_recommendation")
+
+        # recommendation_obj = from_dict(data_class=data=recommendation)
+        recommendation = find_recommendation(plan, recommendation_id)
+        if not recommendation:
+            raise exceptions.ValidationError("Invalid recommendation", code="invalid_recommendation")
+        accept_recommendation(plan, recommendation)
+
+        return response.Response({"ok": True})
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH),
+            OpenApiParameter("recommendation", OpenApiTypes.STR, OpenApiParameter.QUERY),
+        ],
+        request=None,
+        responses=StatusOkSerializer,
+    )
+    @decorators.action(["POST"], detail=True)
+    def recommendation_cancel(self, request, pk=None):
+        plan = self.get_object()
+        recommendation_id = request.GET.get("recommendation")
+
+        if not recommendation_id:
+            raise exceptions.ValidationError("Invalid empty recommendation", code="invalid_recommendation")
+
+        # recommendation_obj = from_dict(data_class=data=recommendation)
+        recommendation = find_recommendation(plan, recommendation_id)
+        if not recommendation:
+            raise exceptions.ValidationError("Invalid recommendation", code="invalid_recommendation")
+        cancel_recommendation(plan, recommendation)
+
+        return response.Response({"ok": True})
 
 
 @extend_schema_view(

@@ -42,11 +42,13 @@ def get_product_list(year: int, week: int):
 
 def unactual_product_list(year: int, week: int):
     product_week = get_product_list(year, week)
-    print("Unactual Product List ", year, week, product_week)
     if product_week and product_week.is_actual:
-        print("CHANGING")
         product_week.is_actual = False
         product_week.save(update_fields=["is_actual"])
+
+
+def unactual_plan_product_list(plan: RecipePlanWeek):
+    unactual_product_list(plan.year, plan.week)
 
 
 @receiver(pre_save, sender=RecipeIngredient)

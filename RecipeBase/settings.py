@@ -62,6 +62,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # 3-party
+    "constance",
+    "constance.backends.database",
     "adminsortable",
     "cachalot",
     "ckeditor",
@@ -132,7 +134,9 @@ if TESTING:
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": os.getenv("CHANNELS_BACKEND", "channels.layers.InMemoryChannelLayer"),
+        "BACKEND": os.getenv(
+            "CHANNELS_BACKEND", "channels.layers.InMemoryChannelLayer"
+        ),
         #     "CONFIG": {
         #         "hosts": json.loads(os.getenv("CHANNELS_HOSTS", "[]"))
         #     }
@@ -172,7 +176,9 @@ else:
 
 CACHES = {
     "default": {
-        "BACKEND": os.getenv("CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"),
+        "BACKEND": os.getenv(
+            "CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"
+        ),
         "LOCATION": os.getenv("CACHE_LOCATION", None),
         "KEY_PREFIX": os.getenv("CACHE_PREFIX", "recipebase"),
     }
@@ -240,7 +246,16 @@ if DEBUGBAR:
 
 
 COMPUTEDFIELDS_ADMIN = True
+CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
+# CONSTANCE_BACKEND = 'constance.backends.memory.MemoryBackend'
+# CONSTANCE_DATABASE_CACHE_BACKEND = 'default'
 
+CONSTANCE_ADDITIONAL_FIELDS = {
+    # "select_meal_time": ['django.forms.IntegerField', {
+    #     "queryset": get_qs_meal_time
+    # }]
+}
+CONSTANCE_CONFIG = {"RECOMMENDATION_MEAL_TIME": (1, "Recommendation meal time", int)}
 
 CKEDITOR_CONFIGS = {
     "default": {

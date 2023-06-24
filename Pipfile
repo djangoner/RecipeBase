@@ -30,6 +30,9 @@ django-imagekit = "*"
 djangoql = "*"
 django-computedfields = "*"
 tqdm = "*"
+django-constance = "*"
+dacite = "*"
+django-picklefield = "*"
 
 [dev-packages]
 pytest = "*"

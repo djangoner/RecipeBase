@@ -4,6 +4,7 @@
 
 import type { RecipeImage } from './RecipeImage';
 import type { RecipeIngredient } from './RecipeIngredient';
+import type { RecipeIngredientRecommendation } from './RecipeIngredientRecommendation';
 import type { RecipeRating } from './RecipeRating';
 import type { RecipeTag } from './RecipeTag';
 import type { ShortUser } from './ShortUser';
@@ -25,6 +26,9 @@ export type PatchedRecipe = {
     ingredients?: Array<RecipeIngredient>;
     ratings?: Array<RecipeRating>;
     readonly author?: ShortUser;
+    recommendations_tags?: Array<RecipeTag>;
+    recommendations_recipes?: Array<number | null>;
+    recommendations_ingredients?: Array<RecipeIngredientRecommendation>;
     title?: string;
     content?: string;
     content_source?: string;

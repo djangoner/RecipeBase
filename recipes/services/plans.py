@@ -8,6 +8,7 @@ from recipes.models import (
     ProductListItem,
     ProductListWeek,
     RecipeIngredient,
+    RecipeIngredientRecommendation,
     RecipePlan,
     RecipePlanWeek,
     RegularIngredient,
@@ -66,7 +67,7 @@ def get_ingredient_key(ing: RecipeIngredient):
     return ing.ingredient.title
 
 
-def extract_ingredient_amount(ing: RecipeIngredient | RegularIngredient):
+def extract_ingredient_amount(ing: RecipeIngredient | RegularIngredient | RecipeIngredientRecommendation):
     if (
         ing.amount_type == "items" and ing.ingredient.item_weight and ing.ingredient.type != "item"
     ):  # Convert items to grams
@@ -105,6 +106,15 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, WeekIngredientInfo]:
             # -- Update ingredient min_day
             if plan.day and plan.day < ing_info.min_day:
                 ing_info.min_day = plan.day
+
+    # Add recommendations ingredients
+    rec_ing: RecipeIngredientRecommendation
+    for rec_ing in week.recommendations_ingredients.all():
+        ing_key = rec_ing.ingredient.title
+        if ing_key not in res:  # Create default ingredient
+            res[ing_key] = WeekIngredientInfo(ingredient=rec_ing.ingredient)
+
+        res[ing_key].amounts.append(extract_ingredient_amount(rec_ing))
 
     # Add regular ingredients
     for regular_ing in RegularIngredient.objects.all():

@@ -7,7 +7,15 @@
       name="info"
       icon="info"
       class="text-info"
-    />
+    >
+      <q-badge
+        v-if="weekCommentFilled"
+        color="teal"
+        floating
+      >
+        <q-icon name="comment" />
+      </q-badge>
+    </q-tab>
     <q-tab
       name="warnings"
       icon="warning"
@@ -182,6 +190,9 @@ export default defineComponent({
       }
       return this.store.condWarnings.length;
     },
+    weekCommentFilled(){
+      return Boolean(this.plan?.comments["week"]) || false
+    }
   },
   watch: {
     tab(val: string) {

@@ -185,7 +185,6 @@
         </template>
       </div>
 
-
       <!-- Aside filters -->
       <transition
         appear
@@ -222,22 +221,17 @@
 </template>
 
 <script lang="ts">
-import RecipesListFilters from '../components/Recipes/RecipesListFilters.vue'
-import { useQuery } from "@oarepo/vue-query-synchronizer";
-import recipeCard from "components/RecipeCard.vue";
-import { date, debounce, QTableProps, SessionStorage } from "quasar";
-import {
-  PaginatedRecipeReadList,
-  RecipeRead,
-} from "src/client";
-import { RecipesFilters, TablePagination, TablePropsOnRequest } from "src/modules/Globals";
-import HandleErrorsMixin, {
-  CustomAxiosError,
-} from "src/modules/HandleErrorsMixin";
-import { clearPayload } from "src/modules/Utils";
-import { useAuthStore } from "src/stores/auth";
-import { useBaseStore } from "src/stores/base.js";
-import { defineComponent } from "vue";
+import RecipesListFilters from "../components/Recipes/RecipesListFilters.vue"
+import { useQuery } from "@oarepo/vue-query-synchronizer"
+import recipeCard from "components/RecipeCard.vue"
+import { date, debounce, QTableProps, SessionStorage } from "quasar"
+import { PaginatedRecipeReadList, RecipeRead } from "src/client"
+import { RecipesFilters, TablePagination, TablePropsOnRequest } from "src/modules/Globals"
+import HandleErrorsMixin, { CustomAxiosError } from "src/modules/HandleErrorsMixin"
+import { clearPayload } from "src/modules/Utils"
+import { useAuthStore } from "src/stores/auth"
+import { useBaseStore } from "src/stores/base.js"
+import { defineComponent } from "vue"
 
 const orderingOptions = [
   { label: "Кол-во приготовлений - по возрастанию", value: "cooked_times" },
@@ -252,7 +246,7 @@ const orderingOptions = [
   { label: "Полная цена - по убыванию", value: "-price_full" },
   { label: "Название - по возрастанию", value: "title" },
   { label: "Название - по убыванию", value: "-title" },
-];
+]
 
 const tableColumns = [
   {
@@ -289,45 +283,48 @@ const tableColumns = [
   {
     name: "created",
     label: "Создан",
-    field: (r: RecipeRead) =>
-      r.created ? date.formatDate(r.created, "YYYY.MM.DD hh:mm") : "",
+    field: (r: RecipeRead) => (r.created ? date.formatDate(r.created, "YYYY.MM.DD hh:mm") : ""),
     required: true,
     sortable: true,
     style: "width: 50px",
   },
-] as QTableProps["columns"];
-
-
+] as QTableProps["columns"]
 
 interface QueryInterface {
-  compilation?: string;
-  display: string;
+  compilation?: string
+  display: string
 }
 
 const defaultFilters = {
-      cooking_time: { min: 5, max: 120 },
-      price: { min: 0, max: 1000 },
-      priceUseFull: false,
-      tags_include: [],
-      tags_exclude: [],
-      ingredients_include: [],
-      ingredients_exclude: [],
-      ratings: {},
-    } as RecipesFilters;
+  cooking_time: { min: 5, max: 120 },
+  price: { min: 0, max: 1000 },
+  priceUseFull: false,
+  tags_include: [],
+  tags_exclude: [],
+  ingredients_include: [],
+  ingredients_exclude: [],
+  ratings: {},
+} as RecipesFilters
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   components: { recipeCard, RecipesListFilters },
   mixins: [HandleErrorsMixin],
   data() {
-    const store = useBaseStore();
-    const storeAuth = useAuthStore();
-
+    const store = useBaseStore()
+    const storeAuth = useAuthStore()
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const emptyFunc = () => {};
+    const emptyFunc = () => {}
 
-    const initialFilters = SessionStorage.getItem("recipesFilters") || defaultFilters
+    const reset = Boolean(this.$route.query.reset)
+
+    const initialFilters = reset ? defaultFilters : SessionStorage.getItem("recipesFilters") as RecipesFilters || defaultFilters
+
+    const searchTag = this.$route.query.q_tag
+    if (searchTag){
+      initialFilters.tags_include.push(Number(searchTag))
+    }
 
     return {
       store,
@@ -346,62 +343,50 @@ export default defineComponent({
       } as TablePagination,
       // compilation: this.$query.compilation,
       showFilters: this.$q.localStorage.getItem("recipesShowFilters"),
-      filters: Object.assign({}, initialFilters) as RecipesFilters,
+      filters: Object.assign({}, initialFilters) ,
       filtersDefault: JSON.parse(JSON.stringify(defaultFilters)) as RecipesFilters,
       orderingOptions,
       debounceLoadRecipes: emptyFunc,
-    };
+    }
   },
 
   computed: {
     recipes() {
-      return this.store.recipes;
+      return this.store.recipes
     },
     compilation: {
       get() {
-        return (this.$query as unknown as QueryInterface).compilation;
+        return (this.$query as unknown as QueryInterface).compilation
       },
       set(val: string) {
-        (this.$query as unknown as QueryInterface).compilation = val;
+        ;(this.$query as unknown as QueryInterface).compilation = val
       },
     },
     displayMode: {
       get() {
-        return (this.$query as unknown as QueryInterface).display;
+        return (this.$query as unknown as QueryInterface).display
       },
       set(val: string) {
-        (this.$query as unknown as QueryInterface).display = val;
+        ;(this.$query as unknown as QueryInterface).display = val
       },
     },
     totalPages(): number | null {
-      if (
-        !this.tablePagination.rowsNumber ||
-        !this.tablePagination.rowsPerPage
-      ) {
-        return null;
+      if (!this.tablePagination.rowsNumber || !this.tablePagination.rowsPerPage) {
+        return null
       }
-      return (
-        Math.ceil(
-          this.tablePagination?.rowsNumber / this.tablePagination?.rowsPerPage
-        ) || 1
-      );
+      return Math.ceil(this.tablePagination?.rowsNumber / this.tablePagination?.rowsPerPage) || 1
     },
     tableColumns() {
-      let r = tableColumns?.slice() || [];
+      let r = tableColumns?.slice() || []
       if (this.compilation == "top10") {
         r.unshift({
           name: "pos",
           label: "#",
-          field: (r: RecipeRead) =>
-            this.recipes
-              ? String(
-                  this.recipes.indexOf(r) + 1 + (this.page - 1) * this.page_size
-                )
-              : "-",
+          field: (r: RecipeRead) => (this.recipes ? String(this.recipes.indexOf(r) + 1 + (this.page - 1) * this.page_size) : "-"),
           style: "width: 20px",
           sortable: false,
           required: false,
-        });
+        })
         r.splice(2, 0, {
           name: "cooked_times",
           label: "Кол-во",
@@ -409,181 +394,173 @@ export default defineComponent({
           style: "width: 20px",
           sortable: true,
           required: false,
-        });
+        })
       } else if (this.compilation == "new") {
-        r = r.filter((c) => c.name !== "last_cooked");
+        r = r.filter((c) => c.name !== "last_cooked")
       }
-      return r;
+      return r
     },
   },
 
   watch: {
     search(val: string) {
-      this.page = 1;
-      void this.loadRecipes();
+      this.page = 1
+      void this.loadRecipes()
       SessionStorage.set("recipesSearch", val)
     },
     ordering(val: boolean) {
-      void this.loadRecipes();
+      void this.loadRecipes()
       SessionStorage.set("recipesOrdering", val)
     },
     compilation() {
-      this.page = 1;
-      void this.loadRecipes();
+      this.page = 1
+      void this.loadRecipes()
     },
     page() {
-      void this.loadRecipes();
+      void this.loadRecipes()
     },
     filters: {
       deep: true,
       handler(val) {
         SessionStorage.set("recipesFilters", val)
-        this.page = 1;
-        this.debounceLoadRecipes();
+        this.page = 1
+        this.debounceLoadRecipes()
       },
     },
     showFilters(val) {
-      this.$q.localStorage.set("recipesShowFilters", val);
+      this.$q.localStorage.set("recipesShowFilters", val)
     },
   },
   created() {
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    this.debounceLoadRecipes = debounce(this.loadRecipes, 1000);
+    this.debounceLoadRecipes = debounce(this.loadRecipes, 1000)
     void this.$nextTick(() => {
-      void this.loadRecipes();
-    });
+      void this.loadRecipes()
+    })
   },
 
   methods: {
     loadRecipes() {
       return new Promise((resolve, reject) => {
         const payload = {
-          omit: 'content,content_source'
-        } as { [key: string]: string };
+          omit: "content,content_source",
+        } as { [key: string]: string }
 
-        payload.search = this.search;
-        payload.page = String(this.page);
-        payload.pageSize = String(this.page_size);
+        payload.search = this.search
+        payload.page = String(this.page)
+        payload.pageSize = String(this.page_size)
 
         if (this.compilation == "top10") {
-          payload.ordering = "";
+          payload.ordering = ""
           if (this.tablePagination.sortBy !== "cooked_times") {
-            this.tablePagination.sortBy = "cooked_times";
-            this.tablePagination.descending = true;
+            this.tablePagination.sortBy = "cooked_times"
+            this.tablePagination.descending = true
           }
         } else {
-          payload.ordering = this.ordering;
-          this.tablePagination.sortBy = this.ordering;
+          payload.ordering = this.ordering
+          this.tablePagination.sortBy = this.ordering
         }
         // Compilation
         if (this.compilation) {
-          payload.compilation = this.compilation;
+          payload.compilation = this.compilation
         }
         // Tags
         if (this.filters.tags_include) {
-          payload.tagsInclude = this.filters.tags_include.join(",");
+          payload.tagsInclude = this.filters.tags_include.join(",")
         }
         if (this.filters.tags_exclude) {
-          payload.tagsExclude = this.filters.tags_exclude.join(",");
+          payload.tagsExclude = this.filters.tags_exclude.join(",")
         }
         // Tags
         if (this.filters.ingredients_include) {
-          payload.ingredientsInclude =
-            this.filters.ingredients_include.join(",");
+          payload.ingredientsInclude = this.filters.ingredients_include.join(",")
         }
         if (this.filters.ingredients_exclude) {
-          payload.ingredientsExclude =
-            this.filters.ingredients_exclude.join(",");
+          payload.ingredientsExclude = this.filters.ingredients_exclude.join(",")
         }
 
         // Cooking time
         if (this.filters.cooking_time) {
           if (this.filters.cooking_time.min > defaultFilters.cooking_time.min) {
-            payload.cookingTimeGt = String(this.filters.cooking_time.min);
+            payload.cookingTimeGt = String(this.filters.cooking_time.min)
           }
           if (this.filters.cooking_time.max < defaultFilters.cooking_time.max) {
-            payload.cookingTimeLt = String(this.filters.cooking_time.max);
+            payload.cookingTimeLt = String(this.filters.cooking_time.max)
           }
         }
         if (this.filters.price) {
           if (this.filters.price.min > defaultFilters.price.min) {
-            payload[this.filters.priceUseFull?'priceFullGt': 'pricePartGt'] = String(this.filters.price.min);
+            payload[this.filters.priceUseFull ? "priceFullGt" : "pricePartGt"] = String(this.filters.price.min)
           }
           if (this.filters.price.max < defaultFilters.price.max) {
-            payload[this.filters.priceUseFull?'priceFullLt': 'pricePartLt'] = String(this.filters.price.max);
+            payload[this.filters.priceUseFull ? "priceFullLt" : "pricePartLt"] = String(this.filters.price.max)
           }
         }
 
         // Ratings
         if (this.filters.ratings) {
-          const r = [];
-          for (const [user_id, values] of Object.entries(
-            this.filters.ratings
-          )) {
+          const r = []
+          for (const [user_id, values] of Object.entries(this.filters.ratings)) {
             if (values.min == values.max) {
-              r.push(`${user_id}_${values.min}`);
+              r.push(`${user_id}_${values.min}`)
               // payload.rating = `${user_id}_${values.min}`;
             } else {
               if (values.min > 0) {
-                r.push(`${user_id}_+${values.min}`);
+                r.push(`${user_id}_+${values.min}`)
                 // payload.rating = `${user_id}_+${values.min}`;
               }
 
               if (values.max < 5) {
-                r.push(`${user_id}_-${values.max}`);
+                r.push(`${user_id}_-${values.max}`)
                 // payload.rating = `${user_id}_-${values.max}`;
               }
             }
           }
-          payload.rating = r.join(",");
+          payload.rating = r.join(",")
         }
 
         // Send request
 
-        this.loading = true;
+        this.loading = true
 
         this.store
           .loadRecipes(clearPayload(payload))
           .then((resp: PaginatedRecipeReadList) => {
-            this.loading = false;
-            this.tablePagination.rowsNumber = resp?.count;
-            resolve(resp);
+            this.loading = false
+            this.tablePagination.rowsNumber = resp?.count
+            resolve(resp)
           })
           .catch((err: CustomAxiosError) => {
-            console.warn(err);
-            reject(err);
-            this.loading = false;
-            this.handleErrors(err, "Ошибка загрузки рецептов");
-          });
-      });
+            console.warn(err)
+            reject(err)
+            this.loading = false
+            this.handleErrors(err, "Ошибка загрузки рецептов")
+          })
+      })
     },
     loadRecipesTable(props: TablePropsOnRequest) {
-      console.debug("tableProps: ", props.pagination);
-      this.ordering =
-        props?.pagination?.descending &&
-        !props?.pagination?.sortBy?.startsWith("-")
-          ? "-"
-          : "";
-      this.ordering += props?.pagination?.sortBy;
-      this.page = props?.pagination?.page || 1;
-      this.page_size = props?.pagination?.rowsPerPage || 20;
+      console.debug("tableProps: ", props.pagination)
+      this.ordering = props?.pagination?.descending && !props?.pagination?.sortBy?.startsWith("-") ? "-" : ""
+      this.ordering += props?.pagination?.sortBy
+      this.page = props?.pagination?.page || 1
+      this.page_size = props?.pagination?.rowsPerPage || 20
       void this.loadRecipes().then(() => {
-        Object.assign(this.tablePagination, props.pagination);
-      });
+        Object.assign(this.tablePagination, props.pagination)
+      })
     },
     onRowClick(e: Event, row: RecipeRead) {
-      this.openRecipe(row.id);
+      this.openRecipe(row.id)
     },
     resetFilters() {
-      this.filters = Object.assign({}, this.filtersDefault);
-      this.filters.ratings = [];
-      console.debug("Reset: ", this.filters);
+      this.filters = Object.assign({}, this.filtersDefault)
+      this.filters.ratings = []
+      console.debug("Reset: ", this.filters)
     },
     openRecipe(id: number | "new") {
-      void this.$router.push({ name: "recipe", params: { id: id } });
+      void this.$router.push({ name: "recipe", params: { id: id } })
     },
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

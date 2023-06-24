@@ -76,7 +76,7 @@ import { YearWeek } from "src/modules/Globals"
 import { promiseSetLoading } from "src/modules/StoreCrud"
 import { useBaseStore } from "src/stores/base"
 import { computed, onMounted, PropType, ref, watch } from "vue"
-import { RecipePlanWeek, Recommendations } from 'src/client'
+import { Recommendations } from 'src/client'
 import { WeekDaysShort } from 'src/modules/WeekUtils'
 
 const props = defineProps({

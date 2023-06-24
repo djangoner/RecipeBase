@@ -58,6 +58,7 @@
         <template v-else>
           <q-btn
             v-if="rec.recipe_tag"
+            :to="{name: 'recipes', query: {reset: true, q_tag: [rec.recipe_tag.id]}}"
             label="Найти"
             icon="search"
             color="primary"

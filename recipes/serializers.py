@@ -221,11 +221,11 @@ class RecipeSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer,
     ingredients = RecipeIngredientSerializer(many=True, required=False)
     ratings = RecipeRatingSerializer(many=True, required=False)
     author = ShortUserSerializer(read_only=True)
-    recommendations_tags = RecipeTagSerializer(many=True)
+    recommendations_tags = RecipeTagSerializer(many=True, required=False)
     recommendations_recipes = serializers.PrimaryKeyRelatedField(
         queryset=Recipe.objects.all(), many=True, required=False, allow_null=True, default=None
     )
-    recommendations_ingredients = RecipeIngredientRecommendationSerializer(many=True)
+    recommendations_ingredients = RecipeIngredientRecommendationSerializer(many=True, required=False)
 
     class Meta:
         model = Recipe

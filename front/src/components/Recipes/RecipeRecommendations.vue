@@ -1,7 +1,6 @@
 <template>
   <div class="row column q-gutter-y-md">
     <recipe-tags-select
-      v-if="value.recommendations_tags"
       v-model="value.recommendations_tags"
       :readonly="!edit"
       label="Рекомендовать метки"

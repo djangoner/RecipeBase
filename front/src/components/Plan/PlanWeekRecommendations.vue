@@ -112,6 +112,9 @@ const recommendationsGrouped = computed(() => {
 })
 
 function loadRecommendations() {
+  if (!props.week){
+    return
+  }
   const prom = store.loadWeekRecommendations({ year: props.week.year, week: props.week.week })
 
   promiseSetLoading(prom, loading)

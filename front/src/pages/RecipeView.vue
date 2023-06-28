@@ -148,6 +148,7 @@ const defaultRecipe = {
   ratings: [],
   portion_count: null,
   preparation_time: null,
+  is_archived: false,
 }
 
 interface PatchedRecipeRead {

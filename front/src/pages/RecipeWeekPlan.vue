@@ -131,6 +131,7 @@
 
     <plan-week-recommendations
       ref="recommendationsRef"
+      class="print-hide"
       :week="week"
       @updated="loadWeekPlan()"
     />
@@ -156,6 +157,7 @@
   <Fireworks
     v-if="enableFireworks && showFireworks"
     ref="fw"
+    class="print-hide"
     :autostart="true"
     :options="fireworksOptions"
     :style="{
@@ -169,7 +171,10 @@
     }"
   />
   <!-- Fireworks overlay -->
-  <div v-if="enableFireworks && showFireworks">
+  <div
+    v-if="enableFireworks && showFireworks"
+    class="print-hide"
+  >
     <div class="position-absolute absolute-top fireworks-overlay text-white">
       <div class="text-h6 text-center q-my-md">
         План заполнен за {{ editedTimeStr }}!
@@ -205,7 +210,7 @@ import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
 // import { useQuery } from "@oarepo/vue-query-synchronizer";
 import Fireworks from "@fireworks-js/vue"
-import { useDebounceFn, useDocumentVisibility, useNow, useStorage } from "@vueuse/core"
+import { useDebounceFn, useDocumentVisibility, useEventListener, useNow, useStorage } from "@vueuse/core"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import { isOnline } from "src/modules/isOnline"
 import { RecipePlanWeekFromRead } from "src/Convert"
@@ -377,15 +382,23 @@ const fillingPrc = computed(() => {
   return plansFilled / plansTotal
 })
 
-function onPrint() {
+function onPrint(ignorePrint = false) {
   console.debug("Print before")
   store.printMode = true
+  if (!ignorePrint){
   void nextTick(() => {
-    window.print()
-    store.printMode = false
-    console.debug("Print after")
-  })
+      window.print()
+      store.printMode = false
+      console.debug("Print after")
+    })
+  }
 }
+
+useEventListener(window, "beforeprint", () => onPrint(true))
+useEventListener(window, "afterprint", () => {
+    store.printMode = false
+  console.debug("Print after")
+})
 
 function loadWeekPlan() {
   if (!week.value?.year || !week.value?.week) {

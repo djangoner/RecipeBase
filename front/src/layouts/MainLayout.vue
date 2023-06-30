@@ -288,6 +288,7 @@ export default defineComponent({
   watch: {
     "store.printMode": {
       handler(val) {
+        console.debug("Hiding drawer for print")
         if (val) {
           sessionStorage.setItem("leftDrawerOpen", this.leftDrawerOpen ? "1" : "0")
           this.leftDrawerOpen = false

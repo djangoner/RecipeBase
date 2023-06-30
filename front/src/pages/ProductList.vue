@@ -78,30 +78,12 @@
     <!-- Product list -->
     <q-list class="row column q-col-gutter-y-md q-py-md q-px-none q-px-sm-lg">
       <!-- New item -->
-      <div
+      <add-product-item
         v-if="storeAuth.hasPerm('recipes.add_productlistitem')"
-        class="row items-center q-px-md q-mb-sm"
-      >
-        <div class="col-grow">
-          <q-input
-            v-model="createItem"
-            label="Добавить продукт"
-            dense
-            outlined
-            @keypress.enter="createNewItem()"
-          />
-        </div>
-        <q-btn
-          class="col-auto q-ml-md"
-          icon="add"
-          size="sm"
-          color="green"
-          dense
-          rounded
-          unelevated
-          @click="createNewItem()"
-        />
-      </div>
+        @select="viewItem = $event"
+        @create="createNewItem"
+      />
+
       <!-- Prices total -->
       <div class="row q-gutter-x-sm q-px-md q-pt-xs">
         <q-badge color="grey">
@@ -205,6 +187,7 @@
 </template>
 
 <script lang="ts">
+import AddProductItem from '../components/Products/AddProductItem.vue'
 import NotActualListBanner from "../components/Products/NotActualListBanner.vue"
 import ProductListMenu from "../components/Products/ProductListMenu.vue"
 import AlreadyCompletedBanner from "../components/Products/AlreadyCompletedBanner.vue"
@@ -267,7 +250,7 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     ProductListMenu,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    NotActualListBanner,
+    NotActualListBanner, AddProductItem
   },
   mixins: [HandleErrorsMixin, IsOnlineMixin, WorkerMessagesMixin],
   data() {
@@ -286,7 +269,6 @@ export default defineComponent({
       saving: false,
       showCompleted: Boolean(showCompleted),
       showAlreadyCompleted: Boolean(showAlreadyCompleted),
-      createItem: "",
       markAlreadyCompleted: false,
       listRawLast: null as ProductListItemRead[] | null,
       // week: {
@@ -893,12 +875,12 @@ export default defineComponent({
       this.viewItem = item
       // this.$query.task = item.id;
     },
-    async createNewItem() {
-      if (!this.createItem) {
+    async createNewItem(title: string) {
+      if (!title) {
         return
       }
       const payload = {
-        title: this.createItem,
+        title: title,
         week: this.store.product_list?.id,
         amount: 1,
         amount_type: "items",
@@ -906,7 +888,6 @@ export default defineComponent({
         is_completed: false,
         already_completed: false,
       } as ProductListItemRead
-      this.createItem = ""
 
       if (!this.isOnLine) {
         const newKey = await this.updateOfflineItem(payload)

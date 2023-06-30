@@ -30,7 +30,7 @@
             />
 
             <!-- Subtitle row -->
-            <div class="row q-gutter-x-sm q-mt-xs">
+            <div class="row q-gutter-x-sm q-gutter-y-xs q-mt-xs">
               <span class="text-body2 text-primary">
                 <q-icon
                   v-if="item.is_auto"

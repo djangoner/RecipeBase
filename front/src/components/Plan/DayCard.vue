@@ -51,7 +51,7 @@
               :item-key="getItemKey"
               :sort="false"
               :data-day="dayIdx"
-              :disabled="readonly"
+              :disabled="readonly || $q.screen.lt.md"
               group="plans"
               filter=".not-draggable"
               ghost-class="ghost-class"

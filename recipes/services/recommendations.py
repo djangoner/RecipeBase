@@ -149,6 +149,20 @@ def clear_tags_recommendations(plan: RecipePlanWeek, recs: list[Recommendation])
     return res
 
 
+def check_stale_recommendations(plan: RecipePlanWeek, recs: list[Recommendation]):
+    ings_rec = [rec.ingredient.ingredient.pk for rec in recs if rec.ingredient]
+
+    deleted = 0
+
+    rec_ing: RecipeIngredientRecommendation
+    for rec_ing in plan.recommendations_ingredients.all():
+        if rec_ing.ingredient.pk not in ings_rec:  # Stale accepted recommendation
+            rec_ing.delete()
+            deleted += 1
+
+    return deleted
+
+
 def generate_recommendations(plan: RecipePlanWeek) -> list[Recommendation]:
     res: list[Recommendation] = []
     ## -- Generate recommendations
@@ -158,6 +172,10 @@ def generate_recommendations(plan: RecipePlanWeek) -> list[Recommendation]:
     res = clear_recipes_recommendations(plan, res)
     res = clear_ingredients_recommendations(plan, res)
     res = clear_tags_recommendations(plan, res)
+
+    ## -- Check old accepted recommendations
+
+    check_stale_recommendations(plan, res)
 
     ## -- Process and return
     for i in range(len(res)):

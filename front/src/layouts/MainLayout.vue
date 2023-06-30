@@ -115,7 +115,7 @@
         </q-item>
         <q-item
           v-if="storeAuth.hasPerm('recipes.view_recipeplanweek')"
-          :to="{ name: 'week_plan' }"
+          :to="{ name: 'week_plan', query: routeQuery }"
         >
           <q-item-section avatar>
             <q-icon name="calendar_month" />
@@ -124,7 +124,7 @@
         </q-item>
         <q-item
           v-if="storeAuth.hasPerm('recipes.view_productlistweek')"
-          :to="{ name: 'product_list' }"
+          :to="{ name: 'product_list', query: routeQuery }"
         >
           <q-item-section avatar>
             <q-icon name="shopping_cart" />
@@ -281,6 +281,9 @@ export default defineComponent({
       }
       return this.user.first_name ? [this.user.first_name, this.user.last_name].join(" ").trim() : "@" + this.user.username
     },
+    routeQuery(){
+      return this.$route.query
+    }
   },
   watch: {
     "store.printMode": {

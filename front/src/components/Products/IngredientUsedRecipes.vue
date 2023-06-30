@@ -88,7 +88,6 @@ const plan = computed(() => {
 const recommendationAccepted = computed(() => plan.value?.recommendations_ingredients)
 
 function ingAccepted(ing:RecipeIngredientWithRecipeRead ){
-  console.debug(recommendationAccepted.value, ing.id)
   return recommendationAccepted.value?.find(r => r.ingredient.id == ing.id)
 }
 

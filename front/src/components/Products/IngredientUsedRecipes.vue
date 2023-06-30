@@ -87,8 +87,9 @@ const plan = computed(() => {
 
 const recommendationAccepted = computed(() => plan.value?.recommendations_ingredients)
 
-function ingAccepted(ing:RecipeIngredientWithRecipeRead ): boolean{
-  return recommendationAccepted.value?.find(r => r.ingredient == ing.id)
+function ingAccepted(ing:RecipeIngredientWithRecipeRead ){
+  console.debug(recommendationAccepted.value, ing.id)
+  return recommendationAccepted.value?.find(r => r.ingredient.id == ing.id)
 }
 
 function getRecipeDays(recipe: RecipeRead | RecipeShort): null | string[] {

@@ -46,9 +46,14 @@
         />
       </div>
       <div>
-        <q-toggle
+        <!-- <q-toggle
           v-model="showCompleted"
           label="Показать завершенные"
+          dense
+        /> -->
+        <q-toggle
+          v-model="markAlreadyCompleted"
+          label="Отметить уже есть"
           dense
         />
       </div>
@@ -59,6 +64,7 @@
           ref="menu"
           v-model:mark-already-completed="markAlreadyCompleted"
           v-model:show-already-completed="showAlreadyCompleted"
+          v-model:show-completed="showCompleted"
           :week="week"
           :can-sync="canSync"
           @loading="loading = $event"
@@ -73,9 +79,9 @@
     <q-list class="row column q-col-gutter-y-md q-py-md q-px-none q-px-sm-lg">
       <!-- New item -->
       <div
-          v-if="storeAuth.hasPerm('recipes.add_productlistitem')"
-          class="row items-center q-px-md q-mb-sm"
-        >
+        v-if="storeAuth.hasPerm('recipes.add_productlistitem')"
+        class="row items-center q-px-md q-mb-sm"
+      >
         <div class="col-grow">
           <q-input
             v-model="createItem"
@@ -166,7 +172,7 @@
     </q-list>
 
     <div
-      v-if="!showCompleted && completedCount && listItemsRaw.length > 2"
+      v-if="!showCompleted"
       class="flex flex-center"
     >
       <q-btn
@@ -177,6 +183,20 @@
         size="sm"
         dense
         @click="showCompleted = true"
+      />
+    </div>
+    <div
+      v-else-if="showCompleted"
+      class="flex flex-center"
+    >
+      <q-btn
+        flat
+        label="Скрыть завершенные"
+        icon="expand_less"
+        no-caps
+        size="sm"
+        dense
+        @click="showCompleted = false"
       />
     </div>
 
@@ -319,14 +339,16 @@ export default defineComponent({
             res = res.filter((i) => !i.already_completed)
           }
           sortChains(res, [
-            (a, b) => { // Is completed
+            (a, b) => {
+              // Is completed
               if (a.is_completed && !b.is_completed) {
                 return 1
               } else if (b.is_completed && !a.is_completed) {
                 return -1
               }
             },
-            (a, b) => { // Name sort (If completed)
+            (a, b) => {
+              // Name sort (If completed)
               if (a.is_completed && b.is_completed) {
                 if (a.title < b.title) {
                   return -1
@@ -336,8 +358,9 @@ export default defineComponent({
                 }
               }
             },
-            (a, b) => { // Buy later
-              return (new Date(a.buy_later || 0)) - (new Date(b.buy_later || 0))
+            (a, b) => {
+              // Buy later
+              return new Date(a.buy_later || 0) - new Date(b.buy_later || 0)
             },
             (a, b) => {
               // Days sort

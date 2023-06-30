@@ -23,6 +23,21 @@
             <q-item-label>Отметить что уже есть</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item
+          v-ripple
+          tag="label"
+        >
+          <q-item-section side>
+            <q-toggle
+              :model-value="showCompleted"
+              dense
+              @update:model-value="$emit('update:showCompleted', $event)"
+            />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Показать завершенные</q-item-label>
+          </q-item-section>
+        </q-item>
         <!-- <q-item
           v-ripple
           tag="label"
@@ -70,9 +85,7 @@
           <q-item-section>
             <q-item-label> Завершить отмечание списка </q-item-label>
           </q-item-section>
-          <q-tooltip>
-            Завершить отмечание продуктов которые уже есть
-          </q-tooltip>
+          <q-tooltip> Завершить отмечание продуктов которые уже есть </q-tooltip>
         </q-item>
         <q-item
           v-if="storeAuth.hasPerm('recipes.change_productlistitem')"
@@ -137,6 +150,10 @@ const props = defineProps({
     type: Object as PropType<YearWeek>,
     required: true,
   },
+  showCompleted: {
+    type: Boolean,
+    default: false,
+  },
   showAlreadyCompleted: {
     type: Boolean,
     default: false,
@@ -151,7 +168,7 @@ const props = defineProps({
   },
 })
 
-const $emit = defineEmits(["loading", "askSync", "dialogObj", "update:markAlreadyCompleted", "update:showAlreadyCompleted", "canSyncFlag"])
+const $emit = defineEmits(["loading", "askSync", "dialogObj", "update:markAlreadyCompleted", "update:showAlreadyCompleted", "update:showCompleted", "canSyncFlag"])
 
 const $q = useQuasar()
 const store = useBaseStore()
@@ -220,31 +237,33 @@ function askClearDB() {
   $emit("dialogObj", dialog)
 }
 
-
-function completeList(){
+function completeList() {
   const upd = {
     is_filled: true,
   }
 
-  const payload = Object.assign({year: props.week.year, week: props.week.week}, store.product_list, upd)
+  const payload = Object.assign({ year: props.week.year, week: props.week.week }, store.product_list, upd)
 
   // @ts-expect-error ignore items
   delete payload["items"]
 
   const notif = $q.notify({
-    type: 'ongoing',
-    message: 'Завершение списка...'
+    type: "ongoing",
+    message: "Завершение списка...",
   })
 
-  void store.saveProductListWeek(payload).then(() => {
-    notif({
-      type: 'positive',
-      message: 'Список успешно завершен',
-      timeout: 1000
+  void store
+    .saveProductListWeek(payload)
+    .then(() => {
+      notif({
+        type: "positive",
+        message: "Список успешно завершен",
+        timeout: 1000,
+      })
     })
-  }).catch(() => {
-    notif({})
-  })
+    .catch(() => {
+      notif({})
+    })
 }
 
 function askCompleteList() {
@@ -260,7 +279,6 @@ function askCompleteList() {
     })
 }
 
-
 async function runClearDB() {
   await destroyDB()
   $emit("canSyncFlag", false)
@@ -270,13 +288,16 @@ async function runClearDB() {
   })
 }
 
-watch(() => props.markAlreadyCompleted, (val: boolean, oldVal: boolean) => {
-  if (val === false && oldVal === true){
-    if (!store.product_list?.is_filled){
-      askCompleteList()
+watch(
+  () => props.markAlreadyCompleted,
+  (val: boolean, oldVal: boolean) => {
+    if (val === false && oldVal === true) {
+      if (!store.product_list?.is_filled) {
+        askCompleteList()
+      }
     }
   }
-})
+)
 
-defineExpose({regenerateList})
+defineExpose({ regenerateList })
 </script>

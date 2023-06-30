@@ -9,11 +9,15 @@
     <q-card
       flat
       bordered
+      style="height: 400px"
     >
       <q-card-section>
-        <q-scroll-area style="height: 400px">
+        <q-scroll-area
+          v-if="recommendations && recommendations.length"
+          style="height: 400px"
+        >
           <q-list
-            v-if="recommendations && recommendations.length"
+
             dense
           >
             <template
@@ -62,6 +66,14 @@
             </template>
           </q-list>
         </q-scroll-area>
+
+        <div
+          v-else-if="!loading"
+          class="flex flex-center"
+          style="height: 400px"
+        >
+          <span class="text-h6 text-bold text-grey">Пока рекомендаций нет</span>
+        </div>
 
         <q-inner-loading :showing="loading" />
       </q-card-section>

@@ -53,12 +53,15 @@
         /> -->
         <q-toggle
           v-model="markAlreadyCompleted"
-          label="Отметить уже есть"
+          label="Отметить есть"
           dense
         />
       </div>
 
       <q-space />
+      <div>
+        <product-list-search @select="viewItem = $event" />
+      </div>
       <div>
         <product-list-menu
           ref="menu"
@@ -187,6 +190,7 @@
 </template>
 
 <script lang="ts">
+import ProductListSearch from '../components/Products/ProductListSearch.vue'
 import AddProductItem from '../components/Products/AddProductItem.vue'
 import NotActualListBanner from "../components/Products/NotActualListBanner.vue"
 import ProductListMenu from "../components/Products/ProductListMenu.vue"
@@ -250,7 +254,7 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     ProductListMenu,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    NotActualListBanner, AddProductItem
+    NotActualListBanner, AddProductItem, ProductListSearch
   },
   mixins: [HandleErrorsMixin, IsOnlineMixin, WorkerMessagesMixin],
   data() {
@@ -875,7 +879,7 @@ export default defineComponent({
       this.viewItem = item
       // this.$query.task = item.id;
     },
-    async createNewItem(title: string) {
+    async createNewItem(title: string, override?: object) {
       if (!title) {
         return
       }
@@ -888,6 +892,10 @@ export default defineComponent({
         is_completed: false,
         already_completed: false,
       } as ProductListItemRead
+
+      if (override){
+        Object.assign(payload, override)
+      }
 
       if (!this.isOnLine) {
         const newKey = await this.updateOfflineItem(payload)

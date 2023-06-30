@@ -33,39 +33,52 @@
 </template>
 
 <script setup lang="ts">
-import { ProductListItemRead } from "src/client"
+import { IngredientRead, ProductListItemRead } from "src/client"
 import SelectSearch from "src/components/Form/SelectSearch.vue"
 import { useBaseStore } from "src/stores/base"
-import { computed, ref, Ref } from "vue"
+import { computed, ref, Ref, onMounted } from "vue"
 
 const $emit = defineEmits(["create", "select"])
 
 const itemText = ref("")
 const selectSearch = ref(null)
-const options: Ref<ProductListItemRead[]> = ref([])
+const options: Ref<ProductListItemRead[] | IngredientRead[]> = ref([])
 
 const store = useBaseStore()
 
-const productItems = computed(() => store.product_list?.items)
+const ingredients = computed(() => store.ingredients)
+
+
+function loadIngredients(search?: string) {
+  const payload = {
+    fields: "id,title",
+    pageSize: 1000,
+    search: search,
+  }
+
+  const prom = store.loadIngredients(payload)
+  return prom
+}
 
 
 function filterFn(val: string, update: CallableFunction) {
   itemText.value = val
   update(() => {
     const needle = val.toLowerCase()
-    if (needle.length < 2){
+    if (needle.length < 2) {
       options.value = []
       return
     }
-    options.value = productItems?.value?.filter(v => v.title.toLowerCase().indexOf(needle) > -1).slice(0, 5) || []
+    // options.value = productItems?.value?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1).slice(0, 5) || []
+    options.value = ingredients?.value?.filter((v) => v.title.toLowerCase().indexOf(needle) > -1).slice(0, 5) || []
   })
 }
 
-function onSelected(productItem: ProductListItemRead){
-  console.debug("[ProductItemAdd]Select ", productItem)
-  $emit("select", productItem)
+function onSelected(ing: IngredientRead) {
+  console.debug("[ProductItemAdd]Select ", ing)
+  $emit("create", ing.title, {ingredient: ing.id})
   itemText.value = ""
-  if (selectSearch.value){
+  if (selectSearch.value) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     selectSearch.value?.clear()
   }
@@ -76,4 +89,7 @@ function createItem() {
   $emit("create", itemText.value)
   itemText.value = ""
 }
+
+onMounted(() => loadIngredients())
+
 </script>

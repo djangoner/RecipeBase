@@ -348,6 +348,12 @@ export default defineComponent({
               }
             },
             (a, b) => {
+              // Priority
+              if (a.priority && b.priority) {
+              return a.priority - b.priority
+              }
+            },
+            (a, b) => {
               // Name sort (If completed)
               if (a.is_completed && b.is_completed) {
                 if (a.title < b.title) {
@@ -387,7 +393,7 @@ export default defineComponent({
           return []
         }
         const categoriesArr: CustomIngredientCategory[] = this.ingredientCategories.slice()
-        const today = new Date().getDate()
+        const today = new Date()
 
         categoriesArr.forEach((item, idx) => (categoriesArr[idx].items = [])) // Add items array
 

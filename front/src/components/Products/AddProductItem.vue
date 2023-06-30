@@ -74,20 +74,25 @@ function filterFn(val: string, update: CallableFunction) {
   })
 }
 
-function onSelected(ing: IngredientRead) {
-  console.debug("[ProductItemAdd]Select ", ing)
-  $emit("create", ing.title, {ingredient: ing.id})
-  itemText.value = ""
+function selectClear(){
   if (selectSearch.value) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     selectSearch.value?.clear()
   }
 }
 
+function onSelected(ing: IngredientRead) {
+  console.debug("[ProductItemAdd]Select ", ing)
+  $emit("create", ing.title, {ingredient: ing.id})
+  itemText.value = ""
+  selectClear()
+}
+
 function createItem() {
   console.debug("[ProductItemAdd] Create ", itemText.value)
   $emit("create", itemText.value)
   itemText.value = ""
+  selectClear()
 }
 
 onMounted(() => loadIngredients())

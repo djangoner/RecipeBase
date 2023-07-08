@@ -124,7 +124,7 @@ const recommendationsGrouped = computed(() => {
 })
 
 function loadRecommendations() {
-  if (!props.week){
+  if (!props.week?.year || !props.week?.week){
     return
   }
   const prom = store.loadWeekRecommendations({ year: props.week.year, week: props.week.week })
@@ -167,7 +167,9 @@ watch(
 watch(
   () => props.week,
   (val, oldVal) => {
-    if (!oldVal){return}
+    if (!oldVal?.week || !val?.week){
+      return
+    }
     void debouncedLoad()
   }
 )

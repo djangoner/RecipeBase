@@ -141,10 +141,7 @@ async function moveWeekDelta(delta: number) {
   const year = props.week.year.valueOf()
   const week = props.week.week.valueOf()
 
-  const payload = Object.assign({}, weekDelta(year, week, delta),{
-    year: year,
-    week: week,
-  })
+  const payload = Object.assign({}, weekDelta(year, week, delta))
   const resp = await store.loadProductListWeek(payload, true)
 
   moveWeek.value = resp

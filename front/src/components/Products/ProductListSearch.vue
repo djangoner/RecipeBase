@@ -15,7 +15,7 @@
             use-input
             option-label="title"
             option-value="id"
-            options-dense
+            :options-dense="$q.screen.gt.sm"
             :input-debounce="0"
             :options="options"
             outlined

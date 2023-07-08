@@ -253,6 +253,7 @@ const recommendationsRef = ref(null);
 
 const visibility = useDocumentVisibility()
 const debouncedSaveWeekPlan = useDebounceFnCustom(saveWeekPlan, 5000, { maxWait: 15000 })
+const loadTry = ref(0)
 
 const week = computed({
   get() {
@@ -327,10 +328,17 @@ watch(debouncedSaveWeekPlan.state, (state: boolean) => {
 })
 
 const debouncedLoadWarnings = useDebounceFn(() => {
-  if (!week.value || !week.value.year) {
+  if (!week.value || !week.value.week) {
+    if (loadTry.value >= 3){
+      console.debug("debounced load warnings cancelled by tries")
+      return;
+    }
     console.debug("re-running debounced load warnings")
     void debouncedLoadWarnings()
+    loadTry.value += 1
+    return;
   }
+  loadTry.value = 0
   void store.loadWeekWarnings({ year: week.value.year, week: week.value.week })
 }, 2000)
 

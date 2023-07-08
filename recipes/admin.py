@@ -131,6 +131,7 @@ class MealTimeAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
 class RecipePlanWeekAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ("id", "year", "week")
     list_filter = ("year", "week")
+    filter_horizontal = ("recommendations_ingredients",)
     inlines = [RecipePlanInline]
 
 
@@ -204,3 +205,9 @@ class WeekPlanConditionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_filter = ("condition", "comparison_mode", "plan_field")
     search_fields = ["title", "selector_type", "selector_value", "comparison_mode"]
     inlines = [WeekPlanConditionInline]
+
+
+@admin.register(RecipeIngredientRecommendation)
+class RecipeIngredientRecommendationAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    list_display = ("id", "recipe", "ingredient", "amount", "amount_type")
+    autocomplete_fields = ("ingredient", "recipe")

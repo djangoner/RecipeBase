@@ -7,6 +7,7 @@ from recipes.models import (
     Ingredient,
     ProductListItem,
     ProductListWeek,
+    Recipe,
     RecipeIngredient,
     RecipeIngredientRecommendation,
     RecipePlan,
@@ -26,7 +27,7 @@ class WeekIngredientInfo:
     measuring: Optional[str] = None
     amounts: IngredientAmounts = field(default_factory=list)
     amount: Optional[int | float] = None
-    min_day: int = field(default=7)
+    min_day: int = field(default=8)
 
 
 def get_current_or_next_week():
@@ -76,6 +77,25 @@ def extract_ingredient_amount(ing: RecipeIngredient | RegularIngredient | Recipe
         return (ing.amount_type, ing.amount)
 
 
+def get_week_recipe_plans(week: RecipePlanWeek, recipe: Recipe) -> list[RecipePlan]:
+    res: list[RecipePlan] = []
+
+    for plan in week.plans.all():
+        if plan.recipe.pk == recipe.pk:
+            res.append(plan)
+
+    return res
+
+
+def get_week_recipe_min_day(week: RecipePlanWeek, recipe: Recipe) -> RecipePlan | None:
+    plans = get_week_recipe_plans(week, recipe)
+    if not plans:
+        return None
+
+    print("Plans: ", [p.day for p in plans])
+    return min(plans, key=lambda x: x.day or 8)
+
+
 def get_week_ingredients(week: RecipePlanWeek) -> dict[str, WeekIngredientInfo]:
     """Generate list of ingredients for week"""
     res: dict[str, WeekIngredientInfo] = {}
@@ -112,7 +132,11 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, WeekIngredientInfo]:
     for rec_ing in week.recommendations_ingredients.all():
         ing_key = rec_ing.ingredient.title
         if ing_key not in res:  # Create default ingredient
-            res[ing_key] = WeekIngredientInfo(ingredient=rec_ing.ingredient)
+            min_day = 8
+            if (min_plan := get_week_recipe_min_day(week, rec_ing.recipe)) is not None and min_plan.day:
+                print("Min day set: ", min_plan.day)
+                min_day = min_plan.day
+            res[ing_key] = WeekIngredientInfo(ingredient=rec_ing.ingredient, min_day=min_day)
 
         res[ing_key].amounts.append(extract_ingredient_amount(rec_ing))
 

@@ -262,6 +262,9 @@ class RecipeIngredientRecommendation(models.Model):
         verbose_name = _("Ингредиент рекомендации")
         verbose_name_plural = _("Ингредиенты рекомендаций")
 
+    def __str__(self):
+        return f"{self.recipe.title}-{self.ingredient.title} {self.amount} {self.amount_type}"
+
 
 class RegularIngredient(models.Model):
     ingredient = models.OneToOneField(

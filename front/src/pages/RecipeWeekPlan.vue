@@ -10,6 +10,7 @@
           v-model="editMode"
           label="Режим редактирования"
           :readonly="!canEdit"
+          @update:model-value="onUpdateEditMode"
         />
       </div>
       <q-space />
@@ -210,7 +211,7 @@ import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
 // import { useQuery } from "@oarepo/vue-query-synchronizer";
 import Fireworks from "@fireworks-js/vue"
-import { useDebounceFn, useDocumentVisibility, useEventListener, useNow, useStorage } from "@vueuse/core"
+import { useDebounceFn, useDocumentVisibility, useEventListener, useNow, useSessionStorage, useStorage } from "@vueuse/core"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import { isOnline } from "src/modules/isOnline"
 import { RecipePlanWeekFromRead } from "src/Convert"
@@ -248,6 +249,7 @@ const editMode: Ref<boolean | null> = ref(null)
 const loading = ref(false)
 const saving = ref(false)
 const enableFireworks = useStorage("enableFireworks", false)
+const weekEdit: Ref<YearWeek | null> = useSessionStorage("weekEdit", {})
 const showFireworks = ref(false)
 const recommendationsRef = ref(null);
 
@@ -417,13 +419,21 @@ function loadWeekPlan() {
     week: week.value.week,
   }
   loading.value = true
+  console.debug("Loading week plan")
 
   store
     .loadWeekPlan(payload)
     .then(() => {
       loading.value = false
-      if (editMode.value === null) {
+      // console.debug("Weeks: ", weekEdit.value.year == week.value.year && weekEdit.value.week == week.value.week, weekEdit.value, week.value)
+      if (weekEdit.value && weekEdit.value.year == week.value.year && weekEdit.value.week == week.value.week){
+        console.info("Enable editMode, remembering week")
+        editMode.value = true
+      }
+      else if (editMode.value === null) { // Auto set if week filled
         editMode.value = !(plan.value?.plans && plan.value?.plans?.length > 0)
+      } else {
+        editMode.value = false
       }
     })
     .catch(() => {
@@ -485,6 +495,17 @@ function askPlanCompleted() {
 
 function loadMealTime() {
   void store.loadMealTime({ pageSize: 1000 })
+}
+
+function onUpdateEditMode(val: boolean){
+  console.debug("EDIT MODE: ", val);
+  if (val){
+    console.debug("Set week edit mode")
+    weekEdit.value = week.value
+  } else {
+    console.debug("Erased week edit mode")
+    weekEdit.value = null;
+  }
 }
 
 onMounted(() => {

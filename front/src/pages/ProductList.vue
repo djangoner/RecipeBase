@@ -271,6 +271,7 @@ export default defineComponent({
       loading: false,
       updating: false,
       saving: false,
+      week: {} as YearWeek,
       showCompleted: Boolean(showCompleted),
       showAlreadyCompleted: Boolean(showAlreadyCompleted),
       markAlreadyCompleted: false,
@@ -287,19 +288,6 @@ export default defineComponent({
     }
   },
   computed: {
-    week: {
-      get(): YearWeek {
-        const [year, week] = getYearWeek()
-        return {
-          year: (this.$query as QueryInterface).year || year,
-          week: (this.$query as QueryInterface).week || week,
-        }
-      },
-      set(val: YearWeek) {
-        ; (this.$query as QueryInterface).year = val.year || undefined
-          ; (this.$query as QueryInterface).week = val.week || undefined
-      },
-    },
     sortShop: {
       get() {
         return (this.$query as QueryInterface).shop || null

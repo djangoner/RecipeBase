@@ -27,13 +27,16 @@
 
 <script setup lang="ts">
 import { date } from "quasar"
-import { computed, onMounted, PropType, ref, Ref, watch } from "vue"
+import { computed, nextTick, onMounted, PropType, ref, Ref, watch } from "vue"
 import { DatePicker, YearWeek, YearWeekNullable, getDateOfISOWeek, getFirstDayOfWeek, getWeekNumber, getYearWeek } from "src/modules/WeekUtils"
+import { useQuery } from "@oarepo/vue-query-synchronizer"
 
 const props = defineProps({
   modelValue: { required: true, type: Object as PropType<YearWeek> },
+  syncQuery: { type: Boolean, default: true },
 })
 const $emit = defineEmits(["update:model-value"])
+const $query = useQuery()
 
 const date_picker: Ref<DatePicker | string | null> = ref(null)
 const week_pick: Ref<YearWeekNullable | Record<string, never>> = ref({})
@@ -47,6 +50,7 @@ function selectToday() {
   week_pick.value.week = week
   changeWeek(0)
 }
+
 function changeWeek(num: number): void {
   const min = 1
   const max = 53
@@ -66,6 +70,7 @@ function changeWeek(num: number): void {
   updateDatePicker()
   // loadWeekPlan();
 }
+
 function updateDatePicker(): void {
   if (!week_pick.value.year || !week_pick.value.week) {
     return
@@ -80,6 +85,7 @@ function updateDatePicker(): void {
   date_picker.value = { from: firstday, to: lastday }
   console.debug("Datepicker upd: ", date_picker, week_pick.value.year)
 }
+
 function parseDatePicker(): void {
   if (typeof date_picker.value != "string") {
     return
@@ -90,6 +96,7 @@ function parseDatePicker(): void {
   ;[week_pick.value.year, week_pick.value.week] = getWeekNumber(d)
   changeWeek(0)
 }
+
 function getDay(idx: number): string | undefined {
   if (!date_picker.value || typeof date_picker.value == "string") {
     return
@@ -101,9 +108,29 @@ function getDay(idx: number): string | undefined {
   return date.formatDate(fday, "DD.MM")
 }
 
+function isCurrentWeek(year: number, week: number){
+  const [Cyear, Cweek] = getYearWeek()
+  return (year == Cyear && week == Cweek)
+}
+
+function setFromQuery() {
+  if (!($query.year && $query.week)) {
+    return false
+  }
+  week_pick.value = { year: $query.year as number, week: $query.week as number }
+  return true
+}
+
 onMounted(() => {
   if (!modelValue.value.year || !modelValue.value.week) {
-    selectToday()
+    const fromQuery = setFromQuery()
+    if (fromQuery) {
+      updateDatePicker()
+    } else {
+      void nextTick(() => {
+        selectToday()
+      })
+    }
   } else {
     week_pick.value = modelValue.value
     updateDatePicker()
@@ -116,7 +143,6 @@ watch(date_picker, (val, oldVal) => {
   }
 })
 watch(modelValue, (val: YearWeek, oldVal: YearWeek) => {
-  console.debug("modelValue: ", val, oldVal)
   if (val !== oldVal) {
     week_pick.value = val
   }
@@ -133,7 +159,23 @@ watch(
     console.debug("week_pick: ", notChanged, val, week_pick_old)
     week_pick_old.value = Object.assign({}, val)
     $emit("update:model-value", val)
+
+    if (props.syncQuery) {
+      if (isCurrentWeek(val.year, val.week)){
+        $query.year = 0
+        $query.week = 0
+      } else {
+        $query.year = val.year
+        $query.week = val.week
+      }
+    }
   },
   { deep: true }
 )
+
+watch($query, () => {
+  if ($query.year && $query.week && JSON.stringify({year: $query.year as number, week: $query.week as number}) != JSON.stringify(week_pick.value)){
+    setFromQuery()
+  }
+})
 </script>

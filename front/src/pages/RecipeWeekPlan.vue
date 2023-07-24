@@ -96,7 +96,7 @@
         >
           <day-card
             :day-idx="parseInt(idx)"
-            :day-str="getDay(idx - 1)"
+            :day-str="getDay(idx - 1) || ''"
             :warned-plans="warnedPlans"
             :loading="loading"
             :readonly="readonly"
@@ -258,18 +258,7 @@ const visibility = useDocumentVisibility()
 const debouncedSaveWeekPlan = useDebounceFnCustom(saveWeekPlan, 5000, { maxWait: 15000 })
 const loadTry = ref(0)
 
-const week = computed({
-  get() {
-    return {
-      year: ($query as QueryInterface)?.year as string | number | null,
-      week: ($query as QueryInterface)?.week as string | number | null,
-    } as YearWeek
-  },
-  set(val: YearWeek) {
-    ;($query as QueryInterface).year = val?.year
-    ;($query as QueryInterface).week = val?.week
-  },
-})
+const week: Ref<YearWeek | Record<string, never>> = ref({})
 
 const canEdit = computed(() => {
   return storeAuth.hasPerm("recipes.change_recipeplanweek")

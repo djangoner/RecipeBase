@@ -236,7 +236,7 @@ function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: n
   let action: "create" | "delete" | "update"
   const foundIdx = plan.value?.plans?.findIndex((p) => p.id === planItem?.id)
 
-  if (foundIdx === -1 && !planItem?.id){
+  if (foundIdx === -1 && !planItem?.id && !value?.id){
     console.debug("Empty set recipe prevented")
     return
   }

@@ -29,17 +29,14 @@ def recipe_ingredient_packs(ing: ProductListItem | RecipeIngredient) -> float:
 
 
 def recipe_ingredient_price_part(ing: ProductListItem | RecipeIngredient) -> float | None:
-    print("Ing: ", ing)
     if not (
         ing.ingredient
         and (ing.ingredient.min_pack_size or ing.ingredient.item_weight)
         and ing.ingredient.price
         and ing.amount
     ):
-        print("Delegating price to full")
         return recipe_ingredient_price_full(ing)
     packs = recipe_ingredient_packs(ing)
-    print("Packs: ", packs, ing.ingredient.price)
     return round(packs * ing.ingredient.price)
 
 

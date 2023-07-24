@@ -18,7 +18,7 @@ class Keyboards:
     def main(cls):
         k = ReplyKeyboardMarkup(resize_keyboard=True)
         k.add("План на неделю", "План на сегодня", "План на завтра")
-        k.add("Список продуктов", "Список на сегодня")
+        k.add("Список покупок", "Список на сегодня")
 
         return k
 
@@ -88,8 +88,8 @@ def register_bot_handlers(bot: telebot.TeleBot):
         tx = """
 Бот базы рецептов. Примеры команд:
 
-/list - список продуктов
-/list_today - список продуктов на сегодня
+/list - список покупок
+/list_today - список покупок на сегодня
 /plan - план на неделю
 /plan_day - план на сегодня
 /plan_tomorrow - план на завтра
@@ -97,18 +97,18 @@ def register_bot_handlers(bot: telebot.TeleBot):
         reply_message(bot, message, tx, reply_markup=Keyboards().main)
 
     @bot.message_handler(commands=["product_list", "list"])
-    @bot.message_handler(func=message_contains("Список продуктов"))
+    @bot.message_handler(func=message_contains("Список покупок"))
     def notif_product_list_week(message: Message):
         r = send_notification_telegram_id("product_list", message.from_user.id)
         if r is False:
-            reply_message(bot, message, "Список продуктов пуст")
+            reply_message(bot, message, "Список покупок пуст")
 
     @bot.message_handler(commands=["list_today"])
     @bot.message_handler(func=message_contains("Список на сегодня"))
     def notif_product_list_today(message: Message):
         r = send_notification_telegram_id("products_reminder", message.from_user.id)
         if r is False:
-            reply_message(bot, message, "Список продуктов пуст")
+            reply_message(bot, message, "Список покупок пуст")
 
     @bot.message_handler(commands=["plan", "plan_week"])
     @bot.message_handler(func=message_contains("План на неделю"))

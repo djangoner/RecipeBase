@@ -454,7 +454,7 @@ class ProductListWeek(models.Model):
 
     class Meta:
         ordering = ["-year", "-week"]
-        verbose_name = _("Список продуктов недели")
+        verbose_name = _("Список покупок недели")
         verbose_name_plural = _("Списки продуктов недель")
 
     def __str__(self) -> str:
@@ -480,7 +480,7 @@ class ProductListItem(models.Model):
     week = models.ForeignKey(
         ProductListWeek,
         models.CASCADE,
-        verbose_name=_("Список продуктов недели"),
+        verbose_name=_("Список покупок недели"),
         blank=True,
         related_name="items",
     )

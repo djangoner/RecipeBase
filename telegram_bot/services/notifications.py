@@ -63,6 +63,7 @@ def get_notification_text(name: str, **options) -> Optional[str]:
     today_str = now.strftime("%d.%m.%Y")
     day = None
     day_offset = options.get("day_offset")
+    week_str = options.get("week", "")
     if day_offset:
         day = today_day + day_offset
 
@@ -143,7 +144,7 @@ def get_notification_text(name: str, **options) -> Optional[str]:
         date_start, date_end = week_plan.week_dates
         # fmt = '%m.%d'
         fmt = "%d.%m"
-        text = f"<b>Список продуктов ({date_start.strftime(fmt)}-{date_end.strftime(fmt)})</b>:\n\n"
+        text = f"<b>Список покупок ({date_start.strftime(fmt)}-{date_end.strftime(fmt)})</b>:\n\n"
 
         product_items: list[ProductListItem] = list(week_plan.items.all())  # type: ignore
         product_items.sort(key=lambda x: x.day if x.day is not None else 99)
@@ -159,10 +160,10 @@ def get_notification_text(name: str, **options) -> Optional[str]:
         return text
 
     elif name == "products_filled":
-        return "✅ Список продуктов готов! Рекомендуется выполнить синхронизацию."
+        return f"✅ Список покупок для {week_str} готов! Рекомендуется выполнить синхронизацию."
 
     elif name == "weekplan_ready":
-        return "✅ План на неделю готов!"
+        return f"✅ План на неделю {week_str} готов!"
 
     elif name == "notif_synced":
         return "Успешно выполнена фоновая синхронизация"
@@ -234,7 +235,7 @@ def send_notification_profile(name: str, profile: UserProfile, **text_kwargs):
     bot.send_message(user_id, text, reply_markup=keyboard)
 
 
-def send_notification(name: str, force: bool = False):
+def send_notification(name: str, force: bool = False, **text_kwargs):
     assert name in get_notifications_dict().keys(), "Invalid notification name"
     log.info(f"Sending notification: {name}")
 
@@ -243,7 +244,7 @@ def send_notification(name: str, force: bool = False):
         log.debug(f"Checking profile: {profile} ({notif_enabled} - {','.join(profile.telegram_notifications)})")
 
         if notif_enabled or force:
-            send_notification_profile(name, profile)
+            send_notification_profile(name, profile, **text_kwargs)
 
 
 def send_product_list(week: ProductListWeek, user: AbstractBaseUser):

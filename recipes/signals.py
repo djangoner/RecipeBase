@@ -64,7 +64,7 @@ def product_list_week_changed(sender, instance, **kwargs):
         old = instance
 
     if instance.is_filled and not old.is_filled:
-        send_notification("products_filled")
+        send_notification("products_filled", week=str(instance))
 
 
 @receiver(pre_save, sender=RecipePlanWeek)
@@ -75,7 +75,7 @@ def plan_week_changed(sender, instance, **kwargs):
         old = instance
 
     if instance.is_filled and not old.is_filled:
-        send_notification("weekplan_ready")
+        send_notification("weekplan_ready", week=str(instance))
 
 
 @receiver(pre_delete, sender=RecipePlan)

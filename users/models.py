@@ -14,11 +14,11 @@ TELEGRAM_NOTIFICATIONS = [
     ("products_reminder", "Купить продукты на завтра"),
     ("products_missed", "Пропущенные продукты"),
     ("weekplan_ready", "План на неделю готов"),
-    ("products_filled", "Список продуктов готов"),
+    ("products_filled", "Список покупок готов"),
 ]
 
 TELEGRAM_NOTIFICATIONS_MANUAL = [
-    ("product_list", "Список продуктов"),
+    ("product_list", "Список покупок"),
     ("week_plan", "План на неделю"),
     ("notif_synced", "Уведомление о синхронизации"),
 ]

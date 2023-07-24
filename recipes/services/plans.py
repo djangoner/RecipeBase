@@ -92,7 +92,6 @@ def get_week_recipe_min_day(week: RecipePlanWeek, recipe: Recipe) -> RecipePlan 
     if not plans:
         return None
 
-    print("Plans: ", [p.day for p in plans])
     return min(plans, key=lambda x: x.day or 8)
 
 
@@ -134,7 +133,6 @@ def get_week_ingredients(week: RecipePlanWeek) -> dict[str, WeekIngredientInfo]:
         if ing_key not in res:  # Create default ingredient
             min_day = 8
             if (min_plan := get_week_recipe_min_day(week, rec_ing.recipe)) is not None and min_plan.day:
-                print("Min day set: ", min_plan.day)
                 min_day = min_plan.day
             res[ing_key] = WeekIngredientInfo(ingredient=rec_ing.ingredient, min_day=min_day)
 

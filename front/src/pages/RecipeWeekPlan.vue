@@ -131,6 +131,7 @@
     </div>
 
     <plan-week-recommendations
+      v-if="plan"
       ref="recommendationsRef"
       class="print-hide"
       :week="week"

@@ -234,6 +234,12 @@ function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: n
   })
   let prom: Promise<RecipePlan>
   let action: "create" | "delete" | "update"
+  const foundIdx = plan.value?.plans?.findIndex((p) => p.id === planItem?.id)
+
+  if (foundIdx === -1 && !planItem?.id){
+    console.debug("Empty set recipe prevented")
+    return
+  }
 
   if (planItem?.id && value) {
     prom = store.updateWeekPlanItem(planItem.id, newPlan)
@@ -250,7 +256,6 @@ function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: n
   void prom
     .then((resp: RecipePlan | undefined) => {
       $emit("update-recipe")
-      const foundIdx = plan.value?.plans?.findIndex((p) => p.id === planItem?.id)
 
       if (resp && resp.id && plan.value) {
         console.debug("Updated/Created plan: ", resp.id, foundIdx, resp)

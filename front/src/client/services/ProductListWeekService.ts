@@ -12,216 +12,184 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 
 export class ProductListWeekService {
-
+  /**
+   * @returns PaginatedProductListWeekReadList
+   * @throws ApiError
+   */
+  public static productListWeekList({
+    expand,
+    fields,
+    omit,
+    ordering,
+    page,
+    pageSize,
+    search,
+  }: {
     /**
-     * @returns PaginatedProductListWeekReadList 
-     * @throws ApiError
+     * Which field should be expanded, comma separated
      */
-    public static productListWeekList({
-expand,
-fields,
-omit,
-ordering,
-page,
-pageSize,
-search,
-}: {
-/**
- * Which field should be expanded, comma separated
- */
-expand?: string,
-/**
- * Which fields should be returned
- */
-fields?: string,
-/**
- * Which fields should be excluded from results
- */
-omit?: string,
-/**
- * Which field to use when ordering the results.
- */
-ordering?: string,
-/**
- * A page number within the paginated result set.
- */
-page?: number,
-/**
- * Number of results to return per page.
- */
-pageSize?: number,
-/**
- * A search term.
- */
-search?: string,
-}): CancelablePromise<PaginatedProductListWeekReadList> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/product_list_week/',
-            query: {
-                'expand': expand,
-                'fields': fields,
-                'omit': omit,
-                'ordering': ordering,
-                'page': page,
-                'page_size': pageSize,
-                'search': search,
-            },
-        });
-    }
-
+    expand?: string
     /**
-     * @returns ProductListWeek 
-     * @throws ApiError
+     * Which fields should be returned
      */
-    public static productListWeekCreate({
-requestBody,
-}: {
-requestBody: ProductListWeek,
-}): CancelablePromise<ProductListWeek> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/v1/product_list_week/',
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-
+    fields?: string
     /**
-     * @returns ProductListWeekRead 
-     * @throws ApiError
+     * Which fields should be excluded from results
      */
-    public static productListWeekRetrieve({
-id,
-}: {
-id: string,
-}): CancelablePromise<ProductListWeekRead> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/product_list_week/{id}/',
-            path: {
-                'id': id,
-            },
-        });
-    }
-
+    omit?: string
     /**
-     * @returns ProductListWeekRead 
-     * @throws ApiError
+     * Which field to use when ordering the results.
      */
-    public static productListWeekUpdate({
-id,
-requestBody,
-}: {
-id: string,
-requestBody: ProductListWeek,
-}): CancelablePromise<ProductListWeekRead> {
-        return __request(OpenAPI, {
-            method: 'PUT',
-            url: '/api/v1/product_list_week/{id}/',
-            path: {
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-
+    ordering?: string
     /**
-     * @returns ProductListWeekRead 
-     * @throws ApiError
+     * A page number within the paginated result set.
      */
-    public static productListWeekPartialUpdate({
-id,
-requestBody,
-}: {
-/**
- * A unique integer value identifying this Список продуктов недели.
- */
-id: number,
-requestBody?: PatchedProductListWeek,
-}): CancelablePromise<ProductListWeekRead> {
-        return __request(OpenAPI, {
-            method: 'PATCH',
-            url: '/api/v1/product_list_week/{id}/',
-            path: {
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-
+    page?: number
     /**
-     * @returns void 
-     * @throws ApiError
+     * Number of results to return per page.
      */
-    public static productListWeekDestroy({
-id,
-}: {
-id: string,
-}): CancelablePromise<void> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/api/v1/product_list_week/{id}/',
-            path: {
-                'id': id,
-            },
-        });
-    }
-
+    pageSize?: number
     /**
-     * @returns ProductListWeekRead 
-     * @throws ApiError
+     * A search term.
      */
-    public static productListWeekGenerateRetrieve({
-id,
-}: {
-id: string,
-}): CancelablePromise<ProductListWeekRead> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/product_list_week/{id}/generate/',
-            path: {
-                'id': id,
-            },
-        });
-    }
+    search?: string
+  }): CancelablePromise<PaginatedProductListWeekReadList> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/product_list_week/",
+      query: {
+        expand: expand,
+        fields: fields,
+        omit: omit,
+        ordering: ordering,
+        page: page,
+        page_size: pageSize,
+        search: search,
+      },
+    })
+  }
 
+  /**
+   * @returns ProductListWeek
+   * @throws ApiError
+   */
+  public static productListWeekCreate({ requestBody }: { requestBody: ProductListWeek }): CancelablePromise<ProductListWeek> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/product_list_week/",
+      body: requestBody,
+      mediaType: "application/json",
+    })
+  }
+
+  /**
+   * @returns ProductListWeekRead
+   * @throws ApiError
+   */
+  public static productListWeekRetrieve({ id }: { id: string }): CancelablePromise<ProductListWeekRead> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/product_list_week/{id}/",
+      path: {
+        id: id,
+      },
+    })
+  }
+
+  /**
+   * @returns ProductListWeekRead
+   * @throws ApiError
+   */
+  public static productListWeekUpdate({ id, requestBody }: { id: string; requestBody: ProductListWeek }): CancelablePromise<ProductListWeekRead> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/product_list_week/{id}/",
+      path: {
+        id: id,
+      },
+      body: requestBody,
+      mediaType: "application/json",
+    })
+  }
+
+  /**
+   * @returns ProductListWeekRead
+   * @throws ApiError
+   */
+  public static productListWeekPartialUpdate({
+    id,
+    requestBody,
+  }: {
     /**
-     * @returns StatusOk 
-     * @throws ApiError
+     * A unique integer value identifying this Список покупок недели.
      */
-    public static productListWeekSendListRetrieve({
-id,
-}: {
-id: string,
-}): CancelablePromise<StatusOk> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/product_list_week/{id}/send_list/',
-            path: {
-                'id': id,
-            },
-        });
-    }
+    id: number
+    requestBody?: PatchedProductListWeek
+  }): CancelablePromise<ProductListWeekRead> {
+    return __request(OpenAPI, {
+      method: "PATCH",
+      url: "/api/v1/product_list_week/{id}/",
+      path: {
+        id: id,
+      },
+      body: requestBody,
+      mediaType: "application/json",
+    })
+  }
 
-    /**
-     * @returns StatusOk 
-     * @throws ApiError
-     */
-    public static productListWeekSendSyncedRetrieve({
-id,
-}: {
-id: string,
-}): CancelablePromise<StatusOk> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/product_list_week/{id}/send_synced/',
-            path: {
-                'id': id,
-            },
-        });
-    }
+  /**
+   * @returns void
+   * @throws ApiError
+   */
+  public static productListWeekDestroy({ id }: { id: string }): CancelablePromise<void> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/product_list_week/{id}/",
+      path: {
+        id: id,
+      },
+    })
+  }
 
+  /**
+   * @returns ProductListWeekRead
+   * @throws ApiError
+   */
+  public static productListWeekGenerateRetrieve({ id }: { id: string }): CancelablePromise<ProductListWeekRead> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/product_list_week/{id}/generate/",
+      path: {
+        id: id,
+      },
+    })
+  }
+
+  /**
+   * @returns StatusOk
+   * @throws ApiError
+   */
+  public static productListWeekSendListRetrieve({ id }: { id: string }): CancelablePromise<StatusOk> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/product_list_week/{id}/send_list/",
+      path: {
+        id: id,
+      },
+    })
+  }
+
+  /**
+   * @returns StatusOk
+   * @throws ApiError
+   */
+  public static productListWeekSendSyncedRetrieve({ id }: { id: string }): CancelablePromise<StatusOk> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/product_list_week/{id}/send_synced/",
+      path: {
+        id: id,
+      },
+    })
+  }
 }

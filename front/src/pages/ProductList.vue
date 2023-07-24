@@ -668,7 +668,7 @@ export default defineComponent({
           } else {
             this.$q.notify({
               type: "negative",
-              caption: `Не найден сохраненный список продуктов для ${this.week.year}.${this.week.week}`,
+              caption: `Не найден сохраненный список покупок для ${this.week.year}.${this.week.week}`,
             })
           }
         })
@@ -778,7 +778,7 @@ export default defineComponent({
       this.$q.loading.hide("product-list-sync")
       this.$q.notify({
         type: "positive",
-        caption: "Список продуктов успешно синхронизирован",
+        caption: "Список покупок успешно синхронизирован",
       })
       void this.$nextTick(() => {
         this.canSyncFlag = false

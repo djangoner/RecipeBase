@@ -8,7 +8,7 @@
  * * `products_reminder` - Купить продукты на завтра
  * * `products_missed` - Пропущенные продукты
  * * `weekplan_ready` - План на неделю готов
- * * `products_filled` - Список продуктов готов
+ * * `products_filled` - Список покупок готов
  */
 export enum TelegramNotificationsEnum {
     WEEKDAYS_MORNING = 'weekdays_morning',

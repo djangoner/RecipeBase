@@ -129,7 +129,7 @@
           <q-item-section avatar>
             <q-icon name="shopping_cart" />
           </q-item-section>
-          <q-item-section>Список продуктов</q-item-section>
+          <q-item-section>Список покупок</q-item-section>
         </q-item>
         <q-item
           v-if="storeAuth.hasPerm('recipes.view_ingredient')"

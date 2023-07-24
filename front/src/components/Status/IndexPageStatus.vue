@@ -26,7 +26,7 @@
     <q-step
       :done="step > 2"
       :name="2"
-      title="Список продуктов"
+      title="Список покупок"
       icon="list"
     />
     <q-step

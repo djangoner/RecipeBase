@@ -9,6 +9,10 @@ def extract_ingredient_amount(ing: RecipeIngredient | RegularIngredient):
         ing.amount_type == "items" and ing.ingredient.item_weight and ing.ingredient.type != "item"
     ):  # Convert items to grams
         return ("g", int(ing.amount * ing.ingredient.item_weight))
+    elif (
+        ing.amount_type == "items" and ing.ingredient.min_pack_size and ing.ingredient.type != "item"
+    ):  # Fallback to min_pack_size if items and no item size
+        return ("g", int(ing.amount * ing.ingredient.min_pack_size))
     else:
         return (ing.amount_type, ing.amount)
 
@@ -25,14 +29,17 @@ def recipe_ingredient_packs(ing: ProductListItem | RecipeIngredient) -> float:
 
 
 def recipe_ingredient_price_part(ing: ProductListItem | RecipeIngredient) -> float | None:
+    print("Ing: ", ing)
     if not (
         ing.ingredient
         and (ing.ingredient.min_pack_size or ing.ingredient.item_weight)
         and ing.ingredient.price
         and ing.amount
     ):
-        return None
+        print("Delegating price to full")
+        return recipe_ingredient_price_full(ing)
     packs = recipe_ingredient_packs(ing)
+    print("Packs: ", packs, ing.ingredient.price)
     return round(packs * ing.ingredient.price)
 
 

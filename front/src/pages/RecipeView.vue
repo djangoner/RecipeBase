@@ -400,6 +400,7 @@ export default defineComponent({
 
 :deep(.recipe-text) {
   overflow: hidden;
+  word-break: break-word;
 
   h1,
   h2,

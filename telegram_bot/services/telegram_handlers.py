@@ -1,14 +1,26 @@
-from functools import lru_cache
 import logging
+from functools import lru_cache
+
 import telebot
-from telebot.types import ReplyKeyboardMarkup, Message, CallbackQuery
+from telebot.handler_backends import CancelUpdate, SkipHandler
+from telebot.types import (
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    Message,
+    ReplyKeyboardMarkup,
+)
+
 from recipes.models import Ingredient, ProductListItem
 from telegram_bot.models import ChatModeChoices
-from telegram_bot.services.modes.product_list import ModeProductList
-from telegram_bot.services.utils import BOT_TOKEN, get_current_product_week, parse_command
-
-from telebot.handler_backends import CancelUpdate, SkipHandler
 from telegram_bot.services.modes.core import BaseChatMiddleware
+from telegram_bot.services.modes.product_list import ModeProductList
+from telegram_bot.services.search import search_ingredient
+from telegram_bot.services.utils import (
+    BOT_TOKEN,
+    get_current_product_week,
+    parse_command,
+)
 
 log = logging.getLogger("TelegramHandlers")
 telebot.apihelper.ENABLE_MIDDLEWARE = True
@@ -64,11 +76,11 @@ class ChatModesMiddleware(BaseChatMiddleware):
         msg_text = message.text
 
         if msg_text and msg_text.startswith("/chat_mode"):
-            new_mode = msg_text.split(" ", 2)[-1]
-            if new_mode in self.chat_modes:
+            new_mode = msg_text.split(" ", 2)[-1].upper()
+            if new_mode in self.chat_modes or new_mode == "CM":
                 chat.chat_mode = new_mode
                 chat.save(update_fields=["chat_mode"])
-                self.instance.reply_to(message, "Режим чата изменен")
+                self.instance.reply_to(message, f"Режим чата изменен на {chat.chat_mode}")
                 return SkipHandler()
             else:
                 self.instance.reply_to(message, f"Текущий режим: {chat.chat_mode}")
@@ -134,6 +146,8 @@ def register_bot_handlers(bot: telebot.TeleBot):
 /plan - план на неделю
 /plan_day - план на сегодня
 /plan_tomorrow - план на завтра
+
+/list_add (ингредиент) - Добавить в список продуктов
 """
         reply_message(bot, message, tx, reply_markup=Keyboards().main)
 
@@ -164,6 +178,41 @@ def register_bot_handlers(bot: telebot.TeleBot):
         r = send_notification_telegram_id("weekdays_morning", message.chat.id)
         if r is False:
             reply_message(bot, message, "На сегодня планов нет")
+
+    @bot.message_handler(commands=["list_add"])
+    def product_list_add(message: Message):
+        if not message.text:
+            return
+
+        msg_text = message.text.split(" ", 2)[-1]
+
+        if not msg_text:
+            bot.reply_to(message, "Напишите название ингредиента после /list_add. Например: /list_add бананы")
+            return
+
+        matches = search_ingredient(msg_text)
+
+        if not matches:  # Matches not found
+            bot.reply_to(message, "✅ Добавлено в список покупок")
+            week = get_current_product_week()
+            ProductListItem.objects.create(week=week, title=msg_text)
+            return
+
+        ## Matches found
+
+        keyboard = InlineKeyboardMarkup()
+        for match in matches[:5]:
+            keyboard.add(
+                InlineKeyboardButton(text=match.ingredient.title, callback_data=f"add_ing:{match.ingredient.pk}")
+            )
+
+        keyboard.add(
+            InlineKeyboardButton(text="-- Нет нужного варианта --", callback_data=f"add_ing_default:{msg_text}")
+        )
+        keyboard.add(InlineKeyboardButton(text="Отменить", callback_data="cancel"))
+
+        bot.reply_to(message, "Возможно вы имели ввиду:", reply_markup=keyboard)
+        # return SkipHandler()
 
     @bot.message_handler(commands=["plan_tomorrow"])
     @bot.message_handler(func=message_contains(["План на завтра"]))

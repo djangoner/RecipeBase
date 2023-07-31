@@ -15,7 +15,7 @@ class UserProfile(models.Model):
 
     conditions_include = models.BooleanField(_("Включить в условия недели"), default=False)
 
-    telegram_chat = models.ForeignKey(
+    telegram_chat = models.OneToOneField(
         "telegram_bot.TelegramChat", models.SET_NULL, null=True, blank=True, related_name="user_profile"
     )
 
@@ -28,3 +28,7 @@ class UserProfile(models.Model):
 
     def __str__(self) -> str:
         return self.user.__str__()
+
+    @classmethod
+    def with_telegram(self):
+        return self.objects.filter(telegram_chat__isnull=False)

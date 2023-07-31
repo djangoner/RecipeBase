@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from typing import Optional
 from recipes.models import ProductListItem, ProductListWeek, RecipePlan, RecipePlanWeek
+from telegram_bot.models import TELEGRAM_NOTIFICATIONS_MANUAL, TelegramChat
 from telegram_bot.services.telegram_handlers import get_bot
 
 from telegram_bot.services.utils import (
@@ -24,6 +25,7 @@ from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from django.contrib.auth.models import AbstractBaseUser
 
 log = telegram_log.getChild("Notifications")
+log.setLevel("DEBUG")
 
 
 def render_plan_day(week_plan: RecipePlanWeek, plans: list[RecipePlan]):
@@ -223,7 +225,9 @@ def send_notification_profile(name: str, profile: UserProfile, **text_kwargs):
     bot = get_bot()
     text = get_notification_text(name, **text_kwargs)
     keyboard = get_notification_keyboard(name)
-    user_id = profile.telegram_id
+
+    telegram_chat: TelegramChat = profile.telegram_chat
+    user_id = telegram_chat.uid
 
     if not user_id:
         log.warning(f"Telegram ID not specified for {profile.user}")
@@ -239,9 +243,12 @@ def send_notification(name: str, force: bool = False, **text_kwargs):
     assert name in get_notifications_dict().keys(), "Invalid notification name"
     log.info(f"Sending notification: {name}")
 
-    for profile in UserProfile.objects.all():
-        notif_enabled = name in profile.telegram_notifications
-        log.debug(f"Checking profile: {profile} ({notif_enabled} - {','.join(profile.telegram_notifications)})")
+    for profile in UserProfile.with_telegram().all():
+        if not profile.telegram_chat:
+            continue
+        enabled_notifications = profile.telegram_chat.telegram_notifications
+        notif_enabled = name in enabled_notifications or name in [n[0] for n in TELEGRAM_NOTIFICATIONS_MANUAL]
+        log.debug(f"Checking profile: {profile} ({notif_enabled} - {','.join(enabled_notifications)})")
 
         if notif_enabled or force:
             send_notification_profile(name, profile, **text_kwargs)

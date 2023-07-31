@@ -20,13 +20,13 @@ class ModeProductList(BaseChatMiddleware):
 
         matches = search_ingredient(msg_text)
 
-        if not matches:
+        if not matches:  # Matches not found
             self.instance.reply_to(message, "✅ Добавлено в список покупок")
             week = get_current_product_week()
             ProductListItem.objects.create(week=week, title=msg_text)
             return SkipHandler()
 
-        ## Matches
+        ## Matches found
 
         keyboard = InlineKeyboardMarkup()
         for match in matches[:5]:

@@ -33,6 +33,7 @@ tqdm = "*"
 django-constance = "*"
 dacite = "*"
 django-picklefield = "*"
+fuzzywuzzy = "*"
 
 [dev-packages]
 pytest = "*"

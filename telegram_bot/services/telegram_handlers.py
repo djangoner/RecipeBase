@@ -1,13 +1,14 @@
 from functools import lru_cache
 import logging
 import telebot
-from telebot.types import ReplyKeyboardMarkup, Message
-from telebot.handler_backends import BaseMiddleware
-from telegram_bot.services.utils import BOT_TOKEN
+from telebot.types import ReplyKeyboardMarkup, Message, CallbackQuery
+from recipes.models import Ingredient, ProductListItem
+from telegram_bot.models import ChatModeChoices
+from telegram_bot.services.modes.product_list import ModeProductList
+from telegram_bot.services.utils import BOT_TOKEN, get_current_product_week, parse_command
 
-from users.models import UserProfile
-from telebot.handler_backends import CancelUpdate
-
+from telebot.handler_backends import CancelUpdate, SkipHandler
+from telegram_bot.services.modes.core import BaseChatMiddleware
 
 log = logging.getLogger("TelegramHandlers")
 telebot.apihelper.ENABLE_MIDDLEWARE = True
@@ -23,19 +24,16 @@ class Keyboards:
         return k
 
 
-@lru_cache(10)
-def profile_telegram_id_exists(uid: int) -> UserProfile | None:
-    return UserProfile.objects.filter(telegram_id=uid).first()
-
-
-class OnlyUsersExistsMiddleware(BaseMiddleware):
-    def __init__(self) -> None:
+class OnlyUsersExistsMiddleware(BaseChatMiddleware):
+    def __init__(self, *args, **kwargs) -> None:
         self.update_types = ["message"]
 
-    def pre_process(self, message: Message, data):
-        profile = profile_telegram_id_exists(message.from_user.id)
+        super().__init__(*args, **kwargs)
 
-        if not profile:
+    def pre_process(self, message: Message, data):
+        chat = self.get_chat(message)
+
+        if not chat or not chat.get_allowed():
             bot = get_bot()
             bot.reply_to(message, text="Access denied")
             return CancelUpdate()
@@ -44,10 +42,53 @@ class OnlyUsersExistsMiddleware(BaseMiddleware):
         pass
 
 
+class ChatModesMiddleware(BaseChatMiddleware):
+    chat_modes: dict[str, BaseChatMiddleware] = {ChatModeChoices.PRODUCT_LIST: ModeProductList}
+
+    def __init__(self, instance: telebot.TeleBot) -> None:
+        self.update_types = ["message"]
+
+        for mode in self.chat_modes:
+            self.chat_modes[mode] = self.chat_modes[mode](instance)
+
+        super().__init__(instance)
+
+    def get_mode_cls(self, mode: str) -> BaseChatMiddleware | None:
+        return self.chat_modes.get(mode)
+
+    def pre_process(self, message: Message, data):
+        chat = self.get_chat(message)
+        if not chat or not chat.get_allowed():
+            return
+        ##
+        msg_text = message.text
+
+        if msg_text and msg_text.startswith("/chat_mode"):
+            new_mode = msg_text.split(" ", 2)[-1]
+            if new_mode in self.chat_modes:
+                chat.chat_mode = new_mode
+                chat.save(update_fields=["chat_mode"])
+                self.instance.reply_to(message, "Режим чата изменен")
+                return SkipHandler()
+            else:
+                self.instance.reply_to(message, f"Текущий режим: {chat.chat_mode}")
+                return SkipHandler()
+        ##
+        mode_str = chat.chat_mode
+        mode_cls = self.get_mode_cls(mode_str)
+        if mode_cls:
+            return mode_cls.pre_process(message, data)
+
+    # def post_process(self, message, data, exception):
+    #     super().post_process(message, data, exception)
+
+
 def _get_bot():
     assert BOT_TOKEN is not None, "Bot token is empty"
     bot = telebot.TeleBot(BOT_TOKEN, parse_mode="HTML", use_class_middlewares=True)
-    log.info(f"Bot init: {bot}")
+
+    bot_info = bot.get_me()
+    log.info(f"Bot run as @{bot_info.username}")
     if not isinstance(bot, str):
         register_bot_handlers(bot)
     return bot
@@ -67,7 +108,6 @@ def message_contains(text: str | list[str]):
     """Telegram message contains"""
 
     def inner(message: Message) -> bool:
-
         text_list = [text] if isinstance(text, str) else text
         for t in text_list:
             if message.text and message.text.lower() == t.lower():
@@ -81,7 +121,8 @@ def message_contains(text: str | list[str]):
 def register_bot_handlers(bot: telebot.TeleBot):
     from telegram_bot.services.notifications import send_notification_telegram_id
 
-    bot.setup_middleware(OnlyUsersExistsMiddleware())
+    bot.setup_middleware(OnlyUsersExistsMiddleware(bot))
+    bot.setup_middleware(ChatModesMiddleware(bot))
 
     @bot.message_handler(commands=["start", "help", "menu"])
     def send_welcome(message: Message):
@@ -134,3 +175,24 @@ def register_bot_handlers(bot: telebot.TeleBot):
     @bot.message_handler(func=lambda message: True)
     def unknown_command(message: Message):
         bot.reply_to(message, "Неизвестная команда. /help")
+
+    @bot.callback_query_handler(func=lambda x: True)
+    def callback_handler(cb: CallbackQuery):
+        cmd, cmd_args = parse_command(cb.data)
+        chat_id = cb.message.chat.id
+        msg_id = cb.message.id
+
+        if cmd == "cancel":
+            bot.edit_message_text("Отменено", chat_id, msg_id)
+
+        elif cmd == "add_ing":
+            ing = Ingredient.objects.get(id=cmd_args[0])
+            week = get_current_product_week()
+            ProductListItem.objects.create(week=week, ingredient=ing, title=ing.title)
+
+            bot.edit_message_text(f"✅ Добавлено в список покупок:\n\n<pre>{ing.title}</pre>", chat_id, msg_id)
+        elif cmd == "add_ing_default":
+            week = get_current_product_week()
+            ProductListItem.objects.create(week=week, ingredient=ing, title=cmd_args[1])
+
+            bot.edit_message_text("✅ Добавлено в список покупок", chat_id, msg_id)

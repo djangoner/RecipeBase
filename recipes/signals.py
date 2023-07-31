@@ -35,6 +35,12 @@ def get_current_plan_week():
     return plan
 
 
+def get_current_product_week():
+    now = datetime.now()
+    plan, _ = ProductListWeek.objects.get_or_create(year=now.year, week=now.isocalendar()[1])
+    return plan
+
+
 def get_product_list(year: int, week: int):
     product_week: ProductListWeek | None = ProductListWeek.objects.filter(year=year, week=week).first()
     return product_week

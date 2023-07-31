@@ -6,7 +6,7 @@ from typing import Optional
 from recipes.models import ProductListItem, ProductListWeek, Recipe, RecipeIngredient, RecipePlan, RecipePlanWeek
 from recipes.services.measurings import measuring_str
 from recipes.services.plans import get_ingredient_packs
-from users.models import TELEGRAM_NOTIFICATIONS, TELEGRAM_NOTIFICATIONS_MANUAL
+from telegram_bot.models import TELEGRAM_NOTIFICATIONS, TELEGRAM_NOTIFICATIONS_MANUAL
 
 telegram_log = logging.getLogger("Telegram")
 SITE_DOMAIN = os.getenv("SITE_DOMAIN", "")
@@ -158,3 +158,16 @@ def get_recipe_flags(recipe: Recipe):
         recipe_flags.append(RecipeFlags.no_ratings)
 
     return recipe_flags
+
+
+def parse_command(command: str):
+    spl = command.split(":")
+
+    command = spl[0]
+    arguments = spl[1:]
+
+    return command, arguments
+
+
+def command_name(command: str):
+    return command.split(":", 2)[0]

@@ -2,26 +2,9 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
-from multiselectfield import MultiSelectField
 
 
 User = get_user_model()
-
-
-TELEGRAM_NOTIFICATIONS = [
-    ("weekdays_morning", "Будни утром"),
-    ("weekend_morning", "Выходные утром"),
-    ("products_reminder", "Купить продукты на завтра"),
-    ("products_missed", "Пропущенные продукты"),
-    ("weekplan_ready", "План на неделю готов"),
-    ("products_filled", "Список покупок готов"),
-]
-
-TELEGRAM_NOTIFICATIONS_MANUAL = [
-    ("product_list", "Список покупок"),
-    ("week_plan", "План на неделю"),
-    ("notif_synced", "Уведомление о синхронизации"),
-]
 
 
 class UserProfile(models.Model):
@@ -32,9 +15,8 @@ class UserProfile(models.Model):
 
     conditions_include = models.BooleanField(_("Включить в условия недели"), default=False)
 
-    telegram_id = models.CharField(_("ID аккаунта телеграмм"), max_length=20, null=True, blank=True)
-    telegram_notifications = MultiSelectField(
-        _("Telegram уведомления"), max_length=255, choices=TELEGRAM_NOTIFICATIONS, null=True, blank=True
+    telegram_chat = models.ForeignKey(
+        "telegram_bot.TelegramChat", models.SET_NULL, null=True, blank=True, related_name="user_profile"
     )
 
     class Meta:

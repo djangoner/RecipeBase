@@ -140,35 +140,35 @@ def register_bot_handlers(bot: telebot.TeleBot):
     @bot.message_handler(commands=["product_list", "list"])
     @bot.message_handler(func=message_contains("Список покупок"))
     def notif_product_list_week(message: Message):
-        r = send_notification_telegram_id("product_list", message.from_user.id)
+        r = send_notification_telegram_id("product_list", message.chat.id)
         if r is False:
             reply_message(bot, message, "Список покупок пуст")
 
     @bot.message_handler(commands=["list_today"])
     @bot.message_handler(func=message_contains("Список на сегодня"))
     def notif_product_list_today(message: Message):
-        r = send_notification_telegram_id("products_reminder", message.from_user.id)
+        r = send_notification_telegram_id("products_reminder", message.chat.id)
         if r is False:
             reply_message(bot, message, "Список покупок пуст")
 
     @bot.message_handler(commands=["plan", "plan_week"])
     @bot.message_handler(func=message_contains("План на неделю"))
     def notif_plan_week(message: Message):
-        r = send_notification_telegram_id("week_plan", message.from_user.id)
+        r = send_notification_telegram_id("week_plan", message.chat.id)
         if r is False:
             reply_message(bot, message, "План пуст")
 
     @bot.message_handler(commands=["plan_day"])
     @bot.message_handler(func=message_contains(["План на день", "План на сегодня"]))
     def notif_plan_day(message: Message):
-        r = send_notification_telegram_id("weekdays_morning", message.from_user.id)
+        r = send_notification_telegram_id("weekdays_morning", message.chat.id)
         if r is False:
             reply_message(bot, message, "На сегодня планов нет")
 
     @bot.message_handler(commands=["plan_tomorrow"])
     @bot.message_handler(func=message_contains(["План на завтра"]))
     def notif_plan_tomorrow(message: Message):
-        r = send_notification_telegram_id("weekdays_morning", message.from_user.id, day_offset=1)
+        r = send_notification_telegram_id("weekdays_morning", message.chat.id, day_offset=1)
         if r is False:
             reply_message(bot, message, "На завтра планов нет")
 

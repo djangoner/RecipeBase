@@ -10,9 +10,9 @@ User = get_user_model()
 class UserProfile(models.Model):
     user = models.OneToOneField(User, models.CASCADE, related_name="profile")
     icon = models.CharField(_("Иконка"), max_length=50, null=True, blank=True)
-    show_rate = models.BooleanField(_("Показывать в рейтинге"), default=True)
     num = models.PositiveSmallIntegerField(_("Сортировка"), null=True, blank=True)
 
+    show_rate = models.BooleanField(_("Показывать в рейтинге"), default=True)
     conditions_include = models.BooleanField(_("Включить в условия недели"), default=False)
 
     telegram_chat = models.OneToOneField(

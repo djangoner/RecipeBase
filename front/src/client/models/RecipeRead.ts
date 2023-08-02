@@ -26,9 +26,9 @@ export type RecipeRead = {
     ingredients?: Array<RecipeIngredientRead>;
     ratings?: Array<RecipeRatingRead>;
     readonly author: ShortUser;
-    recommendations_tags: Array<RecipeTag>;
+    recommendations_tags?: Array<RecipeTag>;
     recommendations_recipes?: Array<number | null>;
-    recommendations_ingredients: Array<RecipeIngredientRecommendation>;
+    recommendations_ingredients?: Array<RecipeIngredientRecommendation>;
     title: string;
     content?: string;
     content_source?: string;
@@ -37,6 +37,7 @@ export type RecipeRead = {
     portion_count?: number | null;
     cooking_time?: number | null;
     preparation_time?: number | null;
+    difficulty?: number | null;
     source_link?: string | null;
     readonly created: string | null;
     readonly edited: string | null;

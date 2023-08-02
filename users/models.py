@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 User = get_user_model()
@@ -14,6 +15,9 @@ class UserProfile(models.Model):
 
     show_rate = models.BooleanField(_("Показывать в рейтинге"), default=True)
     conditions_include = models.BooleanField(_("Включить в условия недели"), default=False)
+    cook_difficulty = models.PositiveSmallIntegerField(
+        _("Сложность приготовления"), validators=[MinValueValidator(1), MaxValueValidator(5)], null=True, blank=True
+    )
 
     telegram_chat = models.OneToOneField(
         "telegram_bot.TelegramChat", models.SET_NULL, null=True, blank=True, related_name="user_profile"

@@ -12,5 +12,4 @@ export type Recommendations = {
     recipe_tag: RecipeTag;
     ingredient: RecipeIngredientRecommendation;
     plan: number;
-    readonly recipe: Record<string, any>;
 };

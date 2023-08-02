@@ -34,6 +34,16 @@
         <q-tooltip>Этот рецепт архивирован</q-tooltip>
       </q-icon>
       {{ recipe.title }}
+
+
+      <q-icon
+        name="help"
+        color="grey"
+        size="sm"
+      >
+        <recipe-card-tooltip :recipe="recipe" />
+      </q-icon>
+
       <q-btn
         v-if="storeAuth.hasPerm('recipes.change_recipe')"
         icon="edit"
@@ -66,6 +76,8 @@
         target="_blank"
         icon="open_in_new"
         size="sm"
+        color="primary"
+        no-caps
       >
         Открыть источник
       </q-btn>
@@ -79,7 +91,10 @@
   </div>
 
   <!-- Recipe tags -->
-  <div class="row recipe-tags items-center q-gutter-x-md">
+  <div
+    v-if="edit | recipe.tags?.length"
+    class="row recipe-tags items-center q-gutter-x-md"
+  >
     <span class="text-subtitle2">Метки: </span>
 
     <recipe-tags
@@ -89,6 +104,23 @@
   </div>
 
   <!-- Info -->
+
+  <div>
+    <recipe-difficulty
+      v-if="edit"
+      v-model.number="recipe.difficulty"
+    />
+    <h6
+      v-else-if="recipe.difficulty"
+      class="text-center q-my-none"
+    >
+      <q-icon
+        name="bar_chart"
+        color="grey"
+      />
+      Сложность: {{ recipe.difficulty }}
+    </h6>
+  </div>
 
   <div>
     <q-input
@@ -249,6 +281,8 @@ import RecipeMenu from "src/components/RecipeMenu.vue"
 import RecipeImagesUpload from "src/components/RecipeImagesUpload.vue"
 import RecipeTags from "src/components/Recipes/RecipeTags.vue"
 import ContentEditor from "src/components/Recipes/ContentEditor.vue"
+import RecipeDifficulty from "./Fields/RecipeDifficulty.vue"
+import RecipeCardTooltip from "../RecipeCardTooltip.vue"
 
 const requiredRule = (val: string | number) => !!val || "Обязательное поле"
 
@@ -269,7 +303,11 @@ export default defineComponent({
     RecipeTags,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     RecipeImagesView,
-  },
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    RecipeDifficulty,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    RecipeCardTooltip
+},
   props: {
     edit: {
       type: Boolean,

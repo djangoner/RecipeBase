@@ -1,5 +1,5 @@
 import { date } from "quasar"
-import { IngredientRead, Task, TaskCategory } from "src/client"
+import { IngredientRead, Task, TaskCategory, User } from "src/client"
 import { T } from "vitest/dist/types-b7007192"
 import { TaskOrCategory } from "./Globals"
 
@@ -76,4 +76,8 @@ export function sortChains<T>(arr: Array<T>, chains: ((a: T, b: T) => number | u
     }
     return 0
   })
+}
+
+export function userReadable(user: User): string {
+  return user.first_name ? [user.first_name, user.last_name].join(" ") : user.username
 }

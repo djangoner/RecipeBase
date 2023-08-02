@@ -56,6 +56,9 @@ class Recipe(ComputedFieldsModel):
     portion_count = models.FloatField(_("Кол-во порций"), null=True, blank=True)
     cooking_time = models.IntegerField(_("Примерное время приготовления"), null=True, blank=True)
     preparation_time = models.IntegerField(_("Примерное время подготовки"), null=True, blank=True)
+    difficulty = models.PositiveSmallIntegerField(
+        _("Сложность приготовления"), validators=[MinValueValidator(1), MaxValueValidator(5)], null=True, blank=True
+    )
 
     source_link = models.CharField(_("Источника"), max_length=255, blank=True, null=True)
     tags = models.ManyToManyField("RecipeTag", "recipes", verbose_name=_("Метки"), blank=True)

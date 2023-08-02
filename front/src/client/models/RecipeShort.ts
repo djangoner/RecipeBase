@@ -4,6 +4,7 @@
 
 import type { RecipeIngredient } from './RecipeIngredient';
 import type { RecipeRating } from './RecipeRating';
+import type { RecipeTag } from './RecipeTag';
 
 /**
  * A ModelSerializer that takes additional arguments for
@@ -17,6 +18,7 @@ export type RecipeShort = {
     readonly last_cooked: string;
     readonly cooked_times: number;
     readonly is_planned: boolean;
+    tags?: Array<RecipeTag>;
     ingredients?: Array<RecipeIngredient>;
     ratings?: Array<RecipeRating>;
     title: string;
@@ -25,6 +27,7 @@ export type RecipeShort = {
     portion_count?: number | null;
     cooking_time?: number | null;
     preparation_time?: number | null;
+    difficulty?: number | null;
     source_link?: string | null;
     readonly created: string | null;
     readonly edited: string | null;

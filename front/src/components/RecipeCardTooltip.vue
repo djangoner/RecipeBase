@@ -18,7 +18,19 @@
         color="primary"
       />
       {{ recipe.title }}
+      <!-- Stars difficulty -->
+
+      <div class="title-rating" v-if="recipe.difficulty">
+        <q-icon
+          v-for="i in recipe.difficulty"
+          :key="i"
+          size="xs"
+          color="teal"
+          name="star_rate"
+        />
+      </div>
     </h6>
+
     <h6
       v-if="recipe.last_cooked"
       class="q-mt-none q-mb-sm text-subtitle2"
@@ -131,3 +143,13 @@ export default defineComponent({
   },
 });
 </script>
+
+
+<style lang="scss" scoped>
+.title {
+  &-rating {
+    white-space: nowrap;
+    display: inline-block;
+  }
+}
+</style>

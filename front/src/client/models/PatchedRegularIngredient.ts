@@ -10,5 +10,6 @@ export type PatchedRegularIngredient = {
     day?: number | null;
     amount?: number;
     amount_type?: AmountTypeEnum;
+    active?: boolean;
     ingredient?: number;
 };

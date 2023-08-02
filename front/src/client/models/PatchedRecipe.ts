@@ -37,6 +37,7 @@ export type PatchedRecipe = {
     portion_count?: number | null;
     cooking_time?: number | null;
     preparation_time?: number | null;
+    difficulty?: number | null;
     source_link?: string | null;
     readonly created?: string | null;
     readonly edited?: string | null;

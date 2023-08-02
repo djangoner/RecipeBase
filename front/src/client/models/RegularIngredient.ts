@@ -10,5 +10,6 @@ export type RegularIngredient = {
     day?: number | null;
     amount: number;
     amount_type?: AmountTypeEnum;
+    active?: boolean;
     ingredient: number;
 };

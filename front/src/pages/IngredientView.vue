@@ -58,8 +58,10 @@
       class="q-my-md"
       @submit.prevent="saveIngredient()"
     >
-      <q-card padding
-class="shadow-1">
+      <q-card
+        padding
+        class="shadow-1"
+      >
         <q-card-section class="q-col-gutter-y-md">
           <!-- Main fields -->
           <q-input

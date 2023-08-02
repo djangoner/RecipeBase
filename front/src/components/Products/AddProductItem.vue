@@ -2,7 +2,7 @@
   <div class="row items-center q-px-md q-mb-sm">
     <div class="col-grow">
       <select-search
-        ref="selectSearch"
+        ref="selectSearchVal"
         behavior="menu"
         label="Добавить продукт"
         dense
@@ -41,13 +41,12 @@ import { computed, ref, Ref, onMounted } from "vue"
 const $emit = defineEmits(["create", "select"])
 
 const itemText = ref("")
-const selectSearch = ref(null)
+const selectSearchVal = ref(null)
 const options: Ref<ProductListItemRead[] | IngredientRead[]> = ref([])
 
 const store = useBaseStore()
 
 const ingredients = computed(() => store.ingredients)
-
 
 function loadIngredients(search?: string) {
   const payload = {
@@ -59,7 +58,6 @@ function loadIngredients(search?: string) {
   const prom = store.loadIngredients(payload)
   return prom
 }
-
 
 function filterFn(val: string, update: CallableFunction) {
   itemText.value = val
@@ -74,16 +72,16 @@ function filterFn(val: string, update: CallableFunction) {
   })
 }
 
-function selectClear(){
-  if (selectSearch.value) {
+function selectClear() {
+  if (selectSearchVal.value) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    selectSearch.value?.clear()
+    selectSearchVal.value?.clear()
   }
 }
 
 function onSelected(ing: IngredientRead) {
   console.debug("[ProductItemAdd]Select ", ing)
-  $emit("create", ing.title, {ingredient: ing.id})
+  $emit("create", ing.title, { ingredient: ing.id })
   itemText.value = ""
   selectClear()
 }
@@ -96,5 +94,4 @@ function createItem() {
 }
 
 onMounted(() => loadIngredients())
-
 </script>

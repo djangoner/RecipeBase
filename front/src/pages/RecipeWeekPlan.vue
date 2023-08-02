@@ -210,18 +210,14 @@ import { getDateOfISOWeek, YearWeek } from "src/modules/WeekUtils"
 import { WeekDays } from "src/modules/WeekUtils"
 import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
-// import { useQuery } from "@oarepo/vue-query-synchronizer";
 import Fireworks from "@fireworks-js/vue"
 import { useDebounceFn, useDocumentVisibility, useEventListener, useNow, useSessionStorage, useStorage } from "@vueuse/core"
-import { useQuery } from "@oarepo/vue-query-synchronizer"
 import { isOnline } from "src/modules/isOnline"
 import { RecipePlanWeekFromRead } from "src/Convert"
 import { date, useQuasar } from "quasar"
 import { WarningPriorities } from "src/modules/Globals"
 import { dateTimeFormat } from "src/modules/Utils"
-import { useDebounceFnCustom, useDebounceFnState, useShortcutcs } from "src/modules/VueUtils"
-
-type QueryInterface = YearWeek
+import { useDebounceFnCustom, useShortcutcs } from "src/modules/VueUtils"
 
 interface WarnedPlan {
   priority: string | null
@@ -240,7 +236,6 @@ const fireworksOptions = {
   },
 }
 
-const $query = useQuery()
 const $q = useQuasar()
 const store = useBaseStore()
 const storeAuth = useAuthStore()

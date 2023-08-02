@@ -20,7 +20,10 @@
       {{ recipe.title }}
       <!-- Stars difficulty -->
 
-      <div class="title-rating" v-if="recipe.difficulty">
+      <div
+        v-if="recipe.difficulty"
+        class="title-rating"
+      >
         <q-icon
           v-for="i in recipe.difficulty"
           :key="i"

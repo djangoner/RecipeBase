@@ -113,7 +113,6 @@
         >
           <q-card
             class="position-sticky shadow-1"
-
           >
             <q-card-section>
               <h6 class="q-my-sm text-center text-bold">

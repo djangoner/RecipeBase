@@ -149,7 +149,7 @@ onMounted(() => {
   loadStats()
 })
 
-const {isActive} = useIntervalFn(() => {
+useIntervalFn(() => {
   loadStats()
 }, 15000)
 

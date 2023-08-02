@@ -283,13 +283,13 @@ function getItemKey(item: RecipePlanRead | null){
 
 function onDrag(e: Event, perform=false){
   // @ts-expect-error ignore
-  const elFrom = e.from as HTMLElement
+  // const elFrom = e.from as HTMLElement
   // @ts-expect-error ignore
   const elTo = e.to as HTMLElement
   // @ts-expect-error ignore
   const elItem = (e.dragged || e.item) as HTMLElement
 
-  const dayFrom = Number(elFrom.dataset.day) || null
+  // const dayFrom = Number(elFrom.dataset.day) || null
   const dayTo = Number(elTo.dataset.day) || null
   const planId = Number(elItem.dataset.plan_id ) || null
 

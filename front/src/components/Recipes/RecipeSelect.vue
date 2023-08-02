@@ -31,7 +31,7 @@ import { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
 import { useBaseStore } from "src/stores/base"
 import { PropType, computed, ref } from "vue"
 
-const props = defineProps({
+defineProps({
   modelValue: {
     type: Object as PropType<RecipeRead>,
     required: false,
@@ -101,7 +101,7 @@ const filterRecipes = (val: string, update: CallableFunction) => {
   })
 }
 
-const onScroll = ({ to, index }: { to: number, index: number }) => {
+const onScroll = ({ index }: { to: number, index: number }) => {
   const lastIndex = (recipesList.value?.length || 1) - 1
   // console.debug("Scroll: ", to, index, lastIndex, page.value, lastPage.value)
 

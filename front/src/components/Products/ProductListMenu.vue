@@ -277,6 +277,7 @@ function askCompleteList() {
     .onOk(() => {
       completeList()
     })
+    $emit("dialogObj", dialog)
 }
 
 async function runClearDB() {

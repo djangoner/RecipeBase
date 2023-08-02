@@ -166,11 +166,6 @@ function onCancell(){
     });
 }
 
-function getIngredient(id: number){
-  return store.ingredients?.find(i => i.id == id)
-}
-
-
 function runPerform(){
   saving.value = true
 

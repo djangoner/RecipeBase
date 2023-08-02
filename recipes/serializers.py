@@ -197,20 +197,6 @@ class RecipeIngredientRecommendationSerializer(serializers.ModelSerializer):
         return measuring_str(obj.amount_type)
 
 
-class RecommendationsSerializer(serializers.Serializer):
-    idx = serializers.IntegerField()
-    accepted = serializers.BooleanField()
-    hash = serializers.CharField()
-    # recipe = RecipeReadSerializer()
-    recipe_tag = RecipeTagSerializer()
-    ingredient = RecipeIngredientRecommendationSerializer()
-    plan = serializers.IntegerField()
-
-    def to_representation(self, instance):
-        self.fields["recipe"] = RecipeShortSerializer()
-        return super().to_representation(instance)
-
-
 class RecipeSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):
     short_description_str = serializers.SerializerMethodField()
     last_cooked = serializers.SerializerMethodField()
@@ -305,6 +291,20 @@ class RecipeShortSerializer(RecipeSerializer):
             list(RecipeSerializer.Meta.exclude)
             + ["author", "content", "content_source", "recommendations_recipes", "recommendations_tags"]
         )
+
+
+class RecommendationsSerializer(serializers.Serializer):
+    idx = serializers.IntegerField()
+    accepted = serializers.BooleanField()
+    hash = serializers.CharField()
+    recipe = RecipeShortSerializer()
+    recipe_tag = RecipeTagSerializer()
+    ingredient = RecipeIngredientRecommendationSerializer()
+    plan = serializers.IntegerField()
+
+    # def to_representation(self, instance):
+    #     self.fields["recipe"] = RecipeShortSerializer()
+    #     return super().to_representation(instance)
 
 
 class RecipeForRecipeIngredientSerializer(RecipeShortSerializer):

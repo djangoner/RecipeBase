@@ -502,6 +502,12 @@ export const useBaseStore = defineStore("base", {
           })
       })
     },
+    async productListMoveUncompleted(payload: { year: number; week: number }): Promise<void> {
+      const id = `${payload?.year}_${payload?.week}`
+      return storeShortcut({
+        promise: ProductListWeekService.productListWeekMoveUncompletedRetrieve({ id }),
+      })
+    },
 
     async loadProductListItems(payload: object): Promise<PaginatedProductListItemReadList> {
       return new Promise((resolve, reject) => {

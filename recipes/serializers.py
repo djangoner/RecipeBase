@@ -31,6 +31,7 @@ from recipes.services.ingredients import (
     recipe_ingredient_price_part,
 )
 from recipes.services.measurings import measuring_str
+from recipes.services.utils import week_delta
 from users.models import User
 from users.serializers import ShortUserSerializer
 from rest_flex_fields import FlexFieldsModelSerializer
@@ -471,11 +472,20 @@ class ProductListItemReadSerializer(ProductListItemSerializer):
 
 class ProductListWeekSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):
     items = ProductListItemSerializer(many=True, required=False)
+    previous_uncompleted = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductListWeek
         fields = "__all__"
         depth = 1
+
+    @extend_schema_field(OpenApiTypes.NUMBER)
+    def get_previous_uncompleted(self, instance: ProductListWeek):
+        year, week = week_delta(instance.year, instance.week, -1)
+        prev_list = ProductListWeek.objects.filter(year=year, week=week).first()
+        if not prev_list:
+            return 0
+        return prev_list.items.filter(is_auto=False, is_completed=False, already_completed=False).count()
 
 
 class ProductListWeekReadSerializer(ProductListWeekSerializer):

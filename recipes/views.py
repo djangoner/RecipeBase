@@ -32,6 +32,7 @@ from recipes.services.recommendations import (
     find_recommendation,
     generate_recommendations,
 )
+from recipes.services.utils import week_delta
 from telegram_bot.services.notifications import send_notif_synced, send_product_list
 from tasks.models import Task
 from recipes.serializers import (
@@ -613,6 +614,20 @@ class ProductListWeekViewset(viewsets.ModelViewSet):
         send_notif_synced(week_plan, request.user)
 
         # return self.retrieve(request)
+        return response.Response({"ok": True})
+
+    @extend_schema(
+        parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)],
+        responses=StatusOkSerializer,
+    )
+    @decorators.action(["GET"], detail=True)
+    def move_uncompleted(self, request, pk=None):
+        week = self.get_object()
+        week_plan, _ = ProductListWeek.objects.get_or_create(year=week.year, week=week.week)
+        year, week = week_delta(week.year, week.week, -1)
+        prev_list = ProductListWeek.objects.filter(year=year, week=week).first()
+
+        prev_list.items.filter(is_auto=False, is_completed=False, already_completed=False).update(week=week_plan)
         return response.Response({"ok": True})
 
 

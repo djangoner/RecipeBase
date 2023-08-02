@@ -13,6 +13,7 @@ import type { ProductListItemRead } from './ProductListItemRead';
 export type ProductListWeekRead = {
     readonly id: number;
     items: Array<ProductListItemRead>;
+    readonly previous_uncompleted: number;
     year: number;
     week: number;
     is_filled?: boolean;

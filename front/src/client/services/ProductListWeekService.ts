@@ -192,6 +192,24 @@ id: string,
      * @returns StatusOk 
      * @throws ApiError
      */
+    public static productListWeekMoveUncompletedRetrieve({
+id,
+}: {
+id: string,
+}): CancelablePromise<StatusOk> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/product_list_week/{id}/move_uncompleted/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+
+    /**
+     * @returns StatusOk 
+     * @throws ApiError
+     */
     public static productListWeekSendListRetrieve({
 id,
 }: {

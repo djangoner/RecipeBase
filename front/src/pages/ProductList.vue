@@ -18,6 +18,12 @@
       :show="productList && !isActual"
       @reload="$refs.menu.regenerateList()"
     />
+    <previous-uncompleted-banner
+      v-if="productList?.previous_uncompleted"
+      :count="productList?.previous_uncompleted"
+      :week="week"
+      @reload="$refs.menu.regenerateList()"
+    />
     <!-- Modals -->
     <product-list-item-view
       v-model="viewItem"
@@ -221,6 +227,7 @@ import WorkerMessagesMixin, { WorkerMessage } from "src/modules/WorkerMessages"
 import { DialogChainObject } from "quasar"
 import StatusWebsocket from "src/components/Status/StatusWebsocket.vue"
 import { sortChains } from "src/modules/Utils"
+import PreviousUncompletedBanner from 'src/components/Products/PreviousUncompletedBanner.vue'
 
 type CustomIngredientCategory = IngredientCategory & {
   items?: ProductListItemRead[]
@@ -253,8 +260,10 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     ProductListMenu,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    NotActualListBanner, AddProductItem, ProductListSearch
-  },
+    NotActualListBanner, AddProductItem, ProductListSearch,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    PreviousUncompletedBanner
+},
   mixins: [HandleErrorsMixin, IsOnlineMixin, WorkerMessagesMixin],
   data() {
     const store = useBaseStore()

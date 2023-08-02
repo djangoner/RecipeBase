@@ -13,6 +13,7 @@ import type { ProductListItem } from './ProductListItem';
 export type ProductListWeek = {
     readonly id: number;
     items?: Array<ProductListItem>;
+    readonly previous_uncompleted: number;
     year: number;
     week: number;
     is_filled?: boolean;

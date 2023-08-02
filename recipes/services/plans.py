@@ -17,6 +17,8 @@ from recipes.models import (
 from recipes.services.measurings import IngredientAmounts, convert_all_to_grams, is_convertible, measuring_str
 from django.db import transaction
 
+from recipes.services.utils import week_delta
+
 log = logging.getLogger("PlansGen")
 
 
@@ -35,11 +37,7 @@ def get_current_or_next_week():
     year, week = now.year, now.isocalendar()[1]
 
     if now.isocalendar()[2] >= 5:  # If friday
-        week += 1
-
-    if week > 54:
-        year += 1
-        week = 1
+        year, week = week_delta(year, week, 1)
 
     return year, week
 

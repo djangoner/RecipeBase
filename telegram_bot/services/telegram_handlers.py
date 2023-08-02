@@ -242,6 +242,6 @@ def register_bot_handlers(bot: telebot.TeleBot):
             bot.edit_message_text(f"✅ Добавлено в список покупок:\n\n<pre>{ing.title}</pre>", chat_id, msg_id)
         elif cmd == "add_ing_default":
             week = get_current_product_week()
-            ProductListItem.objects.create(week=week, ingredient=ing, title=cmd_args[1])
+            ProductListItem.objects.create(week=week, title=cmd_args[1])
 
             bot.edit_message_text("✅ Добавлено в список покупок", chat_id, msg_id)

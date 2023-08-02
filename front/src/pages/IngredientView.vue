@@ -58,7 +58,8 @@
       class="q-my-md"
       @submit.prevent="saveIngredient()"
     >
-      <q-card padding class="shadow-1">
+      <q-card padding
+class="shadow-1">
         <q-card-section class="q-col-gutter-y-md">
           <!-- Main fields -->
           <q-input
@@ -273,7 +274,11 @@ const defaultIngredient = {
 export default defineComponent({
   mixins: [HandleErrorsMixin],
   beforeRouteUpdate(to) {
-    this.loadIngredient(parseInt(to.params.id as string));
+    if (to.params.id == "new"){
+      this.loadIngredient("new")
+    } else {
+      this.loadIngredient(parseInt(to.params.id as string));
+    }
   },
   data() {
     const store = useBaseStore();

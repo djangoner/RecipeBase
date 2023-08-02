@@ -298,6 +298,7 @@ interface QueryInterface {
 const defaultFilters = {
   cooking_time: { min: 5, max: 120 },
   price: { min: 0, max: 1000 },
+  difficulty: {min: 1, max: 5},
   priceUseFull: false,
   tags_include: [],
   tags_exclude: [],
@@ -494,6 +495,15 @@ export default defineComponent({
           }
           if (this.filters.price.max < defaultFilters.price.max) {
             payload[this.filters.priceUseFull ? "priceFullLt" : "pricePartLt"] = String(this.filters.price.max)
+          }
+        }
+        // Difficulty
+        if (this.filters.difficulty) {
+          if (this.filters.difficulty.min > defaultFilters.difficulty.min) {
+            payload.difficultyGt = String(this.filters.difficulty.min)
+          }
+          if (this.filters.difficulty.max < defaultFilters.difficulty.max) {
+            payload.difficultyLt = String(this.filters.difficulty.max)
           }
         }
 

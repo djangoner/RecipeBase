@@ -145,6 +145,10 @@ export interface RecipesFilters {
     min: number
     max: number
   }
+  difficulty: {
+    min: number
+    max: number
+  }
   priceUseFull: boolean
   tags_include: number[]
   tags_exclude: number[]

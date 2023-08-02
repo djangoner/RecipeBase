@@ -16,6 +16,18 @@
         label
       />
     </div>
+    <div class="q-my-sm">
+      <h6 class="q-my-sm text-subtitle2 text-bold">
+        Сложность
+      </h6>
+      <q-range
+        v-model="filters.difficulty"
+        class="q-px-md"
+        :min="1"
+        :max="5"
+        label
+      />
+    </div>
 
     <div class="q-my-sm">
       <h6 class="q-my-sm text-subtitle2 text-bold">

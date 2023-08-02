@@ -105,6 +105,9 @@ class RecipeFilterSet(filters.FilterSet):
     price_full_gt = filters.NumberFilter("price_full", lookup_expr="gte")
     price_full_lt = filters.NumberFilter("price_full", lookup_expr="lte")
 
+    difficulty_gt = filters.NumberFilter("difficulty", lookup_expr="gte")
+    difficulty_lt = filters.NumberFilter("difficulty", lookup_expr="lte")
+
     class Meta:
         model = Recipe
         exclude = ("tags",)

@@ -145,13 +145,16 @@ class RecipeFilterSet(filters.FilterSet):
     def filter_tags_include(self, queryset, name, value: str):
         if not value:
             return queryset
-        print(value)
-        return queryset.filter(tags__in=value.split(",")).distinct()
+        for val in value.split(","):
+            queryset = queryset.filter(tags=val)
+        return queryset.distinct()
 
     def filter_tags_exclude(self, queryset, name, value: str):
         if not value:
             return queryset
-        return queryset.exclude(tags__in=value.split(",")).distinct()
+        for val in value.split(","):
+            queryset = queryset.exclude(tags=val)
+        return queryset.distinct()
 
     def filter_ingredients_include(self, queryset, name, value: str):
         if not value:

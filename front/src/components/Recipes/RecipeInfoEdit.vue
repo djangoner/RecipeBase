@@ -106,19 +106,9 @@
 
   <div>
     <recipe-difficulty
-      v-if="edit"
       v-model.number="recipe.difficulty"
+      :edit="edit"
     />
-    <h6
-      v-else-if="recipe.difficulty"
-      class="text-center q-my-none"
-    >
-      <q-icon
-        name="bar_chart"
-        color="grey"
-      />
-      Сложность: {{ recipe.difficulty }}
-    </h6>
   </div>
 
   <div>

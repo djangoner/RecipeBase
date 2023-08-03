@@ -1,6 +1,7 @@
 <template>
   <div class="q-mx-md">
     <q-slider
+      v-if="edit"
       v-model="modelValue"
       :min="1"
       :max="5"
@@ -13,7 +14,7 @@
           v-for="marker in scope.markerList"
           :key="marker.index"
           class="cursor-pointer"
-          :class="[ marker.classes ]"
+          :class="[marker.classes]"
           :style="marker.style"
           @click="modelValue = marker.value"
         >
@@ -48,21 +49,60 @@
         </div>
       </template>
     </q-slider>
+
+    <h6
+      v-else-if="modelValue"
+      class="text-center q-my-none"
+    >
+      <q-icon
+        name="bar_chart"
+        color="grey"
+      />
+      Сложность: {{ modelValue }}
+      <q-tooltip>
+        <q-icon
+          v-for="i in modelValue"
+          :key="i"
+          size="xs"
+          color="white"
+          name="star_rate"
+        />
+        <div
+          v-for="user in difficultyUsersEqual(modelValue)"
+          :key="user.id"
+        >
+          - {{ userReadable(user) }}
+        </div>
+        <q-separator
+          v-if="difficultyUsersEqual(modelValue)?.length"
+          color="white"
+          class="q-my-xs"
+        />
+        <div
+          v-for="user in difficultyUsersGreater(modelValue)"
+          :key="user.id"
+        >
+          - {{ userReadable(user) }}
+        </div>
+      </q-tooltip>
+    </h6>
   </div>
 </template>
 
-
 <script setup lang="ts">
-import { userReadable } from 'src/modules/Utils';
-import { useAuthStore } from 'src/stores/auth';
-import { computed } from 'vue';
-
+import { userReadable } from "src/modules/Utils"
+import { useAuthStore } from "src/stores/auth"
+import { computed } from "vue"
 
 const props = defineProps({
   modelValue: {
     type: Number,
     required: true,
-  }
+  },
+  edit: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const $emit = defineEmits(["update:model-value"])
@@ -70,19 +110,22 @@ const $emit = defineEmits(["update:model-value"])
 const store = useAuthStore()
 
 const modelValue = computed({
-  get(){
+  get() {
     return props.modelValue
   },
-  set(value){
+  set(value) {
     $emit("update:model-value", value)
-  }
+  },
 })
 
-function difficultyUsersGreater(level: number){
-  return store.users?.filter(u => (u.profile.cook_difficulty || 0) > level)
-}
-function difficultyUsersEqual(level: number){
-  return store.users?.filter(u => (u.profile.cook_difficulty || 0) == level)
+function difficultyUsersGreaterOrEqual(level: number) {
+  return store.users?.filter((u) => (u.profile.cook_difficulty || 0) >= level)
 }
 
+function difficultyUsersGreater(level: number) {
+  return store.users?.filter((u) => (u.profile.cook_difficulty || 0) > level)
+}
+function difficultyUsersEqual(level: number) {
+  return store.users?.filter((u) => (u.profile.cook_difficulty || 0) == level)
+}
 </script>

@@ -302,7 +302,12 @@ class RegularIngredient(models.Model):
 
 
 class RecipeTag(models.Model):
+    class TypeChoices(models.TextChoices):
+        NORMAL = "norm", _("Обычный")
+        NEW = "new", _("Новые рецепты")
+
     title = models.CharField(_("Название метки"), max_length=50)
+    type = models.CharField(_("Тип метки"), max_length=5, choices=TypeChoices.choices, default=TypeChoices.NORMAL)
 
     class Meta:
         ordering = ["-id"]

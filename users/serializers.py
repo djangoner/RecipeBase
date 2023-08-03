@@ -36,3 +36,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ShortUserSerializer(UserSerializer):
     profile = None  # type: ignore
+    permissions = None  # type: ignore
+
+    class Meta(UserSerializer.Meta):
+        exclude = UserSerializer.Meta.exclude = ["last_login", "date_joined", "is_staff", "is_superuser"]

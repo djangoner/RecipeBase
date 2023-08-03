@@ -35,7 +35,6 @@
       </q-icon>
       {{ recipe.title }}
 
-
       <q-icon
         name="help"
         color="grey"
@@ -271,12 +270,12 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import RecipeImagesView from "./RecipeImagesView.vue"
 import { RecipeRead } from "src/client"
 import { useAuthStore } from "src/stores/auth"
 import { useBaseStore } from "src/stores/base"
-import { defineComponent, PropType } from "vue"
+import { computed, defineComponent, PropType } from "vue"
 import RecipeMenu from "src/components/RecipeMenu.vue"
 import RecipeImagesUpload from "src/components/RecipeImagesUpload.vue"
 import RecipeTags from "src/components/Recipes/RecipeTags.vue"
@@ -291,65 +290,33 @@ const archivedOptions = [
   { label: "Архивирован", value: true },
 ]
 
-export default defineComponent({
-  components: {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    RecipeImagesUpload,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    RecipeMenu,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    ContentEditor,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    RecipeTags,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    RecipeImagesView,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    RecipeDifficulty,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    RecipeCardTooltip
-},
-  props: {
-    edit: {
-      type: Boolean,
-      default: false,
-    },
-    modelValue: {
-      type: Object as PropType<RecipeRead>,
-      default: null,
-      required: false,
-    },
+const props = defineProps({
+  edit: {
+    type: Boolean,
+    default: false,
   },
-  emits: ["update:model-value", "update:edit"],
-  data() {
-    const store = useBaseStore()
-    const storeAuth = useAuthStore()
-    return {
-      store,
-      storeAuth,
-      archivedOptions,
-      requiredRule,
-    }
-  },
-  computed: {
-    recipe: {
-      get() {
-        return this.modelValue
-      },
-      set(val: RecipeRead) {
-        this.$emit("update:model-value", val)
-      },
-    },
-    dense() {
-      return true
-    },
-    exists() {
-      return Boolean(this.recipe?.id)
-    },
-  },
-  methods: {
-    toggleEdit() {
-      this.$emit("update:edit", !this.edit)
-    },
+  modelValue: {
+    type: Object as PropType<RecipeRead>,
+    default: null,
+    required: false,
   },
 })
+
+const $emit = defineEmits(["update:model-value", "update:edit"])
+const store = useBaseStore()
+const storeAuth = useAuthStore()
+
+const recipe = computed({
+  get() {
+    return props.modelValue
+  },
+  set(val: RecipeRead) {
+    $emit("update:model-value", val)
+  },
+})
+const dense = computed(() => true)
+const exists = computed(() => Boolean(recipe.value?.id))
+function toggleEdit() {
+  $emit("update:edit", !props.edit)
+}
 </script>

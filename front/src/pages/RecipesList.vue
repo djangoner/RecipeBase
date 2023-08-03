@@ -87,6 +87,13 @@
       </q-btn>
 
       <q-space />
+      <q-select
+        v-model.number="pageSize"
+        :options="pageSizeSelect"
+        options-dense
+        dense
+        size="sm"
+      />
 
       <q-btn-toggle
         v-model="displayMode"
@@ -232,6 +239,7 @@ import { clearPayload } from "src/modules/Utils"
 import { useAuthStore } from "src/stores/auth"
 import { useBaseStore } from "src/stores/base.js"
 import { defineComponent } from "vue"
+import { useSessionStorage } from "@vueuse/core"
 
 const orderingOptions = [
   { label: "Кол-во приготовлений - по возрастанию", value: "cooked_times" },
@@ -327,13 +335,16 @@ export default defineComponent({
       initialFilters.tags_include.push(Number(searchTag))
     }
 
+    const page = SessionStorage.getItem("recipesListPage") ?? 1
+
     return {
       store,
       $query: useQuery(),
       storeAuth,
       search: SessionStorage.getItem("recipesSearch") ?? "",
-      page: 1,
-      page_size: 20,
+      page,
+      pageSize: SessionStorage.getItem("recipesListPageSize") ?? 20,
+      pageSizeSelect: [5, 10, 20, 50],
       loading: false,
       ordering: SessionStorage.getItem("recipesOrdering") ?? "-cooked_times",
       tablePagination: {
@@ -383,7 +394,7 @@ export default defineComponent({
         r.unshift({
           name: "pos",
           label: "#",
-          field: (r: RecipeRead) => (this.recipes ? String(this.recipes.indexOf(r) + 1 + (this.page - 1) * this.page_size) : "-"),
+          field: (r: RecipeRead) => (this.recipes ? String(this.recipes.indexOf(r) + 1 + (this.page - 1) * this.pageSize) : "-"),
           style: "width: 20px",
           sortable: false,
           required: false,
@@ -417,7 +428,12 @@ export default defineComponent({
       this.page = 1
       void this.loadRecipes()
     },
-    page() {
+    page(val: number) {
+      SessionStorage.set("recipesListPage", val)
+      void this.loadRecipes()
+    },
+    pageSize(val: number) {
+      SessionStorage.set("recipesListPageSize", val)
       void this.loadRecipes()
     },
     filters: {
@@ -449,7 +465,7 @@ export default defineComponent({
 
         payload.search = this.search
         payload.page = String(this.page)
-        payload.pageSize = String(this.page_size)
+        payload.pageSize = String(this.pageSize)
 
         if (this.compilation == "top10") {
           payload.ordering = ""
@@ -553,7 +569,7 @@ export default defineComponent({
       this.ordering = props?.pagination?.descending && !props?.pagination?.sortBy?.startsWith("-") ? "-" : ""
       this.ordering += props?.pagination?.sortBy
       this.page = props?.pagination?.page || 1
-      this.page_size = props?.pagination?.rowsPerPage || 20
+      this.pageSize = props?.pagination?.rowsPerPage || 20
       void this.loadRecipes().then(() => {
         Object.assign(this.tablePagination, props.pagination)
       })

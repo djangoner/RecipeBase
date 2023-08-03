@@ -2,9 +2,7 @@
   <div
     :key="index"
     class="row q-col-gutter-x-sm wrap"
-    :class="[
-      plan?.recipe? '' :'not-draggable',
-    ]"
+    :class="[plan?.recipe ? '' : 'not-draggable']"
     :data-plan_id="plan?.id"
   >
     <div class="col-auto">
@@ -42,8 +40,10 @@
 
     <div class="col">
       <recipe-select
+        :key="index"
         :model-value="plan?.recipe"
         :readonly="readonly"
+        :index="index"
         @update:model-value="$emit('set-recipe', dayIdx, mtime, $event, index)"
       />
       <!-- <span>{{ getplan(dayIdx, mtime)?.title }}</span> -->
@@ -133,7 +133,7 @@ const storeAuth = useAuthStore()
 
 const warningColor = computed(() => {
   const warn: WarnedPlan | null | undefined = props.warning
-  if (!warn){
+  if (!warn) {
     return ""
   }
   return getWarningPriorityColor(warn.priority)

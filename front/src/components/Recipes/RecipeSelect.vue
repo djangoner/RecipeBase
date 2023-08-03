@@ -1,5 +1,8 @@
 <template>
   <q-select
+    v-bind="$attrs"
+    :key="index"
+    ref="refSelect"
     popup-content-class="popup__recipe-select"
     :model-value="modelValue"
     :input-debounce="100"
@@ -10,10 +13,11 @@
     clearable
     options-dense
     :dense="dense"
-    v-bind="$attrs"
     @update:model-value="$emit('update:model-value', $event)"
     @filter="filterRecipes"
     @virtual-scroll="onScroll"
+    @popup-show="selectPopup = true"
+    @popup-hide="selectPopup = false"
   >
     <template #no-option>
       <q-item>
@@ -26,10 +30,12 @@
 </template>
 
 <script setup lang="ts">
+import { onClickOutside } from "@vueuse/core"
 import { RecipeRead } from "src/client"
 import { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
 import { useBaseStore } from "src/stores/base"
-import { PropType, computed, ref } from "vue"
+import { PropType, computed, ref, Ref } from "vue"
+import {QSelect} from 'quasar'
 
 defineProps({
   modelValue: {
@@ -45,15 +51,28 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  index: {
+    type: Number,
+    default: null,
+  },
 })
+
 const store = useBaseStore()
 const search = ref("")
 const loading = ref(false)
+const refSelect: Ref<QSelect | null> = ref(null)
+const selectPopup = ref(false)
 
 const page = ref(1)
 const lastPage = ref(0)
 const totalItems = ref(0)
 const $emit = defineEmits(["update:model-value"])
+
+onClickOutside(refSelect, () => {
+  if (selectPopup.value && refSelect.value){
+    refSelect.value.hidePopup()
+  }
+})
 
 const recipesList = computed(() => {
   return store.recipes
@@ -101,7 +120,7 @@ const filterRecipes = (val: string, update: CallableFunction) => {
   })
 }
 
-const onScroll = ({ index }: { to: number, index: number }) => {
+const onScroll = ({ index }: { to: number; index: number }) => {
   const lastIndex = (recipesList.value?.length || 1) - 1
   // console.debug("Scroll: ", to, index, lastIndex, page.value, lastPage.value)
 
@@ -111,11 +130,10 @@ const onScroll = ({ index }: { to: number, index: number }) => {
     void loadRecipes()
   }
 }
-
 </script>
 
 <style lang="scss">
 .popup__recipe-select {
-  max-height: 400px!important;
+  max-height: 400px !important;
 }
 </style>

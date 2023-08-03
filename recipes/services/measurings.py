@@ -15,7 +15,23 @@ MEASURING_TYPES = (
     ("tea_spoon", _("Ч. Л.")),
     ("head", _("Качан")),
     ("items", _("Шт")),
+    ("fl_oz", _("fl oz")),
 )
+
+MEASURING_TRANSLATES = {
+    "oz": "fl_oz",
+    "fl_oz": "fl_oz",
+    "г": "g",
+    "гр": "g",
+    "грамм": "g",
+    "шт": "items",
+    "зуб": "items",
+    "стл": "table_spoon",
+    "чл": "tea_spoon",
+    "чаш": "cup",
+    "чашка": "cup",
+    "стакан": "cup",
+}
 
 MEASURING_SHORT = {"g": "гр", "kg": "кг", "l": "л", "ml": "мл", "items": "шт"}
 
@@ -27,10 +43,14 @@ MEASURING_CONVERT = {
     "pinch": 2,
     "table_spoon": 20,
     "tea_spoon": 10,
+    "fl_oz": 30,
 }
 
-MEASURING_LIQUIDS = ["l", "ml", "g"]
+MEASURING_LIQUIDS = ["l", "ml", "fl_oz", "g"]
 CONVERT_ADVANCED = ["l", "ml"]
+
+MEAS_TYPES_DICT = dict(MEASURING_TYPES)
+MEAS_TYPES_DICT_REVERSED = {v.lower(): k.lower() for k, v in MEAS_TYPES_DICT.items()}
 
 
 def short_text(tx: str, length: int = 100):
@@ -61,6 +81,15 @@ def measuring_str(meas: str | None):
 
 def is_convertible(measuring: str, advanced: bool = True) -> bool:
     return measuring in MEASURING_CONVERT or (advanced and measuring in CONVERT_ADVANCED)
+
+
+def translate_measuring(meas: str):
+    if meas in MEASURING_TRANSLATES:
+        return MEASURING_TRANSLATES.get(meas, None)
+    elif meas in MEAS_TYPES_DICT:
+        return meas
+    elif meas in MEAS_TYPES_DICT_REVERSED:
+        return MEAS_TYPES_DICT_REVERSED[meas]
 
 
 def convert_all_to_grams(measurings: IngredientAmounts) -> Tuple[str, int | float]:

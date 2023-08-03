@@ -5,6 +5,8 @@ import type { PaginatedRecipeReadList } from '../models/PaginatedRecipeReadList'
 import type { PatchedRecipe } from '../models/PatchedRecipe';
 import type { Recipe } from '../models/Recipe';
 import type { RecipeRead } from '../models/RecipeRead';
+import type { RecognizedIngredients } from '../models/RecognizedIngredients';
+import type { RecognizeText } from '../models/RecognizeText';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -289,6 +291,23 @@ id: number,
             path: {
                 'id': id,
             },
+        });
+    }
+
+    /**
+     * @returns RecognizedIngredients 
+     * @throws ApiError
+     */
+    public static recipesRecognizeIngredientsCreate({
+requestBody,
+}: {
+requestBody: RecognizeText,
+}): CancelablePromise<RecognizedIngredients> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/recipes/recognize_ingredients/',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 

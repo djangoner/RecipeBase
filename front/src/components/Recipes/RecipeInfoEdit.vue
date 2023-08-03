@@ -204,9 +204,26 @@
     v-if="edit"
     class="q-py-md q-gutter-sm full-width"
   >
-    <h6 class="q-my-sm">
-      Содержание (изначальное, источник)
-    </h6>
+    <div class="row justify-between items-center q-my-sm">
+      <h6 class="q-my-none">
+        Содержание (изначальное, источник)
+      </h6>
+      <div class="row">
+        <q-btn
+          icon="o_find_in_page"
+          :disable="recipe.ingredients.length > 0 && exists"
+          flat
+          dense
+          @click="autorecognizeIngredients()"
+        >
+          <q-tooltip>
+            Автоматическое распознавание ингредиентов.
+            <br>
+            (доступно только при пустом списке ингрединтов)
+          </q-tooltip>
+        </q-btn>
+      </div>
+    </div>
     <content-editor v-model="recipe.content_source" />
     <h6 class="q-my-sm">
       Содержание (редактированное)
@@ -262,16 +279,18 @@
 
 <script lang="ts" setup>
 import RecipeImagesView from "./RecipeImagesView.vue"
-import { RecipeRead } from "src/client"
+import { RecipeRead, RecognizedIngredients } from "src/client"
 import { useAuthStore } from "src/stores/auth"
 import { useBaseStore } from "src/stores/base"
-import { computed, defineComponent, PropType } from "vue"
+import { ingAddDefault } from "src/modules/Models"
+import { computed, PropType } from "vue"
 import RecipeMenu from "src/components/RecipeMenu.vue"
 import RecipeImagesUpload from "src/components/RecipeImagesUpload.vue"
 import RecipeTags from "src/components/Recipes/RecipeTags.vue"
 import ContentEditor from "src/components/Recipes/ContentEditor.vue"
 import RecipeDifficulty from "./Fields/RecipeDifficulty.vue"
 import RecipeCardTooltip from "../RecipeCardTooltip.vue"
+import { useQuasar } from "quasar"
 
 const requiredRule = (val: string | number) => !!val || "Обязательное поле"
 
@@ -293,6 +312,7 @@ const props = defineProps({
 })
 
 const $emit = defineEmits(["update:model-value", "update:edit"])
+const $q = useQuasar()
 const store = useBaseStore()
 const storeAuth = useAuthStore()
 
@@ -309,4 +329,39 @@ const exists = computed(() => Boolean(recipe.value?.id))
 function toggleEdit() {
   $emit("update:edit", !props.edit)
 }
+
+function autorecognizeIngredients(){
+  console.debug("Auto recognize ingredients")
+  const prom = store.autorecognizeIngredients({text: recipe.value.content_source})
+  $q.loading.show({
+    message: "Распознавание ингредиентов..."
+  })
+
+  void prom.then((resp: RecognizedIngredients) => {
+    const ings = resp.result
+    console.debug("Auto recognized ingredients: ", ings, resp)
+    if (ings && ings.length > 0){
+
+      if (recipe.value.ingredients){
+        recipe.value.ingredients.length = 0
+        ings.forEach(ingredient => {
+            recipe.value.ingredients.push(Object.assign({}, ingAddDefault, ingredient))
+          });
+      }
+
+      $q.notify({
+        type: 'positive',
+        message: "Ингредиенты успешно распознаны"
+      })
+    } else {
+      $q.notify({
+        type: 'warning',
+        message: "Ингредиенты не распознаны"
+      })
+    }
+  }).finally(() => {
+    $q.loading.hide()
+  })
+}
+
 </script>

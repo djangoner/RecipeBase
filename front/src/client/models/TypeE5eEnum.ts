@@ -8,7 +8,7 @@
  * * `kilo` - Измеряется в КГ
  * * `item` - Поштучный
  */
-export enum TypeEnum {
+export enum TypeE5eEnum {
     GROCERY = 'grocery',
     LIQ = 'liq',
     KILO = 'kilo',

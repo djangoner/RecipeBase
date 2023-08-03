@@ -843,5 +843,12 @@ export const useBaseStore = defineStore("base", {
           })
       })
     },
+
+    async autorecognizeIngredients(text: string) {
+      return storeShortcut({
+        promise: RecipesService.recipesRecognizeIngredientsCreate({ requestBody: text }),
+        errorTitle: "Ошибка распознавания ингредиентов",
+      })
+    },
   },
 })

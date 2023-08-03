@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { RegularIngredient } from './RegularIngredient';
-import type { TypeEnum } from './TypeEnum';
+import type { TypeE5eEnum } from './TypeE5eEnum';
 
 /**
  * A ModelSerializer that takes additional arguments for
@@ -26,7 +26,7 @@ export type PatchedIngredient = {
      */
     min_pack_size?: number | null;
     item_weight?: number | null;
-    type?: TypeEnum | null;
+    type?: TypeE5eEnum | null;
     price?: number | null;
     need_buy?: boolean;
     edible?: boolean;

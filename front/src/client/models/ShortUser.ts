@@ -2,14 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Nested } from './Nested';
+
 export type ShortUser = {
     readonly id: number;
-    readonly permissions: Array<string>;
-    readonly last_login: string | null;
-    /**
-     * Указывает, что пользователь имеет все права без явного их назначения.
-     */
-    readonly is_superuser: boolean;
+    password: string;
     /**
      * Обязательное поле. Не более 150 символов. Только буквы, цифры и символы @/./+/-/_.
      */
@@ -18,12 +15,9 @@ export type ShortUser = {
     last_name?: string;
     email?: string;
     /**
-     * Отметьте, если пользователь может входить в административную часть сайта.
-     */
-    readonly is_staff: boolean;
-    /**
      * Отметьте, если пользователь должен считаться активным. Уберите эту отметку вместо удаления учётной записи.
      */
     is_active?: boolean;
-    readonly date_joined: string;
+    readonly groups: Array<Nested>;
+    readonly user_permissions: Array<Nested>;
 };

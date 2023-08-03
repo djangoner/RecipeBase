@@ -13,6 +13,7 @@
  * * `tea_spoon` - Ч. Л.
  * * `head` - Качан
  * * `items` - Шт
+ * * `fl_oz` - fl oz
  */
 export enum AmountTypeEnum {
     G = 'g',
@@ -25,4 +26,5 @@ export enum AmountTypeEnum {
     TEA_SPOON = 'tea_spoon',
     HEAD = 'head',
     ITEMS = 'items',
+    FL_OZ = 'fl_oz',
 }

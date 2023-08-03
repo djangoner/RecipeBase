@@ -1,3 +1,8 @@
+from typing import TypeVar
+
+T = TypeVar("T")
+
+
 def week_delta(year: int, week: int, delta: int):
     """Add delta weeks to year & week"""
     week += delta
@@ -8,3 +13,7 @@ def week_delta(year: int, week: int, delta: int):
         week = 1
 
     return year, week
+
+
+def first_or_none(lst: list[T] | None) -> T | None:
+    return next(iter(lst or []), None)

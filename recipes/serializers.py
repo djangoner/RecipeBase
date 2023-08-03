@@ -506,3 +506,9 @@ class WeekPlanConditionSerializer(serializers.ModelSerializer):
     @extend_schema_field(OpenApiTypes.BOOL)
     def get_full_day(self, instance: WeekPlanCondition):
         return instance.full_day
+
+
+class RecognizedIngredientSerializer(serializers.Serializer):
+    ingredient = IngredientSerializer()
+    amount = serializers.IntegerField()
+    amount_type = serializers.CharField()

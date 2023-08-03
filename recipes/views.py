@@ -26,6 +26,7 @@ from recipes.models import (
     WeekPlanCondition,
 )
 from recipes.services.conditions import process_conditions_tree, warnings_json
+from recipes.services.ingredients import recognize_ingredients_text
 from recipes.services.recommendations import (
     accept_recommendation,
     cancel_recommendation,
@@ -58,6 +59,7 @@ from recipes.serializers import (
     RecipeShortSerializer,
     RecipeTagSerializer,
     IngredientCategorySerializer,
+    RecognizedIngredientSerializer,
     RecommendationsSerializer,
     RegularIngredientSerializer,
     ShopSerializer,
@@ -254,6 +256,27 @@ class RecipeViewset(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @extend_schema(
+        request=inline_serializer(
+            "RecognizeText",
+            {
+                "text": fields.CharField(),
+            },
+        ),
+        responses=inline_serializer(
+            "RecognizedIngredients",
+            {"result": RecognizedIngredientSerializer(many=True)},
+        ),
+    )
+    @decorators.action(["POST"], detail=False)
+    def recognize_ingredients(self, request):
+        text = request.data.get("text", "")
+        res = recognize_ingredients_text(text)
+        if not res:
+            return response.Response({"result": []})
+
+        return response.Response({"result": [RecognizedIngredientSerializer(i).data for i in res]})
 
 
 class RecipeImageViewset(viewsets.ModelViewSet):

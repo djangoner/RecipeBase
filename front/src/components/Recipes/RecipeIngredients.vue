@@ -133,6 +133,7 @@ import IngredientSelect from "./IngredientSelect.vue"
 import { IngredientRead, RecipeIngredientRead, RecipeRead } from "src/client"
 import { computed, PropType, Ref, ref, watch } from "vue"
 import { useQuasar } from "quasar"
+import { getDefaultMeasuringType as getDefaultAmountType } from "src/modules/Utils"
 
 const $emit = defineEmits(["update:recipe"])
 const $q = useQuasar()
@@ -246,6 +247,7 @@ function addIngredient(ingredient?: IngredientRead) {
 
   const newIngredient = Object.assign({}, ingAddDefault, {
     ingredient: ingredient,
+    amount_type: getDefaultAmountType(ingredient)
   })
 
   // @ts-expect-error new ingredient creation

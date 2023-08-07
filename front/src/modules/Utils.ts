@@ -55,6 +55,22 @@ export function getPackSuffix(ingredient: IngredientRead): string {
       return "шт"
   }
 }
+export function getDefaultMeasuringType(ingredient: IngredientRead): string {
+  switch (ingredient.type) {
+    case "item":
+      return "items"
+
+    case "liq":
+      return "l"
+
+    case "kilo":
+      return "kg"
+
+    default:
+      return "g"
+  }
+}
+
 
 export function pluralize(count: number, words: string[]): string {
   const cases = [2, 0, 1, 1, 1, 2]

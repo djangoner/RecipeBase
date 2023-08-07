@@ -1,7 +1,7 @@
 <template>
   <q-select
     :model-value="ingredient"
-    :input-debounce="preloadAll? 0 : 100"
+    :input-debounce="preloadAll ? 0 : 100"
     :options="ingredients"
     :rules="rules"
     :label="label"
@@ -27,98 +27,93 @@
   </q-select>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { useBaseStore } from "src/stores/base"
-import { defineComponent, PropType } from "vue"
+import { computed, PropType, ref } from "vue"
 import { IngredientRead } from "src/client"
-import HandleErrorsMixin, { CustomAxiosError } from "src/modules/HandleErrorsMixin"
+import { promiseSetLoading } from "src/modules/StoreCrud"
 
-export default defineComponent({
-  mixins: [HandleErrorsMixin],
-  props: {
-    ingredient: {
-      type: Object as PropType<IngredientRead | undefined>,
-        default: undefined,
-      required: false,
-    },
-    label: {
-      type: String,
-      default: null,
-      required: false,
-    },
-    required: {
-      type: Boolean,
-      default: true,
-    },
-    readonly: {
-      type: Boolean,
-      default: false,
-    },
-    disable: {
-      type: Boolean,
-      default: false,
-    },
-    clearable: {
-      type: Boolean,
-      default: false,
-    },
-    preloadAll: {
-      type: Boolean,
-      default: true,
-    }
+const props = defineProps({
+  ingredient: {
+    type: Object as PropType<IngredientRead | undefined>,
+    default: undefined,
+    required: false,
   },
-  emits: ["update:ingredient"],
-  data() {
-    const store = useBaseStore()
-    return { store, search: "", loading: true }
+  label: {
+    type: String,
+    default: null,
+    required: false,
   },
-  computed: {
-    ingredients() {
-      return this.store.ingredients?.filter((v) => v.title.toLowerCase().indexOf(this.search) !== -1).slice(0, 20)
-    },
-    rules() {
-      if (this.required) {
-        return [(val: string) => val || "Обязательное поле"]
-      }
-      return []
-    },
+  required: {
+    type: Boolean,
+    default: true,
   },
-  created() {
-    if (!this.ingredients || this.store.ingredients_searched) {
-      this.loadIngredients()
-    }
+  readonly: {
+    type: Boolean,
+    default: false,
   },
-  methods: {
-    filterIngredients(val: string, update: CallableFunction) {
-      update(() => {
-        if (this.preloadAll){
-          this.search = val.toLowerCase()
-        } else {
-          this.loadIngredients(val)
-        }
-      })
-    },
-    loadIngredients(search?: string) {
-      const payload = {
-        fields: "id,title",
-        pageSize: 1000,
-        search: search,
-      }
-      if (!this.preloadAll){
-        payload.pageSize = 20
-      }
-
-      this.loading = true
-      this.store
-        .loadIngredients(payload)
-        .then(() => {
-          this.loading = false
-        })
-        .catch((err: CustomAxiosError) => {
-          this.loading = false
-          this.handleErrors(err, "Ошибка загрузки ингредиентов")
-        })
-    },
+  disable: {
+    type: Boolean,
+    default: false,
+  },
+  clearable: {
+    type: Boolean,
+    default: false,
+  },
+  preloadAll: {
+    type: Boolean,
+    default: true,
   },
 })
+const $emit = defineEmits(["update:ingredient"])
+const store = useBaseStore()
+const search = ref("")
+const loading = ref(false)
+
+const ingredients = computed(() => {
+  return store.ingredients?.filter((v) => v.title.toLowerCase().indexOf(search.value) !== -1).slice(0, 20)
+})
+const rules = computed(() => {
+  if (props.required) {
+    return [(val: string) => val || "Обязательное поле"]
+  }
+  return []
+})
+
+
+function filterIngredients(val: string, update: CallableFunction) {
+  update(() => {
+    if (props.preloadAll) {
+      if (!ingredients.value || store.ingredients_searched) {
+        loadIngredients()
+      }
+      search.value = val.toLowerCase()
+
+    } else {
+      loadIngredients(val)
+    }
+  })
+}
+const loadIngredients = (search?: string) => {
+  const payload = {
+    fields: "id,title,type",
+    pageSize: 1000,
+    search: search,
+  }
+  if (!props.preloadAll) {
+    payload.pageSize = 20
+  }
+
+  const prom = store.loadIngredients(payload)
+  promiseSetLoading(prom, loading)
+
+  loading.value = true
+}
+
+
+// onMounted(() => {
+//   if (!ingredients.value || store.ingredients_searched) {
+//     loadIngredients()
+//   }
+// })
 </script>

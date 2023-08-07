@@ -59,6 +59,8 @@ import { storeShortcut } from "src/modules/StoreCrud"
 
 const isOnline = () => navigator?.onLine
 
+type PromiseMap = Map<string, Promise<unknown>>
+
 export const useBaseStore = defineStore("base", {
   state: () => ({
     printMode: false,
@@ -87,6 +89,7 @@ export const useBaseStore = defineStore("base", {
     condWarnings: null as ConditionWarning[] | null,
     weekRecommendations: null as Recommendations[] | null,
 
+    promises: new Map() as PromiseMap,
     // Settings
     enableWebsocket: (LocalStorage.getItem("enableWebsocket") as boolean) ?? false,
   }),

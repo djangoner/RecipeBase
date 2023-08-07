@@ -107,6 +107,7 @@
             :readonly="!canEdit"
             label="Размер упаковки"
             type="number"
+            :hint="ingredient.type == 'item' ? 'Количество штук в упаковке':'Общий вес упаковки'"
             filled
           />
           <q-input
@@ -418,6 +419,7 @@ export default defineComponent({
           payload.image = "";
         }
       }
+      payload.type = payload.type || ""
       console.debug("Payload: ", payload);
       method(payload)
         .then((resp) => {

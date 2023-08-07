@@ -105,6 +105,7 @@ class IngredientSerializer(FlexFieldsModelSerializer, WritableNestedModelSeriali
     class Meta:
         model = Ingredient
         fields = "__all__"
+        extra_kwargs = {"type": {"allow_null": True}}
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

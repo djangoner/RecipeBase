@@ -1,6 +1,5 @@
 import { date } from "quasar"
 import { IngredientRead, Task, TaskCategory, User } from "src/client"
-import { T } from "vitest/dist/types-b7007192"
 import { TaskOrCategory } from "./Globals"
 
 export function isTaskCategory(item: Task | TaskCategory): item is TaskCategory {

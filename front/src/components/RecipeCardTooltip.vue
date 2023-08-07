@@ -8,7 +8,7 @@
     :offset="[2, 0]"
     max-width="50vw"
     max-height="50vh"
-    style="min-width: 300px;min-height: 300px;width: auto;height: auto;"
+    style="min-width: 300px; min-height: 300px; width: auto; height: auto"
   >
     <h6 class="q-mt-none q-mb-sm text-subtitle1">
       <q-icon
@@ -52,8 +52,7 @@
       v-for="ing of recipe.ingredients"
       :key="ing.id"
     >
-      {{ ing.ingredient.title }}: {{ ing.amount_grams }} ({{ ing.amount }}
-      {{ ing.amount_type_str }})
+      {{ ing.ingredient.title }}: {{ ing.amount_grams }} ({{ ing.amount }} {{ ing.amount_type_str }})
     </div>
 
     <div v-if="recipe.ratings && recipe.ratings.length > 0">
@@ -65,11 +64,7 @@
             :key="rating.id"
           >
             <td>
-              {{
-                rating.user?.first_name
-                  ? rating.user.first_name + ' ' + rating.user?.last_name
-                  : rating.user.username
-              }}
+              {{ rating.user?.first_name ? rating.user.first_name + " " + rating.user?.last_name : rating.user.username }}
             </td>
             <td>
               <q-rating
@@ -106,47 +101,39 @@
   </q-tooltip>
 </template>
 
-<script lang="ts">
-import { RecipeRead } from 'src/client';
-import { defineComponent, PropType } from 'vue';
-import { date } from 'quasar';
-import {pluralize} from 'src/modules/Utils'
+<script lang="ts" setup>
+import { RecipeRead } from "src/client"
+import { defineComponent, PropType } from "vue"
+import { date } from "quasar"
+import { pluralize } from "src/modules/Utils"
 
-export default defineComponent({
-  props: {
-    recipe: { required: true, type: Object as PropType<RecipeRead> },
-  },
-  data() {
-    return {};
-  },
-  methods: {
-    dateFormat(dt: Date | string): string {
-      return date.formatDate(dt, 'YYYY.MM.DD');
-    },
-    daysLeft(dt: Date | string): number {
-      return date.getDateDiff(new Date(), dt, "days")
-    },
-    daysLeftStr(dt: Date | string): string {
-      const days = this.daysLeft(dt)
-      const daysAbs = Math.abs(days)
-      const daysPlural = pluralize(daysAbs, ["день", "дня", "дней"])
-      let txBefore = "";
-      let txAfter = "";
-      if (days > 0){
-        txAfter = daysPlural + " назад"
-      } else if(days < 0){
-        txBefore = "через"
-        txAfter = daysPlural
-      } else {
-        txAfter = "сегодня"
-      }
-      return `${txBefore} ${daysAbs} ${txAfter}`.trim()
+const props = defineProps({
+  recipe: { required: true, type: Object as PropType<RecipeRead> },
+})
 
-    }
-  },
-});
+function dateFormat(dt: Date | string): string {
+  return date.formatDate(dt, "YYYY.MM.DD")
+}
+function daysLeft(dt: Date | string): number {
+  return date.getDateDiff(new Date(), dt, "days")
+}
+function daysLeftStr(dt: Date | string): string {
+  const days = daysLeft(dt)
+  const daysAbs = Math.abs(days)
+  const daysPlural = pluralize(daysAbs, ["день", "дня", "дней"])
+  let txBefore = ""
+  let txAfter = ""
+  if (days > 0) {
+    txAfter = daysPlural + " назад"
+  } else if (days < 0) {
+    txBefore = "через"
+    txAfter = daysPlural
+  } else {
+    txAfter = "сегодня"
+  }
+  return `${txBefore} ${daysAbs} ${txAfter}`.trim()
+}
 </script>
-
 
 <style lang="scss" scoped>
 .title {

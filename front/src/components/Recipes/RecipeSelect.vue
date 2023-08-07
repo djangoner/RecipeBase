@@ -30,14 +30,14 @@
 </template>
 
 <script setup lang="ts">
-import { onClickOutside } from "@vueuse/core"
 import { RecipeRead } from "src/client"
 import { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
 import { useBaseStore } from "src/stores/base"
-import { PropType, computed, ref, Ref } from "vue"
+import { PropType, computed, ref, Ref, watch } from "vue"
 import {QSelect} from 'quasar'
+import { useEventBus } from "@vueuse/core"
 
-defineProps({
+const props = defineProps({
   modelValue: {
     type: Object as PropType<RecipeRead>,
     required: false,
@@ -52,7 +52,7 @@ defineProps({
     default: false,
   },
   index: {
-    type: Number,
+    type: String,
     default: null,
   },
 })
@@ -68,9 +68,17 @@ const lastPage = ref(0)
 const totalItems = ref(0)
 const $emit = defineEmits(["update:model-value"])
 
-onClickOutside(refSelect, () => {
-  if (selectPopup.value && refSelect.value){
-    refSelect.value.hidePopup()
+const bus = useEventBus<string>('active-recipe-select')
+
+bus.on((event) => {
+  if (selectPopup.value && props.index != event){
+    refSelect.value?.hidePopup()
+  }
+})
+
+watch(selectPopup, (val: boolean) => {
+  if (val){
+    bus.emit(props.index)
   }
 })
 

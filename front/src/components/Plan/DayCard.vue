@@ -62,6 +62,7 @@
               <!-- <div>{{ element }}</div> -->
               <template #item="{element, index}">
                 <plan-item-row
+                  :key="dayIdx"
                   :plan="element"
                   :index="index"
                   :mtime="mtime"

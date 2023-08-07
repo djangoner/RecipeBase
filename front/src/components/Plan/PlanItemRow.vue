@@ -43,7 +43,7 @@
         :key="index"
         :model-value="plan?.recipe"
         :readonly="readonly"
-        :index="index"
+        :index="[dayIdx, mtime.id, index].join('-')"
         @update:model-value="$emit('set-recipe', dayIdx, mtime, $event, index)"
       />
       <!-- <span>{{ getplan(dayIdx, mtime)?.title }}</span> -->

@@ -1,6 +1,7 @@
 <template>
   <q-page
     id="week_plan_print"
+    class="flex column"
     padding
     style="padding-top: 40px"
   >

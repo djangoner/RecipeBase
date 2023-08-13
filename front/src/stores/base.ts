@@ -353,7 +353,6 @@ export const useBaseStore = defineStore("base", {
         })
           .then((resp) => {
             this.week_plan = resp
-            this.condWarnings = resp.warnings
             void recipePlansListUpdateFromServer(resp)
             resolve(resp)
           })
@@ -361,7 +360,6 @@ export const useBaseStore = defineStore("base", {
             const resObj = await recipePlansGetOffline(payload.year, payload.week)
             if (resObj) {
               this.week_plan = resObj
-              this.condWarnings = resObj.warnings
             }
             handleErrors(err, "Ошибка загрузки плана")
             reject(err)

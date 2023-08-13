@@ -24,7 +24,6 @@ from recipes.models import (
     ShopIngredientCategory,
     WeekPlanCondition,
 )
-from recipes.services.conditions import process_conditions_tree, warnings_json
 from recipes.services.ingredients import (
     recipe_ingredient_packs,
     recipe_ingredient_price_full,
@@ -341,7 +340,7 @@ class RecipePlanSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        representation["recipe"] = RecipeSerializer(instance.recipe).data
+        representation["recipe"] = RecipeShortSerializer(instance.recipe).data
         # representation["recipe"] = RecipeShortSerializer(instance.recipe).data
         representation["meal_time"] = MealTimeSerializer(instance.meal_time).data
 
@@ -392,12 +391,6 @@ class RecipePlanWeekSerializer(serializers.ModelSerializer):
         model = RecipePlanWeek
         fields = "__all__"
         depth = 1
-
-    @extend_schema_field(ConditionWarningSerializer(many=True))
-    def get_warnings(self, instance: RecipePlanWeek):
-        res = process_conditions_tree(instance)
-        warnings = warnings_json(res.warnings)
-        return warnings
 
     @extend_schema_field(serializers.DateTimeField)
     def get_edited_first(self, instance: RecipePlanWeek):

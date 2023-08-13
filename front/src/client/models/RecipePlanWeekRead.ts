@@ -2,14 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ConditionWarning } from './ConditionWarning';
 import type { RecipeIngredientRecommendation } from './RecipeIngredientRecommendation';
 import type { RecipePlanRead } from './RecipePlanRead';
 
 export type RecipePlanWeekRead = {
     readonly id: number;
     plans: Array<RecipePlanRead>;
-    readonly warnings: Array<ConditionWarning>;
     readonly edited_first: string;
     readonly edited_last: string;
     readonly recommendations_ingredients: Array<RecipeIngredientRecommendation>;

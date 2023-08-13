@@ -204,7 +204,12 @@ class RecipeFilterSet(filters.FilterSet):
 
 
 @extend_schema_view(
-    retrieve=extend_schema(responses=RecipeReadSerializer),
+    retrieve=extend_schema(
+        responses=RecipeReadSerializer,
+        parameters=[
+            OpenApiParameter("omit", str),
+        ],
+    ),
     create=extend_schema(responses=RecipeReadSerializer),
     list=extend_schema(responses=RecipeReadSerializer),
     update=extend_schema(responses=RecipeReadSerializer),

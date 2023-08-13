@@ -498,6 +498,10 @@ onMounted(() => {
   loadMealTime()
 })
 
+watch(() => store.week_plan, () => {
+  void debouncedLoadWarnings()
+}, {deep: true})
+
 watch(fillingPrc, (val, oldVal) => {
   // When plan finished, show fireworks if enabled
   if (val == 1 && oldVal && !plan.value?.is_filled) {

@@ -246,9 +246,9 @@ export const useBaseStore = defineStore("base", {
           })
       })
     },
-    async loadRecipe(id: number): Promise<RecipeRead> {
+    async loadRecipe(id: number, omit?: string): Promise<RecipeRead> {
       return new Promise((resolve, reject) => {
-        RecipesService.recipesRetrieve({ id })
+        RecipesService.recipesRetrieve({ id, omit })
           .then((resp) => {
             this.recipe = resp
             resolve(resp)

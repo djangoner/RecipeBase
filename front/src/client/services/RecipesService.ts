@@ -208,17 +208,22 @@ requestBody: Recipe,
      */
     public static recipesRetrieve({
 id,
+omit,
 }: {
 /**
  * A unique integer value identifying this Рецепт.
  */
 id: number,
+omit?: string,
 }): CancelablePromise<RecipeRead> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/recipes/{id}/',
             path: {
                 'id': id,
+            },
+            query: {
+                'omit': omit,
             },
         });
     }

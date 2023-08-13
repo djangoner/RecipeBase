@@ -1,6 +1,7 @@
 <template>
   <q-item
     clickable
+    :to="toUrl"
     dense
     :inset-level="1"
   >
@@ -152,6 +153,15 @@ const canCancell = computed(() => {
   return rec.value.ingredient
 })
 
+const toUrl = computed(() => {
+  if (rec.value.recipe){
+    return {name: 'recipe', params: {id: rec.value.recipe.id}}
+  } else if (rec.value.ingredient?.ingredient){
+    return {name: 'ingredient', params: {id: rec.value.ingredient.ingredient.id as number}}
+  }
+  return null
+})
+
 
 function onCancell(){
   $q
@@ -165,6 +175,7 @@ function onCancell(){
       runCancell()
     });
 }
+
 
 function runPerform(){
   saving.value = true

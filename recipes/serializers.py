@@ -222,7 +222,8 @@ class RecipeSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer,
         depth = 2
 
     def to_representation(self, instance):
-        self.fields["recommendations_recipes"] = RecipeShortSerializer(many=True)
+        if "recommendations_recipes" in self.fields:
+            self.fields["recommendations_recipes"] = RecipeShortSerializer(many=True)
         # self.fields["author"] = ShortUserSerializer()
         return super().to_representation(instance)
 
@@ -289,10 +290,12 @@ class RecipeShortSerializer(RecipeSerializer):
     # is_planned = None  # type: ignore
 
     class Meta(RecipeSerializer.Meta):
-        exclude = tuple(
-            list(RecipeSerializer.Meta.exclude)
-            + ["author", "content", "content_source", "recommendations_recipes", "recommendations_tags"]
-        )
+        fields = ("id", "title")
+        exclude = None
+        # exclude = tuple(
+        #     list(RecipeSerializer.Meta.exclude)
+        #     + ["author", "content", "content_source", "recommendations_recipes", "recommendations_tags"]
+        # )
 
 
 class RecommendationsSerializer(serializers.Serializer):
@@ -380,7 +383,7 @@ class ConditionWarningSerializer(serializers.Serializer):
 
 class RecipePlanWeekSerializer(serializers.ModelSerializer):
     plans = RecipePlanShortSerializer(many=True, required=False)
-    warnings = serializers.SerializerMethodField()
+    # warnings = serializers.SerializerMethodField()
     edited_first = serializers.SerializerMethodField()
     edited_last = serializers.SerializerMethodField()
     recommendations_ingredients = RecipeIngredientRecommendationSerializer(many=True, read_only=True)

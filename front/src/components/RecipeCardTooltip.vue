@@ -9,8 +9,15 @@
     max-width="50vw"
     max-height="50vh"
     style="min-width: 300px; min-height: 300px; width: auto; height: auto"
+    @before-show="onShow"
   >
     <h6 class="q-mt-none q-mb-sm text-subtitle1">
+      <q-icon
+        v-if="isLoading"
+        name="pending"
+        size="xs"
+        color="primary"
+      />
       <q-icon
         v-if="recipe.is_archived"
         name="archive"
@@ -44,7 +51,10 @@
       </template>
     </h6>
 
-    <span class="q-my-sm text-subtitle2">Ингредиенты:
+    <span
+      v-if="recipe.ingredients?.length"
+      class="q-my-sm text-subtitle2"
+    >Ингредиенты:
       <template v-if="recipe.price_part">({{ recipe.price_part }}₺ - <small class="text-grey">{{ recipe.price_full }}₺</small>)</template>
     </span>
 
@@ -74,7 +84,7 @@
                 :color-selected="['grey', 'green-5']"
                 :max="6"
                 size="1.5em"
-                color="primary"
+color="primary"
               />
             </td>
           </tr>
@@ -102,13 +112,36 @@
 </template>
 
 <script lang="ts" setup>
-import { RecipeRead } from "src/client"
-import { defineComponent, PropType } from "vue"
+import { RecipeRead, RecipeShort } from "src/client"
+import { computed, PropType, ref } from "vue"
 import { date } from "quasar"
 import { pluralize } from "src/modules/Utils"
+import { useBaseStore } from "src/stores/base"
+import { useCacheStore } from "src/stores/cache"
+import { promiseSetLoading } from "src/modules/StoreCrud"
 
 const props = defineProps({
-  recipe: { required: true, type: Object as PropType<RecipeRead> },
+  recipe: { required: true, type: Object as PropType<RecipeRead | RecipeShort> },
+  loadRecipe: { type: Boolean, default: true },
+})
+
+const store = useBaseStore()
+const storeCache = useCacheStore()
+
+const isLoading = ref(false)
+
+const recipe = computed(() => {
+  if (props.loadRecipe) {
+    const cachedRecipe = storeCache.getCached(cacheKey.value)
+    if (cachedRecipe) {
+      return cachedRecipe as RecipeRead
+    }
+  }
+  return props.recipe
+})
+
+const cacheKey = computed(() => {
+  return { recipe: props.recipe.id }
 })
 
 function dateFormat(dt: Date | string): string {
@@ -132,6 +165,30 @@ function daysLeftStr(dt: Date | string): string {
     txAfter = "сегодня"
   }
   return `${txBefore} ${daysAbs} ${txAfter}`.trim()
+}
+
+function onShow() {
+  loadRecipe()
+}
+
+function loadRecipe() {
+  if (!props.loadRecipe || !props.recipe?.id || isLoading.value) {
+    return
+  }
+  const cacheKey = { recipe: props.recipe.id }
+  if (storeCache.getCached(cacheKey)) {
+    return
+  }
+  const omit = "content,content_source,recommendations_ingredients,recommendations_recipes,recommendations_tags"
+
+  // console.debug("Loading recipe #" + props.recipe.id.toString())
+  const prom = store.loadRecipe(props.recipe.id, omit)
+
+  promiseSetLoading(prom, isLoading)
+  void prom.then((data) => {
+    storeCache.setCached(cacheKey, data)
+    // console.debug("Caching recipe #" + props.recipe.id.toString())
+  })
 }
 </script>
 

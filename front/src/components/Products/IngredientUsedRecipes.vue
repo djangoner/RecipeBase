@@ -16,7 +16,11 @@
       <q-item-section>
         {{ ing.recipe.title }} ({{ ingUsingStr(ing) }})
       </q-item-section>
-      <recipe-card-tooltip :recipe="item" />
+
+      <recipe-card-tooltip
+        v-if="ing.recipe"
+        :recipe="ing.recipe"
+      />
     </q-item>
 
     <template v-if="item.ingredient && item.ingredient.regular_ingredients">

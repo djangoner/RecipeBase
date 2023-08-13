@@ -52,7 +52,7 @@
       />
     </q-tab-panel>
     <q-tab-panel name="warnings">
-      <template v-if="plan.warnings.length === 0">
+      <template v-if="!store.condWarnings || !store.condWarnings.length">
         <div class="text-subtitle1 flex flex-center full-height">
           Нет предупреждений
         </div>

@@ -239,7 +239,6 @@ import { clearPayload } from "src/modules/Utils"
 import { useAuthStore } from "src/stores/auth"
 import { useBaseStore } from "src/stores/base.js"
 import { defineComponent } from "vue"
-import { useSessionStorage } from "@vueuse/core"
 
 const orderingOptions = [
   { label: "Кол-во приготовлений - по возрастанию", value: "cooked_times" },
@@ -460,7 +459,8 @@ export default defineComponent({
     loadRecipes() {
       return new Promise((resolve, reject) => {
         const payload = {
-          omit: "content,content_source,recommendations_ingredients,recommendations_recipes,recommendations_tags",
+          // omit: "content,content_source,recommendations_ingredients,recommendations_recipes,recommendations_tags",
+          fields: "id,title,images,short_description_str"
         } as { [key: string]: string }
 
         payload.search = this.search

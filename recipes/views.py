@@ -399,6 +399,8 @@ class RecipePlanWeekViewset(viewsets.ModelViewSet):
         "plans__recipe__ingredients__ingredient__category",
         "plans__recipe__ingredients__ingredient__category__sorting",
         "plans__recipe__ingredients__ingredient__category__sorting__shop",
+        "recommendations_ingredients",
+        "recommendations_ingredients__ingredient",
     )
     serializer_class = RecipePlanWeekSerializer
     search_fields = ["year", "week"]

@@ -118,9 +118,9 @@ const modelValue = computed({
   },
 })
 
-function difficultyUsersGreaterOrEqual(level: number) {
-  return store.users?.filter((u) => (u.profile.cook_difficulty || 0) >= level)
-}
+// function difficultyUsersGreaterOrEqual(level: number) {
+//   return store.users?.filter((u) => (u.profile.cook_difficulty || 0) >= level)
+// }
 
 function difficultyUsersGreater(level: number) {
   return store.users?.filter((u) => (u.profile.cook_difficulty || 0) > level)

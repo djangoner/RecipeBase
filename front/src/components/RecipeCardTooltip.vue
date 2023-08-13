@@ -11,95 +11,97 @@
     style="min-width: 300px; min-height: 300px; width: auto; height: auto"
     @before-show="onShow"
   >
-    <h6 class="q-mt-none q-mb-sm text-subtitle1">
-      <q-icon
-        v-if="isLoading"
-        name="pending"
-        size="xs"
-        color="primary"
-      />
-      <q-icon
-        v-if="recipe.is_archived"
-        name="archive"
-        size="xs"
-        color="primary"
-      />
-      {{ recipe.title }}
-      <!-- Stars difficulty -->
+    <div v-if="isRecipeFull(recipe)">
+      <h6 class="q-mt-none q-mb-sm text-subtitle1">
+        <q-icon
+          v-if="isLoading"
+          name="pending"
+          size="xs"
+          color="primary"
+        />
+        <q-icon
+          v-if="recipe?.is_archived"
+          name="archive"
+          size="xs"
+          color="primary"
+        />
+        {{ recipe.title }}
+        <!-- Stars difficulty -->
+
+        <div
+          v-if="recipe?.difficulty"
+          class="title-rating"
+        >
+          <q-icon
+            v-for="i in recipe.difficulty"
+            :key="i"
+            size="xs"
+            color="teal"
+            name="star_rate"
+          />
+        </div>
+      </h6>
+
+      <h6
+        v-if="recipe.last_cooked"
+        class="q-mt-none q-mb-sm text-subtitle2"
+      >
+        Приготовлено {{ dateFormat(recipe.last_cooked) }} - {{ daysLeftStr(recipe.last_cooked) }}
+        <template v-if="recipe.cooked_times">
+          ({{ recipe.cooked_times }} раз)
+        </template>
+      </h6>
+
+      <span
+        v-if="recipe.ingredients?.length"
+        class="q-my-sm text-subtitle2"
+      >Ингредиенты:
+        <template v-if="recipe.price_part">({{ recipe.price_part }}₺ - <small class="text-grey">{{ recipe.price_full }}₺</small>)</template>
+      </span>
 
       <div
-        v-if="recipe.difficulty"
-        class="title-rating"
+        v-for="ing of recipe.ingredients"
+        :key="ing.id"
       >
-        <q-icon
-          v-for="i in recipe.difficulty"
-          :key="i"
-          size="xs"
-          color="teal"
-          name="star_rate"
-        />
+        {{ ing.ingredient.title }}: {{ ing.amount_grams }} ({{ ing.amount }} {{ ing.amount_type_str }})
       </div>
-    </h6>
 
-    <h6
-      v-if="recipe.last_cooked"
-      class="q-mt-none q-mb-sm text-subtitle2"
-    >
-      Приготовлено {{ dateFormat(recipe.last_cooked) }} - {{ daysLeftStr(recipe.last_cooked) }}
-      <template v-if="recipe.cooked_times">
-        ({{ recipe.cooked_times }} раз)
-      </template>
-    </h6>
+      <div v-if="recipe.ratings && recipe.ratings.length > 0">
+        <span class="q-my-sm text-subtitle2">Рейтинг:</span>
+        <table>
+          <tbody>
+            <tr
+              v-for="rating of recipe.ratings"
+              :key="rating.id"
+            >
+              <td>
+                {{ rating.user?.first_name ? rating.user.first_name + " " + rating.user?.last_name : rating.user.username }}
+              </td>
+              <td>
+                <q-rating
+                  :model-value="(rating?.rating || 0) + 1"
+                  :readonly="true"
+                  :icon="['thumb_down', 'star']"
+                  :color-selected="['grey', 'green-5']"
+                  :max="6"
+                  size="1.5em"
+                  color="primary"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-    <span
-      v-if="recipe.ingredients?.length"
-      class="q-my-sm text-subtitle2"
-    >Ингредиенты:
-      <template v-if="recipe.price_part">({{ recipe.price_part }}₺ - <small class="text-grey">{{ recipe.price_full }}₺</small>)</template>
-    </span>
-
-    <div
-      v-for="ing of recipe.ingredients"
-      :key="ing.id"
-    >
-      {{ ing.ingredient.title }}: {{ ing.amount_grams }} ({{ ing.amount }} {{ ing.amount_type_str }})
-    </div>
-
-    <div v-if="recipe.ratings && recipe.ratings.length > 0">
-      <span class="q-my-sm text-subtitle2">Рейтинг:</span>
-      <table>
-        <tbody>
-          <tr
-            v-for="rating of recipe.ratings"
-            :key="rating.id"
+      <div v-if="recipe.tags && recipe.tags.length > 0">
+        <span class="q-my-sm text-subtitle2">Метки:</span>
+        <div class="row q-col-gutter-sm">
+          <div
+            v-for="tag of recipe.tags"
+            :key="tag.id"
           >
-            <td>
-              {{ rating.user?.first_name ? rating.user.first_name + " " + rating.user?.last_name : rating.user.username }}
-            </td>
-            <td>
-              <q-rating
-                :model-value="rating?.rating + 1"
-                :readonly="true"
-                :icon="['thumb_down', 'star']"
-                :color-selected="['grey', 'green-5']"
-                :max="6"
-                size="1.5em"
-color="primary"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div v-if="recipe.tags && recipe.tags.length > 0">
-      <span class="q-my-sm text-subtitle2">Метки:</span>
-      <div class="row q-col-gutter-sm">
-        <div
-          v-for="tag of recipe.tags"
-          :key="tag.id"
-        >
-          <q-badge>{{ tag.title }}</q-badge>
+            <q-badge>{{ tag.title }}</q-badge>
+          </div>
         </div>
       </div>
     </div>
@@ -143,6 +145,10 @@ const recipe = computed(() => {
 const cacheKey = computed(() => {
   return { recipe: props.recipe.id }
 })
+
+function isRecipeFull(recipe: RecipeRead | RecipeShort): recipe is RecipeRead{
+  return Object.hasOwn(recipe, "tags")
+}
 
 function dateFormat(dt: Date | string): string {
   return date.formatDate(dt, "YYYY.MM.DD")

@@ -11,6 +11,7 @@
 *.sqlite*
 *tmp*
 *cache*
+!cache.ts
 *.local
 __pycache__
 media

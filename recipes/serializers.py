@@ -39,9 +39,10 @@ from cachetools.func import ttl_cache
 
 @ttl_cache(ttl=5)
 def get_edited_first(instance_id: int, is_filled: bool):
-    print("FIRST", instance_id, is_filled)
     if not is_filled:
         plans = RecipePlan.objects.filter(week=instance_id, created__gte=datetime.now().date())
+    else:
+        plans = RecipePlan.objects.filter(week=instance_id)
     plan: RecipePlan | None = plans.order_by("created").first()
     return plan.created if plan else None
 

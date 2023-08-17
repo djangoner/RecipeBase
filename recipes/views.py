@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters import rest_framework as filters
 from rest_framework import decorators, response, viewsets, permissions, exceptions
+from django_auto_prefetching import AutoPrefetchViewSetMixin
 
 # from django_q.tasks import async_task
 from recipes.models import (
@@ -215,7 +216,7 @@ class RecipeFilterSet(filters.FilterSet):
     update=extend_schema(responses=RecipeReadSerializer),
     partial_update=extend_schema(responses=RecipeReadSerializer),
 )
-class RecipeViewset(viewsets.ModelViewSet):
+class RecipeViewset(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     queryset = (
         Recipe.objects.prefetch_related(
             "author",
@@ -223,6 +224,7 @@ class RecipeViewset(viewsets.ModelViewSet):
             "ratings__user",
             "ingredients",
             "ingredients__ingredient",
+            "ingredients__ingredient__regular_ingredients",
             "tags",
             "images",
             "ingredients__ingredient__regular_ingredients",
@@ -383,7 +385,7 @@ class MealTimeViewset(viewsets.ModelViewSet):
     partial_update=extend_schema(responses=RecipePlanWeekReadSerializer),
     list=extend_schema(responses=RecipePlanWeekReadSerializer),
 )
-class RecipePlanWeekViewset(viewsets.ModelViewSet):
+class RecipePlanWeekViewset(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     queryset = RecipePlanWeek.objects.prefetch_related(
         "plans",
         "plans__meal_time",
@@ -549,7 +551,7 @@ class RecipeRatingViewset(viewsets.ModelViewSet):
     partial_update=extend_schema(responses=ProductListWeekReadSerializer),
     list=extend_schema(responses=ProductListWeekReadSerializer),
 )
-class ProductListWeekViewset(viewsets.ModelViewSet):
+class ProductListWeekViewset(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     queryset = ProductListWeek.objects.prefetch_related(
         "items",
         "items__author",

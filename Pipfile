@@ -35,6 +35,7 @@ dacite = "*"
 django-picklefield = "*"
 fuzzywuzzy = "*"
 lxml = "*"
+django-auto-prefetching = "*"
 
 [dev-packages]
 pytest = "*"

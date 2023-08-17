@@ -34,6 +34,30 @@ from recipes.services.utils import week_delta
 from users.models import User
 from users.serializers import ShortUserSerializer
 from rest_flex_fields import FlexFieldsModelSerializer
+from cachetools.func import ttl_cache
+
+
+@ttl_cache(ttl=5)
+def get_edited_first(instance_id: int, is_filled: bool):
+    print("FIRST", instance_id, is_filled)
+    if not is_filled:
+        plans = RecipePlan.objects.filter(week=instance_id, created__gte=datetime.now().date())
+    plan: RecipePlan | None = plans.order_by("created").first()
+    return plan.created if plan else None
+
+
+@ttl_cache(ttl=5)
+def get_edited_last(instance_id: int, is_filled: bool):
+    print("LAST", instance_id, is_filled)
+    plans = RecipePlan.objects.filter(week=instance_id)
+    if not is_filled:
+        plans = RecipePlan.objects.filter(week=instance_id, created__gte=datetime.now().date())
+    else:
+        edited_first = get_edited_first(instance_id, is_filled)
+        if edited_first:
+            plans = RecipePlan.objects.filter(week=instance_id, created__gt=edited_first)
+    plan: RecipePlan | None = plans.order_by("created").last()
+    return plan.created if plan else None
 
 
 class StatusOkSerializer(serializers.Serializer):
@@ -348,6 +372,8 @@ class RecipePlanSerializer(serializers.ModelSerializer):
 
 
 class RecipePlanShortSerializer(RecipePlanSerializer):
+    recipe = RecipeShortSerializer()
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
@@ -394,23 +420,11 @@ class RecipePlanWeekSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.DateTimeField)
     def get_edited_first(self, instance: RecipePlanWeek):
-        plans = instance.plans
-        if not instance.is_filled:
-            plans = plans.filter(created__gte=datetime.now().date())
-        plan: RecipePlan | None = plans.order_by("created").first()
-        return plan.created if plan else None
+        return get_edited_first(instance.pk, instance.is_filled)
 
     @extend_schema_field(serializers.DateTimeField)
     def get_edited_last(self, instance: RecipePlanWeek):
-        plans = instance.plans
-        if not instance.is_filled:
-            plans = plans.filter(created__gte=datetime.now().date())
-        else:
-            edited_first = self.get_edited_first(instance)
-            if edited_first:
-                plans = plans.filter(created__gt=edited_first)
-        plan: RecipePlan | None = plans.order_by("created").last()
-        return plan.created if plan else None
+        return get_edited_last(instance.pk, instance.is_filled)
 
 
 class RecipePlanWeekShortSerializer(RecipePlanWeekSerializer, serializers.ModelSerializer):
@@ -418,7 +432,7 @@ class RecipePlanWeekShortSerializer(RecipePlanWeekSerializer, serializers.ModelS
 
 
 class RecipePlanWeekReadSerializer(RecipePlanWeekSerializer):
-    plans = RecipePlanReadSerializer(many=True)
+    plans = RecipePlanShortSerializer(many=True)
 
 
 class ProductListItemSerializer(FlexFieldsModelSerializer, WritableNestedModelSerializer, serializers.ModelSerializer):

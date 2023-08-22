@@ -53,7 +53,7 @@
             dense
             no-caps
             unelevated
-            @click="onCancell"
+            @click.stop="onCancell"
           />
         </template>
         <template v-else>
@@ -78,7 +78,7 @@
             no-caps
             unelevated
             :loading="saving"
-            @click="runPerform()"
+            @click.stop="runPerform()"
           />
         </template>
       </div>

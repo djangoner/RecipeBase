@@ -12,6 +12,10 @@ interface CacheMeta {
 }
 type CacheData = Map<string, CacheMeta>
 
+const DEFAULT_TIMEOUT = 60 * 5 * 1000
+const UPDATE_CLEARED_TIMEOUT = 30 * 1000
+
+
 function readCache(): CacheData {
   const rawString: string = SessionStorage.getItem("CacheStorage") || ""
   const data = new Map(Object.entries((parse(rawString) as object) || {})) as CacheData
@@ -48,7 +52,7 @@ export const useCacheStore = defineStore("cache", {
     readCache() {
       return readCache()
     },
-    setCached(key: CacheKey, value: CacheValue, ttl = 60 * 1000) {
+    setCached(key: CacheKey, value: CacheValue, ttl = DEFAULT_TIMEOUT) {
       const meta: CacheMeta = {
         value: value,
         valid_until: Date.now() + ttl,
@@ -56,7 +60,7 @@ export const useCacheStore = defineStore("cache", {
       this.cacheData.set(JSON.stringify(key), meta)
       this.writeCache()
 
-      if (Date.now() - this.lastCleared > 30*1000){
+      if (Date.now() - this.lastCleared > UPDATE_CLEARED_TIMEOUT) {
         this.clearOutdated()
         this.lastCleared = Date.now()
       }
@@ -76,7 +80,7 @@ export const useCacheStore = defineStore("cache", {
       })
       const sizeAfter = this.cacheData.size
       console.debug(`[Cache] cleared: (${sizeBefore} -> ${sizeAfter})`)
-      if (sizeAfter != sizeBefore){
+      if (sizeAfter != sizeBefore) {
         this.writeCache()
       }
     },

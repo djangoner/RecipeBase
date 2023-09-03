@@ -12,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+import { useVibrate } from '@vueuse/core';
 import { ProductListItemRead } from 'src/client';
 import { PropType } from 'vue';
 
@@ -29,10 +30,14 @@ const props = defineProps({
 
 const $emit = defineEmits(["update:model-value"])
 
+const { vibrate } = useVibrate({ pattern: [50] })
+
 
 const onUpdate = (checkboxVal: boolean) => {
   const newItem = Object.assign({}, props.modelValue)
   newItem.is_completed = checkboxVal
+
+  vibrate()
   $emit('update:model-value', newItem)
 }
 </script>

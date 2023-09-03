@@ -3,11 +3,14 @@
     <q-slide-item
       v-for="item of listItems"
       :key="item.id"
+      left-color="primary"
+      right-color="warning"
+      @left="itemMarkCompleted(item, $event)"
       @right="itemLater(item, $event)"
     >
-      <!-- <template #left>
-        Left content
-      </template> -->
+      <template #left>
+        Отметить
+      </template>
       <template #right>
         <div class="row items-center">
           Отложить <q-icon
@@ -152,7 +155,7 @@ import { onMounted, PropType, ref, Ref } from "vue"
 import { getDateOfISOWeek, WeekDays, YearWeek, WeekDaysColors, priorityColors } from "src/modules/WeekUtils"
 import { productListGetChanged, ProductListItemSyncable } from "src/modules/ProductListSync"
 import { pluralize } from "src/modules/Utils"
-import { useNow } from "@vueuse/core"
+import { useNow, useVibrate } from "@vueuse/core"
 
 const props = defineProps({
   listItems: {
@@ -168,6 +171,7 @@ const $q = useQuasar()
 const now = useNow({interval: 60000})
 
 const changedItems: Ref<number[] | null> = ref(null)
+const { vibrate } = useVibrate({ pattern: [100] })
 
 onMounted(async () => {
   const items = await productListGetChanged()
@@ -271,12 +275,26 @@ function itemLater(item: ProductListItemRead, {reset}: {reset: CallableFunction}
   } else {
     item.buy_later = newDate
   }
+  vibrate(100)
 
   $emit('updateItem', item)
   setTimeout(() => {
     reset()
   }, 300)
 }
+
+function itemMarkCompleted(item: ProductListItemRead, {reset}: {reset: CallableFunction}){
+
+  item.is_completed = !item.is_completed
+
+  vibrate(50)
+
+  $emit('updateItem', item)
+  setTimeout(() => {
+    reset()
+  }, 300);
+}
+
 </script>
 
 <style scoped lang="scss">

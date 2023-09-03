@@ -49,6 +49,7 @@ import {
   RecipePlanService,
   ConditionWarning,
   Recommendations,
+  RecipePlanWeekStats,
 } from "src/client"
 import { request } from "src/client/core/request"
 import { productListItemFromRead } from "src/Convert"
@@ -88,6 +89,7 @@ export const useBaseStore = defineStore("base", {
     shops: null as Shop[] | null,
     conditions: null as WeekPlanCondition[] | null,
     condWarnings: null as ConditionWarning[] | null,
+    weekStats: null as RecipePlanWeekStats | null,
     weekRecommendations: null as Recommendations[] | null,
 
     promises: new Map() as PromiseMap,
@@ -392,7 +394,7 @@ export const useBaseStore = defineStore("base", {
       const id = `${payload?.year}_${payload?.week}`
       return storeShortcut({
         promise: RecipePlanWeekService.recipePlanWeekRecommendationsRetrieve({ id }),
-        setValue: (resp: ConditionWarning[]) => {
+        setValue: (resp: Recommendations[]) => {
           this.weekRecommendations = resp
         },
       })
@@ -409,6 +411,17 @@ export const useBaseStore = defineStore("base", {
         promise: RecipePlanWeekService.recipePlanWeekRecommendationCancelCreate({ id, recommendation: payload.recommendation }),
       })
     },
+
+    async loadWeekStats(payload: { year: number; week: number }) {
+      const id = `${payload?.year}_${payload?.week}`
+      return storeShortcut({
+        promise: RecipePlanWeekService.recipePlanWeekStatsRetrieve({ id }),
+        setValue: (resp: RecipePlanWeekStats) => {
+          this.weekStats = resp
+        },
+      })
+    },
+
     async loadWeekPlans(payload: object): Promise<PaginatedRecipePlanWeekReadList> {
       return new Promise((resolve, reject) => {
         RecipePlanWeekService.recipePlanWeekList(payload)

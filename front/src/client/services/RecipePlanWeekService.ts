@@ -6,6 +6,7 @@ import type { PaginatedRecipePlanWeekReadList } from '../models/PaginatedRecipeP
 import type { PatchedRecipePlanWeek } from '../models/PatchedRecipePlanWeek';
 import type { RecipePlanWeek } from '../models/RecipePlanWeek';
 import type { RecipePlanWeekRead } from '../models/RecipePlanWeekRead';
+import type { RecipePlanWeekStats } from '../models/RecipePlanWeekStats';
 import type { Recommendations } from '../models/Recommendations';
 import type { StatusOk } from '../models/StatusOk';
 
@@ -212,6 +213,24 @@ id: string,
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/recipe_plan_week/{id}/recommendations/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+
+    /**
+     * @returns RecipePlanWeekStats 
+     * @throws ApiError
+     */
+    public static recipePlanWeekStatsRetrieve({
+id,
+}: {
+id: string,
+}): CancelablePromise<RecipePlanWeekStats> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/recipe_plan_week/{id}/stats/',
             path: {
                 'id': id,
             },

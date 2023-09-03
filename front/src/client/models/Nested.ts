@@ -5,5 +5,6 @@
 export type Nested = {
     readonly id: number;
     name: string;
-    permissions?: Array<number>;
+    codename: string;
+    content_type: number;
 };

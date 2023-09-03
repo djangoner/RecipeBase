@@ -2,7 +2,7 @@
   <div class="flex column">
     <div class="row q-mb-md">
       <q-badge>
-        <span>Цена: </span> {{ pricePart }}₺ - <small>{{ priceFull }}₺</small>
+        <span>Цена: &nbsp;</span> {{ weekStats?.price || 0 }}₺
       </q-badge>
     </div>
 
@@ -22,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from "pinia"
 import { sumArray } from "src/modules/Utils"
 import { useBaseStore } from "src/stores/base"
 import { computed, ref, watch } from "vue"
@@ -35,20 +36,12 @@ defineProps({
 const $emit = defineEmits(["update-plan"])
 
 const store = useBaseStore()
+const {weekStats} = storeToRefs(store)
 const plan = computed(() => store.week_plan)
 const changed = ref(false)
 
 const commentId = "week"
 
-const pricePart = computed(() => {
-  return 0
-  // return sumArray(plan.value?.plans.map((p) => p.recipe.price_part))
-})
-
-const priceFull = computed(() => {
-  return 0
-  // return sumArray(plan.value?.plans.map((p) => p.recipe.price_full))
-})
 
 const currentComment = computed(() => {
   return plan.value?.comments[commentId] as string | undefined || ""

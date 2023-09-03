@@ -21,6 +21,5 @@ export type ShortUser = {
      * Отметьте, если пользователь должен считаться активным. Уберите эту отметку вместо удаления учётной записи.
      */
     is_active?: boolean;
-    readonly groups: Array<Nested>;
     readonly user_permissions: Array<Nested>;
 };

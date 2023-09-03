@@ -225,35 +225,11 @@ export default defineComponent({
         })
     },
     getRating(day_idx: number, user: User): number | null {
-      if (!this.plan) {
+      if (!this.store.weekStats) {
         return null;
       }
-      const dayRecipes = this.plan?.plans.filter(
-        (plan) => plan.day == day_idx && plan.recipe && !plan.recipe.is_archived
-      );
-
-      const ratings = dayRecipes.map((r) => {
-        const items: Array<number> = [];
-        // if (r?.recipe?.ratings) {
-          // items = r?.recipe?.ratings.map((r) => {
-          //   const rate =
-          //     typeof r.user == "number"
-          //       ? r.user == user.id
-          //       : r.user.id == user.id;
-          //   return rate ? r.rating : -1;
-          // });
-        // }
-        if (!items) {
-          return -1;
-        }
-        return Math.max(...items);
-      });
-
-      const rate = ratings.length > 0 ? Math.max(...ratings) : -1;
-
-      // if (dayRecipes) {
-      //   console.debug(day_idx, user.username, dayRecipes, ratings);
-      // }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const rate = this.store.weekStats?.rating[user.id][day_idx-1] as number | undefined || -1
       return rate;
     },
     loadConditions() {

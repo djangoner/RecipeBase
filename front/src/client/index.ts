@@ -68,6 +68,7 @@ export type { RecipePlanRead } from './models/RecipePlanRead';
 export type { RecipePlanShort } from './models/RecipePlanShort';
 export type { RecipePlanWeek } from './models/RecipePlanWeek';
 export type { RecipePlanWeekRead } from './models/RecipePlanWeekRead';
+export type { RecipePlanWeekStats } from './models/RecipePlanWeekStats';
 export type { RecipeRating } from './models/RecipeRating';
 export type { RecipeRatingRead } from './models/RecipeRatingRead';
 export type { RecipeRead } from './models/RecipeRead';

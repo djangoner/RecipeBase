@@ -34,6 +34,7 @@ from recipes.services.recommendations import (
     find_recommendation,
     generate_recommendations,
 )
+from recipes.services.stats import get_week_stats
 from recipes.services.utils import week_delta
 from telegram_bot.services.notifications import send_notif_synced, send_product_list
 from tasks.models import Task
@@ -54,6 +55,7 @@ from recipes.serializers import (
     RecipePlanWeekReadSerializer,
     RecipePlanWeekSerializer,
     RecipePlanWeekShortSerializer,
+    RecipePlanWeekStatsSerializer,
     RecipeRatingSerializer,
     RecipeReadSerializer,
     RecipeSerializer,
@@ -431,6 +433,18 @@ class RecipePlanWeekViewset(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
             return plan_week
 
         return super().get_object()
+
+    @extend_schema(
+        parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)],
+        responses=RecipePlanWeekStatsSerializer,
+    )
+    @decorators.action(["GET"], detail=True)
+    def stats(self, request, pk=None):
+        plan = self.get_object()
+
+        data = get_week_stats(plan)
+        json = RecipePlanWeekStatsSerializer(data).data
+        return response.Response(json)
 
     @extend_schema(
         parameters=[OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH)],

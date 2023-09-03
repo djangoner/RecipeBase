@@ -309,6 +309,7 @@ function onUpdateRecipe() {
     plan.value.edited_last = new Date().toISOString()
   }
   void debouncedLoadWarnings()
+  void debouncedLoadStats()
 }
 
 watch(debouncedSaveWeekPlan.state, (state: boolean) => {
@@ -328,6 +329,10 @@ const debouncedLoadWarnings = useDebounceFn(() => {
   }
   loadTry.value = 0
   void store.loadWeekWarnings({ year: week.value.year, week: week.value.week })
+}, 2000)
+
+const debouncedLoadStats = useDebounceFn(() => {
+  void store.loadWeekStats({ year: week.value.year, week: week.value.week })
 }, 2000)
 
 
@@ -500,6 +505,7 @@ onMounted(() => {
 
 watch(() => store.week_plan, () => {
   void debouncedLoadWarnings()
+  void debouncedLoadStats()
 }, {deep: true})
 
 watch(fillingPrc, (val, oldVal) => {

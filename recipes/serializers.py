@@ -523,3 +523,10 @@ class RecognizedIngredientSerializer(serializers.Serializer):
     ingredient = IngredientSerializer()
     amount = serializers.IntegerField()
     amount_type = serializers.CharField()
+
+
+class RecipePlanWeekStatsSerializer(serializers.Serializer):
+    price_part = serializers.IntegerField()
+    price_full = serializers.IntegerField()
+    price = serializers.IntegerField()
+    rating = serializers.DictField()

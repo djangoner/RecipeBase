@@ -17,7 +17,7 @@ export function cacheKeyRecipe(short: number | RecipeShort | RecipeRead) {
   return { recipe: extractRecipeId(short) }
 }
 
-export function getCachedRecipe(short: number | RecipeShort) {
+export function getCachedRecipe<T extends number | RecipeShort>(short: T): RecipeRead | T {
   const cacheKey = cacheKeyRecipe(short)
   const storeCache = useCacheStore()
   const cachedRecipe = storeCache.getCached(cacheKey) as undefined | RecipeRead
@@ -29,7 +29,7 @@ export function getCachedRecipe(short: number | RecipeShort) {
   return short
 }
 
-export function loadCachedRecipe(id: number | RecipeShort, params: LoadCachedRecipeParams = {}): Promise<RecipeRead | null> {
+export function loadCachedRecipe(id: number | RecipeShort, params: LoadCachedRecipeParams = {}): Promise<RecipeRead> {
   // console.debug("Loading for cache...", id)
   const store = useBaseStore()
   const storeCache = useCacheStore()

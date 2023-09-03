@@ -91,7 +91,7 @@ export const useBaseStore = defineStore("base", {
 
     promises: new Map() as PromiseMap,
     // Settings
-    enableWebsocket: (LocalStorage.getItem("enableWebsocket") as boolean) ?? false,
+    enableWebsocket: (LocalStorage.getItem("enableWebsocket") as boolean) ?? true,
   }),
 
   getters: {

@@ -6,7 +6,6 @@ import type { Nested } from './Nested';
 
 export type ShortUser = {
     readonly id: number;
-    password: string;
     /**
      * Обязательное поле. Не более 150 символов. Только буквы, цифры и символы @/./+/-/_.
      */
@@ -14,6 +13,10 @@ export type ShortUser = {
     first_name?: string;
     last_name?: string;
     email?: string;
+    /**
+     * Отметьте, если пользователь может входить в административную часть сайта.
+     */
+    readonly is_staff: boolean;
     /**
      * Отметьте, если пользователь должен считаться активным. Уберите эту отметку вместо удаления учётной записи.
      */

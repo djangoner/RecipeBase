@@ -3,11 +3,11 @@
 /* eslint-disable */
 
 import type { RecipeIngredientRecommendation } from './RecipeIngredientRecommendation';
-import type { RecipePlanRead } from './RecipePlanRead';
+import type { RecipePlanShort } from './RecipePlanShort';
 
 export type RecipePlanWeekRead = {
     readonly id: number;
-    plans: Array<RecipePlanRead>;
+    plans: Array<RecipePlanShort>;
     readonly edited_first: string;
     readonly edited_last: string;
     readonly recommendations_ingredients: Array<RecipeIngredientRecommendation>;

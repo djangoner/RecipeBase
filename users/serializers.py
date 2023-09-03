@@ -39,4 +39,4 @@ class ShortUserSerializer(UserSerializer):
     permissions = None  # type: ignore
 
     class Meta(UserSerializer.Meta):
-        exclude = UserSerializer.Meta.exclude = ["last_login", "date_joined", "is_staff", "is_superuser"]
+        exclude = UserSerializer.Meta.exclude = ["last_login", "date_joined", "is_superuser", "password"]

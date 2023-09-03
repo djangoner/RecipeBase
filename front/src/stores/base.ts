@@ -56,6 +56,7 @@ import { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
 import { getDB, ProductListItemSyncable, recipePlansGetOffline, recipePlansListUpdateFromServer } from "src/modules/ProductListSync"
 import { mockedPaginatedResponse, objectUnproxy, onlyChangedFields } from "src/modules/SyncUtils"
 import { storeShortcut } from "src/modules/StoreCrud"
+import { useCacheStore } from "./cache"
 
 const isOnline = () => navigator?.onLine
 
@@ -252,6 +253,9 @@ export const useBaseStore = defineStore("base", {
           .then((resp) => {
             this.recipe = resp
             resolve(resp)
+            // set cache
+            const store = useCacheStore()
+            store.saveRecipe(resp)
           })
           .catch((err) => {
             reject(err)
@@ -267,6 +271,9 @@ export const useBaseStore = defineStore("base", {
           .then((resp) => {
             this.recipe = resp
             resolve(resp)
+            // set cache
+            const store = useCacheStore()
+            store.saveRecipe(resp)
           })
           .catch((err) => {
             reject(err)
@@ -282,6 +289,9 @@ export const useBaseStore = defineStore("base", {
           .then((resp) => {
             this.recipe = resp
             resolve(resp)
+            // set cache
+            const store = useCacheStore()
+            store.saveRecipe(resp)
           })
           .catch((err) => {
             reject(err)
@@ -294,6 +304,9 @@ export const useBaseStore = defineStore("base", {
           .then((resp) => {
             this.recipe = resp
             resolve(resp)
+            // set cache
+            const store = useCacheStore()
+            store.saveRecipe(resp)
           })
           .catch((err) => {
             reject(err)

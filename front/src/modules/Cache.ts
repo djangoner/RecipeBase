@@ -40,9 +40,5 @@ export function loadCachedRecipe(id: number | RecipeShort, params: LoadCachedRec
   }
   const omit = "content,content_source,recommendations_ingredients,recommendations_recipes,recommendations_tags"
   const prom = store.loadRecipe(extractRecipeId(id), params.omit || omit)
-  void prom.then((data) => {
-    storeCache.setCached(cacheKey, data)
-    // console.debug("Caching recipe #" + props.recipe.id.toString())
-  })
   return prom
 }

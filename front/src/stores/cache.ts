@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import { SessionStorage } from "quasar"
+import { RecipeRead } from "src/client"
 import { stringify, parse } from "zipson"
 
 type CacheKey = string | object
@@ -14,7 +15,6 @@ type CacheData = Map<string, CacheMeta>
 
 const DEFAULT_TIMEOUT = 60 * 5 * 1000
 const UPDATE_CLEARED_TIMEOUT = 30 * 1000
-
 
 function readCache(): CacheData {
   const rawString: string = SessionStorage.getItem("CacheStorage") || ""
@@ -83,6 +83,15 @@ export const useCacheStore = defineStore("cache", {
       if (sizeAfter != sizeBefore) {
         this.writeCache()
       }
+    },
+
+    // Helpers
+
+    saveRecipe(recipe: RecipeRead) {
+      this.setCached({ recipe: recipe.id }, recipe)
+    },
+    deleteRecipe(recipe: RecipeRead) {
+      this.delCached({ recipe: recipe.id })
     },
   },
 })

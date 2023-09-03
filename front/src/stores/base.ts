@@ -384,13 +384,13 @@ export const useBaseStore = defineStore("base", {
         },
       })
     },
-    async acceptWeekRecommendation(payload: { year: number; week: number; recommendation: Recommendations }) {
+    async acceptWeekRecommendation(payload: { year: number; week: number; recommendation: string }) {
       const id = `${payload?.year}_${payload?.week}`
       return storeShortcut({
         promise: RecipePlanWeekService.recipePlanWeekRecommendationAcceptCreate({ id, recommendation: payload.recommendation }),
       })
     },
-    async cancellWeekRecommendation(payload: { year: number; week: number; recommendation: Recommendations }) {
+    async cancellWeekRecommendation(payload: { year: number; week: number; recommendation: string }) {
       const id = `${payload?.year}_${payload?.week}`
       return storeShortcut({
         promise: RecipePlanWeekService.recipePlanWeekRecommendationCancelCreate({ id, recommendation: payload.recommendation }),

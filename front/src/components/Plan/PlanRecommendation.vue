@@ -157,6 +157,7 @@ const toUrl = computed(() => {
   if (rec.value.recipe){
     return {name: 'recipe', params: {id: rec.value.recipe.id}}
   } else if (rec.value.ingredient?.ingredient){
+    // @ts-expect-error ingredient id model
     return {name: 'ingredient', params: {id: rec.value.ingredient.ingredient.id as number}}
   }
   return null

@@ -49,7 +49,6 @@ def get_edited_first(instance_id: int, is_filled: bool):
 
 @ttl_cache(ttl=5)
 def get_edited_last(instance_id: int, is_filled: bool):
-    print("LAST", instance_id, is_filled)
     plans = RecipePlan.objects.filter(week=instance_id)
     if not is_filled:
         plans = RecipePlan.objects.filter(week=instance_id, created__gte=datetime.now().date())

@@ -1,7 +1,6 @@
 <template>
   <q-item
     clickable
-    :to="toUrl"
     dense
     :inset-level="1"
   >
@@ -23,12 +22,18 @@
 
     <!-- Title -->
     <q-item-section>
-      <q-item-label :class="{'text-positive':rec.accepted}">
-        {{ sectionTitle }}
-      </q-item-label>
-      <q-item-label caption>
-        {{ sectionText }}
-      </q-item-label>
+      <conditional-router-link
+        class="q-link text-inherit"
+        :to="toUrl"
+        :disabled="!toUrl"
+      >
+        <q-item-label :class="{'text-positive':rec.accepted}">
+          {{ sectionTitle }}
+        </q-item-label>
+        <q-item-label caption>
+          {{ sectionText }}
+        </q-item-label>
+      </conditional-router-link>
 
 
       <template v-if="rec.recipe">
@@ -53,7 +58,7 @@
             dense
             no-caps
             unelevated
-            @click.stop="onCancell"
+            @click.stop.prevent="onCancell"
           />
         </template>
         <template v-else>
@@ -88,6 +93,7 @@
 
 
 <script setup lang="ts">
+import ConditionalRouterLink from '../ConditionalRouterLink.vue'
 import RecipeCardTooltip from '../RecipeCardTooltip.vue'
 import { useQuasar } from 'quasar';
 import { Recommendations } from 'src/client';

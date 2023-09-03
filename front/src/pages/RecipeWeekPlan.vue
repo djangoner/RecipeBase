@@ -212,7 +212,7 @@ import { WeekDays } from "src/modules/WeekUtils"
 import { useAuthStore } from "src/stores/auth"
 // import VueHtmlToPaper from 'vue-html-to-paper';
 import Fireworks from "@fireworks-js/vue"
-import { useDebounceFn, useDocumentVisibility, useEventListener, useNow, useSessionStorage, useStorage } from "@vueuse/core"
+import { useDebounceFn, useDocumentVisibility, useEventListener, useIntervalFn, useNow, useSessionStorage, useStorage } from "@vueuse/core"
 import { isOnline } from "src/modules/isOnline"
 import { RecipePlanWeekFromRead } from "src/Convert"
 import { date, useQuasar } from "quasar"
@@ -255,6 +255,10 @@ const debouncedSaveWeekPlan = useDebounceFnCustom(saveWeekPlan, 5000, { maxWait:
 const loadTry = ref(0)
 
 const week: Ref<YearWeek | Record<string, never>> = ref({})
+
+useIntervalFn(() => {
+  loadWeekPlan()
+}, 60*10*1000)
 
 const canEdit = computed(() => {
   return storeAuth.hasPerm("recipes.change_recipeplanweek")

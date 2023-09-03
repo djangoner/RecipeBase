@@ -95,7 +95,9 @@ export function storeItemsConcat<T>(items: Array<T> | null, results: Array<T>): 
 
 export function promiseSetLoading(prom: Promise<unknown>, loadingVar: Ref<boolean>) {
   loadingVar.value = true
+  // console.debug("Loading...")
   prom.finally(() => {
+    // console.debug("Loaded.")
     loadingVar.value = false
   })
 }

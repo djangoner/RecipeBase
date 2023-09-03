@@ -95,6 +95,7 @@ export default defineComponent({
   mixins: [HandleErrorsMixin],
   props: {
     recipe: { required: true, type: Object as PropType<RecipeRead> },
+    loadRecipe: { type: Boolean, default: true },
   },
   emits: ['updateItem'],
   setup() {

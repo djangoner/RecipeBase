@@ -170,15 +170,15 @@ export default defineComponent({
       if (!this.plan || !this.plan.plans) {
         return null;
       }
-      this.plan?.plans?.forEach((p) => {
-        if (!p.recipe.tags) return;
-        p.recipe.tags.forEach((t) => {
-          if (!Object.prototype.hasOwnProperty.call(stats, t.title)) {
-            stats[t.title] = 0;
-          }
-          stats[t.title] += 1;
-        });
-      });
+      // this.plan?.plans?.forEach((p) => {
+      //   if (!p.recipe.tags) return;
+      //   p.recipe.tags.forEach((t) => {
+      //     if (!Object.prototype.hasOwnProperty.call(stats, t.title)) {
+      //       stats[t.title] = 0;
+      //     }
+      //     stats[t.title] += 1;
+      //   });
+      // });
       return stats;
     },
     conditions() {
@@ -233,16 +233,16 @@ export default defineComponent({
       );
 
       const ratings = dayRecipes.map((r) => {
-        let items: Array<number> = [];
-        if (r?.recipe?.ratings) {
-          items = r?.recipe?.ratings.map((r) => {
-            const rate =
-              typeof r.user == "number"
-                ? r.user == user.id
-                : r.user.id == user.id;
-            return rate ? r.rating : -1;
-          });
-        }
+        const items: Array<number> = [];
+        // if (r?.recipe?.ratings) {
+          // items = r?.recipe?.ratings.map((r) => {
+          //   const rate =
+          //     typeof r.user == "number"
+          //       ? r.user == user.id
+          //       : r.user.id == user.id;
+          //   return rate ? r.rating : -1;
+          // });
+        // }
         if (!items) {
           return -1;
         }

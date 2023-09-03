@@ -138,6 +138,7 @@ import { AmountTypesConvert, AmountTypesTypes } from "src/modules/Globals"
 import { RecipeFromRead } from "src/Convert"
 import { useAuthStore } from "src/stores/auth"
 import {dateFormat, dateTimeFormat } from "src/modules/Utils"
+import { cacheKeyRecipe } from 'src/modules/Cache'
 
 const defaultRecipe = {
   content_source: "",
@@ -258,6 +259,8 @@ export default defineComponent({
         .loadRecipe(id)
         .then(() => {
           this.loading = false
+          const cacheKey = cacheKeyRecipe(parseInt(id))
+          
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false

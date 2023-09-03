@@ -101,6 +101,9 @@ export default defineComponent({
       const plans = this.warnings.map((w) => w.plan);
       return [...new Set(plans)];
     },
+    mealTimes(){
+      return this.store.meal_time
+    }
   },
   methods: {
     conditionName(cond: WeekPlanCondition | null): string {
@@ -141,6 +144,10 @@ export default defineComponent({
 
       return `${val1} ${sign} ${val2}`;
     },
+    getMealTimeTitle(id: number){
+      const m = this.mealTimes?.find((m) => m.id == id)
+      return m? m.title : id
+    },
     warningNodeRender(
       rootCond: ConditionWarning,
       warnings: ConditionWarning[]
@@ -161,10 +168,10 @@ export default defineComponent({
               StrConditions[cond.condition].toUpperCase() || cond.condition;
 
             label = `${dayStr || ""} ${
-              plan.meal_time.title
+              this.getMealTimeTitle(plan.meal_time)
             } (условие ${condStr})`;
           } else {
-            label = `${dayStr || ""} ${plan.meal_time.title} ${failTx} (${
+            label = `${dayStr || ""} ${this.getMealTimeTitle(plan.meal_time)} ${failTx} (${
               cond.plan_field || ""
             })`;
           }

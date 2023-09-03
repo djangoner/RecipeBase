@@ -41,11 +41,13 @@ const changed = ref(false)
 const commentId = "week"
 
 const pricePart = computed(() => {
-  return sumArray(plan.value?.plans.map((p) => p.recipe.price_part))
+  return 0
+  // return sumArray(plan.value?.plans.map((p) => p.recipe.price_part))
 })
 
 const priceFull = computed(() => {
-  return sumArray(plan.value?.plans.map((p) => p.recipe.price_full))
+  return 0
+  // return sumArray(plan.value?.plans.map((p) => p.recipe.price_full))
 })
 
 const currentComment = computed(() => {

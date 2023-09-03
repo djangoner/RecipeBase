@@ -14,34 +14,32 @@ import {
   RecipeRead,
 } from "src/client";
 
-export function RecipePlanWeekFromRead(
-  source: RecipePlanWeekRead | null
-): RecipePlanWeek {
+export function RecipePlanWeekFromRead(source: RecipePlanWeekRead | null): RecipePlanWeek {
   const payloadReplaces = {
     plans: [] as RecipePlan[],
-  };
+  }
 
   payloadReplaces.plans =
     source?.plans.map((p) => {
       const replaces = {
         recipe: undefined as number | undefined,
         meal_time: undefined as number | undefined,
-      };
+      }
       if (typeof p.recipe == "object") {
-        replaces.recipe = p.recipe?.id;
+        replaces.recipe = p.recipe?.id
       }
-      if (typeof p.meal_time == "object") {
-        replaces.meal_time = p.meal_time.id;
-      }
-      return Object.assign({}, p, replaces) as RecipePlan;
-    }) || [];
+      // if (typeof p.meal_time == "object") {
+      //   replaces.meal_time = p.meal_time?.id
+      // }
+      return Object.assign({}, p, replaces) as RecipePlan
+    }) || []
 
   // Exclude empty plans
   payloadReplaces.plans = payloadReplaces.plans.filter((p) => {
-    return p.recipe && p.meal_time;
-  });
+    return p.recipe && p.meal_time
+  })
 
-  return Object.assign({}, source, payloadReplaces);
+  return Object.assign({}, source, payloadReplaces)
 }
 
 export function RecipeFromRead(source: RecipeRead | null): Recipe {
@@ -80,7 +78,7 @@ export function RecipeFromRead(source: RecipeRead | null): Recipe {
     source?.recommendations_ingredients?.map((r) => {
       const rep = {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        ingredient: r.ingredient.id,
+        ingredient: r.ingredient?.id,
       }
       return Object.assign({}, r, rep)
     }) || []

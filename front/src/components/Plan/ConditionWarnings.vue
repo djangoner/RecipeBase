@@ -144,10 +144,6 @@ export default defineComponent({
 
       return `${val1} ${sign} ${val2}`;
     },
-    getMealTimeTitle(id: number){
-      const m = this.mealTimes?.find((m) => m.id == id)
-      return m? m.title : id
-    },
     warningNodeRender(
       rootCond: ConditionWarning,
       warnings: ConditionWarning[]
@@ -163,15 +159,17 @@ export default defineComponent({
         if (plan && plan.day) {
           const dayStr = this.getDay(plan.day - 1);
           const failTx = this.conditionAsString(rootCond);
+          // @ts-expect-error meal time title
+          const mealTimeTitle = plan.meal_time.title as string
           if (cond.condition) {
             const condStr =
               StrConditions[cond.condition].toUpperCase() || cond.condition;
 
             label = `${dayStr || ""} ${
-              this.getMealTimeTitle(plan.meal_time)
+              mealTimeTitle
             } (условие ${condStr})`;
           } else {
-            label = `${dayStr || ""} ${this.getMealTimeTitle(plan.meal_time)} ${failTx} (${
+            label = `${dayStr || ""} ${mealTimeTitle} ${failTx} (${
               cond.plan_field || ""
             })`;
           }

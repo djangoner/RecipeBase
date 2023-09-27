@@ -50,7 +50,7 @@
           <small class="ing-day">-.&nbsp;</small>
         </q-item-section>
         <q-item-section>
-          Рекомендация ({{ ingAccepted(item.ingredient).amount }} {{ ingAccepted(item.ingredient).amount_type_str }})
+          {{ingAccepted(item.ingredient).recipe.title}} - рекомендация ({{ ingAccepted(item.ingredient).amount }} {{ ingAccepted(item.ingredient).amount_type_str }})
         </q-item-section>
       </q-item>
     </template>

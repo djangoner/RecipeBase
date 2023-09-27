@@ -200,12 +200,19 @@ class RecipeRatingReadSerializer(RecipeRatingSerializer):
     user = ShortUserSerializer()
 
 
+class RecipeShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ("id", "title")
+
+
 class RecipeIngredientRecommendationSerializer(serializers.ModelSerializer):
     # ingredient = IngredientReadSerializer()
     ingredient = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(), required=False, allow_null=True, default=None
     )
     amount_type_str = serializers.SerializerMethodField()
+    recipe = RecipeShortSerializer()
 
     class Meta:
         model = RecipeIngredientRecommendation
@@ -297,28 +304,6 @@ class RecipeIngredientWithRecipeSerializer(RecipeIngredientSerializer):
         representation = super().to_representation(instance)
         representation["recipe"] = RecipeForRecipeIngredientSerializer(instance.recipe).data
         return representation
-
-
-class RecipeShortSerializer(RecipeSerializer):
-    # tags = None  # type: ignore
-    # ingredients = None  # type: ignore
-    # ratings = None  # type: ignore
-    author = None  # type: ignore
-    content = None  # type: ignore
-    content_source = None  # type: ignore
-    images = None  # type: ignore
-    recommendations_recipes = None  # type: ignore
-    recommendations_ingredients = None  # type: ignore
-    recommendations_tags = None  # type: ignore
-    # is_planned = None  # type: ignore
-
-    class Meta(RecipeSerializer.Meta):
-        fields = ("id", "title")
-        exclude = None
-        # exclude = tuple(
-        #     list(RecipeSerializer.Meta.exclude)
-        #     + ["author", "content", "content_source", "recommendations_recipes", "recommendations_tags"]
-        # )
 
 
 class RecommendationsSerializer(serializers.Serializer):

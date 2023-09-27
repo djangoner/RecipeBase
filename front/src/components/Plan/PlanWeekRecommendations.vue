@@ -14,7 +14,7 @@
     >
       <q-card-section>
         <div
-          v-if="recommendations && recommendations.length"
+          v-if="recommendations && recommendations.length && !planLoading"
           class="row"
         >
           <template
@@ -60,13 +60,32 @@
         </div>
 
         <div
-          v-else-if="!loading"
+          v-else-if="planLoading"
+          class="row"
+        >
+          <q-card
+            v-for="i of 4"
+            :key="i"
+            class="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3"
+            flat
+          >
+            <q-card-section class="q-gutter-y-md">
+              <q-skeleton
+                v-for="i of 3"
+                :key="i"
+              />
+            </q-card-section>
+          </q-card>
+        </div>
+
+        <div
+          v-else-if="!isLoading"
           class="flex flex-center"
         >
           <span class="text-h6 text-bold text-grey">Пока рекомендаций нет</span>
         </div>
 
-        <q-inner-loading :showing="loading" />
+        <q-inner-loading :showing="isLoading" />
       </q-card-section>
     </q-card>
   </q-expansion-item>
@@ -90,13 +109,17 @@ const props = defineProps({
   edit: {
     type: Boolean,
     default: false,
+  },
+  planLoading: {
+    type: Boolean,
+    default: false
   }
 })
 
 const $emit = defineEmits(["updated"])
 
 const store = useBaseStore()
-const loading = ref(false)
+const isLoading = ref(false)
 
 const debouncedLoad = useDebounceFn(loadRecommendations, 2000)
 
@@ -124,7 +147,7 @@ function loadRecommendations() {
   }
   const prom = store.loadWeekRecommendations({ year: props.week.year, week: props.week.week })
 
-  promiseSetLoading(prom, loading)
+  promiseSetLoading(prom, isLoading)
 }
 
 function onUpdated() {

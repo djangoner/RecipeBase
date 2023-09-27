@@ -137,6 +137,7 @@
       class="print-hide"
       :week="week"
       :edit="editMode"
+      :plan-loading="loading"
       @updated="loadWeekPlan()"
     />
 

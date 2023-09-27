@@ -52,6 +52,7 @@
                 :key="idx"
                 :week="week"
                 :recommendation="recommendation"
+                :edit="edit"
                 @updated="onUpdated"
               />
             </q-expansion-item>
@@ -86,6 +87,10 @@ const props = defineProps({
     type: Object as PropType<YearWeek>,
     required: true,
   },
+  edit: {
+    type: Boolean,
+    default: false,
+  }
 })
 
 const $emit = defineEmits(["updated"])

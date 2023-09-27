@@ -58,6 +58,7 @@
             dense
             no-caps
             unelevated
+            :disable="!edit"
             @click.stop.prevent="onCancell"
           />
         </template>
@@ -65,6 +66,7 @@
           <q-btn
             v-if="rec.recipe_tag"
             :to="{name: 'recipes', query: {reset: true, q_tag: [rec.recipe_tag.id]}}"
+            :disable="!edit"
             label="Найти"
             icon="search"
             color="primary"
@@ -83,6 +85,7 @@
             no-caps
             unelevated
             :loading="saving"
+            :disable="!edit"
             @click.stop="runPerform()"
           />
         </template>
@@ -111,6 +114,10 @@ const props = defineProps({
   recommendation: {
     type: Object as PropType<Recommendations>,
       required: true,
+  },
+  edit: {
+    type: Boolean,
+    default: false,
   }
 })
 

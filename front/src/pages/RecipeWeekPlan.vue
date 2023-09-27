@@ -136,6 +136,7 @@
       ref="recommendationsRef"
       class="print-hide"
       :week="week"
+      :edit="editMode"
       @updated="loadWeekPlan()"
     />
 
@@ -197,7 +198,7 @@
     </div>
   </div>
 
-  <q-inner-loading :showing="loading" />
+  <q-inner-loading :showing="loading && !plan" />
 </template>
 
 <script lang="ts" setup>
@@ -254,7 +255,7 @@ const visibility = useDocumentVisibility()
 const debouncedSaveWeekPlan = useDebounceFnCustom(saveWeekPlan, 5000, { maxWait: 15000 })
 const loadTry = ref(0)
 
-const week: Ref<YearWeek | Record<string, never>> = ref({})
+const week: Ref<YearWeek> = ref({year: 0, week: 0})
 
 useIntervalFn(() => {
   loadWeekPlan()

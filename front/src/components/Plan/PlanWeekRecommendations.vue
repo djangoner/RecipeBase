@@ -18,7 +18,7 @@
           class="row"
         >
           <template
-            v-for="(items, plan) of recommendationsGrouped"
+            v-for="[plan, items] of recommendationsGrouped"
             :key="plan"
           >
             <q-expansion-item
@@ -37,7 +37,7 @@
 
                 <q-item-section>
                   <q-item-label>
-                    <span class="text-grey"> {{ WeekDaysShort[getPlan(plan)?.day] }}. </span>
+                    <span class="text-grey"> {{ WeekDaysShort[getPlan(plan)?.day] }}. <q-tooltip>{{ getPlan(plan) }}</q-tooltip></span>
                     {{ getPlan(plan)?.recipe?.title }}
 
                     <small class="text-grey"> ({{ getPlan(plan)?.meal_time?.title }}) </small>
@@ -125,6 +125,7 @@ const debouncedLoad = useDebounceFn(loadRecommendations, 2000)
 
 const recommendations = computed(() => store.weekRecommendations)
 
+
 const recommendationsGrouped = computed(() => {
   if (!recommendations.value) {
     return []
@@ -137,8 +138,20 @@ const recommendationsGrouped = computed(() => {
     }
     res[rec.plan].push(rec)
   }
+  const resArray = Object.entries(res)
 
-  return res
+  // Sort plans by day
+  resArray.sort((a, b) => {
+    const planA = getPlan(a[0])
+    const planB = getPlan(b[0])
+
+    if (planA?.day && planB?.day){
+      return planA.day - planB.day
+    }
+    return 0
+  })
+
+  return resArray
 })
 
 function loadRecommendations() {
@@ -156,7 +169,7 @@ function onUpdated() {
   console.debug("Updated recommendations, should reload plan")
 }
 
-function getPlan(id: number) {
+function getPlan(id: number | string | null | undefined) {
   return store.week_plan?.plans?.find((i) => i.id == id)
 }
 

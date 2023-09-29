@@ -19,16 +19,23 @@
             <div class="text-subtitle1 text-center q-my-md">
               Добавить в план
               <small class="text-grey"> ({{ countNow }} / {{ countLimit }}) </small>
+              <q-btn
+                v-if="canAdd"
+                icon="add"
+                size="sm"
+                color="positive"
+                dense
+                round
+                unelevated
+                @click="showSelectRecipe = true"
+              />
             </div>
-            <plan-recipes-drag
-              v-model="recipesSelected"
-              :drag-put="true"
-              :drag-pull="false"
-              :disable="!canAdd"
-              btn-del
-            />
+            <plan-gen-drag />
 
-            <div class="q-px-md q-my-sm">
+            <!-- <div
+              v-if="canAdd"
+              class="q-px-md q-my-sm"
+            >
               <q-btn
                 label="Выбрать рецепт"
                 icon="add"
@@ -38,7 +45,7 @@
                 no-caps
                 @click="showSelectRecipe = true"
               />
-            </div>
+            </div> -->
           </q-card-section>
 
           <q-space />
@@ -99,6 +106,7 @@
 </template>
 
 <script setup lang="ts">
+import PlanGenDrag from './PlanGenDrag.vue'
 import SelectRecipeDialog from './SelectRecipeDialog.vue'
 import PlanGenRecommendations from "./PlanGenRecommendations.vue"
 import PlanRecipesDrag from "./PlanRecipesDrag.vue"
@@ -111,6 +119,7 @@ import { storeToRefs } from "pinia"
 import { YearWeek } from "src/modules/Globals"
 import { promiseSetLoading } from "src/modules/StoreCrud"
 import { useQuasar } from "quasar"
+import { useLocalStore } from 'src/stores/local'
 
 const props = defineProps({
   week: {
@@ -122,9 +131,10 @@ const props = defineProps({
 const emit = defineEmits(["updated"])
 const $q = useQuasar()
 
-const recipesSelected: Ref<RecipeShort[]> = useLocalStorage("planRecipesSelected", [])
 
 const store = useBaseStore()
+const storeLocal = useLocalStore()
+const {recipesSelected} = storeToRefs(storeLocal)
 const { meal_time, week_plan } = storeToRefs(store)
 
 const showDialog = ref(false)
@@ -137,7 +147,9 @@ const countLimit = computed(() => {
     return 0
   }
   const plansTotal = meal_time.value.filter((m) => m.is_primary).length * 5
-  return plansTotal
+  const plansFilled = week_plan.value?.plans.filter((p) => p.meal_time.is_primary && p.day < 6).length
+
+  return plansTotal - plansFilled
 })
 
 const canAdd = computed(() => countNow.value < countLimit.value)
@@ -153,14 +165,7 @@ const filledIds = computed(() => {
 const excludeIds = computed(() => [].concat(selectedIds.value, filledIds.value))
 
 function onAdd(recipe: RecipeShort) {
-  // Clicked add btn
-  console.debug("Add recipe: ", recipe)
-  if (recipe) {
-    const existIdx = recipesSelected.value.findIndex((el) => el.id == recipe.id)
-    if (existIdx === -1) {
-      recipesSelected.value.push(recipe)
-    }
-  }
+  storeLocal.recipesSelectedAdd(recipe)
 }
 
 function reset() {

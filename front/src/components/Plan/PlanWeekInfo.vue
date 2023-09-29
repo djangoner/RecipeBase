@@ -1,4 +1,8 @@
 <template>
+  <select-recipe-dialog
+    v-model="showSelectRecipe"
+    @select="storeLocal.recipesSelectedAdd($event)"
+  />
   <q-tabs
     v-model="tab"
     dense
@@ -35,6 +39,17 @@
       name="eats"
       icon="people"
     />
+    <q-tab
+      name="recipes"
+      icon="list"
+    >
+      <q-badge
+        v-if="storeLocal.recipesSelected.length"
+        floating
+      >
+        {{ storeLocal.recipesSelected.length }}
+      </q-badge>
+    </q-tab>
   </q-tabs>
 
   <q-tab-panels
@@ -106,10 +121,40 @@
         </tbody>
       </q-markup-table>
     </q-tab-panel>
+    <q-tab-panel
+      name="recipes"
+      class="q-px-sm"
+    >
+      <!-- Local saved plan items card -->
+      <div
+        class="col-12 col-md-4"
+      >
+        <q-card
+          flat
+          bordered
+        >
+          <div class="text-subtitle1 text-center">
+            Выбранные рецепты
+            <q-btn
+              icon="add"
+              size="sm"
+              color="positive"
+              dense
+              round
+              unelevated
+              @click="showSelectRecipe = true"
+            />
+          </div>
+          <plan-drag-selected />
+        </q-card>
+      </div>
+    </q-tab-panel>
   </q-tab-panels>
 </template>
 
 <script lang="ts">
+import SelectRecipeDialog from './SelectRecipeDialog.vue'
+import PlanDragSelected from './PlanDragSelected.vue'
 import PlanTabInfo from './PlanTabInfo.vue'
 import { RecipePlanWeekRead, User } from "src/client";
 import { WeekDaysShort, YearWeek } from "src/modules/WeekUtils";
@@ -118,6 +163,7 @@ import { useBaseStore } from "src/stores/base";
 import { defineComponent, PropType } from "vue";
 import ConditionWarnings from "./ConditionWarnings.vue";
 import { useShortcutcs } from 'src/modules/VueUtils';
+import { useLocalStore } from 'src/stores/local';
 
 const ratingColors: { [key: number]: string } = {
   5: "bg-positive",
@@ -133,7 +179,7 @@ interface TagsStats {
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { ConditionWarnings, PlanTabInfo },
+  components: { ConditionWarnings, PlanTabInfo, PlanDragSelected, SelectRecipeDialog },
   props: {
     plan: { required: true, type: Object as PropType<RecipePlanWeekRead> },
     week: { required: true, type: Object as PropType<YearWeek> },
@@ -143,13 +189,16 @@ export default defineComponent({
   data() {
     const store = useBaseStore();
     const storeAuth = useAuthStore();
+    const storeLocal = useLocalStore();
     const defaultTab = this.$q.localStorage.getItem("week_tab") || "warnings";
     return {
       store,
       storeAuth,
+      storeLocal,
       tab: defaultTab as string,
       WeekDaysShort: WeekDaysShort as { [key: number]: string },
       loading: false,
+      showSelectRecipe: false,
     };
   },
   computed: {
@@ -204,6 +253,7 @@ export default defineComponent({
       alt_1: () => this.tab = "info",
       alt_2: () => this.tab = "warnings",
       alt_3: () => this.tab = "eats",
+      alt_4: () => this.tab = "recipes",
     })
   },
   created() {

@@ -25,6 +25,7 @@
       :model-value="recipesFiltered"
       :drag-pull="true"
       btn-add
+      v-bind="$attrs"
       @add="emit('add', $event)"
     />
   </q-scroll-area>
@@ -32,7 +33,6 @@
 
 <script setup lang="ts">
 import { useLocalStorage } from '@vueuse/core';
-import { storeToRefs } from 'pinia';
 import { RecipeShort } from 'src/client';
 import { promiseSetLoading } from 'src/modules/StoreCrud';
 import { useBaseStore } from 'src/stores/base';

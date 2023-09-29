@@ -51,6 +51,7 @@
               :item-key="getItemKey"
               :sort="false"
               :data-day="dayIdx"
+              :data-mtime="mtime.id"
               :disabled="readonly || $q.screen.lt.md"
               group="plans"
               filter=".not-draggable"
@@ -217,7 +218,7 @@ function delMealTime(mtime: MealTime) {
 }
 
 function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: number, planItem?: RecipePlanRead) {
-  console.debug("setRecipe: ", day, mtime, value)
+  console.debug("[Card] setRecipe: ", {day, mtime, value, planItem})
 
   const prom = store.setRecipePlan(day, mtime, value, rec_idx, planItem)
 
@@ -237,8 +238,8 @@ function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: n
         }
       } else if (resp === undefined) {
         console.debug("Deleted plan: ", plan.value?.id, foundIdx)
-        if (foundIdx !== -1 && foundIdx !== undefined) {
-          plan.value?.plans.splice(foundIdx, 1)
+        if (foundIdx !== -1 && foundIdx !== undefined && plan.value) {
+          plan.value.plans.splice(foundIdx, 1)
         }
       }
     })
@@ -249,7 +250,7 @@ function getItemKey(item: RecipePlanRead | null){
 }
 
 function onDrag(e: Event, perform=false){
-  // @ts-expect-error ignore
+  console.debug("Drag event: ", e)
   // const elFrom = e.from as HTMLElement
   // @ts-expect-error ignore
   const elTo = e.to as HTMLElement

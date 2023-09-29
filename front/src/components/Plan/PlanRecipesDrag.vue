@@ -1,12 +1,15 @@
 <template>
   <draggable
     :list="model || []"
-    :group="{name: 'plans', pull: dragPull?'clone':false, put: dragPut}"
+    :group="{name: 'plans', pull: pullValue, put: dragPut}"
     item-key="id"
+    :sort="true"
     :animation="200"
     :disable="disable"
+    filter=".not-draggable"
     handle=".drag-handle"
     ghost-class="ghost"
+    v-bind="$attrs"
     @start="drag = true"
     @end="drag = false"
     @log="log"
@@ -20,6 +23,7 @@
     <template #item="{element}">
       <q-item
         dense
+        :data-recipe_id="element.id"
       >
         <q-item-section
           avatar
@@ -32,12 +36,13 @@
             />
             <q-btn
               v-if="btnAdd"
-              icon="add"
+              class="ghost-hide"
+              icon="add_circle"
               color="positive"
               size="sm"
               dense
               round
-              unelevated
+              flat
               @click="emit('add', element)"
             />
           </div>
@@ -45,8 +50,12 @@
         <q-item-section>
           {{ element.title }}
         </q-item-section>
-        <q-item-section v-if="btnDel" side>
+        <q-item-section
+          v-if="btnDel"
+          side
+        >
           <q-btn
+            class="ghost-hide"
             size="sm"
             icon="delete"
             color="negative"
@@ -63,7 +72,7 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core';
 import { RecipeShort } from 'src/client';
-import { PropType, ref } from 'vue';
+import { computed, PropType, ref } from 'vue';
 import draggable from 'vuedraggable'
 
 const props = defineProps({
@@ -71,11 +80,15 @@ const props = defineProps({
     type: Array as PropType<RecipeShort[]>,
     required: true,
   },
-  dragPut: {
+  dragPut: { // Can be elements inserted into this
     type: Boolean,
     default: false,
   },
-  dragPull: {
+  dragPull: { // Can be these elements dragged into another
+    type: Boolean,
+    default: false,
+  },
+  pullClone: {
     type: Boolean,
     default: false,
   },
@@ -103,6 +116,13 @@ interface HasId {
   id: number
 }
 
+const pullValue = computed(() => {
+  if (props.dragPull){
+    return props.pullClone ? 'clone' : true
+  }
+  return false
+})
+
 function removeElement(element: HasId){
   model.value = model.value.filter(el => el.id !== element.id)
 }
@@ -117,6 +137,10 @@ function log(e){
 <style lang="scss" scoped>
 .ghost {
   opacity: 0.5;
+
+  .ghost-hide {
+    display: none!important;
+  }
 }
 
 </style>

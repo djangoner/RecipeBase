@@ -4,6 +4,8 @@
     class="row q-col-gutter-x-sm wrap"
     :class="[plan?.recipe ? '' : 'not-draggable']"
     :data-plan_id="plan?.id"
+    :data-day="dayIdx"
+    :data-mtime="mtime.id"
   >
     <div class="col-auto">
       <div>
@@ -44,7 +46,7 @@
         :model-value="plan?.recipe"
         :readonly="readonly"
         :index="[dayIdx, mtime.id, index].join('-')"
-        @update:model-value="$emit('set-recipe', dayIdx, mtime, $event, index)"
+        @update:model-value="$emit('set-recipe', dayIdx, mtime, $event, index, plan)"
       />
       <!-- <span>{{ getplan(dayIdx, mtime)?.title }}</span> -->
     </div>

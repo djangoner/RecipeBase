@@ -260,6 +260,8 @@ function onDrag(e: Event, perform=false){
   // const dayFrom = Number(elFrom.dataset.day) || null
   const dayTo = Number(elTo.dataset.day) || null
   const planId = Number(elItem.dataset.plan_id ) || null
+  const mealTime = Number(elTo.dataset.mtime) || null
+  console.debug("[Drag card] set ", {elTo, elItem, dayTo, mealTime})
 
   // console.debug("Drag", {dayFrom, dayTo, planId, perform}, e)
   if (!planId){
@@ -275,7 +277,7 @@ function onDrag(e: Event, perform=false){
 
   if (perform){
     if (dayTo && dayTo != planItem.day){
-      setRecipe(dayTo, planItem.meal_time, planItem.recipe, 0, planItem)
+      setRecipe(dayTo, mealTime, planItem.recipe, 0, planItem)
     }
   }
 }

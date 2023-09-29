@@ -14,7 +14,18 @@
           @update:model-value="onUpdateEditMode"
         />
       </div>
-      <div class="q-ml-sm">
+      <div>
+        <q-btn
+          label="Обновить"
+          icon="refresh"
+          size="sm"
+          color="secondary"
+          dense
+          no-caps
+          @click="loadWeekPlan()"
+        />
+      </div>
+      <div>
         <plan-generation
           :week="week"
           @updated="loadWeekPlan()"

@@ -5,7 +5,6 @@
     item-key="id"
     :sort="true"
     :animation="200"
-    :disable="disable"
     filter=".not-draggable"
     handle=".drag-handle"
     ghost-class="ghost"
@@ -89,10 +88,6 @@ const props = defineProps({
     default: false,
   },
   pullClone: {
-    type: Boolean,
-    default: false,
-  },
-  disable: {
     type: Boolean,
     default: false,
   },

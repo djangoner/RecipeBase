@@ -82,6 +82,7 @@
           </div> -->
           <plan-gen-recommendations
             :exclude="excludeIds"
+            :disabled="!canAdd"
             @add="onAdd"
           />
         </q-card>
@@ -146,8 +147,11 @@ const countLimit = computed(() => {
   if (!meal_time.value) {
     return 0
   }
-  const plansTotal = meal_time.value.filter((m) => m.is_primary).length * 5
-  const plansFilled = week_plan.value?.plans.filter((p) => p.meal_time.is_primary && p.day < 6).length
+  const fillDays = 7 // 5
+  // const plansTotal = meal_time.value.filter((m) => m.is_primary).length * 5
+  // const plansFilled = week_plan.value?.plans.filter((p) => p.meal_time.is_primary && p.day < 6).length
+  const plansTotal = meal_time.value.filter((m) => m.is_primary).length * fillDays
+  const plansFilled = week_plan.value?.plans.length || 0
 
   return plansTotal - plansFilled
 })
@@ -165,6 +169,9 @@ const filledIds = computed(() => {
 const excludeIds = computed(() => [].concat(selectedIds.value, filledIds.value))
 
 function onAdd(recipe: RecipeShort) {
+  if (!canAdd.value){
+    return
+  }
   storeLocal.recipesSelectedAdd(recipe)
 }
 

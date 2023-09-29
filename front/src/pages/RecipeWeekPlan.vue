@@ -14,7 +14,7 @@
           @update:model-value="onUpdateEditMode"
         />
       </div>
-      <div class="q-ml-sm">
+      <div v-if="canEdit" class="q-ml-sm">
         <plan-generation
           :week="week"
           @updated="loadWeekPlan()"
@@ -153,7 +153,7 @@
       :week="week"
       :edit="editMode"
       :plan-loading="loading"
-@updated="loadWeekPlan()"
+      @updated="loadWeekPlan()"
     />
 
     <q-page-sticky

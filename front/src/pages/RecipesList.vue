@@ -35,6 +35,11 @@
         label="8+ недель"
       />
       <q-tab
+        name="recent"
+        icon="history"
+        label="Недавнее"
+      />
+      <q-tab
         name="archive"
         icon="archive"
         label="Архив"

@@ -71,14 +71,18 @@ function getPayload(){
   const result = {
     pageSize: 20,
     fields: 'id,title',
+    compilation: "",
+    ordering: "-last_cooked",
   }
 
   switch (tab.value) {
     case "recent":
       result.compilation = "recent"
+      result.ordering = "-last_cooked"
       break;
-    case "popular":
-      result.compilation = "top10"
+      case "popular":
+        result.compilation = "top10"
+        result.ordering = "-cooked_times"
       break;
 
     default:

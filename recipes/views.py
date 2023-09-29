@@ -183,6 +183,15 @@ class RecipeFilterSet(filters.FilterSet):
         if value == "archive":
             qs = queryset.filter(is_archived=True)
             return qs
+        elif value == "recent":
+            week_firstday = timezone.now().today()
+            while week_firstday.weekday() > 0:
+                week_firstday = week_firstday - timezone.timedelta(days=1)
+            qs = queryset.filter(
+                last_cooked__gt=timezone.now() - timezone.timedelta(weeks=4),
+                last_cooked__lt=week_firstday.date(),
+            )
+            return qs
         elif value == "long_uncooked":
             qs = queryset.filter(
                 last_cooked__lt=timezone.now() - timezone.timedelta(weeks=4),
@@ -192,7 +201,7 @@ class RecipeFilterSet(filters.FilterSet):
         elif value == "vlong_uncooked":
             qs = queryset.filter(last_cooked__lt=timezone.now() - timezone.timedelta(weeks=8))
             return qs
-        elif value == "top10":
+        elif value == "top10" or value == "popular":
             qs = queryset.order_by("-cooked_times").filter(cooked_times__gt=0)
             return qs
         elif value == "new":

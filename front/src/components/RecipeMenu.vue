@@ -4,6 +4,25 @@
     @before-show="preloadMenu()"
   >
     <q-list dense>
+      <!-- Add to selected recipes -->
+      <q-item
+        v-close-popup
+        clickable
+        @click="addOrRemove"
+      >
+        <q-item-section side>
+          <q-icon name="list" />
+        </q-item-section>
+        <q-item-section>
+          <template v-if="isSelected">
+            Убрать из выбранных
+          </template>
+          <template v-else>
+            Выбрать
+          </template>
+        </q-item-section>
+      </q-item>
+
       <!-- Add to plan -->
       <q-item
         clickable
@@ -62,6 +81,7 @@
 
       <!-- Archive management -->
       <q-item
+        v-close-popup
         clickable
         @click="actionArchive()"
       >
@@ -89,6 +109,7 @@ import HandleErrorsMixin, { CustomAxiosError, handleErrors } from "src/modules/H
 import { useQuasar } from "quasar"
 import { getCachedRecipe, loadCachedRecipe } from "src/modules/Cache"
 import { storeToRefs } from "pinia"
+import { useLocalStore } from "src/stores/local"
 
 const props = defineProps({
   recipe: { required: true, type: Object as PropType<RecipeRead> },
@@ -99,6 +120,7 @@ const $emit = defineEmits(["updateItem"])
 const $q = useQuasar()
 
 const store = useBaseStore()
+const storeLocal = useLocalStore()
 const {week_plan} = storeToRefs(store)
 const [year, week] = getYearWeek()
 // const week_p: YearWeek = {
@@ -235,6 +257,33 @@ function loadMealTime() {
 
   const prom = store.loadMealTime(payload)
 }
+
+const isSelected = computed(() => storeLocal.recipesSelectedIdx(props.recipe) !== -1)
+
+function addOrRemove(){
+  if (isSelected.value){
+    removeSelected()
+  } else {
+    addSelected()
+  }
+}
+
+function removeSelected(){
+  storeLocal.recipesSelectedRemove(props.recipe)
+  $q.notify({
+    type: "positive",
+    message: "Рецепт успешно убран из выбранных"
+  })
+}
+
+function addSelected(){
+  storeLocal.recipesSelectedAdd(props.recipe)
+  $q.notify({
+    type: "positive",
+    message: "Рецепт успешно добавлен в выбранные"
+  })
+}
+
 function preloadMenu(){
   void loadCachedRecipe(props.recipe)
 }

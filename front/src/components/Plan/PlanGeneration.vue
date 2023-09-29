@@ -66,6 +66,7 @@
               color="primary"
               no-caps
               unelevated
+              :disable="!canSave"
               :loading="isSaving"
               @click="fillPlan"
             />
@@ -157,6 +158,7 @@ const countLimit = computed(() => {
 })
 
 const canAdd = computed(() => countNow.value < countLimit.value)
+const canSave = computed(() => countNow.value <= countLimit.value)
 
 const selectedIds = computed(() => recipesSelected.value.map((el) => el.id))
 const filledIds = computed(() => {

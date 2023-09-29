@@ -1,8 +1,4 @@
 <template>
-  <select-recipe-dialog
-    v-model="showSelectRecipe"
-    @select="storeLocal.recipesSelectedAdd($event)"
-  />
   <q-tabs
     v-model="tab"
     dense
@@ -129,32 +125,14 @@
       <div
         class="col-12 col-md-4"
       >
-        <q-card
-          flat
-          bordered
-        >
-          <div class="text-subtitle1 text-center">
-            Выбранные рецепты
-            <q-btn
-              icon="add"
-              size="sm"
-              color="positive"
-              dense
-              round
-              unelevated
-              @click="showSelectRecipe = true"
-            />
-          </div>
-          <plan-drag-selected />
-        </q-card>
+        <plan-drag-selected-card />
       </div>
     </q-tab-panel>
   </q-tab-panels>
 </template>
 
 <script lang="ts">
-import SelectRecipeDialog from './SelectRecipeDialog.vue'
-import PlanDragSelected from './PlanDragSelected.vue'
+import PlanDragSelectedCard from './PlanDragSelectedCard.vue'
 import PlanTabInfo from './PlanTabInfo.vue'
 import { RecipePlanWeekRead, User } from "src/client";
 import { WeekDaysShort, YearWeek } from "src/modules/WeekUtils";
@@ -179,7 +157,7 @@ interface TagsStats {
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { ConditionWarnings, PlanTabInfo, PlanDragSelected, SelectRecipeDialog },
+  components: { ConditionWarnings, PlanTabInfo, PlanDragSelectedCard },
   props: {
     plan: { required: true, type: Object as PropType<RecipePlanWeekRead> },
     week: { required: true, type: Object as PropType<YearWeek> },

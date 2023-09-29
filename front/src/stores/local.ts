@@ -15,13 +15,25 @@ export const useLocalStore = defineStore("local", {
     recipesSelectedSave() {
       LocalStorage.set("planRecipesSelected", this.recipesSelected)
     },
+    recipesSelectedIdx(recipe: RecipeShort) {
+      const existIdx = this.recipesSelected.findIndex((el) => el.id == recipe.id)
+      return existIdx
+    },
     recipesSelectedAdd(recipe: RecipeShort) {
       console.debug("Add recipe: ", recipe)
       if (recipe) {
-        const existIdx = this.recipesSelected.findIndex((el) => el.id == recipe.id)
+        const existIdx = this.recipesSelectedIdx(recipe)
         if (existIdx === -1) {
           this.recipesSelected.push(recipe)
           this.recipesSelectedSave()
+        }
+      }
+    },
+    recipesSelectedRemove(recipe: RecipeShort) {
+      if (recipe) {
+        const existIdx = this.recipesSelectedIdx(recipe)
+        if (existIdx !== -1) {
+          this.recipesSelected.splice(existIdx, 1)
         }
       }
     },

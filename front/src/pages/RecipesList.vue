@@ -214,6 +214,15 @@
                 Фильтры
               </h6>
 
+
+              <q-expansion-item
+                label="Выбранные рецепты"
+                dense
+              >
+                <plan-drag-selected-card />
+              </q-expansion-item>
+
+
               <recipes-list-filters
                 v-model="filters"
                 @submit="loadRecipes()"
@@ -233,6 +242,7 @@
 </template>
 
 <script lang="ts">
+import PlanDragSelectedCard from '../components/Plan/PlanDragSelectedCard.vue'
 import RecipesListFilters from "../components/Recipes/RecipesListFilters.vue"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
 import recipeCard from "components/RecipeCard.vue"
@@ -321,7 +331,7 @@ const defaultFilters = {
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { recipeCard, RecipesListFilters },
+  components: { recipeCard, RecipesListFilters, PlanDragSelectedCard },
   mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore()

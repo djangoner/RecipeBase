@@ -66,6 +66,7 @@ const storeMapping: StoreMappingObject = {
   },
   RecipePlan: {
     name: "План на неделю",
+    ignore_create: true,
     array_attr: {
       get() {
         return store.week_plan?.plans

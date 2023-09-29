@@ -28,6 +28,7 @@ export interface Mapping {
   idField?: string
   single_attr?: MappingValue
   array_attr?: MappingValue
+  ignore_create?: boolean
 }
 
 export interface StoreMappingObject {
@@ -119,7 +120,7 @@ export class RealTime {
 
       if (data.created) {
         // Create
-        if (!arr_before_idx) {
+        if (arr_before_idx == -1 && !modelInfo.ignore_create) {
           arr_before_copy.push(newModel)
         }
       } else if (data.deleted) {

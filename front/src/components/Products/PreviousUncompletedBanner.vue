@@ -43,7 +43,7 @@ const props = defineProps({
   }
 })
 
-const $emit = defineEmits(["reload"])
+const $emit = defineEmits(["updated"])
 
 const $q = useQuasar()
 const store = useBaseStore()
@@ -71,7 +71,7 @@ function moveUncompleted() {
       type: "positive",
       caption: "Список продуктов успешно перенесен",
     })
-    $emit("reload")
+    $emit("updated")
   })
 
 

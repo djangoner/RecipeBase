@@ -15,7 +15,7 @@
       <q-btn
         flat
         label="Обновить"
-        @click="$emit('reload')"
+        @click="$emit('updated')"
       />
     </template>
 
@@ -30,5 +30,5 @@ defineProps({
     required: true,
   }
 })
-defineEmits(["reload"])
+defineEmits(["updated"])
 </script>

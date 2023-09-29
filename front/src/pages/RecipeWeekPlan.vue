@@ -14,6 +14,12 @@
           @update:model-value="onUpdateEditMode"
         />
       </div>
+      <div class="q-ml-sm">
+        <plan-generation
+          :week="week"
+          @updated="loadWeekPlan()"
+        />
+      </div>
       <q-space />
       <div v-if="plan && $q.screen.gt.sm">
         <small class="text-grey">
@@ -203,6 +209,7 @@
 </template>
 
 <script lang="ts" setup>
+import PlanGeneration from '../components/Plan/PlanGeneration.vue'
 import PlanWeekRecommendations from '../components/Plan/PlanWeekRecommendations.vue'
 import DayCard from "../components/Plan/DayCard.vue"
 import weekSelect from "components/WeekSelect.vue"

@@ -405,6 +405,12 @@ export const useBaseStore = defineStore("base", {
         promise: RecipePlanWeekService.recipePlanWeekRecommendationAcceptCreate({ id, recommendation: payload.recommendation }),
       })
     },
+    async weekPlaceRecipes(payload: { year: number; week: number; recipes: number[] }) {
+      const id = `${payload?.year}_${payload?.week}`
+      return storeShortcut({
+        promise: RecipePlanWeekService.recipePlanWeekPlaceRecipesCreate({ id, requestBody: { recipes: payload.recipes } }),
+      })
+    },
     async cancellWeekRecommendation(payload: { year: number; week: number; recommendation: string }) {
       const id = `${payload?.year}_${payload?.week}`
       return storeShortcut({

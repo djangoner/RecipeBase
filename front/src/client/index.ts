@@ -51,6 +51,7 @@ export type { PatchedTaskCategory } from './models/PatchedTaskCategory';
 export type { PatchedTaskNested } from './models/PatchedTaskNested';
 export type { PatchedUser } from './models/PatchedUser';
 export type { PatchedWeekPlanCondition } from './models/PatchedWeekPlanCondition';
+export type { PlaceRecipesList } from './models/PlaceRecipesList';
 export { PlanFieldEnum } from './models/PlanFieldEnum';
 export { PriorityEnum } from './models/PriorityEnum';
 export type { ProductListItem } from './models/ProductListItem';

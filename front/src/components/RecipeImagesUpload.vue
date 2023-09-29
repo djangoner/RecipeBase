@@ -155,6 +155,18 @@ export default defineComponent({
         .onOk(() => {
           this.deleteImg(elem);
           this.onOrderChange();
+        });this.$q
+        .dialog({
+          title: "Подтверждение",
+          message: `Вы уверены что хотите удалить изображение '${
+            elem.title || "Новое изображение"
+          }' ?`,
+          cancel: true,
+          persistent: true,
+        })
+        .onOk(() => {
+          this.deleteImg(elem);
+          this.onOrderChange();
         });
     },
   },

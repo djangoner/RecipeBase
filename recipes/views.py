@@ -28,6 +28,7 @@ from recipes.models import (
 )
 from recipes.services.conditions import process_conditions_tree, warnings_json
 from recipes.services.ingredients import recognize_ingredients_text
+from recipes.services.plan_fill import PlanFill, PlanFillParams
 from recipes.services.recommendations import (
     accept_recommendation,
     cancel_recommendation,
@@ -521,6 +522,32 @@ class RecipePlanWeekViewset(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
         if not recommendation:
             raise exceptions.ValidationError("Invalid recommendation", code="invalid_recommendation")
         cancel_recommendation(plan, recommendation)
+
+        return response.Response({"ok": True})
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH),
+            # OpenApiParameter("recipes", OpenApiTypes.JSON_PTR, OpenApiParameter.QUERY),
+        ],
+        request=inline_serializer("PlaceRecipesList", {"recipes": fields.ListField(child=fields.IntegerField())}),
+        responses=StatusOkSerializer,
+    )
+    @decorators.action(["POST"], detail=True)
+    def place_recipes(self, request, pk=None):
+        plan = self.get_object()
+        recipes_ids: list[int] | None = request.data.get("recipes")
+
+        if not recipes_ids:
+            raise exceptions.ValidationError("Invalid recipes IDS", code="invalid_recipes")
+
+        # recommendation_obj = from_dict(data_class=data=recommendation)
+        recipes = list(Recipe.objects.filter(id__in=recipes_ids).all())
+        recipes.sort(key=lambda x: recipes_ids.index(x.pk))
+
+        params = PlanFillParams(recipes=recipes)
+        plan_fill = PlanFill(plan, params)
+        plan_fill.auto_arrange_recipes()
 
         return response.Response({"ok": True})
 

@@ -4,6 +4,7 @@
 import type { ConditionWarning } from '../models/ConditionWarning';
 import type { PaginatedRecipePlanWeekReadList } from '../models/PaginatedRecipePlanWeekReadList';
 import type { PatchedRecipePlanWeek } from '../models/PatchedRecipePlanWeek';
+import type { PlaceRecipesList } from '../models/PlaceRecipesList';
 import type { RecipePlanWeek } from '../models/RecipePlanWeek';
 import type { RecipePlanWeekRead } from '../models/RecipePlanWeekRead';
 import type { RecipePlanWeekStats } from '../models/RecipePlanWeekStats';
@@ -152,6 +153,28 @@ id: string,
             path: {
                 'id': id,
             },
+        });
+    }
+
+    /**
+     * @returns StatusOk 
+     * @throws ApiError
+     */
+    public static recipePlanWeekPlaceRecipesCreate({
+id,
+requestBody,
+}: {
+id: string,
+requestBody: PlaceRecipesList,
+}): CancelablePromise<StatusOk> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/recipe_plan_week/{id}/place_recipes/',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 

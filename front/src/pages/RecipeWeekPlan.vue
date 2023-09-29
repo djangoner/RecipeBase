@@ -14,18 +14,7 @@
           @update:model-value="onUpdateEditMode"
         />
       </div>
-      <div>
-        <q-btn
-          label="Обновить"
-          icon="refresh"
-          size="sm"
-          color="secondary"
-          dense
-          no-caps
-          @click="loadWeekPlan()"
-        />
-      </div>
-      <div>
+      <div class="q-ml-sm">
         <plan-generation
           :week="week"
           @updated="loadWeekPlan()"
@@ -47,6 +36,15 @@
         >
           <q-menu>
             <q-list dense>
+              <q-item
+                clickable
+                @click="loadWeekPlan()"
+              >
+                <q-item-section side>
+                  <q-icon name="refresh" />
+                </q-item-section>
+                <q-item-section> Обновить </q-item-section>
+              </q-item>
               <q-item
                 clickable
                 @click="onPrint()"
@@ -155,7 +153,7 @@
       :week="week"
       :edit="editMode"
       :plan-loading="loading"
-      @updated="loadWeekPlan()"
+@updated="loadWeekPlan()"
     />
 
     <q-page-sticky
@@ -220,8 +218,8 @@
 </template>
 
 <script lang="ts" setup>
-import PlanGeneration from '../components/Plan/PlanGeneration.vue'
-import PlanWeekRecommendations from '../components/Plan/PlanWeekRecommendations.vue'
+import PlanGeneration from "../components/Plan/PlanGeneration.vue"
+import PlanWeekRecommendations from "../components/Plan/PlanWeekRecommendations.vue"
 import DayCard from "../components/Plan/DayCard.vue"
 import weekSelect from "components/WeekSelect.vue"
 import { useBaseStore } from "src/stores/base"
@@ -260,7 +258,7 @@ const fireworksOptions = {
 const $q = useQuasar()
 const store = useBaseStore()
 const storeAuth = useAuthStore()
-const now = useNow({interval: 1000})
+const now = useNow({ interval: 1000 })
 
 const editMode: Ref<boolean | null> = ref(null)
 const loading = ref(false)
@@ -268,17 +266,17 @@ const saving = ref(false)
 const enableFireworks = useStorage("enableFireworks", false)
 const weekEdit: Ref<YearWeek | null> = useSessionStorage("weekEdit", {})
 const showFireworks = ref(false)
-const recommendationsRef = ref(null);
+const recommendationsRef = ref(null)
 
 const visibility = useDocumentVisibility()
 const debouncedSaveWeekPlan = useDebounceFnCustom(saveWeekPlan, 5000, { maxWait: 15000 })
 const loadTry = ref(0)
 
-const week: Ref<YearWeek> = ref({year: 0, week: 0})
+const week: Ref<YearWeek> = ref({ year: 0, week: 0 })
 
 useIntervalFn(() => {
   loadWeekPlan()
-}, 60*10*1000)
+}, 60 * 10 * 1000)
 
 const canEdit = computed(() => {
   return storeAuth.hasPerm("recipes.change_recipeplanweek")
@@ -301,7 +299,7 @@ const editedTimeStr = computed(() => {
     return ""
   }
   // const diff = Math.abs(new Date() - new Date(plan.value?.edited_first)) / 1000
-  const daysFromStart: number = date.getDateDiff(now.value,new Date(plan.value.edited_first), "days")
+  const daysFromStart: number = date.getDateDiff(now.value, new Date(plan.value.edited_first), "days")
 
   const lastEdited = plan.value.is_filled || daysFromStart > 2 ? new Date(plan.value?.edited_last) : now.value
   const diff = Math.abs(Number(lastEdited) - Number(new Date(plan.value?.edited_first))) / 1000
@@ -342,14 +340,14 @@ watch(debouncedSaveWeekPlan.state, (state: boolean) => {
 
 const debouncedLoadWarnings = useDebounceFn(() => {
   if (!week.value || !week.value.week) {
-    if (loadTry.value >= 3){
+    if (loadTry.value >= 3) {
       console.debug("debounced load warnings cancelled by tries")
-      return;
+      return
     }
     console.debug("re-running debounced load warnings")
     void debouncedLoadWarnings()
     loadTry.value += 1
-    return;
+    return
   }
   loadTry.value = 0
   void store.loadWeekWarnings({ year: week.value.year, week: week.value.week })
@@ -358,7 +356,6 @@ const debouncedLoadWarnings = useDebounceFn(() => {
 const debouncedLoadStats = useDebounceFn(() => {
   void store.loadWeekStats({ year: week.value.year, week: week.value.week })
 }, 2000)
-
 
 const warnedPlans = computed(() => {
   const warnings = store.condWarnings || []
@@ -410,8 +407,8 @@ const fillingPrc = computed(() => {
 function onPrint(ignorePrint = false) {
   console.debug("Print before")
   store.printMode = true
-  if (!ignorePrint){
-  void nextTick(() => {
+  if (!ignorePrint) {
+    void nextTick(() => {
       window.print()
       store.printMode = false
       console.debug("Print after")
@@ -421,7 +418,7 @@ function onPrint(ignorePrint = false) {
 
 useEventListener(window, "beforeprint", () => onPrint(true))
 useEventListener(window, "afterprint", () => {
-    store.printMode = false
+  store.printMode = false
   console.debug("Print after")
 })
 
@@ -441,11 +438,11 @@ function loadWeekPlan() {
     .then(() => {
       loading.value = false
       // console.debug("Weeks: ", weekEdit.value.year == week.value.year && weekEdit.value.week == week.value.week, weekEdit.value, week.value)
-      if (weekEdit.value && weekEdit.value.year == week.value.year && weekEdit.value.week == week.value.week){
+      if (weekEdit.value && weekEdit.value.year == week.value.year && weekEdit.value.week == week.value.week) {
         console.info("Enable editMode, remembering week")
         editMode.value = true
-      }
-      else if (editMode.value === null) { // Auto set if week filled
+      } else if (editMode.value === null) {
+        // Auto set if week filled
         editMode.value = !(plan.value?.plans && plan.value?.plans?.length > 0)
       } else {
         editMode.value = false
@@ -512,14 +509,14 @@ function loadMealTime() {
   void store.loadMealTime({ pageSize: 1000 })
 }
 
-function onUpdateEditMode(val: boolean){
-  console.debug("EDIT MODE: ", val);
-  if (val){
+function onUpdateEditMode(val: boolean) {
+  console.debug("EDIT MODE: ", val)
+  if (val) {
     console.debug("Set week edit mode")
     weekEdit.value = week.value
   } else {
     console.debug("Erased week edit mode")
-    weekEdit.value = null;
+    weekEdit.value = null
   }
 }
 
@@ -527,10 +524,14 @@ onMounted(() => {
   loadMealTime()
 })
 
-watch(() => store.week_plan, () => {
-  void debouncedLoadWarnings()
-  void debouncedLoadStats()
-}, {deep: true})
+watch(
+  () => store.week_plan,
+  () => {
+    void debouncedLoadWarnings()
+    void debouncedLoadStats()
+  },
+  { deep: true }
+)
 
 watch(fillingPrc, (val, oldVal) => {
   // When plan finished, show fireworks if enabled
@@ -540,10 +541,9 @@ watch(fillingPrc, (val, oldVal) => {
   }
 })
 
-
 useShortcutcs({
-  shift_e: () => editMode.value = !editMode.value,
-  shift_f: () => showFireworks.value = !showFireworks.value,
+  shift_e: () => (editMode.value = !editMode.value),
+  shift_f: () => (showFireworks.value = !showFireworks.value),
 })
 
 watch(visibility, (current: "hidden" | "visible") => {
@@ -553,7 +553,6 @@ watch(visibility, (current: "hidden" | "visible") => {
     saveWeekPlan()
   }
 })
-
 </script>
 
 <style lang="scss">

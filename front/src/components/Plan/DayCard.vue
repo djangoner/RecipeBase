@@ -108,6 +108,7 @@ import { useAuthStore } from "src/stores/auth"
 import { WarnedPlans, WeekDays } from "src/modules/Globals"
 import { MealTime, RecipePlan, RecipePlanRead, RecipeRead } from "src/client"
 import draggable from 'vuedraggable'
+import { promiseSetLoading } from 'src/modules/StoreCrud'
 
 const props = defineProps({
   dayIdx: {
@@ -218,63 +219,28 @@ function delMealTime(mtime: MealTime) {
 function setRecipe(day: number, mtime: MealTime, value?: RecipeRead, rec_idx?: number, planItem?: RecipePlanRead) {
   console.debug("setRecipe: ", day, mtime, value)
 
-  if (!planItem){
-    const plans =
-      plan.value?.plans?.filter((plan) => {
-        return plan.day == day && plan.meal_time.id == mtime.id
-      }) || []
-    planItem = plans[rec_idx || 0]
-  }
+  const prom = store.setRecipePlan(day, mtime, value, rec_idx, planItem)
 
-  // const prom = plan?
-  const newPlan: RecipePlan = Object.assign({}, planItem, {
-    week: plan.value?.id,
-    meal_time: mtime.id,
-    day: day,
-    recipe: value?.id,
-  })
-  let prom: Promise<RecipePlan>
-  let action: "create" | "delete" | "update"
+  promiseSetLoading(prom, saving)
   const foundIdx = plan.value?.plans?.findIndex((p) => p.id === planItem?.id)
-
-  if (foundIdx === -1 && !planItem?.id && !value?.id){
-    console.debug("Empty set recipe prevented")
-    return
-  }
-
-  if (planItem?.id && value) {
-    prom = store.updateWeekPlanItem(planItem.id, newPlan)
-    action = "update"
-  } else if (planItem?.id) {
-    prom = store.deleteWeekPlanItem(planItem.id)
-    action = "delete"
-  } else {
-    prom = store.createWeekPlanItem(newPlan)
-    action = "create"
-  }
-
-  saving.value = true
   void prom
-    .then((resp: RecipePlan | undefined) => {
+    .then((resp?: RecipePlan) => {
       $emit("update-recipe")
 
       if (resp && resp.id && plan.value) {
         console.debug("Updated/Created plan: ", resp.id, foundIdx, resp)
 
-        if (foundIdx != -1) {
+        if (foundIdx !== -1 && foundIdx !== undefined) {
           plan.value.plans[foundIdx] = resp
         } else {
           plan.value.plans.push(resp)
         }
-      } else if (action == "delete") {
+      } else if (resp === undefined) {
         console.debug("Deleted plan: ", plan.value?.id, foundIdx)
-        if (foundIdx != -1) {
+        if (foundIdx !== -1 && foundIdx !== undefined) {
           plan.value?.plans.splice(foundIdx, 1)
         }
       }
-    })
-    .finally(() => {
-      saving.value = false
     })
 }
 

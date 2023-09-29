@@ -50,6 +50,8 @@ import {
   ConditionWarning,
   Recommendations,
   RecipePlanWeekStats,
+  RecipeShort,
+  RecipePlanRead,
 } from "src/client"
 import { request } from "src/client/core/request"
 import { productListItemFromRead } from "src/Convert"
@@ -469,6 +471,45 @@ export const useBaseStore = defineStore("base", {
       return storeShortcut({
         promise: RecipePlanService.recipePlanDestroy({ id }),
       })
+    },
+
+    async setRecipePlan(day: number, mtime: MealTime, value?: RecipeRead | RecipePlanRead | RecipeShort, rec_idx?: number, planItem?: RecipePlanRead): Promise<RecipePlan | void> {
+      console.debug("setRecipe: ", day, mtime, value)
+
+      if (!planItem) {
+        const plans =
+          this.week_plan?.plans?.filter((plan) => {
+            return plan.day == day && plan.meal_time.id == mtime.id
+          }) || []
+        // @ts-expect-error ignore
+        planItem = plans[rec_idx || 0]
+      }
+
+      // const prom = plan?
+      const newPlan: RecipePlan = Object.assign({}, planItem, {
+        week: this.week_plan?.id,
+        meal_time: mtime.id,
+        day: day,
+        recipe: value?.id,
+      })
+      let prom: Promise<RecipePlan | void>
+      const foundIdx = this.week_plan?.plans?.findIndex((p) => p.id === planItem?.id)
+
+      if (foundIdx === -1 && !planItem?.id && !value?.id) {
+        console.warn("Empty set recipe prevented")
+        return new Promise((resolve, reject) => {
+          reject()
+        })
+      }
+
+      if (planItem?.id && value) {
+        prom = this.updateWeekPlanItem(planItem.id, newPlan)
+      } else if (planItem?.id) {
+        prom = this.deleteWeekPlanItem(planItem.id)
+      } else {
+        prom = this.createWeekPlanItem(newPlan)
+      }
+      return prom
     },
 
     // -- Products

@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     "constance",
     "constance.backends.database",
     "adminsortable",
-    "cachalot",
+    # "cachalot",
     "ckeditor",
     "django_cleanup.apps.CleanupConfig",
     "django_filters",
@@ -134,9 +134,7 @@ if TESTING:
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": os.getenv(
-            "CHANNELS_BACKEND", "channels.layers.InMemoryChannelLayer"
-        ),
+        "BACKEND": os.getenv("CHANNELS_BACKEND", "channels.layers.InMemoryChannelLayer"),
         #     "CONFIG": {
         #         "hosts": json.loads(os.getenv("CHANNELS_HOSTS", "[]"))
         #     }
@@ -176,9 +174,7 @@ else:
 
 CACHES = {
     "default": {
-        "BACKEND": os.getenv(
-            "CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"
-        ),
+        "BACKEND": os.getenv("CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"),
         "LOCATION": os.getenv("CACHE_LOCATION", None),
         "KEY_PREFIX": os.getenv("CACHE_PREFIX", "recipebase"),
     }
@@ -347,7 +343,7 @@ DEBUG_TOOLBAR_PANELS = [
     "debug_toolbar.panels.signals.SignalsPanel",
     "debug_toolbar.panels.redirects.RedirectsPanel",
     "debug_toolbar.panels.profiling.ProfilingPanel",
-    "cachalot.panels.CachalotPanel",
+    # "cachalot.panels.CachalotPanel",
 ]
 
 

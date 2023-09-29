@@ -253,6 +253,7 @@ class RecipeViewset(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
         "cooked_times",
         "price_part",
         "price_full",
+        "?",
     ]
 
     def get_serializer_class(self):

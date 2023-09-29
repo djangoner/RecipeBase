@@ -1,5 +1,8 @@
+from typing import Any
 from django.contrib import admin
-from django.db.models import Count, F
+from django.db.models import F
+from django.db.models.query import QuerySet
+from django.http.request import HttpRequest
 
 from recipes.models import (
     Ingredient,
@@ -23,6 +26,7 @@ from recipes.models import (
 from adminsortable.admin import NonSortableParentAdmin, SortableTabularInline
 from simple_history.admin import SimpleHistoryAdmin
 from djangoql.admin import DjangoQLSearchMixin
+from django.db.models import Count
 
 
 class RecipeIngredientsInline(admin.StackedInline):
@@ -129,10 +133,17 @@ class MealTimeAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
 
 @admin.register(RecipePlanWeek)
 class RecipePlanWeekAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
-    list_display = ("id", "year", "week")
+    list_display = ("id", "year", "week", "plans_count")
     list_filter = ("year", "week")
     filter_horizontal = ("recommendations_ingredients",)
     inlines = [RecipePlanInline]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
+        queryset = super().get_queryset(request)
+        return queryset.annotate(plans_count=Count("plans"))
+
+    def plans_count(self, obj):
+        return obj.plans_count
 
 
 @admin.register(RecipePlan)

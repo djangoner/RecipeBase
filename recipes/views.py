@@ -36,7 +36,7 @@ from recipes.services.recommendations import (
     generate_recommendations,
 )
 from recipes.services.stats import get_week_stats
-from recipes.services.utils import week_delta
+from recipes.services.utils import get_first_weekday, week_delta
 from telegram_bot.services.notifications import send_notif_synced, send_product_list
 from tasks.models import Task
 from recipes.serializers import (
@@ -180,16 +180,15 @@ class RecipeFilterSet(filters.FilterSet):
         if value != "archive":
             queryset = queryset.filter(is_archived=False)
 
+        week_firstday = get_first_weekday()
+
         if value == "archive":
             qs = queryset.filter(is_archived=True)
             return qs
         elif value == "recent":
-            week_firstday = timezone.now().today()
-            while week_firstday.weekday() > 0:
-                week_firstday = week_firstday - timezone.timedelta(days=1)
             qs = queryset.filter(
-                last_cooked__gte=week_firstday.date() - timezone.timedelta(weeks=4),
-                last_cooked__lt=week_firstday.date(),
+                last_cooked__gte=week_firstday - timezone.timedelta(weeks=4),
+                last_cooked__lt=week_firstday,
             )
             return qs
         elif value == "long_uncooked":
@@ -205,9 +204,6 @@ class RecipeFilterSet(filters.FilterSet):
             qs = queryset.order_by("-cooked_times").filter(cooked_times__gt=0)
             return qs
         elif value == "new":
-            week_firstday = timezone.now().today()
-            while week_firstday.weekday() > 0:
-                week_firstday = week_firstday - timezone.timedelta(days=1)
             qs = queryset.filter(Q(last_cooked=None) | (Q(last_cooked__gt=week_firstday.date()) & Q(cooked_times=1)))
             return qs
         else:

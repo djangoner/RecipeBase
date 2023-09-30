@@ -1,7 +1,9 @@
+import datetime
 import logging
 import random
 from typing import TypeVar
 from django.db.models import Max
+from django.utils import timezone
 
 T = TypeVar("T")
 
@@ -33,3 +35,20 @@ def get_random_obj_from_queryset(queryset, maxtry: int = 5):
             return obj
         else:
             logging.info("Random obj miss...")
+
+
+def get_now():
+    return timezone.now()
+
+
+def get_first_weekday(date: datetime.datetime | None = None) -> datetime.date:
+    week_firstday = date or get_now().today()
+    if week_firstday.weekday() < 5:  # IF monday-friday return this monday
+        while week_firstday.weekday() > 0:
+            week_firstday = week_firstday - timezone.timedelta(days=1)
+    else:
+        # Else if saturday-sunday return next monday
+        while week_firstday.weekday() > 0:
+            week_firstday = week_firstday + timezone.timedelta(days=1)
+
+    return week_firstday.date()

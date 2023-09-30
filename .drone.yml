@@ -18,7 +18,8 @@ steps:
     settings:
       hosts:
         - 45.155.207.86
-      user: build
+      user:
+        from_secret: ssh_user
       key:
         from_secret: ssh_key
       source: ./

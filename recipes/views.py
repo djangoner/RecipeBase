@@ -188,7 +188,7 @@ class RecipeFilterSet(filters.FilterSet):
             while week_firstday.weekday() > 0:
                 week_firstday = week_firstday - timezone.timedelta(days=1)
             qs = queryset.filter(
-                last_cooked__gt=timezone.now() - timezone.timedelta(weeks=4),
+                last_cooked__gte=week_firstday.date() - timezone.timedelta(weeks=4),
                 last_cooked__lt=week_firstday.date(),
             )
             return qs

@@ -204,7 +204,7 @@ class RecipeFilterSet(filters.FilterSet):
             qs = queryset.order_by("-cooked_times").filter(cooked_times__gt=0)
             return qs
         elif value == "new":
-            qs = queryset.filter(Q(last_cooked=None) | (Q(last_cooked__gt=week_firstday.date()) & Q(cooked_times=1)))
+            qs = queryset.filter(Q(last_cooked=None) | (Q(last_cooked__gt=week_firstday) & Q(cooked_times=1)))
             return qs
         else:
             logging.warning(f"Unknown compilation: '{value}'")
@@ -431,7 +431,7 @@ class RecipePlanWeekViewset(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
             year, week = datetime.now().year, datetime.now().isocalendar()[1]
         else:
             try:
-                year, week = pk.split("_")
+                year, week = pk.split("_")  # type: ignore
             except ValueError:
                 pass
 
@@ -477,7 +477,7 @@ class RecipePlanWeekViewset(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
 
         data_json = []
         for i in recommendations:
-            i.plan = i.plan.pk  # noqa
+            i.plan = i.plan.pk  # type: ignore
             data_json.append(RecommendationsSerializer(i).data)
 
         return response.Response(data_json)
@@ -706,7 +706,8 @@ class ProductListWeekViewset(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
         year, week = week_delta(week.year, week.week, -1)
         prev_list = ProductListWeek.objects.filter(year=year, week=week).first()
 
-        prev_list.items.filter(is_auto=False, is_completed=False, already_completed=False).update(week=week_plan)
+        if prev_list:
+            prev_list.items.filter(is_auto=False, is_completed=False, already_completed=False).update(week=week_plan)
         return response.Response({"ok": True})
 
 

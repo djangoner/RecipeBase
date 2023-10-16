@@ -19,14 +19,24 @@
       >
         <b>{{ dayStr }}</b> {{ WeekDays[dayIdx] }}
       </span>
-      <button-comment
-        v-model="plan.comments"
-        :plan="plan"
-        :day-idx="dayIdx"
-        :day-str="dayStr"
-        :can-edit="canEdit"
-        @update-plan="$emit('update-plan', true)"
-      />
+      <div>
+        <q-circular-progress
+          class="q-mr-sm"
+          :value="dayFilledPrc*100"
+          :thickness="0.5"
+          size="sm"
+          color="green-5"
+          track-color="white"
+        />
+        <button-comment
+          v-model="plan.comments"
+          :plan="plan"
+          :day-idx="dayIdx"
+          :day-str="dayStr"
+          :can-edit="canEdit"
+          @update-plan="$emit('update-plan', true)"
+        />
+      </div>
     </q-card-section>
 
     <q-card-section>
@@ -161,6 +171,24 @@ const meal_time = computed(() => {
   return store.meal_time
 })
 
+const dayFilledPrc = computed(() => {
+  if (!plan.value){
+    return 0
+  }
+  const plansFilled = plan.value?.plans.filter((plan) => {
+    return plan.day == props.dayIdx && plan.meal_time.is_primary == true
+  }).length
+
+  const plansTotal = meal_time.value?.filter((m) => m.is_primary).length
+
+  if (!plansFilled || !plansTotal){
+    return 0
+  }
+
+  return plansFilled / plansTotal
+})
+
+
 const WeekDaysColors: { [key: number]: string } = {
   1: "bg-amber-2",
   2: "bg-cyan-3",
@@ -168,6 +196,7 @@ const WeekDaysColors: { [key: number]: string } = {
   4: "bg-blue-4",
   5: "bg-indigo-3",
 }
+
 
 function getWarning(plan: RecipePlanRead | null) {
   if (!plan){

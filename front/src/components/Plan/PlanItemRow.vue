@@ -87,7 +87,7 @@
     </div>
 
     <recipe-card-tooltip
-      v-if="plan?.recipe && $q.screen.gt.xs"
+      v-if="plan?.recipe && $q.screen.gt.xs && showTooltip"
       :recipe="plan.recipe"
     />
   </div>
@@ -127,6 +127,10 @@ const props = defineProps({
   readonly: {
     type: Boolean,
     required: true,
+  },
+  showTooltip: {
+    type: Boolean,
+    default: true,
   },
 })
 const $emit = defineEmits(["delete-meal-time", "set-recipe"])

@@ -56,6 +56,7 @@
               group="plans"
               filter=".not-draggable"
               ghost-class="ghost-class"
+              @start="onStart"
               @move="onDrag"
               @change="onChange"
               @end="onEnd"
@@ -70,6 +71,7 @@
                   :warning="getWarning(element)"
                   :day-idx="dayIdx"
                   :readonly="readonly"
+                  :show-tooltip="!isDragging"
                   @delete-meal-time="delMealTime"
                   @set-recipe="setRecipe"
                 />
@@ -139,6 +141,7 @@ const store = useBaseStore()
 const storeAuth = useAuthStore()
 
 const saving = ref(false)
+const isDragging = ref(false)
 
 const plan = computed(() => {
   return store.week_plan
@@ -282,8 +285,13 @@ function onDrag(e: Event, perform=false){
   }
 }
 
+function onStart(){
+  isDragging.value = true
+}
+
 function onEnd(e: Event){
   console.debug("END", e)
+  isDragging.value = false;
   onDrag(e, true)
 }
 

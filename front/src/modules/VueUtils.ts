@@ -128,7 +128,7 @@ interface ShortcutsOptions {
   allowInput: boolean
 }
 
-export function useShortcutcs(keymap: KeyBindingMap, options?: ShortcutsOptions) {
+export function useShortcuts(keymap: KeyBindingMap, options?: ShortcutsOptions) {
   const keys = useMagicKeys({ aliasMap: aliasMap })
   const activeElement = useActiveElement()
   const notUsingInput = computed(() => activeElement.value?.tagName !== "INPUT" && activeElement.value?.tagName !== "TEXTAREA")

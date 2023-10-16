@@ -30,6 +30,7 @@ import { date } from "quasar"
 import { computed, nextTick, onMounted, PropType, ref, Ref, watch } from "vue"
 import { DatePicker, YearWeek, YearWeekNullable, getDateOfISOWeek, getFirstDayOfWeek, getWeekNumber, getYearWeek } from "src/modules/WeekUtils"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
+import { useShortcuts } from 'src/modules/VueUtils'
 
 const props = defineProps({
   modelValue: { required: true, type: Object as PropType<YearWeek> },
@@ -172,6 +173,11 @@ watch(
   },
   { deep: true }
 )
+
+useShortcuts({
+  "alt_[": () => changeWeek(-1),
+  "alt_]": () => changeWeek(+1),
+})
 
 watch($query, () => {
   if ($query.year && $query.week && JSON.stringify({year: $query.year as number, week: $query.week as number}) != JSON.stringify(week_pick.value)){

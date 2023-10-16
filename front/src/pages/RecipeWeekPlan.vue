@@ -14,7 +14,10 @@
           @update:model-value="onUpdateEditMode"
         />
       </div>
-      <div v-if="canEdit" class="q-ml-sm">
+      <div
+        v-if="canEdit"
+        class="q-ml-sm"
+      >
         <plan-generation
           :week="week"
           @updated="loadWeekPlan()"
@@ -236,7 +239,7 @@ import { RecipePlanWeekFromRead } from "src/Convert"
 import { date, useQuasar } from "quasar"
 import { WarningPriorities } from "src/modules/Globals"
 import { dateTimeFormat } from "src/modules/Utils"
-import { useDebounceFnCustom, useShortcutcs } from "src/modules/VueUtils"
+import { useDebounceFnCustom, useShortcuts } from "src/modules/VueUtils"
 
 interface WarnedPlan {
   priority: string | null
@@ -541,7 +544,7 @@ watch(fillingPrc, (val, oldVal) => {
   }
 })
 
-useShortcutcs({
+useShortcuts({
   shift_e: () => (editMode.value = !editMode.value),
   shift_f: () => (showFireworks.value = !showFireworks.value),
 })

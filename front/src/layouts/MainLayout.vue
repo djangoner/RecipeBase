@@ -198,7 +198,7 @@ import { useAuthStore } from "src/stores/auth"
 import { defineComponent, ref } from "vue"
 import IsOnlineMixin from "src/modules/IsOnlineMixin"
 import { useBaseStore } from "src/stores/base"
-import { useShortcutcs } from 'src/modules/VueUtils'
+import { useShortcuts } from 'src/modules/VueUtils'
 import { useRouter } from 'vue-router'
 
 type DarkMode = boolean | "auto"
@@ -222,7 +222,7 @@ export default defineComponent({
       $q.dark.set(preferredMode)
     }
 
-    useShortcutcs({
+    useShortcuts({
       alt_h: () => $router.push({name: "index"}),
       alt_r: () => $router.push({name: "recipes"}),
       alt_w: () => $router.push({name: "week_plan"}),

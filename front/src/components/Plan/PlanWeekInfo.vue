@@ -140,7 +140,7 @@ import { useAuthStore } from "src/stores/auth";
 import { useBaseStore } from "src/stores/base";
 import { defineComponent, PropType } from "vue";
 import ConditionWarnings from "./ConditionWarnings.vue";
-import { useShortcutcs } from 'src/modules/VueUtils';
+import { useShortcuts } from 'src/modules/VueUtils';
 import { useLocalStore } from 'src/stores/local';
 
 const ratingColors: { [key: number]: string } = {
@@ -227,7 +227,7 @@ export default defineComponent({
     },
   },
   mounted(){
-    useShortcutcs({
+    useShortcuts({
       alt_1: () => this.tab = "info",
       alt_2: () => this.tab = "warnings",
       alt_3: () => this.tab = "eats",

@@ -32,6 +32,7 @@ import PlanDragSelected from './PlanDragSelected.vue'
 import { useLocalStore } from 'src/stores/local';
 import { storeToRefs } from 'pinia';
 import { useBaseStore } from 'src/stores/base';
+import { useShortcuts } from 'src/modules/VueUtils';
 
 const store = useBaseStore()
 const storeLocal = useLocalStore()
@@ -57,5 +58,9 @@ const countLimit = computed(() => {
 
 const canAdd = computed(() => countNow.value < countLimit.value)
 
+
+useShortcuts({
+  "alt_a": () => showSelectRecipe.value = true,
+})
 
 </script>

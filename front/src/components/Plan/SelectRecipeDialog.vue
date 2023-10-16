@@ -6,6 +6,7 @@
     <recipe-select
       placeholder="Выберите рецепт..."
       outlined
+      autofocus
       @update:model-value="onSelect"
     />
   </base-dialog>

@@ -193,7 +193,25 @@
             :dense="$q.screen.lt.md"
             @row-click="onRowClick"
             @request="loadRecipesTable"
-          />
+          >
+            <template #body="props">
+              <q-tr
+                :props="props"
+                class="cursor-pointer"
+                @click="onRowClick($event, props.row)"
+              >
+                <q-td
+                  v-for="col in props.cols"
+                  :key="col.name"
+                  :props="props"
+                >
+                  {{ col.value }}
+                </q-td>
+                <recipe-card-tooltip :recipe="props.row" />
+                <recipe-menu :recipe="props.row" />
+              </q-tr>
+            </template>
+          </q-table>
         </template>
       </div>
 
@@ -242,6 +260,8 @@
 </template>
 
 <script lang="ts">
+import RecipeMenu from '../components/RecipeMenu.vue'
+import RecipeCardTooltip from '../components/RecipeCardTooltip.vue'
 import PlanDragSelectedCard from '../components/Plan/PlanDragSelectedCard.vue'
 import RecipesListFilters from "../components/Recipes/RecipesListFilters.vue"
 import { useQuery } from "@oarepo/vue-query-synchronizer"
@@ -331,7 +351,7 @@ const defaultFilters = {
 
 export default defineComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  components: { recipeCard, RecipesListFilters, PlanDragSelectedCard },
+  components: { recipeCard, RecipesListFilters, PlanDragSelectedCard, RecipeCardTooltip, RecipeMenu },
   mixins: [HandleErrorsMixin],
   data() {
     const store = useBaseStore()

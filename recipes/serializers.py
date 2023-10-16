@@ -212,7 +212,7 @@ class RecipeIngredientRecommendationSerializer(serializers.ModelSerializer):
         queryset=Ingredient.objects.all(), required=False, allow_null=True, default=None
     )
     amount_type_str = serializers.SerializerMethodField()
-    recipe = RecipeShortSerializer()
+    recipe = RecipeShortSerializer(read_only=True)
 
     class Meta:
         model = RecipeIngredientRecommendation

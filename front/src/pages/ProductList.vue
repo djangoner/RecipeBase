@@ -16,7 +16,7 @@
     <already-completed-banner :show="markAlreadyCompleted" />
     <not-actual-list-banner
       :show="productList && !isActual"
-      @reload="$refs.menu.regenerateList()"
+      @btn-update="$refs.menu.regenerateList()"
     />
     <previous-uncompleted-banner
       v-if="productList?.previous_uncompleted"

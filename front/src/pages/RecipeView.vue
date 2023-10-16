@@ -133,7 +133,7 @@ import { useBaseStore } from "src/stores/base"
 import RecipeRating from "src/components/RecipeRating.vue"
 import { defineComponent } from "vue"
 import { RecipeImage, RecipeIngredientRead, RecipeRead } from "src/client"
-import HandleErrorsMixin, { CustomAxiosError } from "src/modules/HandleErrorsMixin"
+import HandleErrorsMixin, { CustomAxiosError, handleErrors } from "src/modules/HandleErrorsMixin"
 import { AmountTypesConvert, AmountTypesTypes } from "src/modules/Globals"
 import { RecipeFromRead } from "src/Convert"
 import { useAuthStore } from "src/stores/auth"
@@ -260,7 +260,7 @@ export default defineComponent({
         .then(() => {
           this.loading = false
           const cacheKey = cacheKeyRecipe(parseInt(id))
-          
+
         })
         .catch((err: CustomAxiosError) => {
           this.loading = false
@@ -303,7 +303,9 @@ export default defineComponent({
             resolve(resp)
             console.debug("IMG: ", resp)
           })
-          .catch((err) => reject(err))
+          .catch((err: CustomAxiosError) => {reject(err)
+            handleErrors(err, "Ошибка загрузки изображения")
+          })
       })
     },
     async handleImages(images_src: RecipeImage[]) {

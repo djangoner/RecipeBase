@@ -125,94 +125,102 @@
       :class="$q.screen.gt.sm ? 'no-wrap' : ''"
     >
       <div
-        v-if="recipes"
         class="col q-mt-md"
       >
-        <!-- Cards mode -->
-        <template v-if="displayMode == 'cards'">
-          <!-- Pagination -->
-          <div v-if="totalPages">
-            <div class="flex justify-center q-mb-md">
+        <template v-if="recipes">
+          <!-- Cards mode -->
+          <template v-if="displayMode == 'cards'">
+            <!-- Pagination -->
+            <div v-if="totalPages">
+              <div class="flex justify-center q-mb-md">
+                <q-pagination
+                  v-model="page"
+                  :max="totalPages"
+                  :max-pages="maxPages"
+                  direction-links
+                />
+              </div>
+              <q-separator class="q-my-md" />
+            <!-- /Pagination -->
+            </div>
+            <div class="recipes-row row q-col-gutter-x-md q-col-gutter-y-sm">
+              <div
+                v-for="recipe of recipes"
+                :key="recipe.id"
+                class="col-xs-12 col-sm-6 col-md-4 col-lg-2"
+              >
+                <!-- Recipe card -->
+                <recipe-card
+                  :recipe="recipe"
+                  @update-item="loadRecipes()"
+                />
+              </div>
+            </div>
+
+            <q-separator class="q-my-md" />
+
+            <!-- Pagination -->
+            <div
+              v-if="recipes.length > 0 && totalPages"
+              class="flex justify-center q-mt-md"
+            >
               <q-pagination
                 v-model="page"
                 :max="totalPages"
+                :max-pages="maxPages"
                 direction-links
               />
             </div>
-            <q-separator class="q-my-md" />
             <!-- /Pagination -->
-          </div>
-          <div class="recipes-row row q-col-gutter-x-md q-col-gutter-y-sm">
             <div
-              v-for="recipe of recipes"
-              :key="recipe.id"
-              class="col-xs-12 col-sm-6 col-md-4 col-lg-2"
+              v-else
+              class="flex justify-center items-center full-height"
             >
-              <!-- Recipe card -->
-              <recipe-card
-                :recipe="recipe"
-                @update-item="loadRecipes()"
-              />
+              <h6 class="text-bold">
+                Результатов не найдено
+              </h6>
             </div>
-          </div>
-
-          <q-separator class="q-my-md" />
-
-          <!-- Pagination -->
-          <div
-            v-if="recipes.length > 0 && totalPages"
-            class="flex justify-center q-mt-md"
-          >
-            <q-pagination
-              v-model="page"
-              :max="totalPages"
-              direction-links
-            />
-          </div>
-          <!-- /Pagination -->
-          <div
-            v-else
-            class="flex justify-center items-center full-height"
-          >
-            <h6 class="text-bold">
-              Результатов не найдено
-            </h6>
-          </div>
-        </template>
-        <!-- Table mode -->
-        <template v-else-if="displayMode == 'table'">
-          <q-table
-            v-model:pagination="tablePagination"
-            title="Рецепты"
-            :rows="recipes"
-            :columns="tableColumns"
-            :loading="loading"
-            :filter="search"
-            :rows-per-page-options="[1, 5, 10, 15, 20, 50]"
-            binary-state-sort
-            :dense="$q.screen.lt.md"
-            @row-click="onRowClick"
-            @request="loadRecipesTable"
-          >
-            <template #body="props">
-              <q-tr
-                :props="props"
-                class="cursor-pointer"
-                @click="onRowClick($event, props.row)"
-              >
-                <q-td
-                  v-for="col in props.cols"
-                  :key="col.name"
+          </template>
+          <!-- Table mode -->
+          <template v-else-if="displayMode == 'table'">
+            <q-table
+              v-model:pagination="tablePagination"
+              title="Рецепты"
+              :rows="recipes"
+              :columns="tableColumns"
+              :loading="loading"
+              :filter="search"
+              :rows-per-page-options="[1, 5, 10, 15, 20, 50]"
+              binary-state-sort
+              :dense="$q.screen.lt.md"
+              @row-click="onRowClick"
+              @request="loadRecipesTable"
+            >
+              <template #body="props">
+                <q-tr
                   :props="props"
+                  class="cursor-pointer"
+                  @click="onRowClick($event, props.row)"
                 >
-                  {{ col.value }}
-                </q-td>
-                <recipe-card-tooltip :recipe="props.row" />
-                <recipe-menu :recipe="props.row" />
-              </q-tr>
-            </template>
-          </q-table>
+                  <q-td
+                    v-for="col in props.cols"
+                    :key="col.name"
+                    :props="props"
+                  >
+                    {{ col.value }}
+                  </q-td>
+                  <recipe-card-tooltip :recipe="props.row" />
+                  <recipe-menu :recipe="props.row" />
+                </q-tr>
+              </template>
+            </q-table>
+          </template>
         </template>
+
+        <q-inner-loading
+          v-if="displayMode == 'cards'"
+          :showing="loading"
+        />
       </div>
 
       <!-- Aside filters -->
@@ -222,7 +230,7 @@
         leave-active-class="animated slideOutRight"
       >
         <div
-          v-if="showFilters && recipes"
+          v-if="showFilters"
           class="col-12 col-md-3 col-lg-2 col-shrink"
           :class="$q.screen.gt.sm ? '' : 'order-first'"
         >
@@ -250,11 +258,6 @@
           </q-card>
         </div>
       </transition>
-
-      <q-inner-loading
-        v-if="displayMode == 'cards'"
-        :showing="loading"
-      />
     </div>
   </q-page>
 </template>
@@ -420,7 +423,13 @@ export default defineComponent({
       if (!this.tablePagination.rowsNumber || !this.tablePagination.rowsPerPage) {
         return null
       }
-      return Math.ceil(this.tablePagination?.rowsNumber / this.tablePagination?.rowsPerPage) || 1
+      return Math.ceil(this.tablePagination?.rowsNumber / this.pageSize) || 1
+    },
+    maxPages(): number{
+      if (this.$q.screen.lt.md){
+        return 6;
+      }
+      return 10
     },
     tableColumns() {
       let r = tableColumns?.slice() || []
